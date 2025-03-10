@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Manga } from '../types';
+import { Manga, ReadingStatus } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
+import TrackingModal from './TrackingModal';
 
 interface MangaCardProps {
   manga: Manga;
@@ -16,6 +17,7 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [isTracking, setIsTracking] = useState(manga.tracking);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const { colors } = useTheme();
 
   const handleImageLoad = () => {
@@ -28,69 +30,89 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
   };
 
   const handleTrackingToggle = () => {
-    // Update local state
-    setIsTracking(!isTracking);
+    if (isTracking) {
+      // Si déjà tracké, on retire directement
+      setIsTracking(false);
+      manga.tracking = false;
+      console.log(`${manga.title} retiré du suivi`);
+    } else {
+      // Si pas encore tracké, on affiche le modal
+      setIsModalVisible(true);
+    }
+  };
+
+  const handleSaveTracking = (mangaId: string, status: ReadingStatus, currentChapter?: number) => {
+    // Mise à jour du statut de tracking local
+    setIsTracking(true);
+    manga.tracking = true;
     
-    // Update manga object
-    manga.tracking = !manga.tracking;
-    console.log(manga.tracking ? `${manga.title} ajouté au suivi` : `${manga.title} retiré du suivi`);
-    // Here you would typically also update the tracking status in your backend or state management
+    // Ici, vous pourriez enregistrer le statut et le chapitre dans votre backend ou state management
+    console.log(`${manga.title} ajouté au suivi: ${status}, chapitre: ${currentChapter || 'N/A'}`);
   };
 
   return (
-    <TouchableOpacity
-      style={styles.mangaCard}
-      activeOpacity={0.7}
-      onPress={() => onPress ? onPress(manga) : console.log(`Manga sélectionné: ${manga.title}`)}
-    >
-      <View style={[styles.imageContainer, { backgroundColor: colors.card }]}>
-        {isLoading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color={colors.accent} />
-          </View>
-        )}
-        
-        <Image 
-          source={{ uri: manga.coverImage }} 
-          style={styles.mangaCover} 
-          onLoad={handleImageLoad}
-          onError={handleImageError}
-        />
-        {!isLoading && !hasError && (
-          <TouchableOpacity
-            style={styles.trackButton}
-            onPress={handleTrackingToggle}
-          >
-            <View style={[styles.trackButtonIcon, { backgroundColor: isTracking ? colors.accent : '#1616167b' }]} />
-            {isTracking ? (
-              <Ionicons name="checkmark-circle-outline" size={24} color="#FFF" />
-            ) : (
-              <Ionicons name="add-circle-outline" size={24} color="#FFF" />
-            )}
-          </TouchableOpacity>
-        )}
-        
-        {hasError && (
-          <View style={[styles.errorContainer, { backgroundColor: colors.card }]}>
-            <Ionicons name="image-outline" size={24} color={colors.border} />
-            <Text style={[styles.errorText, { color: colors.border }]}>Image non disponible</Text>
-          </View>
-        )}
-      </View>
-
-      <View style={styles.mangaInfo}>
-        <Text style={[styles.mangaTitle, { color: colors.text }]} numberOfLines={1}>
-          {manga.title}
-        </Text>
-        <Text style={[styles.mangaAuthor, { color: colors.secondaryText }]} numberOfLines={1}>
-          {manga.author}
-        </Text>
-        <View style={styles.ratingContainer}>
-          <Ionicons name="star" size={14} color={colors.text} />
-          <Text style={[styles.ratingText, { color: colors.secondaryText }]}>{manga.rating.toFixed(1)}</Text>
+    <>
+      <TouchableOpacity
+        style={styles.mangaCard}
+        activeOpacity={0.7}
+        onPress={() => onPress ? onPress(manga) : console.log(`Manga sélectionné: ${manga.title}`)}
+      >
+        <View style={[styles.imageContainer, { backgroundColor: colors.card }]}>
+          {isLoading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={colors.accent} />
+            </View>
+          )}
+          
+          <Image 
+            source={{ uri: manga.coverImage }} 
+            style={styles.mangaCover} 
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+          />
+          {!isLoading && !hasError && (
+            <TouchableOpacity
+              style={styles.trackButton}
+              onPress={handleTrackingToggle}
+            >
+              <View style={[styles.trackButtonIcon, { backgroundColor: isTracking ? colors.accent : '#1616167b' }]} />
+              {isTracking ? (
+                <Ionicons name="checkmark-circle-outline" size={24} color="#FFF" />
+              ) : (
+                <Ionicons name="add-circle-outline" size={24} color="#FFF" />
+              )}
+            </TouchableOpacity>
+          )}
+          
+          {hasError && (
+            <View style={[styles.errorContainer, { backgroundColor: colors.card }]}>
+              <Ionicons name="image-outline" size={24} color={colors.border} />
+              <Text style={[styles.errorText, { color: colors.border }]}>Image non disponible</Text>
+            </View>
+          )}
         </View>
-      </View>
-    </TouchableOpacity>
+
+        <View style={styles.mangaInfo}>
+          <Text style={[styles.mangaTitle, { color: colors.text }]} numberOfLines={1}>
+            {manga.title}
+          </Text>
+          <Text style={[styles.mangaAuthor, { color: colors.secondaryText }]} numberOfLines={1}>
+            {manga.author}
+          </Text>
+          <View style={styles.ratingContainer}>
+            <Ionicons name="star" size={14} color={colors.text} />
+            <Text style={[styles.ratingText, { color: colors.secondaryText }]}>{manga.rating.toFixed(1)}</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+
+      <TrackingModal
+        visible={isModalVisible}
+        manga={manga}
+        onClose={() => setIsModalVisible(false)}
+        onSave={handleSaveTracking}
+      />
+    </>
   );
 };
 
