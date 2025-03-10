@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Category } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import MangaCard from './MangaCard';
@@ -9,6 +9,12 @@ interface CategorySliderProps {
   category: Category;
   onSeeAllPress?: (categoryId: string) => void;
 }
+
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = width * 0.33;
+const ITEM_MARGIN_RIGHT = 12;
+const CONTAINER_PADDING_LEFT = 16;
+const ITEM_WIDTH = CARD_WIDTH + ITEM_MARGIN_RIGHT;
 
 const CategorySlider = ({ category, onSeeAllPress }: CategorySliderProps) => {
   const { colors } = useTheme();
@@ -43,6 +49,12 @@ const CategorySlider = ({ category, onSeeAllPress }: CategorySliderProps) => {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.sliderContent}
+        snapToInterval={ITEM_WIDTH}
+        decelerationRate="fast"
+        snapToAlignment="start"
+        snapToOffsets={category.mangas.map((_, index) => {
+          return index * ITEM_WIDTH + CONTAINER_PADDING_LEFT - 25; // -25px to show the previous item
+        })}
       />
     </View>
   );
@@ -80,4 +92,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(CategorySlider); 
+export default React.memo(CategorySlider);
