@@ -33,7 +33,8 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
     
     // Update manga object
     manga.tracking = !manga.tracking;
-    console.log(manga.tracking ? 'Retirer du suivi' : 'Ajouter au suivi');
+    console.log(manga.tracking ? `${manga.title} ajouté au suivi` : `${manga.title} retiré du suivi`);
+    // Here you would typically also update the tracking status in your backend or state management
   };
 
   return (
@@ -57,13 +58,14 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
         />
         {!isLoading && !hasError && (
           <TouchableOpacity
-            style={styles.addButton}
+            style={styles.trackButton}
             onPress={handleTrackingToggle}
           >
+            <View style={[styles.trackButtonIcon, { backgroundColor: isTracking ? colors.accent : '#1616167b' }]} />
             {isTracking ? (
-              <Ionicons name="checkmark-circle" size={24} color={colors.accent} />
+              <Ionicons name="checkmark-circle-outline" size={24} color="#FFF" />
             ) : (
-              <Ionicons name="add-circle" size={24} color="#FFF" />
+              <Ionicons name="add-circle-outline" size={24} color="#FFF" />
             )}
           </TouchableOpacity>
         )}
@@ -96,7 +98,6 @@ const styles = StyleSheet.create({
   mangaCard: {
     width: CARD_WIDTH,
     marginRight: 12,
-    borderRadius: 5,
     overflow: 'hidden',
   },
   imageContainer: {
@@ -135,11 +136,19 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textAlign: 'center',
   },
-  addButton: {
+  trackButton: {
     position: 'absolute',
     top: 4,
     right: 4,
     padding: 4,
+  },
+  trackButtonIcon: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 20,
+    height: 20,
+    borderRadius: 12,
   },
   mangaInfo: {
     paddingTop: 8,

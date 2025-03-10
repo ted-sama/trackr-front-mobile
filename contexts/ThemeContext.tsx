@@ -29,7 +29,7 @@ const lightColors = {
   border: '#E0E0E0',
   primary: '#6200EE',
   secondary: '#03DAC6',
-  accent: '#7b2de9',
+  accent: '#955ae9',
   error: '#B00020',
 };
 
@@ -41,7 +41,7 @@ const darkColors = {
   border: '#333333',
   primary: '#6200EE',
   secondary: '#03DAC6',
-  accent: '#7b2de9',
+  accent: '#955ae9',
   error: '#B00020',
 };
 

@@ -53,7 +53,7 @@ const CategorySlider = ({ category, onSeeAllPress }: CategorySliderProps) => {
         decelerationRate="fast"
         snapToAlignment="start"
         snapToOffsets={category.mangas.map((_, index) => {
-          return index * ITEM_WIDTH + CONTAINER_PADDING_LEFT - 25; // -25px to show the previous item
+          return index * ITEM_WIDTH + CONTAINER_PADDING_LEFT - 12; // -12px to show the previous item
         })}
       />
     </View>
