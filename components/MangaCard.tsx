@@ -15,6 +15,7 @@ const CARD_WIDTH = width * 0.33;
 const MangaCard = ({ manga, onPress }: MangaCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isTracking, setIsTracking] = useState(manga.tracking);
   const { colors } = useTheme();
 
   const handleImageLoad = () => {
@@ -24,6 +25,15 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
   const handleImageError = () => {
     setIsLoading(false);
     setHasError(true);
+  };
+
+  const handleTrackingToggle = () => {
+    // Update local state
+    setIsTracking(!isTracking);
+    
+    // Update manga object
+    manga.tracking = !manga.tracking;
+    console.log(manga.tracking ? 'Retirer du suivi' : 'Ajouter au suivi');
   };
 
   return (
@@ -45,6 +55,18 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
           onLoad={handleImageLoad}
           onError={handleImageError}
         />
+        {!isLoading && !hasError && (
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={handleTrackingToggle}
+          >
+            {isTracking ? (
+              <Ionicons name="checkmark-circle" size={24} color={colors.accent} />
+            ) : (
+              <Ionicons name="add-circle" size={24} color="#FFF" />
+            )}
+          </TouchableOpacity>
+        )}
         
         {hasError && (
           <View style={[styles.errorContainer, { backgroundColor: colors.card }]}>
@@ -80,13 +102,13 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: '100%',
     height: CARD_WIDTH * 1.5,
-    borderRadius: 5,
+    borderRadius: 6,
     position: 'relative',
   },
   mangaCover: {
     width: '100%',
     height: '100%',
-    borderRadius: 5,
+    borderRadius: 6,
     resizeMode: 'cover',
   },
   loadingContainer: {
@@ -113,6 +135,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textAlign: 'center',
   },
+  addButton: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    padding: 4,
+  },
   mangaInfo: {
     paddingTop: 8,
   },
@@ -135,4 +163,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(MangaCard); 
+export default React.memo(MangaCard);

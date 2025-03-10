@@ -18,6 +18,8 @@ export interface Manga {
   status?: 'ongoing' | 'completed' | 'hiatus';
   volumes?: number;
   chapters?: number;
+  publisher?: string;
+  tracking?: boolean; // temporary field for tracking status
 }
 
 /**

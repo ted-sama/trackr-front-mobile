@@ -10,6 +10,7 @@ export const MANGA_DATA: Manga[] = [
     rating: 4.8,
     genres: ['Shonen', 'Aventure', 'Action'],
     releaseYear: 1999,
+    tracking: true,
   },
   {
     id: '2',
@@ -19,6 +20,7 @@ export const MANGA_DATA: Manga[] = [
     rating: 4.7,
     genres: ['Shonen', 'Action', 'Surnaturel'],
     releaseYear: 2016,
+    tracking: false,
   },
   {
     id: '3',
@@ -28,6 +30,7 @@ export const MANGA_DATA: Manga[] = [
     rating: 4.9,
     genres: ['Shonen', 'Action', 'Drame'],
     releaseYear: 2009,
+    tracking: true,
   },
   {
     id: '4',
@@ -37,6 +40,7 @@ export const MANGA_DATA: Manga[] = [
     rating: 4.6,
     genres: ['Shonen', 'Action', 'Surnaturel'],
     releaseYear: 2018,
+    tracking: true,
   },
   {
     id: '5',
@@ -46,6 +50,7 @@ export const MANGA_DATA: Manga[] = [
     rating: 4.5,
     genres: ['Shonen', 'Action', 'Super-héros'],
     releaseYear: 2014,
+    tracking: true,
   },
   {
     id: '6',
@@ -55,6 +60,7 @@ export const MANGA_DATA: Manga[] = [
     rating: 4.7,
     genres: ['Shonen', 'Action', 'Horreur'],
     releaseYear: 2018,
+    tracking: true,
   },
   {
     id: '7',
@@ -64,6 +70,7 @@ export const MANGA_DATA: Manga[] = [
     rating: 4.9,
     genres: ['Seinen', 'Action', 'Dark Fantasy'],
     releaseYear: 1989,
+    tracking: false,
   },
   {
     id: '8',
@@ -73,6 +80,7 @@ export const MANGA_DATA: Manga[] = [
     rating: 4.8,
     genres: ['Seinen', 'Action', 'Historique'],
     releaseYear: 1998,
+    tracking: false,
   },
   {
     id: '9',
@@ -82,6 +90,7 @@ export const MANGA_DATA: Manga[] = [
     rating: 4.7,
     genres: ['Seinen', 'Action', 'Historique'],
     releaseYear: 2005,
+    tracking: true,
   },
   {
     id: '10',
@@ -91,6 +100,17 @@ export const MANGA_DATA: Manga[] = [
     rating: 4.5,
     genres: ['Seinen', 'Action', 'Horreur'],
     releaseYear: 2011,
+    tracking: false,
+  },
+  {
+    id: '11',
+    title: 'Jojo no Kimyou na Bouken Part 9: The JOJOLands',
+    author: 'Hirohiko Araki',
+    coverImage: 'https://cdn.myanimelist.net/images/manga/1/286969.jpg',
+    rating: 4.5,
+    genres: ['Seinen', 'Action', 'Supernaturel'],
+    releaseYear: 2023,
+    tracking: true,
   },
 ];
 
