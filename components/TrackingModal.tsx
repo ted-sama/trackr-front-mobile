@@ -24,7 +24,7 @@ interface TrackingModalProps {
 }
 
 const { height } = Dimensions.get('window');
-const SWIPE_THRESHOLD = 100; // distance de glissement pour fermer le modal
+const SWIPE_THRESHOLD = 2000; // distance de glissement pour fermer le modal - réduit pour plus de sensibilité
 
 const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) => {
   const [status, setStatus] = useState<ReadingStatus>('reading');
@@ -33,39 +33,30 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
   const slideAnim = useRef(new Animated.Value(height)).current;
   const { colors } = useTheme();
 
-  // Création du PanResponder pour gérer le glissement
+  // Création du panResponder avec une configuration améliorée
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, gestureState) => {
-        // Permettre le glissement uniquement vers le bas avec un minimum de mouvement
-        return gestureState.dy > 5;
-      },
-      onPanResponderGrant: () => {
-        // Arrêter toute animation en cours quand l'utilisateur touche
-        slideAnim.stopAnimation();
+        return gestureState.dy > 2; // Déclencher avec un petit mouvement vers le bas
       },
       onPanResponderMove: (_, gestureState) => {
-        // Déplacer le modal en fonction du glissement (seulement vers le bas)
-        if (gestureState.dy > 0) {
+        if (gestureState.dy > 0) { // Seulement pour les mouvements vers le bas
           slideAnim.setValue(gestureState.dy);
         }
       },
       onPanResponderRelease: (_, gestureState) => {
-        // Si le glissement dépasse le seuil, fermer le modal
-        if (gestureState.dy > SWIPE_THRESHOLD) {
+        if (gestureState.dy > SWIPE_THRESHOLD || gestureState.vy > 0.5) {
+          // Fermer si suffisamment glissé vers le bas ou avec une vitesse suffisante
           closeWithAnimation();
         } else {
-          // Sinon, remettre le modal à sa position initiale
+          // Remettre à la position initiale
           Animated.spring(slideAnim, {
             toValue: 0,
             useNativeDriver: true,
           }).start();
         }
       },
-      // Amélioration pour la compatibilité Expo Go
-      onPanResponderTerminationRequest: () => false,
-      onShouldBlockNativeResponder: () => true,
     })
   ).current;
 
@@ -88,7 +79,8 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
       slideAnim.setValue(height);
       Animated.spring(slideAnim, {
         toValue: 0,
-        friction: 100, // Pour un effet de rebond léger
+        friction: 100,
+        tension: 40,
         useNativeDriver: true,
       }).start();
     }
@@ -138,7 +130,7 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
     >
       <TouchableWithoutFeedback onPress={handleClosePress}>
         <View style={styles.overlay}>
-          <TouchableWithoutFeedback onPress={e => e.stopPropagation()}>
+          <View style={styles.modalWrapper}>
             <Animated.View 
               style={[
                 styles.container,
@@ -147,12 +139,8 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
                   transform: [{ translateY: slideAnim }]
                 },
               ]}
+              {...panResponder.panHandlers}
             >
-              {/* La poignée est l'élément principal sur lequel on fait glisser */}
-              <View {...panResponder.panHandlers} style={styles.handleContainer}>
-                <View style={styles.handle} />
-              </View>
-              
               <View style={styles.header}>
                 <Text style={[styles.title, { color: colors.text }]}>
                   Ajouter au suivi
@@ -218,7 +206,7 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
                 </Text>
               </TouchableOpacity>
             </Animated.View>
-          </TouchableWithoutFeedback>
+          </View>
         </View>
       </TouchableWithoutFeedback>
     </Modal>
@@ -231,34 +219,28 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
+  modalWrapper: {
+    width: '100%',
+  },
   container: {
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingHorizontal: 16,
+    paddingTop: 16,
     paddingBottom: 30,
     maxHeight: height * 0.85,
-  },
-  handleContainer: {
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-  },
-  handle: {
-    width: 40,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: '#DDD',
   },
   header: {
     position: 'relative',
     alignItems: 'center',
     marginBottom: 16,
+    marginTop: 10,
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginBottom: 26,
   },
   mangaInfo: {
     flexDirection: 'row',
@@ -296,7 +278,6 @@ const styles = StyleSheet.create({
   },
   statusButton: {
     flexDirection: 'row',
-    // alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 12,
     borderRadius: 8,
@@ -332,4 +313,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TrackingModal; 
+export default TrackingModal;
