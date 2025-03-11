@@ -27,6 +27,14 @@ function TabsLayout() {
           elevation: 2,
         },
         headerTintColor: colors.text,
+        animation: 'fade',
+        transitionSpec: {
+          animation: 'timing',
+          config: {
+            duration: 75,
+          }
+        },
+        
       }}
     >
       <Tabs.Screen

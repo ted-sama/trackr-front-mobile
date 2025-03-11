@@ -23,7 +23,7 @@ type ThemeContextType = {
 // Définition des couleurs pour chaque thème
 const lightColors = {
   background: '#FFFFFF',
-  card: '#F5F5F5',
+  card: '#f0f0f0',
   text: '#121212',
   secondaryText: '#666666',
   border: '#E0E0E0',

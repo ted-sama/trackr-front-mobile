@@ -59,7 +59,6 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
           // Sinon, remettre le modal à sa position initiale
           Animated.spring(slideAnim, {
             toValue: 0,
-            friction: 8,
             useNativeDriver: true,
           }).start();
         }
@@ -89,7 +88,7 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
       slideAnim.setValue(height);
       Animated.spring(slideAnim, {
         toValue: 0,
-        friction: 8, // Pour un effet de rebond léger
+        friction: 100, // Pour un effet de rebond léger
         useNativeDriver: true,
       }).start();
     }
@@ -123,16 +122,9 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
         <Ionicons 
           name={iconName} 
           size={18} 
-          color={isSelected ? '#FFF' : colors.text} 
+          color={isSelected ? '#FFF' : colors.text}
         />
-        <Text
-          style={[
-            styles.statusButtonText,
-            { color: isSelected ? '#FFF' : colors.text },
-          ]}
-        >
-          {label}
-        </Text>
+        <Text style={[styles.statusButtonText, { color: isSelected ? '#FFF' : colors.text }]}>{label}</Text>
       </TouchableOpacity>
     );
   };
@@ -141,7 +133,7 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
     <Modal
       transparent
       visible={visible}
-      animationType="none"
+      animationType="fade"
       onRequestClose={handleClosePress}
     >
       <TouchableWithoutFeedback onPress={handleClosePress}>
@@ -165,7 +157,7 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
                 <Text style={[styles.title, { color: colors.text }]}>
                   Ajouter au suivi
                 </Text>
-                <TouchableOpacity onPress={handleClosePress}>
+                <TouchableOpacity onPress={handleClosePress} style={{ position: 'absolute', right: 16 }}>
                   <Ionicons name="close" size={24} color={colors.text} />
                 </TouchableOpacity>
               </View>
@@ -180,7 +172,7 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
                     {manga.title}
                   </Text>
                   {manga.author && (
-                    <Text style={[styles.mangaAuthor, { color: colors.secondaryText }]}>
+                    <Text style={[styles.mangaDetails, { color: colors.secondaryText }]}>
                       {manga.author}
                     </Text>
                   )}
@@ -189,13 +181,14 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
 
               <View style={styles.statusSection}>
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                  Statut de lecture
+                  Statut
                 </Text>
                 
                 <View style={styles.statusButtons}>
-                  {renderStatusButton('reading', 'En cours', 'book-outline')}
-                  {renderStatusButton('plan_to_read', 'À commencer', 'time-outline')}
-                  {renderStatusButton('dropped', 'Stoppé', 'stop-circle-outline')}
+                  {renderStatusButton('reading', 'En cours', 'book')}
+                  {renderStatusButton('plan_to_read', 'À commencer', 'time')}
+                  {renderStatusButton('dropped', 'Stoppé', 'stop-circle')}
+                  {renderStatusButton('completed', 'Terminé', 'checkmark-circle')}
                 </View>
               </View>
 
@@ -239,8 +232,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   container: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
     paddingHorizontal: 16,
     paddingBottom: 30,
     maxHeight: height * 0.85,
@@ -258,14 +251,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#DDD',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    position: 'relative',
     alignItems: 'center',
     marginBottom: 16,
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   mangaInfo: {
     flexDirection: 'row',
@@ -286,7 +279,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 4,
   },
-  mangaAuthor: {
+  mangaDetails: {
     fontSize: 14,
   },
   statusSection: {
@@ -298,17 +291,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   statusButtons: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-between',
   },
   statusButton: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
+    // alignItems: 'center',
+    paddingVertical: 12,
     paddingHorizontal: 12,
     borderRadius: 8,
-    flex: 1,
-    marginHorizontal: 4,
+    marginBottom: 8,
     justifyContent: 'center',
   },
   statusButtonText: {
@@ -330,6 +322,7 @@ const styles = StyleSheet.create({
   saveButton: {
     borderRadius: 8,
     paddingVertical: 12,
+    marginBottom: 24,
     alignItems: 'center',
   },
   saveButtonText: {
