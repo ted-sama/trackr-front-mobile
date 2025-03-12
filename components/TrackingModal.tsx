@@ -119,20 +119,29 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
     const isSelected = status === buttonStatus;
     
     return (
-      <TouchableOpacity
-        style={[
-          styles.statusButton,
-          { backgroundColor: isSelected ? colors.accent : colors.card },
-        ]}
+      <TouchableWithoutFeedback
         onPress={() => handleStatusSelect(buttonStatus)}
       >
-        <Ionicons 
-          name={iconName} 
-          size={18} 
-          color={isSelected ? '#FFF' : colors.text}
-        />
-        <Text style={[styles.statusButtonText, { color: isSelected ? '#FFF' : colors.text }]}>{label}</Text>
-      </TouchableOpacity>
+        <View style={styles.statusButtonContainer}>
+          <View
+            style={[
+              styles.statusButton,
+              {
+                backgroundColor: colors.card,
+                borderColor: isSelected ? colors.accent : colors.border,
+                borderWidth: 2,
+              },
+            ]}
+          >
+            <Ionicons 
+              name={iconName} 
+              size={24} 
+              color={isSelected ? '#FFF' : colors.text}
+            />
+          </View>
+          <Text style={[styles.statusButtonText, { color: isSelected ? '#FFF' : colors.text }]}>{label}</Text>
+        </View>
+      </TouchableWithoutFeedback>
     );
   };
 
@@ -188,29 +197,28 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
                 </Text>
                 
                 <View style={styles.statusButtons}>
-                  {renderStatusButton('reading', 'En cours', 'book')}
-                  {renderStatusButton('plan_to_read', 'À commencer', 'time')}
-                  {renderStatusButton('dropped', 'Stoppé', 'stop-circle')}
-                  {renderStatusButton('completed', 'Terminé', 'checkmark-circle')}
+                  {renderStatusButton('reading', 'En cours', 'book-outline')}
+                  {renderStatusButton('plan_to_read', 'À commencer', 'time-outline')}
+                  {renderStatusButton('dropped', 'Stoppé', 'stop-circle-outline')}
+                  {renderStatusButton('completed', 'Terminé', 'checkmark-circle-outline')}
                 </View>
               </View>
 
-              {["reading", "dropped"].includes(status) && (
                 <View style={styles.chapterSection}>
                   <Text style={[styles.sectionTitle, { color: colors.text }]}>
                     Dernier chapitre lu
                   </Text>
-                  <View style={[styles.chapterInputContainer, { backgroundColor: colors.card }]}>
+                  <View style={[styles.chapterInputContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
                     <TextInput
                       style={[styles.chapterInput, { color: colors.text }]}
                       value={currentChapter}
                       onChangeText={setCurrentChapter}
                       keyboardType="number-pad"
+                      editable={['reading', 'dropped'].includes(status)}
                       maxLength={4}
                     />
                   </View>
                 </View>
-              )}
 
               <TouchableOpacity 
                 style={[styles.saveButton, { backgroundColor: colors.accent }]}
@@ -288,26 +296,30 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   statusButtons: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
+    flexDirection: 'row',
+    gap: 16,
+  },
+  statusButtonContainer: {
+    flex: 1,
   },
   statusButton: {
-    flexDirection: 'row',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
     borderRadius: 8,
-    marginBottom: 8,
+    height: 78,
     justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   statusButtonText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
-    marginLeft: 6,
+    textAlign: 'center',
+    marginTop: 6,
   },
   chapterSection: {
     marginBottom: 24,
   },
   chapterInputContainer: {
+    borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
