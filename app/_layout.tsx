@@ -31,7 +31,7 @@ function TabsLayout() {
         transitionSpec: {
           animation: 'timing',
           config: {
-            duration: 75,
+            duration: 80,
           }
         },
         
@@ -42,7 +42,7 @@ function TabsLayout() {
         options={{
           title: 'Accueil',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
       />
@@ -51,7 +51,16 @@ function TabsLayout() {
         options={{
           title: 'Découvrir',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="compass" size={size} color={color} />
+            <Ionicons name="compass-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="track"
+        options={{
+          title: 'Track',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="library-outline" size={size} color={color} />
           ),
         }}
       />
@@ -63,7 +72,7 @@ function TabsLayout() {
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <TabsLayout />
+        <TabsLayout />
     </ThemeProvider>
   );
 }
