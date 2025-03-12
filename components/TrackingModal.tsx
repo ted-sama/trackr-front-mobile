@@ -195,10 +195,10 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
                 </View>
               </View>
 
-              {status === 'reading' && (
+              {["reading", "dropped"].includes(status) && (
                 <View style={styles.chapterSection}>
                   <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                    Chapitre actuel
+                    Dernier chapitre lu
                   </Text>
                   <View style={[styles.chapterInputContainer, { backgroundColor: colors.card }]}>
                     <TextInput
