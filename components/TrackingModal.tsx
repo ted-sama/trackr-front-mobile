@@ -10,7 +10,8 @@ import {
   Animated, 
   Dimensions,
   TextInput,
-  PanResponder
+  PanResponder,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -136,10 +137,10 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
             <Ionicons 
               name={iconName} 
               size={24} 
-              color={isSelected ? '#FFF' : colors.text}
+              color={colors.text}
             />
           </View>
-          <Text style={[styles.statusButtonText, { color: isSelected ? '#FFF' : colors.text }]}>{label}</Text>
+          <Text style={[styles.statusButtonText, { color: colors.text }]}>{label}</Text>
         </View>
       </TouchableWithoutFeedback>
     );
@@ -154,7 +155,6 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
     >
       <TouchableWithoutFeedback onPress={handleClosePress}>
         <View style={styles.overlay}>
-          <View style={styles.modalWrapper}>
             <Animated.View 
               style={[
                 styles.container,
@@ -173,36 +173,22 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
                   <Ionicons name="close" size={24} color={colors.text} />
                 </TouchableOpacity>
               </View>
-
-              <View style={styles.mangaInfo}>
-                <Image 
-                  source={{ uri: manga.coverImage }} 
-                  style={styles.cover}
-                />
-                <View style={styles.textInfo}>
-                  <Text style={[styles.mangaTitle, { color: colors.text }]}>
-                    {manga.title}
-                  </Text>
-                  {manga.author && (
-                    <Text style={[styles.mangaDetails, { color: colors.secondaryText }]}>
-                      {manga.author}
+                <View style={styles.mangaInfo}>
+                  <Image 
+                    source={{ uri: manga.coverImage }} 
+                    style={styles.cover}
+                  />
+                  <View style={styles.textInfo}>
+                    <Text style={[styles.mangaTitle, { color: colors.text }]}>
+                      {manga.title}
                     </Text>
-                  )}
+                    {manga.author && (
+                      <Text style={[styles.mangaDetails, { color: colors.secondaryText }]}>
+                        {manga.author}
+                      </Text>
+                    )}
+                  </View>
                 </View>
-              </View>
-
-              <View style={styles.statusSection}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                  Statut
-                </Text>
-                
-                <View style={styles.statusButtons}>
-                  {renderStatusButton('reading', 'En cours', 'book-outline')}
-                  {renderStatusButton('plan_to_read', 'À commencer', 'time-outline')}
-                  {renderStatusButton('dropped', 'Stoppé', 'stop-circle-outline')}
-                  {renderStatusButton('completed', 'Terminé', 'checkmark-circle-outline')}
-                </View>
-              </View>
 
                 <View style={styles.chapterSection}>
                   <Text style={[styles.sectionTitle, { color: colors.text }]}>
@@ -220,16 +206,28 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
                   </View>
                 </View>
 
-              <TouchableOpacity 
-                style={[styles.saveButton, { backgroundColor: colors.accent }]}
-                onPress={handleSave}
-              >
-                <Text style={styles.saveButtonText}>
-                  Enregistrer
-                </Text>
-              </TouchableOpacity>
+                <View style={styles.statusSection}>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                    Statut
+                  </Text>
+                  
+                  <View style={styles.statusButtons}>
+                    {renderStatusButton('reading', 'En cours', 'book-outline')}
+                    {renderStatusButton('plan_to_read', 'À commencer', 'time-outline')}
+                    {renderStatusButton('dropped', 'Stoppé', 'stop-circle-outline')}
+                    {renderStatusButton('completed', 'Terminé', 'checkmark-circle-outline')}
+                  </View>
+                </View>
+
+                <TouchableOpacity 
+                  style={[styles.saveButton, { backgroundColor: colors.accent }]}
+                  onPress={handleSave}
+                >
+                  <Text style={styles.saveButtonText}>
+                    Enregistrer
+                  </Text>
+                </TouchableOpacity>
             </Animated.View>
-          </View>
         </View>
       </TouchableWithoutFeedback>
     </Modal>
@@ -250,7 +248,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 30,
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 30,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 16,
     maxHeight: height * 0.85,
   },
   header: {
