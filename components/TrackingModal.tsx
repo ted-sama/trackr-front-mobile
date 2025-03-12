@@ -13,6 +13,7 @@ import {
   PanResponder
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { Manga, ReadingStatus } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -32,6 +33,7 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
   const [isClosing, setIsClosing] = useState(false);
   const slideAnim = useRef(new Animated.Value(height)).current;
   const { colors } = useTheme();
+  const prevVisibleRef = useRef(visible);
 
   // Création du panResponder avec une configuration améliorée
   const panResponder = useRef(
@@ -63,6 +65,8 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
   // Fonction pour fermer avec animation
   const closeWithAnimation = () => {
     setIsClosing(true);
+    // Déclencher un retour haptique lors de la fermeture
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Animated.timing(slideAnim, {
       toValue: height,
       duration: 300,
@@ -74,7 +78,11 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
   };
 
   useEffect(() => {
-    if (visible && !isClosing) {
+    // Détecter l'ouverture du modal
+    if (visible && !prevVisibleRef.current && !isClosing) {
+      // Déclencher un retour haptique lors de l'ouverture
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      
       // Réinitialiser l'animation lors de l'ouverture
       slideAnim.setValue(height);
       Animated.spring(slideAnim, {
@@ -84,13 +92,20 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
         useNativeDriver: true,
       }).start();
     }
+    
+    // Mettre à jour la référence
+    prevVisibleRef.current = visible;
   }, [visible, slideAnim, isClosing]);
 
   const handleStatusSelect = (newStatus: ReadingStatus) => {
+    // Ajouter un léger retour haptique lors de la sélection du statut
+    Haptics.selectionAsync();
     setStatus(newStatus);
   };
 
   const handleSave = () => {
+    // Ajouter un retour haptique lors de l'enregistrement
+    // Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     const chapter = status === 'reading' ? parseInt(currentChapter, 10) : undefined;
     onSave(manga.id, status, chapter);
     closeWithAnimation();
