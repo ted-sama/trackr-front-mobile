@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import ThemeProvider, { useTheme } from '../contexts/ThemeContext';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 // Composant de layout avec le thème appliqué
 function TabsLayout() {
@@ -87,7 +89,11 @@ function TabsLayout() {
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <TabsLayout />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <BottomSheetModalProvider>
+          <TabsLayout />
+        </BottomSheetModalProvider>
+      </GestureHandlerRootView>
     </ThemeProvider>
   );
 }

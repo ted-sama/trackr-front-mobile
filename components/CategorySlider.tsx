@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { Category } from '../types';
+import { Category, Manga } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import MangaCard from './MangaCard';
 import { useTheme } from '../contexts/ThemeContext';
@@ -8,6 +8,7 @@ import { useTheme } from '../contexts/ThemeContext';
 interface CategorySliderProps {
   category: Category;
   onSeeAllPress?: (categoryId: string) => void;
+  onTrackingRequest?: (manga: Manga) => void;
 }
 
 const { width } = Dimensions.get('window');
@@ -16,7 +17,7 @@ const ITEM_MARGIN_RIGHT = 12;
 const CONTAINER_PADDING_LEFT = 16;
 const ITEM_WIDTH = CARD_WIDTH + ITEM_MARGIN_RIGHT;
 
-const CategorySlider = ({ category, onSeeAllPress }: CategorySliderProps) => {
+const CategorySlider = ({ category, onSeeAllPress, onTrackingRequest }: CategorySliderProps) => {
   const { colors } = useTheme();
   
   return (
@@ -45,7 +46,12 @@ const CategorySlider = ({ category, onSeeAllPress }: CategorySliderProps) => {
       <FlatList
         data={category.mangas}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <MangaCard manga={item} />}
+        renderItem={({ item }) => (
+          <MangaCard 
+            manga={item} 
+            onTrackingRequest={onTrackingRequest}
+          />
+        )}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.sliderContent}

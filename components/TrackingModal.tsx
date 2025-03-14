@@ -1,22 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   View, 
   Text, 
-  Modal, 
   Image, 
   TouchableOpacity, 
   TouchableWithoutFeedback, 
   StyleSheet, 
-  Animated, 
   Dimensions,
   TextInput,
-  PanResponder,
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Manga, ReadingStatus } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
+import { 
+  BottomSheetModal, 
+  BottomSheetBackdrop,
+  BottomSheetView,
+  BottomSheetBackdropProps,
+} from '@gorhom/bottom-sheet';
 
 interface TrackingModalProps {
   visible: boolean;
@@ -26,77 +29,30 @@ interface TrackingModalProps {
 }
 
 const { height } = Dimensions.get('window');
-const SWIPE_THRESHOLD = 2000; // distance de glissement pour fermer le modal - réduit pour plus de sensibilité
 
 const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) => {
   const [status, setStatus] = useState<ReadingStatus>('reading');
   const [currentChapter, setCurrentChapter] = useState<string>('1');
-  const [isClosing, setIsClosing] = useState(false);
-  const slideAnim = useRef(new Animated.Value(height)).current;
   const { colors } = useTheme();
-  const prevVisibleRef = useRef(visible);
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const snapPoints = useRef(['75%']).current;
 
-  // Création du panResponder avec une configuration améliorée
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        return gestureState.dy > 2; // Déclencher avec un petit mouvement vers le bas
-      },
-      onPanResponderMove: (_, gestureState) => {
-        if (gestureState.dy > 0) { // Seulement pour les mouvements vers le bas
-          slideAnim.setValue(gestureState.dy);
-        }
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dy > SWIPE_THRESHOLD || gestureState.vy > 0.5) {
-          // Fermer si suffisamment glissé vers le bas ou avec une vitesse suffisante
-          closeWithAnimation();
-        } else {
-          // Remettre à la position initiale
-          Animated.spring(slideAnim, {
-            toValue: 0,
-            useNativeDriver: true,
-          }).start();
-        }
-      },
-    })
-  ).current;
-
-  // Fonction pour fermer avec animation
-  const closeWithAnimation = () => {
-    setIsClosing(true);
-    // Déclencher un retour haptique lors de la fermeture
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Animated.timing(slideAnim, {
-      toValue: height,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      setIsClosing(false);
-      onClose();
-    });
-  };
-
+  // Gérer l'ouverture et la fermeture du bottom sheet
   useEffect(() => {
-    // Détecter l'ouverture du modal
-    if (visible && !prevVisibleRef.current && !isClosing) {
-      // Déclencher un retour haptique lors de l'ouverture
+    if (visible) {
+      bottomSheetModalRef.current?.present();
+      // Retour haptique à l'ouverture
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      
-      // Réinitialiser l'animation lors de l'ouverture
-      slideAnim.setValue(height);
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        friction: 100,
-        tension: 40,
-        useNativeDriver: true,
-      }).start();
+    } else {
+      bottomSheetModalRef.current?.dismiss();
     }
-    
-    // Mettre à jour la référence
-    prevVisibleRef.current = visible;
-  }, [visible, slideAnim, isClosing]);
+  }, [visible]);
+
+  const handleSheetChanges = useCallback((index: number) => {
+    if (index === -1) {
+      onClose();
+    }
+  }, [onClose]);
 
   const handleStatusSelect = (newStatus: ReadingStatus) => {
     // Ajouter un léger retour haptique lors de la sélection du statut
@@ -106,15 +62,28 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
 
   const handleSave = () => {
     // Ajouter un retour haptique lors de l'enregistrement
-    // Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const chapter = status === 'reading' ? parseInt(currentChapter, 10) : undefined;
     onSave(manga.id, status, chapter);
-    closeWithAnimation();
+    bottomSheetModalRef.current?.dismiss();
   };
 
   const handleClosePress = () => {
-    closeWithAnimation();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    bottomSheetModalRef.current?.dismiss();
   };
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+      />
+    ),
+    []
+  );
 
   const renderStatusButton = (buttonStatus: ReadingStatus, label: string, iconName: any) => {
     const isSelected = status === buttonStatus;
@@ -146,110 +115,92 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
     );
   };
 
+  if (!manga) return null;
+
   return (
-    <Modal
-      transparent
-      visible={visible}
-      animationType="fade"
-      onRequestClose={handleClosePress}
+    <BottomSheetModal
+      ref={bottomSheetModalRef}
+      index={0}
+      snapPoints={snapPoints}
+      enablePanDownToClose={true}
+      backdropComponent={renderBackdrop}
+      onChange={handleSheetChanges}
+      backgroundStyle={{ backgroundColor: colors.background }}
+      handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
     >
-      <TouchableWithoutFeedback onPress={handleClosePress}>
-        <View style={styles.overlay}>
-            <Animated.View 
-              style={[
-                styles.container,
-                { 
-                  backgroundColor: colors.background,
-                  transform: [{ translateY: slideAnim }]
-                },
-              ]}
-              {...panResponder.panHandlers}
-            >
-              <View style={styles.header}>
-                <Text style={[styles.title, { color: colors.text }]}>
-                  Ajouter au suivi
-                </Text>
-                <TouchableOpacity onPress={handleClosePress} style={{ position: 'absolute', right: 16 }}>
-                  <Ionicons name="close" size={24} color={colors.text} />
-                </TouchableOpacity>
-              </View>
-                <View style={styles.mangaInfo}>
-                  <Image 
-                    source={{ uri: manga.coverImage }} 
-                    style={styles.cover}
-                  />
-                  <View style={styles.textInfo}>
-                    <Text style={[styles.mangaTitle, { color: colors.text }]}>
-                      {manga.title}
-                    </Text>
-                    {manga.author && (
-                      <Text style={[styles.mangaDetails, { color: colors.secondaryText }]}>
-                        {manga.author}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-
-                <View style={styles.chapterSection}>
-                  <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                    Dernier chapitre lu
-                  </Text>
-                  <View style={[styles.chapterInputContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                    <TextInput
-                      style={[styles.chapterInput, { color: colors.text }]}
-                      value={currentChapter}
-                      onChangeText={setCurrentChapter}
-                      keyboardType="number-pad"
-                      editable={['reading', 'dropped'].includes(status)}
-                      maxLength={4}
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.statusSection}>
-                  <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                    Statut
-                  </Text>
-                  
-                  <View style={styles.statusButtons}>
-                    {renderStatusButton('reading', 'En cours', 'book-outline')}
-                    {renderStatusButton('plan_to_read', 'À commencer', 'time-outline')}
-                    {renderStatusButton('dropped', 'Stoppé', 'stop-circle-outline')}
-                    {renderStatusButton('completed', 'Terminé', 'checkmark-circle-outline')}
-                  </View>
-                </View>
-
-                <TouchableOpacity 
-                  style={[styles.saveButton, { backgroundColor: colors.accent }]}
-                  onPress={handleSave}
-                >
-                  <Text style={styles.saveButtonText}>
-                    Enregistrer
-                  </Text>
-                </TouchableOpacity>
-            </Animated.View>
+      <BottomSheetView style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.text }]}>
+            Ajouter au suivi
+          </Text>
+          <TouchableOpacity onPress={handleClosePress} style={{ position: 'absolute', right: 16 }}>
+            <Ionicons name="close" size={24} color={colors.text} />
+          </TouchableOpacity>
         </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+        <View style={styles.mangaInfo}>
+          <Image 
+            source={{ uri: manga.coverImage }} 
+            style={styles.cover}
+          />
+          <View style={styles.textInfo}>
+            <Text style={[styles.mangaTitle, { color: colors.text }]}>
+              {manga.title}
+            </Text>
+            {manga.author && (
+              <Text style={[styles.mangaDetails, { color: colors.secondaryText }]}>
+                {manga.author}
+              </Text>
+            )}
+          </View>
+        </View>
+
+        <View style={styles.chapterSection}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Dernier chapitre lu
+          </Text>
+          <View style={[styles.chapterInputContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <TextInput
+              style={[styles.chapterInput, { color: colors.text }]}
+              value={currentChapter}
+              onChangeText={setCurrentChapter}
+              keyboardType="number-pad"
+              editable={['reading', 'dropped'].includes(status)}
+              maxLength={4}
+            />
+          </View>
+        </View>
+
+        <View style={styles.statusSection}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Statut
+          </Text>
+          
+          <View style={styles.statusButtons}>
+            {renderStatusButton('reading', 'En cours', 'book-outline')}
+            {renderStatusButton('plan_to_read', 'À commencer', 'time-outline')}
+            {renderStatusButton('dropped', 'Stoppé', 'stop-circle-outline')}
+            {renderStatusButton('completed', 'Terminé', 'checkmark-circle-outline')}
+          </View>
+        </View>
+
+        <TouchableOpacity 
+          style={[styles.saveButton, { backgroundColor: colors.accent }]}
+          onPress={handleSave}
+        >
+          <Text style={styles.saveButtonText}>
+            Enregistrer
+          </Text>
+        </TouchableOpacity>
+      </BottomSheetView>
+    </BottomSheetModal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalWrapper: {
-    width: '100%',
-  },
   container: {
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: Platform.OS === 'ios' ? 30 : 16,
-    maxHeight: height * 0.85,
   },
   header: {
     position: 'relative',
