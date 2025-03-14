@@ -9,6 +9,7 @@ import {
   Dimensions,
   TextInput,
   Platform,
+  Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -73,6 +74,11 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
     bottomSheetModalRef.current?.dismiss();
   };
 
+  // Gestionnaire pour masquer le clavier lorsqu'on touche le fond du bottom sheet
+  const handleContentPress = useCallback(() => {
+    Keyboard.dismiss();
+  }, []);
+
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
@@ -80,6 +86,7 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
         disappearsOnIndex={-1}
         appearsOnIndex={0}
         opacity={0.5}
+        pressBehavior="close"
       />
     ),
     []
@@ -127,8 +134,13 @@ const TrackingModal = ({ visible, manga, onClose, onSave }: TrackingModalProps) 
       onChange={handleSheetChanges}
       backgroundStyle={{ backgroundColor: colors.background }}
       handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
     >
-      <BottomSheetView style={[styles.container, { backgroundColor: colors.background }]}>
+      <BottomSheetView 
+        style={[styles.container, { backgroundColor: colors.background }]}
+        onTouchStart={handleContentPress}
+      >
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>
             Ajouter au suivi
