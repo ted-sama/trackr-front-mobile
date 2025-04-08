@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Dimensions } from 'react-native';
 import { Category } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import MangaCard from './MangaCard';
@@ -25,22 +25,23 @@ const CategorySlider = ({ category, onSeeAllPress }: CategorySliderProps) => {
         <Text style={[styles.categoryTitle, { color: colors.text }]}>
           {category.title}
         </Text>
-        <TouchableOpacity 
-          style={styles.seeAllButtonContainer}
+        <TouchableWithoutFeedback
           onPress={() => onSeeAllPress 
             ? onSeeAllPress(category.id) 
             : console.log(`Voir tout: ${category.title}`)}
         >
-          <Text style={[styles.seeAllButtonText, { color: colors.accent }]}>
-            Voir tout
-          </Text>
-          <Ionicons 
-            name="arrow-forward" 
-            size={20} 
-            color={colors.accent} 
-            style={styles.buttonIcon} 
-          />
-        </TouchableOpacity>
+          <View style={styles.seeAllButtonContainer}>
+            <Text style={[styles.seeAllButtonText, { color: colors.accent }]}>
+              Voir tout
+            </Text>
+            <Ionicons 
+              name="arrow-forward" 
+              size={20} 
+              color={colors.accent} 
+              style={styles.buttonIcon} 
+            />
+          </View>
+        </TouchableWithoutFeedback>
       </View>
       <FlatList
         data={category.mangas}
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
   },
   seeAllButtonText: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '600',
     marginRight: 4,
   },
   buttonIcon: {

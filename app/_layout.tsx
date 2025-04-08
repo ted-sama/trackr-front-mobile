@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, StatusBar } from 'react-native';
 import { Tabs } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,6 +19,10 @@ function TabsLayout() {
   
   return (
     <View style={screenStyle.container}>
+      <StatusBar 
+        barStyle={currentTheme === 'dark' ? 'light-content' : 'dark-content'} 
+        backgroundColor={colors.background}
+      />
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: colors.primary,
@@ -32,10 +36,14 @@ function TabsLayout() {
           },
           headerStyle: {
             backgroundColor: colors.background,
-            shadowRadius: 2,
-            shadowOffset: { height: 2, width: 2 },
-            shadowColor: colors.border,
+            shadowColor: 'transparent',
             elevation: 2,
+            height: 105,
+          },
+          headerTitleStyle: {
+            color: colors.text,
+            fontWeight: 'bold',
+            fontSize: 16,
           },
           headerTintColor: colors.text,
           animation: 'fade',
