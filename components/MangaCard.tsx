@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,16 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  BottomSheetModal,
+  BottomSheetView,
+  BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import Animated, {
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
+} from "react-native-reanimated";
 import { Manga } from "../types";
 import { useTheme } from "../contexts/ThemeContext";
 
@@ -27,6 +37,28 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
   const [isTracking, setIsTracking] = useState(manga.tracking);
   const { colors } = useTheme();
 
+  // Référence au bottom sheet modal
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  // Options for the bottom sheet tracking actions
+  const bottomSheetTrackingOptions = [
+    {
+      id: "reading",
+      title: "Mettre en cours de lecture",
+      icon: "add-circle-outline" as const,
+    },
+    {
+      id: "add-to-list",
+      title: "Ajouter à une liste",
+      icon: "remove-circle-outline" as const,
+    },
+    {
+      id: "stopped",
+      title: "Mettre en arrêt",
+      icon: "stop-circle-outline" as const,
+    },
+  ];
+
   const handleImageLoad = () => {
     setIsLoading(false);
   };
@@ -36,12 +68,16 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
     setHasError(true);
   };
 
-  const handleTrackingToggle = () => {
-    // Update local state
-    setIsTracking(!isTracking);
+  // Fonction pour présenter le bottom sheet
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
 
-    // Update manga object
-    manga.tracking = !manga.tracking;
+  const handleTrackingToggle = () => {
+    // Ouvrir le bottom sheet au lieu de modifier directement l'état
+    handlePresentModalPress();
+
+    // On garde le console log temporairement, la logique sera déplacée dans le bottom sheet
     console.log(
       manga.tracking
         ? `${manga.title} ajouté au suivi`
@@ -49,84 +85,221 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
     );
     // Here you would typically also update the tracking status in your backend or state management
   };
+
+  // Composant personnalisé pour le backdrop avec animation d'opacité
+  const CustomBackdrop = ({
+    animatedIndex,
+    style,
+  }: BottomSheetBackdropProps) => {
+    const { colors } = useTheme();
+
+    // Style animé pour l'opacité basé sur la position du bottom sheet
+    const animatedStyle = useAnimatedStyle(() => {
+      // Interpoler l'opacité entre 0 et 0.5 en fonction de l'index animé
+      // -1 = fermé, 0 ou plus = ouvert à différentes positions de snap
+      const opacity = interpolate(
+        animatedIndex.value,
+        [-1, 0],
+        [0, 0.5],
+        Extrapolation.CLAMP
+      );
+
+      return {
+        backgroundColor: "black",
+        opacity,
+      };
+    });
+
+    return (
+      <Animated.View
+        style={[
+          style,
+          {
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          },
+          animatedStyle,
+        ]}
+        onTouchEnd={() => bottomSheetModalRef.current?.close()}
+      />
+    );
+  };
+
   return (
-    <TouchableWithoutFeedback
-      onPress={() =>
-        onPress
-          ? onPress(manga)
-          : console.log(`Manga sélectionné: ${manga.title}`)
-      }
-    >
-      <View style={styles.mangaCard}>
-        <View style={[styles.imageContainer, { backgroundColor: colors.card }]}>
-          {isLoading && (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color={colors.accent} />
-            </View>
-          )}
-          <Image
-            source={{ uri: manga.coverImage }}
-            style={styles.mangaCover}
-            onLoad={handleImageLoad}
-            onError={handleImageError}
-          />
-          {!isLoading && !hasError && (
-            <TouchableWithoutFeedback onPress={handleTrackingToggle}>
-              <View style={styles.trackButton}>
-                <View
-                  style={[
-                    styles.trackButtonIcon,
-                    {
-                      backgroundColor: isTracking ? colors.accent : "#1616167b",
-                    },
-                  ]}
-                />
-                {isTracking ? (
-                  <Ionicons
-                    name="checkmark-circle-outline"
-                    size={24}
-                    color="#FFF"
-                  />
-                ) : (
-                  <Ionicons name="add-circle-outline" size={24} color="#FFF" />
-                )}
+    <>
+      <TouchableWithoutFeedback
+        onPress={() =>
+          onPress
+            ? onPress(manga)
+            : console.log(`Manga sélectionné: ${manga.title}`)
+        }
+      >
+        <View style={styles.mangaCard}>
+          <View
+            style={[styles.imageContainer, { backgroundColor: colors.card }]}
+          >
+            {isLoading && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color={colors.accent} />
               </View>
-            </TouchableWithoutFeedback>
-          )}
-          {hasError && (
-            <View
-              style={[styles.errorContainer, { backgroundColor: colors.card }]}
+            )}
+            <Image
+              source={{ uri: manga.coverImage }}
+              style={styles.mangaCover}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+            />
+            {!isLoading && !hasError && (
+              <TouchableWithoutFeedback onPress={handleTrackingToggle}>
+                <View style={styles.trackButton}>
+                  <View
+                    style={[
+                      styles.trackButtonIcon,
+                      {
+                        backgroundColor: isTracking
+                          ? colors.accent
+                          : "#1616167b",
+                      },
+                    ]}
+                  />
+                  {isTracking ? (
+                    <Ionicons
+                      name="checkmark-circle-outline"
+                      size={24}
+                      color="#FFF"
+                    />
+                  ) : (
+                    <Ionicons
+                      name="add-circle-outline"
+                      size={24}
+                      color="#FFF"
+                    />
+                  )}
+                </View>
+              </TouchableWithoutFeedback>
+            )}
+            {hasError && (
+              <View
+                style={[
+                  styles.errorContainer,
+                  { backgroundColor: colors.card },
+                ]}
+              >
+                <Ionicons
+                  name="image-outline"
+                  size={24}
+                  color={colors.border}
+                />
+                <Text style={[styles.errorText, { color: colors.border }]}>
+                  Image non disponible
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.mangaInfo}>
+            <Text
+              style={[styles.mangaTitle, { color: colors.text }]}
+              numberOfLines={1}
             >
-              <Ionicons name="image-outline" size={24} color={colors.border} />
-              <Text style={[styles.errorText, { color: colors.border }]}>
-                Image non disponible
+              {manga.title}
+            </Text>
+            <Text
+              style={[styles.mangaAuthor, { color: colors.secondaryText }]}
+              numberOfLines={1}
+            >
+              {manga.author}
+            </Text>
+            <View style={styles.ratingContainer}>
+              <Ionicons name="star" size={14} color={colors.text} />
+              <Text
+                style={[styles.ratingText, { color: colors.secondaryText }]}
+              >
+                {manga.rating.toFixed(1)}
               </Text>
             </View>
-          )}
-        </View>
-
-        <View style={styles.mangaInfo}>
-          <Text
-            style={[styles.mangaTitle, { color: colors.text }]}
-            numberOfLines={1}
-          >
-            {manga.title}
-          </Text>
-          <Text
-            style={[styles.mangaAuthor, { color: colors.secondaryText }]}
-            numberOfLines={1}
-          >
-            {manga.author}
-          </Text>
-          <View style={styles.ratingContainer}>
-            <Ionicons name="star" size={14} color={colors.text} />
-            <Text style={[styles.ratingText, { color: colors.secondaryText }]}>
-              {manga.rating.toFixed(1)}
-            </Text>
           </View>
         </View>
-      </View>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+      {/* Bottom Sheet Modal */}
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        index={0}
+        backgroundStyle={{ backgroundColor: colors.card }}
+        handleIndicatorStyle={{ backgroundColor: colors.border }}
+        backdropComponent={CustomBackdrop}
+      >
+        <BottomSheetView style={styles.bottomSheetContent}>
+          <View style={styles.bottomSheetHeader}>
+            <Image
+              source={{ uri: manga.coverImage }}
+              style={{
+                width: 60,
+                height: 60 * 1.5,
+                borderRadius: 6,
+                marginBottom: 10,
+              }}
+            />
+            <View>
+              <Text
+                style={{
+                  color: colors.text,
+                  fontSize: 16,
+                  fontWeight: "bold",
+                }}
+              >
+                {manga.title}
+              </Text>
+              <Text
+                style={{
+                  color: colors.secondaryText,
+                  fontSize: 14,
+                  marginTop: 4,
+                }}
+              >
+                {manga.author}
+              </Text>
+              <View style={[styles.ratingContainer, { marginTop: 4 }]}>
+                <Ionicons name="star" size={14} color={colors.text} />
+                <Text
+                  style={[styles.ratingText, { color: colors.secondaryText }]}
+                >
+                  {manga.rating.toFixed(1)}
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View style={styles.bottomSheetActions}>
+            {bottomSheetTrackingOptions.map((option) => (
+              <TouchableWithoutFeedback
+                key={option.id}
+                onPress={() => {
+                  console.log(`Action: ${option.title}`);
+                  bottomSheetModalRef.current?.close();
+                }}
+              >
+                <View
+                  style={styles.bottomSheetActionButton}
+                >
+                  <Ionicons
+                    name={option.icon}
+                    size={20}
+                    color={colors.text}
+                    style={{
+                      marginRight: 8,
+                    }}
+                  />
+                  <Text style={{ color: colors.text }}>{option.title}</Text>
+                </View>
+              </TouchableWithoutFeedback>
+            ))}
+          </View>
+        </BottomSheetView>
+      </BottomSheetModal>
+    </>
   );
 };
 
@@ -135,6 +308,24 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     marginRight: 12,
     overflow: "hidden",
+  },
+  bottomSheetContent: {
+    padding: 16,
+  },
+  bottomSheetHeader: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  bottomSheetActions: {
+    flexDirection: "column",
+    gap: 10,
+    marginTop: 16,
+  },
+  bottomSheetActionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    borderRadius: 6,
   },
   imageContainer: {
     width: "100%",

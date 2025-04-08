@@ -3,6 +3,7 @@ import { View, StyleSheet, StatusBar } from 'react-native';
 import { Tabs } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import ThemeProvider, { useTheme } from '../contexts/ThemeContext';
 
 // Composant de layout avec le thème appliqué
@@ -97,7 +98,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
+        <BottomSheetModalProvider>
           <TabsLayout />
+        </BottomSheetModalProvider>
       </GestureHandlerRootView>
     </ThemeProvider>
   );
