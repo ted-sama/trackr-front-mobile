@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Dimensions,
   ActivityIndicator,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CirclePlus, ListPlus, CircleStop } from "lucide-react-native";
@@ -21,6 +22,9 @@ import Animated, {
   useAnimatedStyle,
   interpolate,
   Extrapolation,
+  useSharedValue,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { Manga } from "../types";
 import { useTheme } from "../contexts/ThemeContext";
@@ -39,6 +43,9 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
   const [hasError, setHasError] = useState(false);
   const [isTracking, setIsTracking] = useState(manga.tracking);
   const { colors } = useTheme();
+  
+  // Shared value for scale animation
+  const scale = useSharedValue(1);
 
   // Référence au bottom sheet modal
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -133,10 +140,93 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
       />
     );
   };
+  // Create animated style for scale animation
+  const animatedCardStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }]
+    };
+  });
 
   return (
     <>
-      <TouchableWithoutFeedback
+    {/* Bottom Sheet Modal */}
+    <BottomSheetModal
+        ref={bottomSheetModalRef}
+        index={0}
+        backgroundStyle={{ backgroundColor: colors.card }}
+        handleIndicatorStyle={{ backgroundColor: colors.border }}
+        backdropComponent={CustomBackdrop}
+      >
+        <BottomSheetView style={styles.bottomSheetContent}>
+          <View style={styles.bottomSheetHeader}>
+            <Image
+              source={{ uri: manga.coverImage }}
+              style={{
+                width: 60,
+                height: 60 * 1.5,
+                borderRadius: 6,
+                marginBottom: 10,
+              }}
+            />
+            <View>
+              <Text
+                style={{
+                  color: colors.text,
+                  fontSize: 16,
+                  fontWeight: "bold",
+                }}
+              >
+                {manga.title}
+              </Text>
+              <Text
+                style={{
+                  color: colors.secondaryText,
+                  fontSize: 14,
+                  marginTop: 4,
+                }}
+              >
+                {manga.author}
+              </Text>
+              <View style={[styles.ratingContainer, { marginTop: 4 }]}>
+                <Ionicons name="star" size={14} color={colors.text} />
+                <Text
+                  style={[styles.ratingText, { color: colors.secondaryText }]}
+                >
+                  {manga.rating.toFixed(1)}
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View style={styles.bottomSheetActions}>
+            {bottomSheetTrackingOptions.map((option) => (
+              <TouchableWithoutFeedback
+                key={option.id}
+                onPress={() => {
+                  console.log(`Action: ${option.title}`);
+                  option.action();
+                  bottomSheetModalRef.current?.close();
+                }}
+              >
+                <View
+                  style={styles.bottomSheetActionButton}
+                >
+                  <option.icon strokeWidth={2} size={24} color={colors.text} style={{ marginRight: 10 }} />
+                  <Text style={{ color: colors.text }}>{option.title}</Text>
+                </View>
+              </TouchableWithoutFeedback>
+            ))}
+          </View>
+        </BottomSheetView>
+      </BottomSheetModal>
+      
+      {/* Manga Card */}
+      <Pressable
+        onPressIn={() => {
+          scale.value = withTiming(0.98, { duration: 100 });
+        }}
+        onPressOut={() => {
+          scale.value = withTiming(1, { duration: 100 });
+        }}
         onPress={() =>
           onPress
             ? onPress(manga)
@@ -144,7 +234,7 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
         }
         onLongPress={handlePresentModalPress}
       >
-        <View style={styles.mangaCard}>
+        <Animated.View style={[styles.mangaCard, animatedCardStyle]}>
           <View
             style={[styles.imageContainer, { backgroundColor: colors.card }]}
           >
@@ -229,77 +319,8 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
               </Text>
             </View>
           </View>
-        </View>
-      </TouchableWithoutFeedback>
-      {/* Bottom Sheet Modal */}
-      <BottomSheetModal
-        ref={bottomSheetModalRef}
-        index={0}
-        backgroundStyle={{ backgroundColor: colors.card }}
-        handleIndicatorStyle={{ backgroundColor: colors.border }}
-        backdropComponent={CustomBackdrop}
-      >
-        <BottomSheetView style={styles.bottomSheetContent}>
-          <View style={styles.bottomSheetHeader}>
-            <Image
-              source={{ uri: manga.coverImage }}
-              style={{
-                width: 60,
-                height: 60 * 1.5,
-                borderRadius: 6,
-                marginBottom: 10,
-              }}
-            />
-            <View>
-              <Text
-                style={{
-                  color: colors.text,
-                  fontSize: 16,
-                  fontWeight: "bold",
-                }}
-              >
-                {manga.title}
-              </Text>
-              <Text
-                style={{
-                  color: colors.secondaryText,
-                  fontSize: 14,
-                  marginTop: 4,
-                }}
-              >
-                {manga.author}
-              </Text>
-              <View style={[styles.ratingContainer, { marginTop: 4 }]}>
-                <Ionicons name="star" size={14} color={colors.text} />
-                <Text
-                  style={[styles.ratingText, { color: colors.secondaryText }]}
-                >
-                  {manga.rating.toFixed(1)}
-                </Text>
-              </View>
-            </View>
-          </View>
-          <View style={styles.bottomSheetActions}>
-            {bottomSheetTrackingOptions.map((option) => (
-              <TouchableWithoutFeedback
-                key={option.id}
-                onPress={() => {
-                  console.log(`Action: ${option.title}`);
-                  option.action();
-                  bottomSheetModalRef.current?.close();
-                }}
-              >
-                <View
-                  style={styles.bottomSheetActionButton}
-                >
-                  <option.icon strokeWidth={2} size={24} color={colors.text} style={{ marginRight: 10 }} />
-                  <Text style={{ color: colors.text }}>{option.title}</Text>
-                </View>
-              </TouchableWithoutFeedback>
-            ))}
-          </View>
-        </BottomSheetView>
-      </BottomSheetModal>
+        </Animated.View>
+      </Pressable>
     </>
   );
 };
