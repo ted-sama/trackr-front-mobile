@@ -8,6 +8,7 @@ import { useTheme } from '../contexts/ThemeContext';
 interface CategorySliderProps {
   category: Category;
   onSeeAllPress?: (categoryId: string) => void;
+  isBottomSheetVisible?: boolean;
 }
 
 const { width } = Dimensions.get('window');
@@ -16,7 +17,7 @@ const ITEM_MARGIN_RIGHT = 12;
 const CONTAINER_PADDING_LEFT = 16;
 const ITEM_WIDTH = CARD_WIDTH + ITEM_MARGIN_RIGHT;
 
-const CategorySlider = ({ category, onSeeAllPress }: CategorySliderProps) => {
+const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false }: CategorySliderProps) => {
   const { colors } = useTheme();
   
   return (
@@ -53,6 +54,7 @@ const CategorySlider = ({ category, onSeeAllPress }: CategorySliderProps) => {
         snapToInterval={ITEM_WIDTH}
         decelerationRate="fast"
         snapToAlignment="start"
+        scrollEnabled={!isBottomSheetVisible}
         snapToOffsets={category.mangas.map((_, index) => {
           return index * ITEM_WIDTH + CONTAINER_PADDING_LEFT - 12; // -12px to show the previous item
         })}

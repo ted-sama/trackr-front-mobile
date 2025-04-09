@@ -28,6 +28,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Manga } from "../types";
 import { useTheme } from "../contexts/ThemeContext";
+import { useBottomSheet } from "../contexts/BottomSheetContext";
 import Toast from "react-native-toast-message";
 
 interface MangaCardProps {
@@ -43,7 +44,8 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
   const [hasError, setHasError] = useState(false);
   const [isTracking, setIsTracking] = useState(manga.tracking);
   const { colors } = useTheme();
-  
+  const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
+
   // Shared value for scale animation
   const scale = useSharedValue(1);
 
@@ -85,18 +87,18 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
   const handleTrackingToggle = () => {
     // Haptic feedback
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setIsTracking(prevTracking => !prevTracking);
+    setIsTracking((prevTracking) => !prevTracking);
     // Show toast message
     Toast.show({
       type: "info",
       text1: isTracking ? "Manga retiré du suivi" : "Manga ajouté au suivi",
     });
-  };
-
-  // Fonction pour présenter le bottom sheet
+  }; // Fonction pour présenter le bottom sheet
   const handlePresentModalPress = useCallback(() => {
     // Haptic feedback
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setBottomSheetVisible(true);
+    scale.value = withTiming(1, { duration: 100 });
     bottomSheetModalRef.current?.present();
   }, []);
 
@@ -105,7 +107,6 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
     animatedIndex,
     style,
   }: BottomSheetBackdropProps) => {
-
     // Style animé pour l'opacité basé sur la position du bottom sheet
     const animatedStyle = useAnimatedStyle(() => {
       // Interpoler l'opacité entre 0 et 0.5 en fonction de l'index animé
@@ -122,7 +123,6 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
         opacity,
       };
     });
-
     return (
       <Animated.View
         style={[
@@ -136,26 +136,30 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
           },
           animatedStyle,
         ]}
-        onTouchEnd={() => bottomSheetModalRef.current?.close()}
+        onTouchEnd={() => {
+          bottomSheetModalRef.current?.close();
+          setBottomSheetVisible(false);
+        }}
       />
     );
   };
   // Create animated style for scale animation
   const animatedCardStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ scale: scale.value }]
+      transform: [{ scale: scale.value }],
     };
   });
 
   return (
     <>
-    {/* Bottom Sheet Modal */}
-    <BottomSheetModal
+      {/* Bottom Sheet Modal */}
+      <BottomSheetModal
         ref={bottomSheetModalRef}
         index={0}
         backgroundStyle={{ backgroundColor: colors.card }}
         handleIndicatorStyle={{ backgroundColor: colors.border }}
         backdropComponent={CustomBackdrop}
+        onDismiss={() => setBottomSheetVisible(false)}
       >
         <BottomSheetView style={styles.bottomSheetContent}>
           <View style={styles.bottomSheetHeader}>
@@ -207,10 +211,13 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
                   bottomSheetModalRef.current?.close();
                 }}
               >
-                <View
-                  style={styles.bottomSheetActionButton}
-                >
-                  <option.icon strokeWidth={2} size={24} color={colors.text} style={{ marginRight: 10 }} />
+                <View style={styles.bottomSheetActionButton}>
+                  <option.icon
+                    strokeWidth={2}
+                    size={24}
+                    color={colors.text}
+                    style={{ marginRight: 10 }}
+                  />
                   <Text style={{ color: colors.text }}>{option.title}</Text>
                 </View>
               </TouchableWithoutFeedback>
@@ -218,11 +225,13 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
           </View>
         </BottomSheetView>
       </BottomSheetModal>
-      
       {/* Manga Card */}
       <Pressable
+        disabled={isBottomSheetVisible}
         onPressIn={() => {
-          scale.value = withTiming(0.98, { duration: 100 });
+          isBottomSheetVisible
+            ? null
+            : scale.value = withTiming(0.98, { duration: 100 });
         }}
         onPressOut={() => {
           scale.value = withTiming(1, { duration: 100 });

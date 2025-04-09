@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import ThemeProvider, { useTheme } from '../contexts/ThemeContext';
+import { BottomSheetProvider } from '../contexts/BottomSheetContext';
 import Toast, { BaseToast, ToastConfig } from 'react-native-toast-message'
 
 // Config Toast
@@ -113,10 +114,12 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <BottomSheetModalProvider>
-            <TabsLayout />
-            <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
-        </BottomSheetModalProvider>
+        <BottomSheetProvider>
+          <BottomSheetModalProvider>
+              <TabsLayout />
+              <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
+          </BottomSheetModalProvider>
+        </BottomSheetProvider>
       </GestureHandlerRootView>
     </ThemeProvider>
   );
