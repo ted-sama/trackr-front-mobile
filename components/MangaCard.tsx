@@ -24,6 +24,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Manga } from "../types";
 import { useTheme } from "../contexts/ThemeContext";
+import Toast from "react-native-toast-message";
 
 interface MangaCardProps {
   manga: Manga;
@@ -78,6 +79,11 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
     // Haptic feedback
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setIsTracking(prevTracking => !prevTracking);
+    // Show toast message
+    Toast.show({
+      type: "info",
+      text1: isTracking ? "Manga retiré du suivi" : "Manga ajouté au suivi",
+    });
   };
 
   // Fonction pour présenter le bottom sheet

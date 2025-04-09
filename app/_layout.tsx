@@ -5,6 +5,21 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import ThemeProvider, { useTheme } from '../contexts/ThemeContext';
+import Toast, { BaseToast, ToastConfig } from 'react-native-toast-message'
+
+// Config Toast
+const toastConfig: ToastConfig = {
+  info: (props) => (
+    <BaseToast
+      {...props}
+      style={{ borderLeftWidth: 0, width: '90%', height: 50, backgroundColor: '#fff' }}
+      contentContainerStyle={{ paddingHorizontal: 15 }}
+      text1Style={{ fontSize: 13, fontWeight: '500' }}
+      text2Style={{ fontSize: 14 }}
+    />
+  ),
+}
+
 
 // Composant de layout avec le thème appliqué
 function TabsLayout() {
@@ -99,7 +114,8 @@ export default function RootLayout() {
     <ThemeProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <BottomSheetModalProvider>
-          <TabsLayout />
+            <TabsLayout />
+            <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
         </BottomSheetModalProvider>
       </GestureHandlerRootView>
     </ThemeProvider>
