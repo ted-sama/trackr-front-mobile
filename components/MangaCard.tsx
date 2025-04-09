@@ -1,4 +1,5 @@
-import React, { useState, useRef, useCallback, useMemo } from "react";
+import React, { useState, useRef, useCallback, useMemo, act } from "react";
+import * as Haptics from "expo-haptics";
 import {
   View,
   Text,
@@ -10,6 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { CirclePlus, ListPlus, CircleStop } from "lucide-react-native";
 import {
   BottomSheetModal,
   BottomSheetView,
@@ -45,17 +47,20 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
     {
       id: "reading",
       title: "Mettre en cours de lecture",
-      icon: "add-circle-outline" as const,
+      icon: CirclePlus,
+      action: () => setIsTracking(true),
     },
     {
       id: "add-to-list",
       title: "Ajouter à une liste",
-      icon: "remove-circle-outline" as const,
+      icon: ListPlus,
+      action: () => setIsTracking(true),
     },
     {
       id: "stopped",
       title: "Mettre en arrêt",
-      icon: "stop-circle-outline" as const,
+      icon: CircleStop,
+      action: () => setIsTracking(false),
     },
   ];
 
@@ -68,30 +73,25 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
     setHasError(true);
   };
 
+  // Function to handle quick add/remove tracking
+  const handleTrackingToggle = () => {
+    // Haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsTracking(prevTracking => !prevTracking);
+  };
+
   // Fonction pour présenter le bottom sheet
   const handlePresentModalPress = useCallback(() => {
+    // Haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     bottomSheetModalRef.current?.present();
   }, []);
-
-  const handleTrackingToggle = () => {
-    // Ouvrir le bottom sheet au lieu de modifier directement l'état
-    handlePresentModalPress();
-
-    // On garde le console log temporairement, la logique sera déplacée dans le bottom sheet
-    console.log(
-      manga.tracking
-        ? `${manga.title} ajouté au suivi`
-        : `${manga.title} retiré du suivi`
-    );
-    // Here you would typically also update the tracking status in your backend or state management
-  };
 
   // Composant personnalisé pour le backdrop avec animation d'opacité
   const CustomBackdrop = ({
     animatedIndex,
     style,
   }: BottomSheetBackdropProps) => {
-    const { colors } = useTheme();
 
     // Style animé pour l'opacité basé sur la position du bottom sheet
     const animatedStyle = useAnimatedStyle(() => {
@@ -136,6 +136,7 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
             ? onPress(manga)
             : console.log(`Manga sélectionné: ${manga.title}`)
         }
+        onLongPress={handlePresentModalPress}
       >
         <View style={styles.mangaCard}>
           <View
@@ -278,20 +279,14 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
                 key={option.id}
                 onPress={() => {
                   console.log(`Action: ${option.title}`);
+                  option.action();
                   bottomSheetModalRef.current?.close();
                 }}
               >
                 <View
                   style={styles.bottomSheetActionButton}
                 >
-                  <Ionicons
-                    name={option.icon}
-                    size={20}
-                    color={colors.text}
-                    style={{
-                      marginRight: 8,
-                    }}
-                  />
+                  <option.icon strokeWidth={2} size={24} color={colors.text} style={{ marginRight: 10 }} />
                   <Text style={{ color: colors.text }}>{option.title}</Text>
                 </View>
               </TouchableWithoutFeedback>
@@ -311,6 +306,7 @@ const styles = StyleSheet.create({
   },
   bottomSheetContent: {
     padding: 16,
+    paddingBottom: 52,
   },
   bottomSheetHeader: {
     flexDirection: "row",
