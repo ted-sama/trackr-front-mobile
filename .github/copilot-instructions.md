@@ -6,6 +6,8 @@ Trackr is a mobile application built with Expo and React Native for tracking and
 ## Coding Guidelines
 
 ### General
+- Use Sequential Thinking to plan your actions
+- Use Brave Search to search the web
 - Follow TypeScript best practices and strong typing
 - Comment in English
 - Use camelCase for variables and functions
