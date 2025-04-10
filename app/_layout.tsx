@@ -7,6 +7,8 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import ThemeProvider, { useTheme } from '../contexts/ThemeContext';
 import { BottomSheetProvider } from '../contexts/BottomSheetContext';
 import Toast, { BaseToast, ToastConfig } from 'react-native-toast-message'
+import HeaderDiscover from '@/components/discover/HeaderDiscover';
+
 
 // Config Toast
 const toastConfig: ToastConfig = {
@@ -90,6 +92,8 @@ function TabsLayout() {
           name="discover"
           options={{
             title: 'Découvrir',
+            header: () => <HeaderDiscover />,
+            tabBarLabel: 'Découvrir',
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="compass-outline" size={size} color={color} />
             ),
