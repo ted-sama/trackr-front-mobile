@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Dimensions, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useRouter } from 'expo-router';
+import { useSearchAnimation } from '../../contexts/SearchAnimationContext';
+import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 interface SearchProps {
   onSearch?: (text: string) => void;
@@ -14,30 +17,48 @@ const { width } = Dimensions.get('window');
 const Search = ({ onSearch, placeholder = 'Rechercher un manga...', onPress }: SearchProps) => {
   const [searchText, setSearchText] = useState('');
   const { colors } = useTheme();
+  const router = useRouter();
+  const { searchBarRef, searchBarHeight, searchBarWidth, searchBarY, searchBarX, isSearchExpanded } = useSearchAnimation();
 
-  const handleChangeText = (text: string) => {
-    setSearchText(text);
-    if (onSearch) {
-      onSearch(text);
+  // Mesurer la position du champ de recherche
+  useEffect(() => {
+    if (searchBarRef.current) {
+      searchBarRef.current.measure((_x: number, _y: number, width: number, height: number, pageX: number, pageY: number) => {
+        searchBarHeight.value = height;
+        searchBarWidth.value = width;
+        searchBarX.value = pageX;
+        searchBarY.value = pageY;
+      });
     }
+  }, []);
+
+  const handleNavigateToSearch = () => {
+    router.push('/discover/search');
   };
 
-  const handleClearText = () => {
-    setSearchText('');
-    if (onSearch) {
-      onSearch('');
-    }
-  };
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          scale: withTiming(isSearchExpanded.value ? 1.02 : 1, {
+            duration: 300,
+          }),
+        },
+      ],
+    };
+  });
 
   return (
-    <TouchableWithoutFeedback onPress={onPress}>
-      <View
+    <TouchableWithoutFeedback style={{width: '100%'}} onPress={handleNavigateToSearch}>
+      <Animated.View
+        ref={searchBarRef}
         style={[
           styles.searchContainer,
           {
             backgroundColor: colors.background,
             borderColor: colors.border,
           },
+          animatedStyle,
         ]}
       >
         <Ionicons
@@ -51,17 +72,17 @@ const Search = ({ onSearch, placeholder = 'Rechercher un manga...', onPress }: S
           placeholder={placeholder}
           placeholderTextColor={colors.secondaryText}
           value={searchText}
-          onChangeText={handleChangeText}
           autoCapitalize="none"
           autoCorrect={false}
           editable={false}
+          onPress={handleNavigateToSearch}
         />
         {searchText.length > 0 && (
-          <TouchableOpacity onPress={handleClearText} style={styles.clearButton}>
+          <TouchableOpacity style={styles.clearButton}>
             <Ionicons name="close-circle" size={18} color={colors.secondaryText} />
           </TouchableOpacity>
         )}
-      </View>
+      </Animated.View>
     </TouchableWithoutFeedback>
   );
 };

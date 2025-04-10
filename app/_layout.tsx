@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import ThemeProvider, { useTheme } from '../contexts/ThemeContext';
 import { BottomSheetProvider } from '../contexts/BottomSheetContext';
+import { SearchAnimationProvider } from '../contexts/SearchAnimationContext';
 import Toast, { BaseToast, ToastConfig } from 'react-native-toast-message'
 import HeaderDiscover from '@/components/discover/HeaderDiscover';
 
@@ -91,15 +92,16 @@ function TabsLayout() {
 }
 
 // Composant racine qui fournit le contexte de thème
-export default function RootLayout() {
-  return (
+export default function RootLayout() {  return (
     <ThemeProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <BottomSheetProvider>
-          <BottomSheetModalProvider>
-              <TabsLayout />
-              <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
-          </BottomSheetModalProvider>
+          <SearchAnimationProvider>
+            <BottomSheetModalProvider>
+                <TabsLayout />
+                <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
+            </BottomSheetModalProvider>
+          </SearchAnimationProvider>
         </BottomSheetProvider>
       </GestureHandlerRootView>
     </ThemeProvider>

@@ -1,15 +1,23 @@
 import { Stack } from 'expo-router';
 
-export default function DiscoverLayout() {
-  return (
+export default function DiscoverLayout() {  return (
     <Stack
       screenOptions={{
-        headerShown: false, // On gère les headers manuellement
-        animation: 'none', // Reanimated prendra le contrôle
+        headerShown: false,
+        animation: 'none',
+        presentation: 'transparentModal',
+        contentStyle: {
+          backgroundColor: 'transparent',
+        },
       }}
     >
-      <Stack.Screen name="index" /> {/* Correspond à discover.tsx */}
-      <Stack.Screen name="search" /> {/* Correspond à search.tsx */}
+      <Stack.Screen name="index" />
+      <Stack.Screen 
+        name="search" 
+        options={{
+          animation: 'fade',
+        }}
+      />
     </Stack>
   );
 }
