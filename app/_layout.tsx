@@ -53,18 +53,6 @@ function TabsLayout() {
           tabBarLabelStyle: {
             fontSize: 12,
           },
-          headerStyle: {
-            backgroundColor: colors.background,
-            shadowColor: 'transparent',
-            elevation: 2,
-            height: 105,
-          },
-          headerTitleStyle: {
-            color: colors.text,
-            fontWeight: 'bold',
-            fontSize: 16,
-          },
-          headerTintColor: colors.text,
           animation: 'fade',
           transitionSpec: {
             animation: 'timing',
@@ -72,7 +60,7 @@ function TabsLayout() {
               duration: 120,
             },
           },
-          headerShown: true,
+          headerShown: false,
           tabBarBackground: () => (
             <View style={{ backgroundColor: colors.background, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
           ),
@@ -92,19 +80,8 @@ function TabsLayout() {
           name="discover"
           options={{
             title: 'Découvrir',
-            header: () => <HeaderDiscover />,
-            tabBarLabel: 'Découvrir',
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="compass-outline" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="track"
-          options={{
-            title: 'Track',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="library-outline" size={size} color={color} />
             ),
           }}
         />

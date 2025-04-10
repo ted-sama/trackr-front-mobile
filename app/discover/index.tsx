@@ -3,10 +3,11 @@ import { StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
-import CategorySlider from "../components/CategorySlider";
-import { CATEGORIES } from "../data/manga";
-import { useTheme } from "../contexts/ThemeContext";
-import { useBottomSheet } from "../contexts/BottomSheetContext";
+import CategorySlider from "@/components/CategorySlider";
+import HeaderDiscover from "@/components/discover/HeaderDiscover";
+import { CATEGORIES } from "@/data/manga";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useBottomSheet } from "@/contexts/BottomSheetContext";
 
 // Composant principal pour la page Discover
 export default function Discover() {
@@ -19,6 +20,7 @@ export default function Discover() {
       edges={["right", "left"]}
     >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+      <HeaderDiscover />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}

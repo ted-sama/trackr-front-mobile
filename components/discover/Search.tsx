@@ -1,23 +1,17 @@
 import React, { useState } from 'react';
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Platform,
-} from 'react-native';
+import { View, TextInput, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Dimensions, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface SearchProps {
   onSearch?: (text: string) => void;
   placeholder?: string;
+  onPress?: () => void;
 }
 
 const { width } = Dimensions.get('window');
 
-const Search = ({ onSearch, placeholder = 'Rechercher un manga...' }: SearchProps) => {
+const Search = ({ onSearch, placeholder = 'Rechercher un manga...', onPress }: SearchProps) => {
   const [searchText, setSearchText] = useState('');
   const { colors } = useTheme();
 
@@ -36,18 +30,21 @@ const Search = ({ onSearch, placeholder = 'Rechercher un manga...' }: SearchProp
   };
 
   return (
-      <View style={[
-        styles.searchContainer, 
-        { 
-          backgroundColor: colors.background, 
-          borderColor: colors.border
-        }
-      ]}>
-        <Ionicons 
-          name="search" 
-          size={20} 
-          color={colors.secondaryText} 
-          style={styles.searchIcon} 
+    <TouchableWithoutFeedback onPress={onPress}>
+      <View
+        style={[
+          styles.searchContainer,
+          {
+            backgroundColor: colors.background,
+            borderColor: colors.border,
+          },
+        ]}
+      >
+        <Ionicons
+          name="search"
+          size={20}
+          color={colors.secondaryText}
+          style={styles.searchIcon}
         />
         <TextInput
           style={[styles.input, { color: colors.text }]}
@@ -57,6 +54,7 @@ const Search = ({ onSearch, placeholder = 'Rechercher un manga...' }: SearchProp
           onChangeText={handleChangeText}
           autoCapitalize="none"
           autoCorrect={false}
+          editable={false}
         />
         {searchText.length > 0 && (
           <TouchableOpacity onPress={handleClearText} style={styles.clearButton}>
@@ -64,6 +62,7 @@ const Search = ({ onSearch, placeholder = 'Rechercher un manga...' }: SearchProp
           </TouchableOpacity>
         )}
       </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -81,7 +80,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 6,
     elevation: 8,
-    
   },
   searchIcon: {
     marginRight: 8,
