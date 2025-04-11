@@ -8,7 +8,6 @@ import ThemeProvider, { useTheme } from '../contexts/ThemeContext';
 import { BottomSheetProvider } from '../contexts/BottomSheetContext';
 import { SearchAnimationProvider } from '../contexts/SearchAnimationContext';
 import Toast, { BaseToast, ToastConfig } from 'react-native-toast-message'
-import HeaderDiscover from '@/components/discover/HeaderDiscover';
 
 
 // Config Toast

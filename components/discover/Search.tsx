@@ -35,12 +35,12 @@ const Search = ({ onSearch, placeholder = 'Rechercher un manga...', onPress }: S
   const handleNavigateToSearch = () => {
     router.push('/discover/search');
   };
-
   const animatedStyle = useAnimatedStyle(() => {
     return {
+      zIndex: isSearchExpanded.value ? 0 : 1,
       transform: [
         {
-          scale: withTiming(isSearchExpanded.value ? 1.02 : 1, {
+          scale: withTiming(isSearchExpanded.value ? 1.05 : 1, {
             duration: 300,
           }),
         },
