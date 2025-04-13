@@ -26,23 +26,24 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { Manga } from "../types";
+import { Book } from "../types";
 import { useTheme } from "../contexts/ThemeContext";
 import { useBottomSheet } from "../contexts/BottomSheetContext";
 import Toast from "react-native-toast-message";
+import TrackingIconButton from "./TrackingIconButton";
 
-interface MangaCardProps {
-  manga: Manga;
-  onPress?: (manga: Manga) => void;
+interface BookCardProps {
+  book: Book;
+  onPress?: (book: Book) => void;
 }
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.33;
 
-const MangaCard = ({ manga, onPress }: MangaCardProps) => {
+const BookCard = ({ book, onPress }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [isTracking, setIsTracking] = useState(manga.tracking);
+  const [isTracking, setIsTracking] = useState(book.tracking ?? false);
   const { colors } = useTheme();
   const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
 
@@ -87,13 +88,15 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
   const handleTrackingToggle = () => {
     // Haptic feedback
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setIsTracking((prevTracking) => !prevTracking);
+    setIsTracking((prevTracking: boolean) => !prevTracking);
     // Show toast message
     Toast.show({
       type: "info",
-      text1: isTracking ? "Manga retiré du suivi" : "Manga ajouté au suivi",
+      text1: isTracking ? "Livre retiré du suivi" : "Livre ajouté au suivi",
     });
-  }; // Fonction pour présenter le bottom sheet
+  };
+
+  // Fonction pour présenter le bottom sheet
   const handlePresentModalPress = useCallback(() => {
     // Haptic feedback
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -143,12 +146,23 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
       />
     );
   };
+
   // Create animated style for scale animation
   const animatedCardStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scale.value }],
     };
   });
+
+  const handlePress = () => {
+    if (onPress) {
+      onPress(book);
+    } else {
+      // Default behavior if no onPress is provided
+      // Example: Navigate to a detail screen or log
+      console.log(`Livre sélectionné: ${book.title}`);
+    }
+  };
 
   return (
     <>
@@ -164,7 +178,7 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
         <BottomSheetView style={styles.bottomSheetContent}>
           <View style={styles.bottomSheetHeader}>
             <Image
-              source={{ uri: manga.coverImage }}
+              source={{ uri: book.cover_image }}
               style={{
                 width: 60,
                 height: 60 * 1.5,
@@ -180,7 +194,7 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
                   fontWeight: "bold",
                 }}
               >
-                {manga.title}
+                {book.title}
               </Text>
               <Text
                 style={{
@@ -189,14 +203,14 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
                   marginTop: 4,
                 }}
               >
-                {manga.author}
+                {book.author}
               </Text>
               <View style={[styles.ratingContainer, { marginTop: 4 }]}>
                 <Ionicons name="star" size={14} color={colors.text} />
                 <Text
                   style={[styles.ratingText, { color: colors.secondaryText }]}
                 >
-                  {manga.rating.toFixed(1)}
+                  {book.rating || "N/A"}
                 </Text>
               </View>
             </View>
@@ -236,11 +250,7 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
         onPressOut={() => {
           scale.value = withTiming(1, { duration: 100 });
         }}
-        onPress={() =>
-          onPress
-            ? onPress(manga)
-            : console.log(`Manga sélectionné: ${manga.title}`)
-        }
+        onPress={handlePress}
         onLongPress={handlePresentModalPress}
       >
         <Animated.View style={[styles.mangaCard, animatedCardStyle]}>
@@ -253,39 +263,18 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
               </View>
             )}
             <Image
-              source={{ uri: manga.coverImage }}
+              source={{ uri: book.cover_image }}
               style={styles.mangaCover}
               onLoad={handleImageLoad}
               onError={handleImageError}
             />
             {!isLoading && !hasError && (
-              <TouchableWithoutFeedback onPress={handleTrackingToggle}>
-                <View style={styles.trackButton}>
-                  <View
-                    style={[
-                      styles.trackButtonIcon,
-                      {
-                        backgroundColor: isTracking
-                          ? colors.accent
-                          : "#1616167b",
-                      },
-                    ]}
-                  />
-                  {isTracking ? (
-                    <Ionicons
-                      name="checkmark-circle-outline"
-                      size={24}
-                      color="#FFF"
-                    />
-                  ) : (
-                    <Ionicons
-                      name="add-circle-outline"
-                      size={24}
-                      color="#FFF"
-                    />
-                  )}
-                </View>
-              </TouchableWithoutFeedback>
+              <View style={styles.trackButton}>
+                <TrackingIconButton 
+                  isTracking={isTracking} 
+                  onPress={handleTrackingToggle} 
+                />
+              </View>
             )}
             {hasError && (
               <View
@@ -311,20 +300,20 @@ const MangaCard = ({ manga, onPress }: MangaCardProps) => {
               style={[styles.mangaTitle, { color: colors.text }]}
               numberOfLines={1}
             >
-              {manga.title}
+              {book.title}
             </Text>
             <Text
               style={[styles.mangaAuthor, { color: colors.secondaryText }]}
               numberOfLines={1}
             >
-              {manga.author}
+              {book.author}
             </Text>
             <View style={styles.ratingContainer}>
               <Ionicons name="star" size={14} color={colors.text} />
               <Text
                 style={[styles.ratingText, { color: colors.secondaryText }]}
               >
-                {manga.rating.toFixed(1)}
+                {book.rating || "N/A"}
               </Text>
             </View>
           </View>
@@ -399,15 +388,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 4,
     right: 4,
-    padding: 4,
-  },
-  trackButtonIcon: {
-    position: "absolute",
-    top: 6,
-    right: 6,
-    width: 20,
-    height: 20,
-    borderRadius: 12,
   },
   mangaInfo: {
     paddingTop: 8,
@@ -431,4 +411,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(MangaCard);
+export default React.memo(BookCard);

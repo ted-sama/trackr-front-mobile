@@ -12,12 +12,6 @@ export default function DiscoverLayout() {  return (
       }}
     >
       <Stack.Screen name="index" />
-      <Stack.Screen 
-        name="search" 
-        options={{
-          animation: 'fade',
-        }}
-      />
     </Stack>
   );
 }

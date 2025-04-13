@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Dimensions } from 'react-native';
-import { Category } from '../types';
+import { Category, Book } from '../types';
 import { Ionicons } from '@expo/vector-icons';
-import MangaCard from './MangaCard';
+import BookCard from './BookCard';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface CategorySliderProps {
@@ -45,9 +45,9 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false 
         </TouchableWithoutFeedback>
       </View>
       <FlatList
-        data={category.mangas}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <MangaCard manga={item} />}
+        data={category.books}
+        keyExtractor={(item, index) => `${item.id}-${index}`}
+        renderItem={({ item }) => <BookCard book={item} />}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.sliderContent}
@@ -55,7 +55,7 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false 
         decelerationRate="fast"
         snapToAlignment="start"
         scrollEnabled={!isBottomSheetVisible}
-        snapToOffsets={category.mangas.map((_, index) => {
+        snapToOffsets={category.books.map((_, index) => {
           return index * ITEM_WIDTH + CONTAINER_PADDING_LEFT - 12; // -12px to show the previous item
         })}
       />

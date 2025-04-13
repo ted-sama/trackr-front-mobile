@@ -24,9 +24,8 @@ import Animated, {
   runOnJS,
   interpolate,
 } from "react-native-reanimated";
-import { MANGA_DATA } from "@/data/manga";
-import { Manga } from "@/types";
-import MangaListElement from "@/components/MangaListElement";
+import { Book } from "@/types";
+import BookListElement from "@/components/BookListElement";
 import { LinearGradient } from 'expo-linear-gradient';
 import { hexToRgba } from "@/utils/colors";
 
@@ -61,25 +60,33 @@ export default function SearchScreen() {
   const [searchText, setSearchText] = useState("");
 
   // Manga search
-  const [mangaSearch, setMangaSearch] = useState<Manga[]>([]);
+  const [bookSearch, setBookSearch] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (searchText.length > 0) {
       setIsLoading(true);
     } else {
-      setMangaSearch([]);
+      setBookSearch([]);
     }
   }, [searchText]);
 
   useEffect(() => {
-    if (isLoading) {
-      const filteredManga = MANGA_DATA.filter((manga) =>
-        manga.title.toLowerCase().includes(searchText.toLowerCase())
-      );
-      setMangaSearch(filteredManga);
-      setIsLoading(false);
-    }
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`https://0a2c-89-221-127-193.ngrok-free.app/api/search?q=${searchText}&type=books&limit=10&offset=0`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const booksData: Book[] = await response.json();
+        setBookSearch(booksData);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching books:', error);
+        setIsLoading(false);
+      }
+    };
+    fetchData();
   }, [isLoading]);
 
   // Animation values
@@ -189,10 +196,10 @@ export default function SearchScreen() {
         <View style={styles.content}>
           <View style={styles.scrollViewContainer}>
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
-              {mangaSearch.map((manga) => (
-                <MangaListElement
-                  key={manga.id}
-                  manga={manga}
+              {bookSearch.map((book) => (
+                <BookListElement
+                  key={book.id}
+                  book={book}
                   onPress={() => router.push(`/discover`)}
                 />
               ))}
@@ -222,12 +229,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
   searchContainer: {
     flexDirection: "column",
     height: 52,
-    padding: 16,
     borderRadius: 25,
     borderWidth: 1,
     shadowColor:
@@ -264,7 +271,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingTop: 32
+    paddingVertical: 12,
+    borderBottomEndRadius: 25,
+    borderBottomStartRadius: 25,
   },
   filterInput: {
     height: 52,
@@ -308,6 +317,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 40, // Adjust height as needed
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
     zIndex: 2,
   },
 });

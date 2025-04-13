@@ -5,21 +5,24 @@
 /**
  * Interface représentant un manga
  */
-export interface Manga {
-  id: string;
+export interface Book {
+  id: number;
   title: string;
-  coverImage: string;
-  rating: number;
-  genres: string[];
-  releaseYear: number;
-  // Champs additionnels qui pourraient être utiles à l'avenir
   author?: string;
-  description?: string;
-  status?: 'ongoing' | 'completed' | 'hiatus';
+  rating?: number;
+  release_year?: number;
+  end_year?: number;
   volumes?: number;
   chapters?: number;
-  publisher?: string;
-  tracking?: boolean; // temporary field for tracking status
+  cover_image?: string;
+  type?: string;
+  description?: string;
+  genres?: string[];
+  tags?: string[];
+  status: 'READING' | 'COMPLETED' | 'PLAN_TO_READ' | 'ON_HOLD' | 'DROPPED';
+  tracking?: boolean;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 /**
@@ -28,7 +31,7 @@ export interface Manga {
 export interface Category {
   id: string;
   title: string;
-  mangas: Manga[];
+  books: Book[];
 }
 
 /**
@@ -48,7 +51,7 @@ export interface ReadingList {
   id: string;
   name: string;
   userId: string;
-  mangas: Manga[];
+  books: Book[];
   isPublic: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -62,9 +65,9 @@ export type ReadingStatus = 'plan_to_read' | 'reading' | 'completed' | 'on_hold'
 /**
  * Interface représentant le suivi de lecture d'un manga par un utilisateur
  */
-export interface MangaTracking {
+export interface BookTracking {
   userId: string;
-  mangaId: string;
+  bookId: string;
   status: ReadingStatus;
   currentChapter?: number;
   currentVolume?: number;
