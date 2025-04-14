@@ -33,7 +33,7 @@ export default function Discover() {
         // Assurez-vous que votre simulateur/appareil peut accéder à localhost.
         // Sur Android, cela pourrait être http://10.0.2.2:3000
         // Sur iOS Simulator, localhost fonctionne généralement.
-        const response = await fetch('https://ed85-89-221-127-193.ngrok-free.app/api/books');
+        const response = await fetch('https://2d23-81-198-118-168.ngrok-free.app/api/books');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -63,7 +63,7 @@ export default function Discover() {
       edges={["right", "left"]}
     >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-      <HeaderDiscover />
+      <HeaderDiscover searchMode="navigate" />
 
       {isLoading ? (
         <View style={styles.centered}>

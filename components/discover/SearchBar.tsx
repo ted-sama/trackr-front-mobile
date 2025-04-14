@@ -1,33 +1,46 @@
-import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Platform } from 'react-native';
+import React from 'react';
+import { View, TextInput, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Platform, NativeSyntheticEvent, TextInputSubmitEditingEventData } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Animated from 'react-native-reanimated';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useRouter } from 'expo-router';
 
-interface SearchProps {
-  onSearch?: (text: string) => void;
+interface SearchBarProps {
+  value: string;
+  onChangeText: (text: string) => void;
+  onSubmitEditing?: (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => void;
   placeholder?: string;
-  onPress?: () => void;
+  isEditable?: boolean;
+  onPressNavigate?: () => void;
+  containerStyle?: Animated.AnimateStyle<any>;
 }
 
-const SearchBar = ({ onSearch, placeholder = 'Rechercher un manga...', onPress }: SearchProps) => {
-  const [searchText, setSearchText] = useState('');
+const SearchBar = ({
+  value,
+  onChangeText,
+  onSubmitEditing,
+  placeholder = 'Rechercher un manga...',
+  isEditable = false,
+  onPressNavigate,
+  containerStyle,
+}: SearchBarProps) => {
   const { colors } = useTheme();
-  const router = useRouter();
 
-  const handleNavigateToSearch = () => {
-    router.navigate('/discover/search');
+  const handleClear = () => {
+    onChangeText('');
   };
 
+  const handlePress = isEditable ? undefined : onPressNavigate;
+
   return (
-    <TouchableWithoutFeedback style={{width: '100%'}} onPress={handleNavigateToSearch}>
-      <View
+    <TouchableWithoutFeedback onPress={handlePress} disabled={isEditable}>
+      <Animated.View
         style={[
           styles.searchContainer,
           {
-            backgroundColor: '#8f8f8f20',
+            backgroundColor: '#ffffff',
             borderColor: colors.border,
           },
+          containerStyle,
         ]}
       >
         <Ionicons
@@ -37,21 +50,25 @@ const SearchBar = ({ onSearch, placeholder = 'Rechercher un manga...', onPress }
           style={styles.searchIcon}
         />
         <TextInput
-          style={[styles.input, { color: colors.text }]}
+          style={[styles.input, { color: 'black' }]}
           placeholder={placeholder}
           placeholderTextColor={colors.secondaryText}
-          value={searchText}
+          value={value}
+          onChangeText={isEditable ? onChangeText : undefined}
+          autoFocus={isEditable}
           autoCapitalize="none"
           autoCorrect={false}
-          editable={false}
-          onPress={handleNavigateToSearch}
+          editable={isEditable}
+          pointerEvents={isEditable ? 'auto' : 'none'}
+          onSubmitEditing={isEditable ? onSubmitEditing : undefined}
+          onPressIn={handlePress}
         />
-        {searchText.length > 0 && (
-          <TouchableOpacity style={styles.clearButton}>
+        {value.length > 0 && isEditable && (
+          <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
             <Ionicons name="close-circle" size={18} color={colors.secondaryText} />
           </TouchableOpacity>
         )}
-      </View>
+      </Animated.View>
     </TouchableWithoutFeedback>
   );
 };
@@ -63,8 +80,8 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 25,
     borderWidth: 1,
+    backgroundColor: '#ffffff',
     paddingHorizontal: 12,
-    width: '100%',
     shadowColor: Platform.OS === 'android' ? 'rgba(0, 0, 0, 0.589)' : 'rgba(0, 0, 0, 0.1)',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.8,
@@ -83,6 +100,7 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     padding: 4,
+    marginLeft: 4,
   },
 });
 
