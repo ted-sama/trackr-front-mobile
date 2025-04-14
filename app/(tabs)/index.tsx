@@ -2,8 +2,8 @@ import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { useTheme } from '../contexts/ThemeContext';
-import ThemeToggle from '../components/ThemeToggle';
+import { useTheme } from '@/contexts/ThemeContext';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Index() {
   const { colors, currentTheme } = useTheme();

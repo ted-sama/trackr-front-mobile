@@ -1,17 +1,18 @@
-import { Stack } from 'expo-router';
+import { Stack } from "expo-router";
 
-export default function DiscoverLayout() {  return (
+export default function DiscoverLayout() {
+  return (
     <Stack
       screenOptions={{
         headerShown: false,
-        animation: 'none',
-        presentation: 'transparentModal',
-        contentStyle: {
-          backgroundColor: 'transparent',
-        },
+        animation: "slide_from_right",
       }}
     >
       <Stack.Screen name="index" />
+      <Stack.Screen
+        name="search"
+        options={{ animation: "fade", animationDuration: 200 }}
+      />
     </Stack>
   );
 }

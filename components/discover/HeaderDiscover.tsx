@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet, StatusBar } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/contexts/ThemeContext";
-import Search from "@/components/discover/Search";
+import SearchBar from "@/components/discover/SearchBar";
 
 export default function HeaderDiscover() {
   const insets = useSafeAreaInsets();
@@ -16,7 +16,7 @@ export default function HeaderDiscover() {
       ]}
     >
       <StatusBar barStyle={currentTheme === "dark" ? "light-content" : "dark-content"} backgroundColor={colors.background} />
-      <Search placeholder="Commencez votre recherche" />
+      <SearchBar placeholder="Commencez votre recherche" />
     </View>
   );
 }
