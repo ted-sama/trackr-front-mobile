@@ -4,6 +4,7 @@ import { Category, Book } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import BookCard from './BookCard';
 import { useTheme } from '../contexts/ThemeContext';
+import { router } from 'expo-router';
 
 interface CategorySliderProps {
   category: Category;
@@ -47,7 +48,7 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false 
       <FlatList
         data={category.books}
         keyExtractor={(item, index) => `${item.id}-${index}`}
-        renderItem={({ item }) => <BookCard book={item} />}
+        renderItem={({ item }) => <BookCard book={item} onPress={() => router.navigate(`/discover/book/${item.id}`)} />}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.sliderContent}

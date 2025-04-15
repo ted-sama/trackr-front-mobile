@@ -2,10 +2,10 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import ThemeProvider from '../contexts/ThemeContext';
+import ThemeProvider, { useTheme } from '../contexts/ThemeContext';
 import { BottomSheetProvider } from '../contexts/BottomSheetContext';
 import Toast, { BaseToast, ToastConfig } from 'react-native-toast-message';
-import { Slot } from 'expo-router';
+import { Stack } from 'expo-router';
 
 
 // Config Toast
@@ -21,19 +21,34 @@ const toastConfig: ToastConfig = {
   ),
 }
 
-
 // Composant racine qui fournit les contextes globaux
-export default function RootLayout() {  
+export default function RootLayout() {
   return (
     <ThemeProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <BottomSheetProvider>
-          <BottomSheetModalProvider>
-            <Slot />
-            <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
-          </BottomSheetModalProvider>
-        </BottomSheetProvider>
-      </GestureHandlerRootView>
+      <RootLayoutContent />
     </ThemeProvider>
+  );
+}
+
+// Nouveau composant pour accéder au contexte du thème
+function RootLayoutContent() {
+  const { colors } = useTheme();
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
+      <BottomSheetProvider>
+        <BottomSheetModalProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.background },
+            }}
+          >
+            <Stack.Screen name="(tabs)" />
+          </Stack>
+          <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
+        </BottomSheetModalProvider>
+      </BottomSheetProvider>
+    </GestureHandlerRootView>
   );
 }

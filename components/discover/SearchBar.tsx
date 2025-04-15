@@ -37,7 +37,7 @@ const SearchBar = ({
         style={[
           styles.searchContainer,
           {
-            backgroundColor: '#ffffff',
+            backgroundColor: colors.searchBar,
             borderColor: colors.border,
           },
           containerStyle,
@@ -80,7 +80,6 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 25,
     borderWidth: 1,
-    backgroundColor: '#ffffff',
     paddingHorizontal: 12,
     shadowColor: Platform.OS === 'android' ? 'rgba(0, 0, 0, 0.589)' : 'rgba(0, 0, 0, 0.1)',
     shadowOffset: { width: 0, height: 4 },

@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Clé pour AsyncStorage
+const THEME_STORAGE_KEY = '@MyApp:themePreference';
 
 // Définition des types pour le contexte de thème
 type ThemeType = 'light' | 'dark' | 'system';
@@ -7,6 +11,7 @@ type ThemeContextType = {
   theme: ThemeType;
   currentTheme: 'light' | 'dark';
   setTheme: (theme: ThemeType) => void;
+  isLoadingTheme: boolean; // Indicateur de chargement
   colors: {
     background: string;
     card: string;
@@ -17,6 +22,7 @@ type ThemeContextType = {
     secondary: string;
     accent: string;
     error: string;
+    searchBar: string;
   };
 };
 
@@ -31,6 +37,7 @@ const lightColors = {
   secondary: '#03DAC6',
   accent: '#955ae9',
   error: '#B00020',
+  searchBar: '#FFFFFF',
 };
 
 const darkColors = {
@@ -43,14 +50,16 @@ const darkColors = {
   secondary: '#03DAC6',
   accent: '#955ae9',
   error: '#B00020',
+  searchBar: '#434343',
 };
 
-// Création du contexte avec une valeur par défaut
+// Création du contexte avec une valeur par défaut initiale (sera mise à jour après chargement)
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'system',
-  currentTheme: 'dark',
+  theme: 'system', // Sera écrasé après chargement
+  currentTheme: 'dark', // Sera écrasé après chargement
   setTheme: () => {},
-  colors: darkColors,
+  isLoadingTheme: true, // Commence en chargement
+  colors: darkColors, // Sera mis à jour
 });
 
 // Hook personnalisé pour utiliser le contexte de thème
@@ -58,27 +67,66 @@ export const useTheme = () => useContext(ThemeContext);
 
 // Fournisseur de contexte pour le thème
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Utilisation de useColorScheme pour détecter le thème du système
-  const colorScheme = useColorScheme();
-  const [theme, setTheme] = useState<ThemeType>('system');
-  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>('dark');
+  const systemColorScheme = useColorScheme() ?? 'light';
+  const [isLoadingTheme, setIsLoadingTheme] = useState(true);
+  const [theme, _setTheme] = useState<ThemeType>('system'); // Préférence utilisateur
+  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>(systemColorScheme); // Thème appliqué
 
-  // Mise à jour du thème actuel en fonction du thème choisi et du thème du système
+  // Charger la préférence de thème au montage
   useEffect(() => {
-    if (theme === 'system') {
-      setCurrentTheme(colorScheme === 'light' ? 'light' : 'dark');
-    } else {
-      setCurrentTheme(theme);
+    const loadThemePreference = async () => {
+      try {
+        const storedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY) as ThemeType | null;
+        if (storedTheme) {
+          _setTheme(storedTheme);
+        } else {
+          _setTheme('system'); // Défaut si rien n'est stocké
+        }
+      } catch (error) {
+        console.error("Failed to load theme preference:", error);
+        _setTheme('system'); // Sécurité en cas d'erreur
+      } finally {
+        setIsLoadingTheme(false);
+      }
+    };
+
+    loadThemePreference();
+  }, []);
+
+  // Mettre à jour le thème appliqué (currentTheme) quand la préférence (theme) ou le schéma système change
+  useEffect(() => {
+    if (!isLoadingTheme) { // Ne pas exécuter avant le chargement initial
+      if (theme === 'system') {
+        setCurrentTheme(systemColorScheme);
+      } else {
+        setCurrentTheme(theme);
+      }
     }
-  }, [theme, colorScheme]);
+  }, [theme, systemColorScheme, isLoadingTheme]);
+
+  // Fonction pour définir et sauvegarder la préférence de thème
+  const setTheme = async (newTheme: ThemeType) => {
+    try {
+      await AsyncStorage.setItem(THEME_STORAGE_KEY, newTheme);
+      _setTheme(newTheme);
+    } catch (error) {
+      console.error("Failed to save theme preference:", error);
+    }
+  };
 
   // Valeur du contexte
   const contextValue: ThemeContextType = {
     theme,
     currentTheme,
     setTheme,
+    isLoadingTheme,
     colors: currentTheme === 'light' ? lightColors : darkColors,
   };
+
+  // Optionnel: Afficher un écran de chargement ou null pendant le chargement initial
+  // if (isLoadingTheme) {
+  //   return null; // Ou un composant de chargement
+  // }
 
   return (
     <ThemeContext.Provider value={contextValue}>

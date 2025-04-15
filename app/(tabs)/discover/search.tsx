@@ -7,6 +7,7 @@ import HeaderDiscover from '@/components/discover/HeaderDiscover';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Book } from '@/types';
 import BookListElement from '@/components/BookListElement';
+import { search } from '@/api';
 
 export default function SearchScreen() {
   const { colors, currentTheme } = useTheme();
@@ -22,15 +23,9 @@ export default function SearchScreen() {
     setSearchText(text);
     setSearchResults([]);
 
-    try {
-      const response = await fetch(`https://2d23-81-198-118-168.ngrok-free.app/api/search?q=${text}&type=books&limit=10&offset=0`);
-      const data: Book[] = await response.json();
-      setSearchResults(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
-    } finally {
-      setIsLoading(false);
-    } 
+    const results = await search({ query: text, offset: 0, limit: 10 });
+    setSearchResults(results);
+    setIsLoading(false);
   }
 
   return (
@@ -45,7 +40,7 @@ export default function SearchScreen() {
       ) : (
         <FlatList
           data={searchResults}
-          renderItem={({ item }) => <BookListElement book={item} onPress={() => {}} />}
+          renderItem={({ item }) => <BookListElement book={item} onPress={() => router.push(`/discover/book/${item.id}`)} />}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={
