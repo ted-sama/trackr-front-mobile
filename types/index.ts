@@ -19,7 +19,7 @@ export interface Book {
   description?: string;
   genres?: string[];
   tags?: string[];
-  status: 'READING' | 'COMPLETED' | 'PLAN_TO_READ' | 'ON_HOLD' | 'DROPPED';
+  status: string;
   tracking?: boolean;
   created_at?: Date;
   updated_at?: Date;

@@ -31,6 +31,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useBottomSheet } from "../contexts/BottomSheetContext";
 import Toast from "react-native-toast-message";
 import TrackingIconButton from "./TrackingIconButton";
+import { useTypography } from "@/hooks/useTypography";
 
 interface BookCardProps {
   book: Book;
@@ -46,6 +47,7 @@ const BookCard = ({ book, onPress }: BookCardProps) => {
   const [isTracking, setIsTracking] = useState(book.tracking ?? false);
   const { colors } = useTheme();
   const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
+  const typography = useTypography();
 
   // Shared value for scale animation
   const scale = useSharedValue(1);
@@ -297,13 +299,13 @@ const BookCard = ({ book, onPress }: BookCardProps) => {
 
           <View style={styles.mangaInfo}>
             <Text
-              style={[styles.mangaTitle, { color: colors.text }]}
+              style={[styles.mangaTitle, typography.h3, { color: colors.text }]}
               numberOfLines={1}
             >
               {book.title}
             </Text>
             <Text
-              style={[styles.mangaAuthor, { color: colors.secondaryText }]}
+              style={[styles.mangaAuthor, typography.caption, { color: colors.secondaryText }]}
               numberOfLines={1}
             >
               {book.author}
@@ -311,7 +313,7 @@ const BookCard = ({ book, onPress }: BookCardProps) => {
             <View style={styles.ratingContainer}>
               <Ionicons name="star" size={14} color={colors.text} />
               <Text
-                style={[styles.ratingText, { color: colors.secondaryText }]}
+                style={[styles.ratingText, typography.caption, { color: colors.secondaryText }]}
               >
                 {book.rating || "N/A"}
               </Text>

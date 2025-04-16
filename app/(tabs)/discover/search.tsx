@@ -40,7 +40,7 @@ export default function SearchScreen() {
       ) : (
         <FlatList
           data={searchResults}
-          renderItem={({ item }) => <BookListElement book={item} onPress={() => router.push(`/discover/book/${item.id}`)} />}
+          renderItem={({ item }) => <BookListElement book={item} onPress={() => router.push(`/book/${item.id}`)} />}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={

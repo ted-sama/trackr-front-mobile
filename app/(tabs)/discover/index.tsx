@@ -8,7 +8,7 @@ import HeaderDiscover from "@/components/discover/HeaderDiscover";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { Book, Category } from "@/types/index";
-
+import { getBooks } from "@/api";
 // Catégories fictives initiales
 const FAKE_CATEGORIES_STRUCTURE: Omit<Category, 'books'>[] = [
   { id: 'news', title: 'Nouveautés' },
@@ -30,14 +30,7 @@ export default function Discover() {
       setIsLoading(true);
       setError(null);
       try {
-        // Assurez-vous que votre simulateur/appareil peut accéder à localhost.
-        // Sur Android, cela pourrait être http://10.0.2.2:3000
-        // Sur iOS Simulator, localhost fonctionne généralement.
-        const response = await fetch('https://2d23-81-198-118-168.ngrok-free.app/api/books');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const booksData: Book[] = await response.json();
+        const booksData = await getBooks();
 
         // Peupler les catégories fictives avec les données récupérées
         const populatedCategories: Category[] = FAKE_CATEGORIES_STRUCTURE.map(cat => ({

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import BookCard from './BookCard';
 import { useTheme } from '../contexts/ThemeContext';
 import { router } from 'expo-router';
+import { useTypography } from '@/hooks/useTypography';
 
 interface CategorySliderProps {
   category: Category;
@@ -20,11 +21,12 @@ const ITEM_WIDTH = CARD_WIDTH + ITEM_MARGIN_RIGHT;
 
 const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false }: CategorySliderProps) => {
   const { colors } = useTheme();
-  
+  const typography = useTypography();
+
   return (
     <View style={styles.categoryContainer}>
       <View style={styles.categoryHeader}>
-        <Text style={[styles.categoryTitle, { color: colors.text }]}>
+        <Text style={[styles.categoryTitle, typography.categoryTitle, { color: colors.text }]}>
           {category.title}
         </Text>
         <TouchableWithoutFeedback
@@ -48,7 +50,7 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false 
       <FlatList
         data={category.books}
         keyExtractor={(item, index) => `${item.id}-${index}`}
-        renderItem={({ item }) => <BookCard book={item} onPress={() => router.navigate(`/discover/book/${item.id}`)} />}
+        renderItem={({ item }) => <BookCard book={item} onPress={() => router.navigate(`/book/${item.id}`)} />}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.sliderContent}

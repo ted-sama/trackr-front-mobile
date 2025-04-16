@@ -17,9 +17,6 @@ export default function DiscoverLayout() {
         name="search"
         options={{ animation: "fade", animationDuration: 200, gestureEnabled: false }}
       />
-      <Stack.Screen
-        name="book/[id]"
-      />
     </Stack>
   );
 }

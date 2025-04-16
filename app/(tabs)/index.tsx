@@ -4,15 +4,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/contexts/ThemeContext';
 import ThemeToggle from '@/components/ThemeToggle';
+import { useTypography } from '@/hooks/useTypography';
 
 export default function Index() {
   const { colors, currentTheme } = useTheme();
+  const typography = useTypography();
   
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />   
       <View style={styles.content}>
-        <Text style={[styles.welcomeText, { color: colors.text }]}>
+        <Text style={[styles.welcomeText, typography.body, { color: colors.text }]}>
           Bienvenue sur Trackr, votre application de suivi et découverte de mangas !
         </Text>
         
@@ -42,7 +44,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   welcomeText: {
-    fontSize: 18,
     textAlign: 'center',
     marginBottom: 30,
   },

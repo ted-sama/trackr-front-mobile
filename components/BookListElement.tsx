@@ -5,6 +5,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import TrackingIconButton from "./TrackingIconButton";
 import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
+import { useTypography } from "@/hooks/useTypography";
 
 interface BookListElementProps {
   book: Book;
@@ -13,6 +14,7 @@ interface BookListElementProps {
 
 const BookListElement = ({ book, onPress }: BookListElementProps) => {
   const { colors } = useTheme();
+  const typography = useTypography();
   const [isTracking, setIsTracking] = useState(book.tracking ?? false);
 
    // Function to handle quick add/remove tracking
@@ -32,8 +34,8 @@ const BookListElement = ({ book, onPress }: BookListElementProps) => {
       <View style={styles.detailsGroup}>
         <Image source={{ uri: book.cover_image }} style={styles.image} />
         <View style={styles.infoContainer}>
-          <Text style={[styles.title, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">{book.title}</Text>
-          <Text style={[styles.author, { color: colors.secondaryText }]}>{book.author}</Text>
+          <Text style={[styles.title, typography.bodyBold, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">{book.title}</Text>
+          <Text style={[styles.author, typography.caption, { color: colors.secondaryText }]}>{book.author}</Text>
         </View>
       </View>
       {book.tracking && (
@@ -59,19 +61,18 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   image: {
-    width: 50,
-    height: 75,
-    borderRadius: 6,
+    width: 45,
+    height: 68,
+    borderRadius: 4,
   },
   infoContainer: {
     marginHorizontal: 16,
     flexShrink: 1,
   },
   title: {
-    fontSize: 14,
-    fontWeight: "bold",
+    marginBottom: 4,
   },
   author: {
-    fontSize: 12,
+    marginBottom: 2,
   },
 });

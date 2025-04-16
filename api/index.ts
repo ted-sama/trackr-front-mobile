@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { Book } from '@/types';
 
 const api: AxiosInstance = axios.create({
-  baseURL: 'https://2d23-81-198-118-168.ngrok-free.app/api',
+  baseURL: 'https://d23c-93-22-150-147.ngrok-free.app/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -25,6 +25,11 @@ export const search = async (params: searchParams): Promise<Book[]> => {
 
 export const getBook = async (params: getBookParams): Promise<Book> => {
   const response = await api.get(`/books/${params.id}`);
+  return response.data;
+};
+
+export const getBooks = async (): Promise<Book[]> => {
+  const response = await api.get('/books');
   return response.data;
 };
 
