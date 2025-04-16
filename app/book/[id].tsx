@@ -27,7 +27,7 @@ export default function BookScreen() {
 
     // Animation setup for button
     const translateY = useSharedValue(150); 
-    const scale = useSharedValue(0.3); 
+    const scale = useSharedValue(0.1); 
     const pressScale = useSharedValue(1);
 
     // Animation setup for description height
@@ -97,7 +97,7 @@ export default function BookScreen() {
             easing: Easing.out(Easing.exp),
         });
         scale.value = withTiming(1, { // Animate scale to 100%
-            duration: 500,
+            duration: 750,
             easing: Easing.out(Easing.exp),
         });
     }, []);
