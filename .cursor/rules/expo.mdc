@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: Rules for Expo/React Native development
 globs: 
 alwaysApply: true
@@ -12,6 +17,7 @@ alwaysApply: true
   - Prefer iteration and modularization over code duplication.
   - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
   - Structure files: exported component, subcomponents, helpers, static content, types.
+  - Use librairies like Reanimated, Skia and Gesture Handler to make fluid and modern animations.
   - Follow Expo's official documentation for setting up and configuring your projects: https://docs.expo.dev/
 
   Naming Conventions

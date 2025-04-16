@@ -145,6 +145,15 @@ export default function BookScreen() {
                     {/* Description */}
                     <Animated.View style={[styles.descriptionContainer, animatedDescriptionStyle]}>
                         <Text style={[typography.body, { color: colors.text }]}>{book?.description}</Text>
+                        {!isDescriptionExpanded && (
+                            <LinearGradient
+                                // Use background color with varying alpha (Hex8 format)
+                                colors={[`${colors.background}00`, `${colors.background}B3`, colors.background]}
+                                locations={[0, 0.5, 1]} // Adjust fade start/intensity
+                                style={styles.fadeOverlay}
+                                pointerEvents="none" // Allow touches to pass through
+                            />
+                        )}
                     </Animated.View>
                     {/* Toggle Button */}
                     <Pressable onPress={toggleDescription} style={styles.toggleButton}>
@@ -264,7 +273,15 @@ const styles = StyleSheet.create({
     },
     descriptionContainer: {
         marginTop: 16,
+        position: 'relative', // Needed for absolute positioning of the overlay
         // overflow: 'hidden', // Moved to animated style
+    },
+    fadeOverlay: { // Style for the fade effect
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 30, // Adjust height as needed for the fade effect
     },
     toggleButton: {
         marginTop: 8,
