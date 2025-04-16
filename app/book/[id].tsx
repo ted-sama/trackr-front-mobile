@@ -124,7 +124,7 @@ export default function BookScreen() {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top", "right", "left"]}>
-            <ScrollView>
+            <ScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
                 <Image source={{ uri: book?.cover_image }} style={styles.image} />
                 <View style={styles.detailsContainer}>
                     {/* Title, author, type, dates and tracking button */}
@@ -152,6 +152,10 @@ export default function BookScreen() {
                             {isDescriptionExpanded ? "Réduire" : "Lire la suite"}
                         </Text>
                     </Pressable>
+                    {/* Genres */}
+                    <View style={[styles.genresContainer, { borderColor: colors.border }]}>
+                        <Text style={[typography.body, { color: colors.text }]}>Genres</Text>
+                    </View>
                 </View>
             </ScrollView>
 
@@ -187,8 +191,6 @@ export default function BookScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 16, // Keep horizontal padding for container
-        // Remove bottom padding if button is absolutely positioned relative to insets
     },
     detailsContainer: {
         marginTop: 16, // Add some margin if needed between image and details
@@ -270,5 +272,10 @@ const styles = StyleSheet.create({
     },
     toggleButtonText: {
         textDecorationLine: 'underline',
+    },
+    genresContainer: {
+        borderTopWidth: 1,
+        marginTop: 24,
+        paddingTop: 24,
     }
 });
