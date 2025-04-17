@@ -355,7 +355,7 @@ export default function BookScreen() {
       {/* Blur gradient mask under the button (100% blur bottom → 0% blur top) */}
       <View pointerEvents="none" style={[
         styles.blurGradientContainer,
-        { bottom: 0, height: insets.bottom + 16 + 100 },
+        { bottom: 0, height: insets.bottom + 16 + 40 },
       ]}>
         <MaskedView
           style={StyleSheet.absoluteFillObject}
