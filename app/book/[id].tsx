@@ -11,6 +11,7 @@ import {
   Pressable,
   ScrollView,
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -31,6 +32,8 @@ import CategorySlider from "@/components/CategorySlider";
 import { BlurView } from 'expo-blur';
 // @ts-ignore no type declarations for masked-view
 import MaskedView from '@react-native-masked-view/masked-view';
+import { Canvas, Image as SkiaImage, useImage, Rect, RadialGradient, vec } from "@shopify/react-native-skia";
+import { DeviceMotion } from "expo-sensors";
 
 // Constants for animation
 const COLLAPSED_HEIGHT = 60; // Adjust based on font size/line height for ~3 lines
@@ -39,7 +42,7 @@ const ANIMATION_DURATION = 300; // ms
 
 export default function BookScreen() {
   const { id } = useLocalSearchParams();
-  const { colors } = useTheme();
+  const { colors, currentTheme } = useTheme();
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -118,6 +121,13 @@ export default function BookScreen() {
     setIsDescriptionExpanded(!isDescriptionExpanded);
   };
 
+  // Skia reflection effect setup
+  const IMAGE_WIDTH = 202.5;
+  const IMAGE_HEIGHT = 303.75;
+  const GRADIENT_RADIUS = 80;
+  const skiaCoverImage = useImage(book?.cover_image ?? "");
+  const [tiltPos, setTiltPos] = useState<{ x: number; y: number }>({ x: IMAGE_WIDTH / 2, y: IMAGE_HEIGHT / 2 });
+
   useEffect(() => {
     const fetchBook = async () => {
       try {
@@ -144,6 +154,17 @@ export default function BookScreen() {
     fetchBook();
     fetchRecommendations();
   }, [id]);
+
+  useEffect(() => {
+    DeviceMotion.setUpdateInterval(16);
+    const subscription = DeviceMotion.addListener((motion) => {
+      const { beta = 0, gamma = 0 } = motion.rotation ?? {};
+      const normX = (gamma / (Math.PI / 2) + 1) / 2;
+      const normY = (beta / (Math.PI / 2) + 1) / 2;
+      setTiltPos({ x: normX * IMAGE_WIDTH, y: normY * IMAGE_HEIGHT });
+    });
+    return () => subscription.remove();
+  }, []);
 
   // Trigger animation on mount
   useEffect(() => {
@@ -197,8 +218,23 @@ export default function BookScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
       edges={["top", "right", "left"]}
     >
+      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
-        <Image source={{ uri: book?.cover_image }} style={styles.image} />
+        {skiaCoverImage ? (
+          <Canvas style={[styles.image, { padding: 0, overflow: "hidden" }]}> 
+            <SkiaImage image={skiaCoverImage} x={0} y={0} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            <Rect x={0} y={0} width={IMAGE_WIDTH} height={IMAGE_HEIGHT}>
+              <RadialGradient
+                c={vec(tiltPos.x, tiltPos.y)}
+                r={GRADIENT_RADIUS}
+                colors={["rgba(255, 255, 255, 0.293)", "rgba(255,255,255,0)"]}
+                positions={[0, 1]}
+              />
+            </Rect>
+          </Canvas>
+        ) : (
+          <Image source={{ uri: book?.cover_image }} style={styles.image} />
+        )}
         <View style={styles.detailsContainer}>
           {/* Title, author, type, dates and tracking button */}
           <View style={styles.titleTextContainer}>
