@@ -1,6 +1,6 @@
 import { getBook, getBooks } from "@/api";
 import React, { useEffect, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Book, Category } from "@/types";
 import {
   Text,
@@ -42,6 +42,7 @@ const ANIMATION_DURATION = 300; // ms
 
 export default function BookScreen() {
   const { id } = useLocalSearchParams();
+  const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -421,7 +422,7 @@ export default function BookScreen() {
         <Animated.View style={[animatedPressStyle]}>
           <Pressable
             style={[styles.button]}
-            onPress={() => console.log("Button Pressed")}
+            onPress={() => router.push({pathname: "/book/tracking-settings", params: {bookId: book?.id}})}
             onPressIn={() => {
               pressScale.value = withTiming(0.97, { duration: 100 });
             }}

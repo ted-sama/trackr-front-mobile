@@ -79,6 +79,7 @@ function RootLayoutContent() {
           >
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name='book/[id]' getId={({ params }) => params?.id} />
+            <Stack.Screen name='book/tracking-settings' getId={({ params }) => params?.bookId}  options={{presentation: 'formSheet'}}/>
           </Stack>
           <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
         </BottomSheetModalProvider>
