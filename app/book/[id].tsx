@@ -32,7 +32,7 @@ import CategorySlider from "@/components/CategorySlider";
 import { BlurView } from 'expo-blur';
 // @ts-ignore no type declarations for masked-view
 import MaskedView from '@react-native-masked-view/masked-view';
-import { Canvas, Image as SkiaImage, useImage, Rect, RadialGradient, vec } from "@shopify/react-native-skia";
+import { Canvas, Rect, RadialGradient, vec } from "@shopify/react-native-skia";
 import { DeviceMotion } from "expo-sensors";
 
 // Constants for animation
@@ -122,11 +122,10 @@ export default function BookScreen() {
     setIsDescriptionExpanded(!isDescriptionExpanded);
   };
 
-  // Skia reflection effect setup
+  // Reflection effect setup with native Image and Skia overlay
   const IMAGE_WIDTH = 202.5;
   const IMAGE_HEIGHT = 303.75;
   const GRADIENT_RADIUS = 80;
-  const skiaCoverImage = useImage(book?.cover_image ?? "");
   const [tiltPos, setTiltPos] = useState<{ x: number; y: number }>({ x: IMAGE_WIDTH / 2, y: IMAGE_HEIGHT / 2 });
 
   useEffect(() => {
@@ -157,7 +156,7 @@ export default function BookScreen() {
   }, [id]);
 
   useEffect(() => {
-    DeviceMotion.setUpdateInterval(16);
+    DeviceMotion.setUpdateInterval(50);
     const subscription = DeviceMotion.addListener((motion) => {
       const { beta = 0, gamma = 0 } = motion.rotation ?? {};
       const normX = (gamma / (Math.PI / 2) + 1) / 2;
@@ -221,21 +220,21 @@ export default function BookScreen() {
     >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
-        {skiaCoverImage ? (
-          <Canvas style={[styles.image, { padding: 0, overflow: "hidden" }]}> 
-            <SkiaImage image={skiaCoverImage} x={0} y={0} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-            <Rect x={0} y={0} width={IMAGE_WIDTH} height={IMAGE_HEIGHT}>
-              <RadialGradient
-                c={vec(tiltPos.x, tiltPos.y)}
-                r={GRADIENT_RADIUS}
-                colors={["rgba(255, 255, 255, 0.293)", "rgba(255,255,255,0)"]}
-                positions={[0, 1]}
-              />
-            </Rect>
-          </Canvas>
-        ) : (
-          <Image source={{ uri: book?.cover_image }} style={styles.image} />
-        )}
+        <View style={styles.shadowContainer}>
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: book?.cover_image }} style={styles.imageContent} />
+            <Canvas style={styles.overlayCanvas}> 
+              <Rect x={0} y={0} width={IMAGE_WIDTH} height={IMAGE_HEIGHT}>
+                <RadialGradient
+                  c={vec(tiltPos.x, tiltPos.y)}
+                  r={GRADIENT_RADIUS}
+                  colors={["rgba(255, 255, 255, 0.15)", "rgba(255,255,255,0)"]}
+                  positions={[0, 1]}
+                />
+              </Rect>
+            </Canvas>
+          </View>
+        </View>
         <View style={styles.detailsContainer}>
           {/* Title, author, type, dates and tracking button */}
           <View style={styles.titleTextContainer}>
@@ -405,7 +404,7 @@ export default function BookScreen() {
             />
           }
         >
-          <BlurView intensity={100} tint="dark" style={StyleSheet.absoluteFillObject} />
+          <BlurView intensity={100} tint={currentTheme === "dark" ? "dark" : "light"} style={StyleSheet.absoluteFillObject} />
           <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.6)' }]} />
         </MaskedView>
       </View>
@@ -458,18 +457,38 @@ const styles = StyleSheet.create({
     marginTop: 16, // Add some margin if needed between image and details
     paddingBottom: 128,
   },
-  image: {
+  shadowContainer: {
     width: 202.5,
     height: 303.75,
-    borderRadius: 6,
-    padding: 16,
     alignSelf: "center",
+    borderRadius: 6,
     shadowColor:
       Platform.OS === "android" ? "rgba(0, 0, 0, 0.589)" : "rgba(0, 0, 0, 0.1)",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.8,
     shadowRadius: 6,
     elevation: 8,
+  },
+  imageContainer: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 6,
+    overflow: "hidden",
+  },
+  imageContent: {
+    width: 202.5,
+    height: 303.75,
+    borderRadius: 6,
+    resizeMode: "cover",
+  },
+  overlayCanvas: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 202.5,
+    height: 303.75,
+    borderRadius: 6,
+    overflow: "hidden",
   },
   title: {
     marginBottom: 4,
