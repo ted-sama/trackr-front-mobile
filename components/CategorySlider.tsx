@@ -11,6 +11,7 @@ interface CategorySliderProps {
   category: Category;
   onSeeAllPress?: (categoryId: string) => void;
   isBottomSheetVisible?: boolean;
+  header?: boolean;
 }
 
 const { width } = Dimensions.get('window');
@@ -19,13 +20,17 @@ const ITEM_MARGIN_RIGHT = 12;
 const CONTAINER_PADDING_LEFT = 16;
 const ITEM_WIDTH = CARD_WIDTH + ITEM_MARGIN_RIGHT;
 
-const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false }: CategorySliderProps) => {
+const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false, header = true }: CategorySliderProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
+  
+  // Ensure books is always an array
+  const books = Array.isArray(category?.books) ? category.books : [];
 
   return (
     <View style={styles.categoryContainer}>
-      <View style={styles.categoryHeader}>
+      {header && (
+        <View style={styles.categoryHeader}>
         <Text style={[styles.categoryTitle, typography.categoryTitle, { color: colors.text }]}>
           {category.title}
         </Text>
@@ -47,10 +52,11 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false 
           </View>
         </TouchableWithoutFeedback>
       </View>
+      )}
       <FlatList
-        data={category.books}
+        data={books}
         keyExtractor={(item, index) => `${item.id}-${index}`}
-        renderItem={({ item }) => <BookCard book={item} onPress={() => router.navigate(`/book/${item.id}`)} />}
+        renderItem={({ item }) => <BookCard book={item} onPress={() => router.push(`/book/${item.id}`)} />}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.sliderContent}
@@ -58,7 +64,7 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false 
         decelerationRate="fast"
         snapToAlignment="start"
         scrollEnabled={!isBottomSheetVisible}
-        snapToOffsets={category.books.map((_, index) => {
+        snapToOffsets={books.map((_, index) => {
           return index * ITEM_WIDTH + CONTAINER_PADDING_LEFT - 12; // -12px to show the previous item
         })}
       />

@@ -23,14 +23,16 @@ type ThemeContextType = {
     accent: string;
     error: string;
     searchBar: string;
+    review: string;
+    list: string;
   };
 };
 
 // Définition des couleurs pour chaque thème
 const lightColors = {
   background: '#FFFFFF',
-  card: '#F5F5F5',
-  text: '#121212',
+  card: '#f5f5f5',
+  text: '#202020',
   secondaryText: '#666666',
   border: '#E0E0E0',
   primary: '#6200EE',
@@ -38,6 +40,8 @@ const lightColors = {
   accent: '#955ae9',
   error: '#B00020',
   searchBar: '#FFFFFF',
+  review: '#51d2f9',
+  list: '#11d261',
 };
 
 const darkColors = {
@@ -51,6 +55,8 @@ const darkColors = {
   accent: '#955ae9',
   error: '#B00020',
   searchBar: '#434343',
+  review: '#51d2f9',
+  list: '#11d261',
 };
 
 // Création du contexte avec une valeur par défaut initiale (sera mise à jour après chargement)

@@ -9,6 +9,7 @@ export interface Typography {
   caption: object;
   button: object;
   categoryTitle: object;
+  socialButton: object;
 }
 
 export function useTypography(): Typography {
@@ -57,6 +58,12 @@ export function useTypography(): Typography {
       fontFamily: 'Manrope_700Bold',
       fontSize: 18,
       lineHeight: 24,
+      letterSpacing: -0.3,
+    },
+    socialButton: {
+      fontFamily: 'Manrope_700Bold',
+      fontSize: 14,
+      lineHeight: 20,
       letterSpacing: -0.3,
     },
   });
