@@ -78,7 +78,7 @@ function RootLayoutContent() {
             }}
           >
             <Stack.Screen name="(tabs)" />
-            <Stack.Screen name='book/[id]' />
+            <Stack.Screen name='book/[id]' getId={({ params }) => params?.id} />
           </Stack>
           <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
         </BottomSheetModalProvider>
