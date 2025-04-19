@@ -228,7 +228,7 @@ export default function BookScreen() {
                 <RadialGradient
                   c={vec(tiltPos.x, tiltPos.y)}
                   r={GRADIENT_RADIUS}
-                  colors={["rgba(255, 255, 255, 0.15)", "rgba(255,255,255,0)"]}
+                  colors={["rgba(255, 255, 255, 0.185)", "rgba(255,255,255,0)"]}
                   positions={[0, 1]}
                 />
               </Rect>
@@ -581,6 +581,12 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: "red",
     borderRadius: 10,
+    shadowColor:
+      Platform.OS === "android" ? "rgba(0, 0, 0, 0.589)" : "rgba(0, 0, 0, 0.1)",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 8,
   },
   recommendationsContainer: {
     borderTopWidth: 1,

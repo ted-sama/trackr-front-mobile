@@ -25,6 +25,10 @@ type ThemeContextType = {
     searchBar: string;
     review: string;
     list: string;
+    tabBarBackground: string;
+    tabBarHighlight: string;
+    tabBarText: string;
+    tabBarTextActive: string;
   };
 };
 
@@ -42,6 +46,11 @@ const lightColors = {
   searchBar: '#FFFFFF',
   review: '#51d2f9',
   list: '#11d261',
+  // TabBar
+  tabBarBackground: '#F0F0F3',
+  tabBarHighlight: '#fff',
+  tabBarText: '#888',
+  tabBarTextActive: '#222',
 };
 
 const darkColors = {
@@ -57,6 +66,11 @@ const darkColors = {
   searchBar: '#434343',
   review: '#51d2f9',
   list: '#11d261',
+  // TabBar
+  tabBarBackground: '#23232a',
+  tabBarHighlight: '#333347',
+  tabBarText: '#aaa',
+  tabBarTextActive: '#fff',
 };
 
 // Création du contexte avec une valeur par défaut initiale (sera mise à jour après chargement)
