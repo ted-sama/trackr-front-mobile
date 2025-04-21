@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { Book } from '@/types';
+import { Book, Chapter, Source } from '@/types';
 
 const api: AxiosInstance = axios.create({
   baseURL: 'https://d23c-93-22-150-147.ngrok-free.app/api',
@@ -30,6 +30,16 @@ export const getBook = async (params: getBookParams): Promise<Book> => {
 
 export const getBooks = async (): Promise<Book[]> => {
   const response = await api.get('/books');
+  return response.data;
+};
+
+export const getChaptersFromBook = async (bookId: string): Promise<Chapter[]> => {
+  const response = await api.get(`/chapters/${bookId}`);
+  return response.data;
+};
+
+export const getSources = async (): Promise<Source[]> => {
+  const response = await api.get('/sources');
   return response.data;
 };
 

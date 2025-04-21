@@ -5,9 +5,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../..//contexts/ThemeContext';
 import { useTypography } from '../../hooks/useTypography';
-import { getBook } from '../../api';
-import { Book } from '../../types';
+import { getBook, getChaptersFromBook, getSources } from '../../api';
+import { Book, Chapter, Source } from '../../types';
 import TabBar, { TabBarTab } from '../../components/TabBar';
+import DropdownSelector from '../../components/DropdownSelector';
 
 export default function TrackingSettingsScreen() {
   const router = useRouter();
@@ -15,13 +16,23 @@ export default function TrackingSettingsScreen() {
   const { colors } = useTheme();
   const typography = useTypography();
   const [book, setBook] = useState<Book | null>(null);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [sources, setSources] = useState<Source[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<'auto' | 'semi-auto'>('auto');
+  const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const trackingTabs: TabBarTab<'auto' | 'semi-auto'>[] = [
     { label: 'Automatique', value: 'auto' },
     { label: 'Semi-automatique', value: 'semi-auto' },
   ];
+
+  const dummySources = [
+    "MANGA Moins",
+    "MANGA Plus",
+    "Little Garden",
+    "VoirAnime"
+  ]
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -35,7 +46,19 @@ export default function TrackingSettingsScreen() {
         setIsLoading(false);
       }
     };
-    if (bookId) fetchBook();
+
+    const fetchChapters = async () => {
+      const data = await getChaptersFromBook(bookId as string);
+      setChapters(data);
+      
+      const sources = await getSources();
+      setSources(sources);
+    };
+
+    if (bookId) {
+      fetchBook();
+      fetchChapters();
+    }
     else setError('ID du livre manquant');
   }, [bookId]);
 
@@ -64,8 +87,13 @@ export default function TrackingSettingsScreen() {
       <TabBar tabs={trackingTabs} selected={selectedTab} onTabChange={setSelectedTab} />
       {/* ... Votre formulaire ici ... */}
       <View>
-        <Text style={[typography.h3, { color: colors.text }]}>Type de suivi</Text>
-        
+        <DropdownSelector
+          options={sources.map(source => ({ label: source.name, value: source.id.toString() }))}
+          selectedValue={selectedSource}
+          onValueChange={setSelectedSource}
+          placeholder="Source de tracking"
+        />
+        {/* Additional form fields go here */}
       </View>
     </View>
   );

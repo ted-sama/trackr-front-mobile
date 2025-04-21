@@ -26,6 +26,30 @@ export interface Book {
 }
 
 /**
+ * Interface représentant un chapitre d'un manga
+ */
+export interface Chapter {
+  id: number;
+  volume?: number;
+  published_at: Date;
+  source_id: number;
+  book_id: number;
+  title: string;
+  translation_language: string;
+  chapter: string;
+  external_url: string;
+}
+
+/**
+ * Interface représentant une source de chapitre
+ */
+export interface Source {
+  id: number;
+  name: string;
+  book_categories: string;
+}
+
+/**
  * Interface représentant une catégorie de mangas
  */
 export interface Category {

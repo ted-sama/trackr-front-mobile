@@ -34,6 +34,7 @@ import { BlurView } from 'expo-blur';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { Canvas, Rect, RadialGradient, vec } from "@shopify/react-native-skia";
 import { DeviceMotion } from "expo-sensors";
+import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 
 // Constants for animation
 const COLLAPSED_HEIGHT = 60; // Adjust based on font size/line height for ~3 lines
@@ -179,12 +180,12 @@ export default function BookScreen() {
     });
   }, []);
 
-  if (isLoading) {
-    return <Text>Loading...</Text>;
-  }
-
   if (error) {
-    return <Text>Error: {error}</Text>;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: colors.text }}>Une erreur est survenue</Text>
+      </View>
+    );
   }
 
   const separator = () => {
@@ -222,7 +223,13 @@ export default function BookScreen() {
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
         <View style={styles.shadowContainer}>
           <View style={styles.imageContainer}>
-            <Image source={{ uri: book?.cover_image }} style={styles.imageContent} />
+             {
+              isLoading ? (
+                <SkeletonLoader width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+              ) : (
+                <Image source={{ uri: book?.cover_image }} style={styles.imageContent} />
+              )
+             }
             <Canvas style={styles.overlayCanvas}> 
               <Rect x={0} y={0} width={IMAGE_WIDTH} height={IMAGE_HEIGHT}>
                 <RadialGradient
@@ -239,13 +246,17 @@ export default function BookScreen() {
           {/* Title, author, type, dates and tracking button */}
           <View style={styles.titleTextContainer}>
             <View style={{ flex: 3 }}>
-              <Text
-                style={[styles.title, typography.h1, { color: colors.text }]}
-                numberOfLines={1}
-                ellipsizeMode="tail"
+              {isLoading ? (
+                <SkeletonLoader width={'100%'} height={40} />
+              ) : (
+                <Text
+                  style={[styles.title, typography.h1, { color: colors.text }]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
               >
                 {book?.title}
               </Text>
+              )}
               <Text
                 style={[
                   styles.author,
@@ -468,6 +479,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 6,
     elevation: 8,
+    marginTop: 16,
   },
   imageContainer: {
     width: "100%",
