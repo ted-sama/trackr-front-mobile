@@ -24,7 +24,7 @@ export default function SearchScreen() {
     setSearchResults([]);
 
     const results = await search({ query: text, offset: 0, limit: 10 });
-    setSearchResults(results);
+    setSearchResults(results.items);
     setIsLoading(false);
   }
 

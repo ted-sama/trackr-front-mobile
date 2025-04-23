@@ -17,6 +17,7 @@ import {
   Manrope_800ExtraBold,
 } from '@expo-google-fonts/manrope';
 import * as SplashScreen from 'expo-splash-screen';
+import { DropdownProvider } from '../contexts/DropdownContext';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -38,7 +39,9 @@ const toastConfig: ToastConfig = {
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <RootLayoutContent />
+      <DropdownProvider>
+        <RootLayoutContent />
+      </DropdownProvider>
     </ThemeProvider>
   );
 }
@@ -80,6 +83,7 @@ function RootLayoutContent() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name='book/[id]' getId={({ params }) => params?.id} />
             <Stack.Screen name='book/tracking-settings' getId={({ params }) => params?.bookId}  options={{presentation: 'formSheet'}}/>
+            <Stack.Screen name='book/chapter-list' getId={({ params }) => params?.bookId} options={{presentation: 'formSheet'}} />
           </Stack>
           <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
         </BottomSheetModalProvider>

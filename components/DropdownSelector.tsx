@@ -1,11 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolate, Extrapolate, Easing } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTypography } from '../hooks/useTypography';
+import { useDropdownContext } from '../contexts/DropdownContext';
 
-type Option = { label: string; value: string };
+type Option = { label: string; value: string; details?: string };
 
 interface DropdownSelectorProps {
   options: Option[];
@@ -18,12 +19,22 @@ const DropdownSelector: React.FC<DropdownSelectorProps> = ({ options, selectedVa
   const { colors } = useTheme();
   const typography = useTypography();
   const animatedValue = useSharedValue(0);
-
-  const toggleOpen = () => {
-    animatedValue.value = withTiming(animatedValue.value === 0 ? 1 : 0, {
+  const { openDropdownId, setOpenDropdownId } = useDropdownContext();
+  const idRef = useRef<string>(Math.random().toString());
+  const isOpen = openDropdownId === idRef.current;
+  useEffect(() => {
+    animatedValue.value = withTiming(isOpen ? 1 : 0, {
       duration: 300,
       easing: Easing.bezier(0.25, 0.1, 0.25, 1),
     });
+  }, [isOpen]);
+
+  const toggleOpen = () => {
+    if (isOpen) {
+      setOpenDropdownId(null);
+    } else {
+      setOpenDropdownId(idRef.current);
+    }
   };
 
   const chevronAnimatedStyle = useAnimatedStyle(() => {
@@ -93,6 +104,7 @@ const DropdownSelector: React.FC<DropdownSelectorProps> = ({ options, selectedVa
                   onPress={() => { onValueChange(item.value); toggleOpen(); }}
                 >
                   <Text style={[typography.h3, styles.itemText, { color: colors.tabBarText }]}>{item.label}</Text>
+                  {item.details && <Text style={[typography.h3, styles.itemText, { color: colors.tabBarText }]}>{item.details}</Text>}
                 </Pressable>
               )}
               style={{ maxHeight: 200 }}
@@ -147,6 +159,7 @@ const styles = StyleSheet.create({
   item: {
     paddingVertical: 12,
     paddingHorizontal: 16,
+    justifyContent: 'space-between',
   },
   itemText: {
     fontSize: 14,

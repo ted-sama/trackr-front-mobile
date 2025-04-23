@@ -2,6 +2,13 @@
  * Types globaux pour l'application Trackr
  */
 
+export interface BookResponse {
+  limit: number;
+  offset: number;
+  total: number;
+  items: Book[];
+}
+
 /**
  * Interface représentant un manga
  */
@@ -25,19 +32,33 @@ export interface Book {
   updated_at?: Date;
 }
 
+export interface ChapterResponse {
+  limit: number;
+  offset: number;
+  total: number;
+  items: Chapter[];
+}
+
 /**
  * Interface représentant un chapitre d'un manga
  */
 export interface Chapter {
   id: number;
   volume?: number;
-  published_at: Date;
+  published_at: string;
   source_id: number;
   book_id: number;
   title: string;
   translation_language: string;
   chapter: string;
   external_url: string;
+}
+
+export interface SourceResponse {
+  limit: number;
+  offset: number;
+  total: number;
+  items: Source[];
 }
 
 /**
@@ -47,6 +68,13 @@ export interface Source {
   id: number;
   name: string;
   book_categories: string;
+}
+
+export interface CategoryResponse {
+  limit: number;
+  offset: number;
+  total: number;
+  items: Category[];
 }
 
 /**

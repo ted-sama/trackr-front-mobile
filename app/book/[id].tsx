@@ -148,7 +148,7 @@ export default function BookScreen() {
       setDummyRecommendations({
         id: "recommendations",
         title: "Recommendations",
-        books: recommendations,
+        books: recommendations.items,
       });
     };
 
@@ -235,7 +235,7 @@ export default function BookScreen() {
                 <RadialGradient
                   c={vec(tiltPos.x, tiltPos.y)}
                   r={GRADIENT_RADIUS}
-                  colors={["rgba(255, 255, 255, 0.185)", "rgba(255,255,255,0)"]}
+                  colors={["rgba(255, 255, 255, 0.2)", "rgba(255,255,255,0)"]}
                   positions={[0, 1]}
                 />
               </Rect>

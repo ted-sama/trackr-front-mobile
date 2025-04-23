@@ -35,7 +35,7 @@ export default function Discover() {
         // Peupler les catégories fictives avec les données récupérées
         const populatedCategories: Category[] = FAKE_CATEGORIES_STRUCTURE.map(cat => ({
           ...cat,
-          books: booksData,
+          books: booksData.items,
         }));
 
         setCategories(populatedCategories);

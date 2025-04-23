@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
-import { View, Text, Image, StyleSheet, ActivityIndicator, Animated, Pressable } from 'react-native';
+import { View, Text, Image, StyleSheet, ActivityIndicator, Animated, Pressable, TouchableWithoutFeedback } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../..//contexts/ThemeContext';
 import { useTypography } from '../../hooks/useTypography';
-import { getBook, getChaptersFromBook, getSources } from '../../api';
-import { Book, Chapter, Source } from '../../types';
+import { getBook, getChaptersFromBook, getSources, getChaptersFromSource } from '../../api';
+import { Book, ChapterResponse, Chapter, Source } from '../../types';
 import TabBar, { TabBarTab } from '../../components/TabBar';
 import DropdownSelector from '../../components/DropdownSelector';
+import { useDropdownContext } from '../../contexts/DropdownContext';
+import Button from '../../components/Button';
+
+interface SourceWithChapterCount extends Source {
+  chapterCount?: number;
+}
 
 export default function TrackingSettingsScreen() {
   const router = useRouter();
@@ -17,11 +23,13 @@ export default function TrackingSettingsScreen() {
   const typography = useTypography();
   const [book, setBook] = useState<Book | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [sources, setSources] = useState<Source[]>([]);
+  const [sources, setSources] = useState<SourceWithChapterCount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<'auto' | 'semi-auto'>('auto');
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
+  const [selectedLastReadChapter, setSelectedLastReadChapter] = useState<string | null>(null);
+  const { openDropdownId, setOpenDropdownId } = useDropdownContext();
   const trackingTabs: TabBarTab<'auto' | 'semi-auto'>[] = [
     { label: 'Automatique', value: 'auto' },
     { label: 'Semi-automatique', value: 'semi-auto' },
@@ -49,53 +57,93 @@ export default function TrackingSettingsScreen() {
 
     const fetchChapters = async () => {
       const data = await getChaptersFromBook(bookId as string);
-      setChapters(data);
-      
-      const sources = await getSources();
-      setSources(sources);
+      setChapters(data.items);
+    };
+
+    const fetchSources = async () => {
+      const sourceData = await getSources();
+      const sourcesWithCount: SourceWithChapterCount[] = await Promise.all(
+        sourceData.items.map(async (source) => {
+          const chapterData = await getChaptersFromSource(bookId as string, source.id.toString());
+          return {
+            ...source,
+            chapterCount: chapterData.total,
+          };
+        })
+      );
+      setSources(sourcesWithCount);
     };
 
     if (bookId) {
       fetchBook();
       fetchChapters();
+      fetchSources();
     }
     else setError('ID du livre manquant');
   }, [bookId]);
+
+  useEffect(() => {
+    const fetchChapters = async () => {
+      if (selectedSource) {
+        const source = sources.find(source => source.id.toString() === selectedSource);
+        if (source) {
+          const chapters = await getChaptersFromSource(bookId as string, source.id.toString());
+          setChapters(chapters.items);
+        }
+      }
+    };
+    fetchChapters();
+  }, [selectedSource]);
+  
 
   if (isLoading) return <ActivityIndicator style={{ flex: 1 }} />;
   if (error) return <Text style={{ color: 'red' }}>{error}</Text>;
   if (!book) return <Text>Livre introuvable</Text>;
 
   return (
-    <View style={{ flex: 1, justifyContent: 'flex-start', paddingTop: 32, paddingHorizontal: 16 }}>
-      {/* Header du bottom sheet copié */}
-      <View style={styles.bottomSheetHeader}> 
-        <Image
-          source={{ uri: book.cover_image }}
-          style={{ width: 60, height: 90, borderRadius: 6, marginBottom: 10 }}
-        />
-        <View>
-          <Text style={[typography.h3, { color: colors.text }]} numberOfLines={1}>{book.title}</Text>
-          <Text style={[typography.caption, { color: colors.secondaryText }]} numberOfLines={1}>{book.author}</Text>
-          <View style={[styles.ratingContainer, { marginTop: 4 }]}> 
-            <Ionicons name="star" size={14} color={colors.text} />
-            <Text style={[typography.caption, { color: colors.secondaryText }]}> {book.rating || 'N/A'}</Text>
+    <TouchableWithoutFeedback onPress={() => setOpenDropdownId(null)}>
+      <View style={{ flex: 1, justifyContent: 'flex-start', paddingTop: 22, paddingHorizontal: 16 }}>
+        {/* Header du bottom sheet copié */}
+        <View style={styles.bottomSheetHeader}> 
+          <Image
+            source={{ uri: book.cover_image }}
+            style={{ width: 60, height: 90, borderRadius: 6, marginBottom: 10 }}
+          />
+          <View>
+            <Text style={[typography.h3, { color: colors.text }]} numberOfLines={1}>{book.title}</Text>
+            <Text style={[typography.caption, { color: colors.secondaryText }]} numberOfLines={1}>{book.author}</Text>
+            <View style={[styles.ratingContainer, { marginTop: 4 }]}> 
+              <Ionicons name="star" size={14} color={colors.text} />
+              <Text style={[typography.caption, { color: colors.secondaryText }]}> {book.rating || 'N/A'}</Text>
+            </View>
           </View>
         </View>
+        {/* TabBar universelle */}
+        <TabBar tabs={trackingTabs} selected={selectedTab} onTabChange={setSelectedTab} />
+        {/* ... Votre formulaire ici ... */}
+        {selectedTab === 'auto' && (
+          <View style={{ gap: 16 }}>
+            <View>
+              <Text style={[typography.h3, { color: colors.text, marginBottom: 8 }]}>Source de tracking</Text>
+              <DropdownSelector
+                options={sources.map(source => ({
+                  label: `${source.name} • ${source.chapterCount ?? 0} ${source.chapterCount === 1 ? 'chapitre' : 'chapitres'}`,
+                  value: source.id.toString()
+                }))}
+                selectedValue={selectedSource}
+                onValueChange={setSelectedSource}
+                placeholder="Source de tracking"
+              />
+            </View>
+            <Button
+              title="Voir les chapitres disponibles"
+              onPress={() => router.push(`/book/chapter-list?bookId=${bookId}&sourceId=${selectedSource}`)}
+              disabled={!selectedSource}
+            />
+          </View>
+        )}
       </View>
-      {/* TabBar universelle */}
-      <TabBar tabs={trackingTabs} selected={selectedTab} onTabChange={setSelectedTab} />
-      {/* ... Votre formulaire ici ... */}
-      <View>
-        <DropdownSelector
-          options={sources.map(source => ({ label: source.name, value: source.id.toString() }))}
-          selectedValue={selectedSource}
-          onValueChange={setSelectedSource}
-          placeholder="Source de tracking"
-        />
-        {/* Additional form fields go here */}
-      </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
