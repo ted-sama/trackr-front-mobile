@@ -62,16 +62,19 @@ export default function TrackingSettingsScreen() {
 
     const fetchSources = async () => {
       const sourceData = await getSources();
-      const sourcesWithCount: SourceWithChapterCount[] = await Promise.all(
+      const sourcesWithCount: (SourceWithChapterCount | null)[] = await Promise.all(
         sourceData.items.map(async (source) => {
           const chapterData = await getChaptersFromSource(bookId as string, source.id.toString());
-          return {
-            ...source,
-            chapterCount: chapterData.total,
-          };
+          if (chapterData.total > 0) {
+            return {
+              ...source,
+              chapterCount: chapterData.total,
+            };
+          }
+          return null;
         })
       );
-      setSources(sourcesWithCount);
+      setSources(sourcesWithCount.filter(source => source !== null) as SourceWithChapterCount[]);
     };
 
     if (bookId) {
