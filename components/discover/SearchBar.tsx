@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 52,
-    borderRadius: 25,
+    borderRadius: 16,
     borderWidth: 1,
     paddingHorizontal: 12,
     shadowColor: Platform.OS === 'android' ? 'rgba(0, 0, 0, 0.589)' : 'rgba(0, 0, 0, 0.1)',

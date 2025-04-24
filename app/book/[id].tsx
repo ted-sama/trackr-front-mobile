@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
     // Remove padding, Pressable now only defines shape/shadow/overflow
     // paddingVertical: 14,
     // paddingHorizontal: 24,
-    borderRadius: 25,
+    borderRadius: 16,
     alignSelf: "stretch",
     alignItems: "center",
     justifyContent: "center",

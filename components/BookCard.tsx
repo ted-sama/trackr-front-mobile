@@ -172,7 +172,11 @@ const BookCard = ({ book, onPress }: BookCardProps) => {
       <BottomSheetModal
         ref={bottomSheetModalRef}
         index={0}
-        backgroundStyle={{ backgroundColor: colors.card }}
+        backgroundStyle={{
+          backgroundColor: colors.card,
+          borderTopLeftRadius: 35,
+          borderTopRightRadius: 35,
+        }}
         handleIndicatorStyle={{ backgroundColor: colors.border }}
         backdropComponent={CustomBackdrop}
         onDismiss={() => setBottomSheetVisible(false)}

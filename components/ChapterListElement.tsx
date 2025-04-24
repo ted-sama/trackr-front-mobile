@@ -4,7 +4,6 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-na
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { Chapter } from '@/types';
-import Toast from 'react-native-toast-message';
 import { CalendarDaysIcon } from 'lucide-react-native';
 export default function ChapterListElement({ chapter }: { chapter: Chapter }) {
     const { colors } = useTheme();
@@ -27,10 +26,6 @@ export default function ChapterListElement({ chapter }: { chapter: Chapter }) {
 
     const handlePress = () => {
         Linking.openURL(chapter.external_url);
-        Toast.show({
-            type: "info",
-            text1: "Ouverture du chapitre",
-        });
     };
 
     return (
