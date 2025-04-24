@@ -13,11 +13,8 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CirclePlus, ListPlus, CircleStop } from "lucide-react-native";
-import {
-  BottomSheetModal,
-  BottomSheetView,
-  BottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
+import CardSheetModal from "./CardSheetModal";
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import Animated, {
   useAnimatedStyle,
   interpolate,
@@ -107,48 +104,6 @@ const BookCard = ({ book, onPress }: BookCardProps) => {
     bottomSheetModalRef.current?.present();
   }, []);
 
-  // Composant personnalisé pour le backdrop avec animation d'opacité
-  const CustomBackdrop = ({
-    animatedIndex,
-    style,
-  }: BottomSheetBackdropProps) => {
-    // Style animé pour l'opacité basé sur la position du bottom sheet
-    const animatedStyle = useAnimatedStyle(() => {
-      // Interpoler l'opacité entre 0 et 0.5 en fonction de l'index animé
-      // -1 = fermé, 0 ou plus = ouvert à différentes positions de snap
-      const opacity = interpolate(
-        animatedIndex.value,
-        [-1, 0],
-        [0, 0.5],
-        Extrapolation.CLAMP
-      );
-
-      return {
-        backgroundColor: "black",
-        opacity,
-      };
-    });
-    return (
-      <Animated.View
-        style={[
-          style,
-          {
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          },
-          animatedStyle,
-        ]}
-        onTouchEnd={() => {
-          bottomSheetModalRef.current?.close();
-          setBottomSheetVisible(false);
-        }}
-      />
-    );
-  };
-
   // Create animated style for scale animation
   const animatedCardStyle = useAnimatedStyle(() => {
     return {
@@ -168,83 +123,49 @@ const BookCard = ({ book, onPress }: BookCardProps) => {
 
   return (
     <>
-      {/* Bottom Sheet Modal */}
-      <BottomSheetModal
+      {/* Card Sheet Modal */}
+      <CardSheetModal
         ref={bottomSheetModalRef}
-        index={0}
-        backgroundStyle={{
-          backgroundColor: colors.card,
-          borderTopLeftRadius: 35,
-          borderTopRightRadius: 35,
-        }}
-        handleIndicatorStyle={{ backgroundColor: colors.border }}
-        backdropComponent={CustomBackdrop}
         onDismiss={() => setBottomSheetVisible(false)}
+        contentContainerStyle={styles.bottomSheetContent}
+        backdropDismiss
       >
-        <BottomSheetView style={styles.bottomSheetContent}>
-          <View style={styles.bottomSheetHeader}>
-            <Image
-              source={{ uri: book.cover_image }}
-              style={{
-                width: 60,
-                height: 60 * 1.5,
-                borderRadius: 6,
-                marginBottom: 10,
-              }}
-            />
-            <View>
-              <Text
-                style={{
-                  color: colors.text,
-                  fontSize: 16,
-                  fontWeight: "bold",
-                }}
-              >
-                {book.title}
-              </Text>
-              <Text
-                style={{
-                  color: colors.secondaryText,
-                  fontSize: 14,
-                  marginTop: 4,
-                }}
-              >
-                {book.author}
-              </Text>
-              <View style={[styles.ratingContainer, { marginTop: 4 }]}>
-                <Ionicons name="star" size={14} color={colors.text} />
-                <Text
-                  style={[styles.ratingText, { color: colors.secondaryText }]}
-                >
-                  {book.rating || "N/A"}
-                </Text>
-              </View>
+        <View style={styles.bottomSheetHeader}>
+          <Image
+            source={{ uri: book.cover_image }}
+            style={{ width: 60, height: 60 * 1.5, borderRadius: 6, marginBottom: 10 }}
+          />
+          <View>
+            <Text style={{ color: colors.text, fontSize: 16, fontWeight: "bold" }}>
+              {book.title}
+            </Text>
+            <Text style={{ color: colors.secondaryText, fontSize: 14, marginTop: 4 }}>
+              {book.author}
+            </Text>
+            <View style={[styles.ratingContainer, { marginTop: 4 }]}> 
+              <Ionicons name="star" size={14} color={colors.text} />
+              <Text style={[styles.ratingText, { color: colors.secondaryText }]}> {book.rating || "N/A"} </Text>
             </View>
           </View>
-          <View style={styles.bottomSheetActions}>
-            {bottomSheetTrackingOptions.map((option) => (
-              <TouchableWithoutFeedback
-                key={option.id}
-                onPress={() => {
-                  console.log(`Action: ${option.title}`);
-                  option.action();
-                  bottomSheetModalRef.current?.close();
-                }}
-              >
-                <View style={styles.bottomSheetActionButton}>
-                  <option.icon
-                    strokeWidth={2}
-                    size={24}
-                    color={colors.text}
-                    style={{ marginRight: 10 }}
-                  />
-                  <Text style={{ color: colors.text }}>{option.title}</Text>
-                </View>
-              </TouchableWithoutFeedback>
-            ))}
-          </View>
-        </BottomSheetView>
-      </BottomSheetModal>
+        </View>
+        <View style={styles.bottomSheetActions}>
+          {bottomSheetTrackingOptions.map((option) => (
+            <TouchableWithoutFeedback
+              key={option.id}
+              onPress={() => {
+                console.log(`Action: ${option.title}`);
+                option.action();
+                bottomSheetModalRef.current?.close();
+              }}
+            >
+              <View style={styles.bottomSheetActionButton}>
+                <option.icon strokeWidth={2} size={24} color={colors.text} style={{ marginRight: 10 }} />
+                <Text style={{ color: colors.text }}>{option.title}</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          ))}
+        </View>
+      </CardSheetModal>
       {/* Manga Card */}
       <Pressable
         disabled={isBottomSheetVisible}
@@ -337,7 +258,6 @@ const styles = StyleSheet.create({
   },
   bottomSheetContent: {
     padding: 16,
-    paddingBottom: 52,
   },
   bottomSheetHeader: {
     flexDirection: "row",
