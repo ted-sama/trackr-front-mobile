@@ -54,7 +54,7 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false,
       </View>
       )}
       <FlatList
-        data={books}
+        data={books.slice(0, 8)}
         keyExtractor={(item, index) => `${item.id}-${index}`}
         renderItem={({ item }) => <BookCard book={item} onPress={() => router.push({pathname: "/book/[id]", params: {id: item.id}})} />}
         horizontal

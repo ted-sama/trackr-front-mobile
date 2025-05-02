@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import ThemeProvider, { useTheme } from '../contexts/ThemeContext';
@@ -82,8 +82,8 @@ function RootLayoutContent() {
           >
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name='book/[id]' getId={({ params }) => params?.id} />
-            <Stack.Screen name='book/tracking-settings' getId={({ params }) => params?.bookId}  options={{presentation: 'formSheet'}}/>
-            <Stack.Screen name='book/chapter-list' getId={({ params }) => params?.bookId} options={{presentation: 'formSheet'}} />
+            <Stack.Screen name='book/tracking-settings' getId={({ params }) => params?.bookId}  options={{presentation: Platform.OS === 'ios' ? 'formSheet' : 'card'}}/>
+            <Stack.Screen name='book/chapter-list' getId={({ params }) => params?.bookId} options={{presentation: Platform.OS === 'ios' ? 'formSheet' : 'card'}} />
           </Stack>
           <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
         </BottomSheetModalProvider>

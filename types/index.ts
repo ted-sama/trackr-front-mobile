@@ -35,6 +35,7 @@ export interface Book {
 export interface ChapterResponse {
   limit: number;
   offset: number;
+  order: 'asc' | 'desc';
   total: number;
   items: Chapter[];
 }
@@ -50,7 +51,7 @@ export interface Chapter {
   book_id: number;
   title: string;
   translation_language: string;
-  chapter: string;
+  chapter: number;
   external_url: string;
 }
 

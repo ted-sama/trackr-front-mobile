@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Button, FlatList, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,17 +16,41 @@ export default function SearchScreen() {
   const [error, setError] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [searchText, setSearchText] = useState<string>('');
+  const [offset, setOffset] = useState<number>(0);
+  const [isFetchingMore, setIsFetchingMore] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const limit = 15;
 
-  const handleSearch = async (text: string) => {
-    setIsLoading(true);
+  const handleSearch = (text: string) => {
     setError(null);
     setSearchText(text);
+    setOffset(0);
+    setHasMore(true);
     setSearchResults([]);
-
-    const results = await search({ query: text, offset: 0, limit: 10 });
-    setSearchResults(results.items);
-    setIsLoading(false);
+    fetchBooks(text, 0, false);
   }
+
+  // Function to fetch paginated search results
+  const fetchBooks = useCallback(async (text: string, newOffset = 0, append = false) => {
+    if (!text) return;
+    if (append) setIsFetchingMore(true); else setIsLoading(true);
+    try {
+      const results = await search({ query: text, offset: newOffset, limit });
+      setOffset(newOffset + results.length);
+      setSearchResults(prev => append ? [...prev, ...results] : results);
+      setHasMore(results.length === limit);
+    } catch (e: any) {
+      setError(e.message || 'Erreur de recherche');
+    } finally {
+      if (append) setIsFetchingMore(false); else setIsLoading(false);
+    }
+  }, [limit]);
+
+  // Handler for infinite scroll
+  const handleEndReached = () => {
+    if (isFetchingMore || isLoading || !hasMore) return;
+    fetchBooks(searchText, offset, true);
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["right", "left"]}>
@@ -49,6 +73,13 @@ export default function SearchScreen() {
             </View>
           }
           initialNumToRender={5}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.2}
+          ListFooterComponent={isFetchingMore ? (
+            <View style={styles.footerContainer}>
+              <ActivityIndicator size="small" color={colors.primary} />
+            </View>
+          ) : null}
         />
       )}
     </SafeAreaView>
