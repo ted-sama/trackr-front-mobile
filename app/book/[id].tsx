@@ -9,7 +9,7 @@ import {
   Image,
   Platform,
   Pressable,
-  ScrollView,
+  ScrollView as DefaultScrollView,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import {
@@ -25,6 +25,9 @@ import Animated, {
   withTiming,
   Easing,
   withSpring,
+  useAnimatedScrollHandler,
+  interpolate,
+  Extrapolate,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -40,6 +43,10 @@ import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 const COLLAPSED_HEIGHT = 60; // Adjust based on font size/line height for ~3 lines
 const EXPANDED_HEIGHT = 1000; // Use a large enough value for any description size
 const ANIMATION_DURATION = 300; // ms
+const HEADER_THRESHOLD = 320; // Threshold for header animation
+
+// Rename ScrollView to AnimatedScrollView for Animated API usage
+const AnimatedScrollView = Animated.createAnimatedComponent(DefaultScrollView);
 
 export default function BookScreen() {
   const { id } = useLocalSearchParams();
@@ -56,6 +63,12 @@ export default function BookScreen() {
   const translateY = useSharedValue(150);
   const scale = useSharedValue(0.1);
   const pressScale = useSharedValue(1);
+
+  // Shared value for scroll position
+  const scrollY = useSharedValue(0);
+
+  // State to store title Y position
+  const [titleY, setTitleY] = useState(0);
 
   // Animation setup for description height
   const descriptionMaxHeight = useSharedValue(COLLAPSED_HEIGHT);
@@ -100,6 +113,57 @@ export default function BookScreen() {
     return {
       transform: [{ scale: pressScale.value }],
     };
+  });
+
+  // Animated style for the header container (controls overall opacity including border/background)
+  const animatedHeaderContainerStyle = useAnimatedStyle(() => {
+    // Ensure titleY has been measured before calculating range
+    const effectiveTitleY = titleY || HEADER_THRESHOLD; // Fallback if titleY is 0
+    const opacity = interpolate(
+      scrollY.value,
+      [0, effectiveTitleY - 10], // Start fading from scroll 0, fully visible before title gone
+      [0, 1], // Opacity from 0 to 1
+      Extrapolate.CLAMP
+    );
+
+    return {
+      opacity: opacity,
+    };
+  });
+
+  // Animated style for the header title text
+  const animatedHeaderTitleStyle = useAnimatedStyle(() => {
+    const effectiveTitleY = titleY || HEADER_THRESHOLD;
+    const opacity = interpolate(
+      scrollY.value,
+      [effectiveTitleY, effectiveTitleY + 40], // Start fading in *after* title is gone
+      [0, 1],
+      Extrapolate.CLAMP
+    );
+    return {
+      opacity: opacity,
+    };
+  });
+
+  // Animated style for the back button background opacity (fades out as header fades in)
+  const animatedBackButtonBackgroundOpacityStyle = useAnimatedStyle(() => {
+    const effectiveTitleY = titleY || HEADER_THRESHOLD;
+    const opacity = interpolate(
+      scrollY.value,
+      [0, effectiveTitleY - 10],
+      [1, 0], // Inverse opacity: 1 (visible) -> 0 (invisible)
+      Extrapolate.CLAMP
+    );
+    return {
+      opacity: opacity,
+    };
+  });
+
+  // Scroll handler to update scrollY
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
   });
 
   const typeMap = {
@@ -217,10 +281,14 @@ export default function BookScreen() {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
-      edges={["top", "right", "left"]}
+      edges={["right", "left"]}
     >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
+      <AnimatedScrollView
+        contentContainerStyle={{ paddingHorizontal: 16 }}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+      >
         <View style={styles.shadowContainer}>
           <View style={styles.imageContainer}>
              {
@@ -244,7 +312,14 @@ export default function BookScreen() {
         </View>
         <View style={styles.detailsContainer}>
           {/* Title, author, type, dates and tracking button */}
-          <View style={styles.titleTextContainer}>
+          <View
+            style={styles.titleTextContainer}
+            onLayout={(event) => {
+              const layout = event.nativeEvent.layout;
+              // Use pageY if relative to screen, or y if relative to parent ScrollView
+              setTitleY(layout.y); // Store the Y position relative to ScrollView
+            }}
+          >
             <View style={{ flex: 3 }}>
               {isLoading ? (
                 <SkeletonLoader width={'100%'} height={40} />
@@ -397,7 +472,7 @@ export default function BookScreen() {
             )}
           </View>
         </View>
-      </ScrollView>
+      </AnimatedScrollView>
 
       {/* Blur gradient mask under the button (100% blur bottom → 0% blur top) */}
       <View pointerEvents="none" style={[
@@ -456,6 +531,59 @@ export default function BookScreen() {
           </Pressable>
         </Animated.View>
       </Animated.View>
+
+      {/* Animated Header */}
+      <View style={[
+        styles.headerContainerBase, // Base style for layout
+        { height: 60 + insets.top } // Set height directly
+      ]}>
+        {/* Animated Background Layer */}
+        <Animated.View style={[
+          StyleSheet.absoluteFillObject, // Takes up the whole space
+          styles.headerAnimatedBackground, // Style for background elements
+          animatedHeaderContainerStyle, // Apply container opacity animation for background/border
+          { borderBottomColor: colors.border, borderBottomWidth: 1 } // Border fades with this view
+        ]}>
+          {/* Background fades with container opacity */}
+          <BlurView intensity={80} tint={currentTheme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFillObject} />
+          {/* Optional overlay for darker background */}
+          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: currentTheme === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.1)' }]} />
+        </Animated.View>
+
+        {/* Visible Content Layer (Back button and Title) */}
+        <View style={[styles.headerVisibleContent, { paddingTop: insets.top }]}>
+          {/* Always Visible Back Button (Icon is always visible, background fades) */}
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            {/* Animated Background */}
+            <Animated.View
+              style={[
+                StyleSheet.absoluteFillObject,
+                styles.backButtonBackground, // Reuse borderRadius, add backgroundColor
+                { backgroundColor: colors.transparentBackground },
+                animatedBackButtonBackgroundOpacityStyle, // Apply fade-out animation
+              ]}
+            />
+            <Ionicons name="arrow-back" size={22} color={colors.text} />
+          </Pressable>
+
+          {/* Animated Header Title */}
+          <Animated.Text // Use Animated.Text for opacity animation
+            style={[
+              typography.h3,
+              styles.headerTitle, // Central styling
+              { color: colors.text },
+              animatedHeaderTitleStyle, // Apply title opacity animation
+            ]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {book?.title}
+          </Animated.Text>
+
+          {/* Placeholder for spacing, matches back button width + padding */}
+          <View style={{ width: 28 + 8 }} />
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -479,7 +607,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 6,
     elevation: 8,
-    marginTop: 16,
+    marginTop: 72,
   },
   imageContainer: {
     width: "100%",
@@ -614,5 +742,50 @@ const styles = StyleSheet.create({
   },
   gradientMask: {
     ...StyleSheet.absoluteFillObject,
+  },
+  // Header Styles
+  headerContainerBase: { // Renamed base style for layout
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    // height and paddingTop are set inline
+    // No background/border here
+  },
+  headerAnimatedBackground: { // Style for the view containing animated background/border
+    overflow: 'hidden', // Clip the BlurView/gradient
+  },
+  headerVisibleContent: { // Contains always-visible and animated visible elements
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16, // Padding for left/right spacing
+    // paddingTop applied inline
+  },
+  headerTitle: {
+    flex: 1, // Take available space
+    textAlign: 'center', // Center text horizontally
+    marginHorizontal: 8, // Add some space between title and potential icons/placeholders
+  },
+  backButton: {
+    padding: 8, // Hit area
+    // Positioned by flexbox in headerVisibleContent
+    // Background color and borderRadius removed, handled by Animated.View inside
+    // Ensure content (icon) is centered if needed, padding handles size
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Minimum size based on padding + icon size (approx)
+    minWidth: 22 + 16,
+    minHeight: 22 + 16,
+    overflow: 'hidden', // Clip the background Animated.View to the Pressable bounds
+  },
+  backButtonBackground: {
+    borderRadius: 25, // Keep the rounding here
   },
 });
