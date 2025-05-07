@@ -8,13 +8,7 @@ import HeaderDiscover from "@/components/discover/HeaderDiscover";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { Book, Category } from "@/types/index";
-import { getBooks } from "@/api";
-// Catégories fictives initiales
-const FAKE_CATEGORIES_STRUCTURE: Omit<Category, 'books'>[] = [
-  { id: 'news', title: 'Nouveautés' },
-  { id: 'popular', title: 'Populaires' },
-  { id: 'recommended', title: 'Recommandés' },
-];
+import { getBooks, getCategories } from "@/api";
 
 // Composant principal pour la page Discover
 export default function Discover() {
@@ -30,15 +24,9 @@ export default function Discover() {
       setIsLoading(true);
       setError(null);
       try {
-        const booksData = await getBooks();
-
-        // Peupler les catégories fictives avec les données récupérées
-        const populatedCategories: Category[] = FAKE_CATEGORIES_STRUCTURE.map(cat => ({
-          ...cat,
-          books: booksData.items,
-        }));
-
-        setCategories(populatedCategories);
+        const categoriesData = await getCategories();
+        
+        setCategories(categoriesData.items);
       } catch (e: any) {
         console.error("Failed to fetch books:", e);
         setError("Impossible de charger les livres. Vérifiez votre connexion ou l'API.");

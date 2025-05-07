@@ -1,4 +1,4 @@
-import { getBook, getBooks } from "@/api";
+import { getBook, getBooks, getCategory } from "@/api";
 import React, { useEffect, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Book, Category } from "@/types";
@@ -10,6 +10,7 @@ import {
   Platform,
   Pressable,
   ScrollView as DefaultScrollView,
+  FlatList,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import {
@@ -38,6 +39,7 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import { Canvas, Rect, RadialGradient, vec } from "@shopify/react-native-skia";
 import { DeviceMotion } from "expo-sensors";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
+import Badge from "@/components/ui/Badge";
 
 // Constants for animation
 const COLLAPSED_HEIGHT = 60; // Adjust based on font size/line height for ~3 lines
@@ -208,12 +210,8 @@ export default function BookScreen() {
     };
 
     const fetchRecommendations = async () => {
-      const recommendations = await getBooks();
-      setDummyRecommendations({
-        id: "recommendations",
-        title: "Recommendations",
-        books: recommendations.items,
-      });
+      const recommendations = await getCategory('1');
+      setDummyRecommendations(recommendations);
     };
 
     fetchBook();
@@ -367,6 +365,27 @@ export default function BookScreen() {
               />
             </View>
           </View>
+          {/* Badge */}
+          {book?.genres && book?.tags && (
+            <View style={styles.badgeContainer}>
+              <FlatList
+                data={[...(book?.genres || []), ...(book?.tags || [])]}
+                horizontal
+                style={{ marginHorizontal: -16 }}
+                contentContainerStyle={{ paddingHorizontal: 16 }}
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <Badge 
+                    key={item}
+                    text={item}
+                    color={colors.primary}
+                    backgroundColor={colors.badgeBackground}
+                  />
+                )}
+                ItemSeparatorComponent={() => <View style={{ width: 4 }} />}
+              />
+            </View>
+          )}
           {/* Description */}
           {book?.description && (
             <View>
@@ -647,6 +666,12 @@ const styles = StyleSheet.create({
   infosContainer: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  badgeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+    gap: 4,
   },
   // Styles for the animated button
   buttonContainer: {

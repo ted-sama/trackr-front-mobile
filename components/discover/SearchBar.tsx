@@ -50,7 +50,7 @@ const SearchBar = ({
           style={styles.searchIcon}
         />
         <TextInput
-          style={[styles.input, { color: 'black' }]}
+          style={[styles.input, { color: colors.text }]}
           placeholder={placeholder}
           placeholderTextColor={colors.secondaryText}
           value={value}

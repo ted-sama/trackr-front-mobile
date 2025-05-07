@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Stack } from 'expo-router';
 import { View, Text, Image, StyleSheet, ActivityIndicator, Animated, Pressable, TouchableWithoutFeedback } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';

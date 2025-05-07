@@ -31,7 +31,7 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false,
     <View style={styles.categoryContainer}>
       {header && (
         <View style={styles.categoryHeader}>
-        <Text style={[styles.categoryTitle, typography.categoryTitle, { color: colors.text }]}>
+        <Text style={[styles.categoryTitle, typography.categoryTitle, { color: colors.text }]} numberOfLines={1}>
           {category.title}
         </Text>
         <TouchableWithoutFeedback
@@ -40,7 +40,7 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false,
             : console.log(`Voir tout: ${category.title}`)}
         >
           <View style={styles.seeAllButtonContainer}>
-            <Text style={[styles.seeAllButtonText, { color: colors.accent }]}>
+            <Text style={[styles.seeAllButtonText, { color: colors.accent }]} numberOfLines={1}>
               Voir tout
             </Text>
             <Ionicons 
@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    maxWidth: '70%',
   },
   seeAllButtonContainer: {
     flexDirection: 'row',

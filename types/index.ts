@@ -84,6 +84,10 @@ export interface CategoryResponse {
 export interface Category {
   id: string;
   title: string;
+  description: string;
+  is_featured: boolean;
+  created_at: Date;
+  updated_at: Date;
   books: Book[];
 }
 

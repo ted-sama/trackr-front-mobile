@@ -31,6 +31,7 @@ type ThemeContextType = {
     tabBarTextActive: string;
     buttonText: string;
     transparentBackground: string;
+    badgeBackground: string;
   };
 };
 
@@ -56,6 +57,7 @@ const lightColors = {
   buttonText: '#FFFFFF',
 
   transparentBackground: 'rgba(114, 114, 114, 0.1)',
+  badgeBackground: '#965ae933',
 };
 
 const darkColors = {
@@ -79,6 +81,7 @@ const darkColors = {
   buttonText: '#FFFFFF',
 
   transparentBackground: 'rgba(160, 160, 160, 0.1)',
+  badgeBackground: '#965ae933',
 };
 
 // Création du contexte avec une valeur par défaut initiale (sera mise à jour après chargement)

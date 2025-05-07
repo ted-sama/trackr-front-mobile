@@ -1,8 +1,8 @@
 import axios, { AxiosInstance } from 'axios';
-import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse } from '@/types';
+import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category } from '@/types';
 
 const api: AxiosInstance = axios.create({
-  baseURL: 'https://9ea2-89-221-127-193.ngrok-free.app/api/v1',
+  baseURL: 'https://7dd4-89-221-127-193.ngrok-free.app/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -21,6 +21,16 @@ interface getBookParams {
 export const search = async (params: searchParams): Promise<Book[]> => {
   const response = await api.get(`/search?q=${params.query}&types=books&offset=${params.offset}&limit=${params.limit}`);
   return response.data.books;
+};
+
+export const getCategories = async (): Promise<CategoryResponse> => {
+  const response = await api.get('/categories');
+  return response.data;
+};
+
+export const getCategory = async (id: string): Promise<Category> => {
+  const response = await api.get(`/categories/${id}`);
+  return response.data;
 };
 
 export const getBook = async (params: getBookParams): Promise<Book> => {
