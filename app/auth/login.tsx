@@ -1,9 +1,10 @@
-import { View, Text, TextInput, StyleSheet, Platform } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, TextInput, StyleSheet, Platform, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useTypography } from '@/hooks/useTypography';
-import { login } from '@/api/auth';
+import { login as loginApi } from '@/api/auth';
 import { LoginResponse } from '@/types/auth';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
@@ -14,12 +15,22 @@ export default function Login() {
     const { colors } = useTheme();
     const typography = useTypography();
     const router = useRouter();
+    const { login, isLoading, isAuthenticated } = useAuth();
 
     const handleLogin = async () => {
-        const response: LoginResponse = await login({ email, password });
+        const response: LoginResponse = await loginApi({ email, password });
         console.log(response);
         if (response.token) {
-            router.push('/');
+            try {
+                await login(response.token);
+                router.push('/');
+            } catch (error) {
+                console.error('Error logging in:', error);
+                Toast.show({
+                    type: "error",
+                    text1: 'Error logging in',
+                });
+            }
         } else {
             Toast.show({
                 type: "error",
@@ -27,6 +38,22 @@ export default function Login() {
             });
         }
     };
+
+    if (isLoading) {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        )
+    }
+
+    if (isAuthenticated) {
+        return (
+            <View style={styles.container}>
+                <Text>You are already logged in</Text>
+            </View>
+        )
+    }
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -62,7 +89,7 @@ export default function Login() {
                 onChangeText={setPassword}
                 secureTextEntry
             />
-            <Button title="Login" onPress={handleLogin} />
+            <Button title="Login" disabled={email === '' || password === ''} onPress={handleLogin} />
         </View>
     );
 }

@@ -7,7 +7,7 @@ const THEME_STORAGE_KEY = '@MyApp:themePreference';
 
 // Définition des types pour le contexte de thème
 type ThemeType = 'light' | 'dark' | 'system';
-type ThemeContextType = {
+interface ThemeContextType {
   theme: ThemeType;
   currentTheme: 'light' | 'dark';
   setTheme: (theme: ThemeType) => void;

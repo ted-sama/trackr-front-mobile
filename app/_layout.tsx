@@ -17,7 +17,8 @@ import {
   Manrope_800ExtraBold,
 } from '@expo-google-fonts/manrope';
 import * as SplashScreen from 'expo-splash-screen';
-import { DropdownProvider } from '../contexts/DropdownContext';
+import { DropdownProvider } from '@/contexts/DropdownContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -38,11 +39,13 @@ const toastConfig: ToastConfig = {
 // Composant racine qui fournit les contextes globaux
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <DropdownProvider>
-        <RootLayoutContent />
-      </DropdownProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <DropdownProvider>
+          <RootLayoutContent />
+        </DropdownProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 // Type definition for the bottom sheet context
-type BottomSheetContextType = {
+interface BottomSheetContextType {
   isBottomSheetVisible: boolean;
   setBottomSheetVisible: (visible: boolean) => void;
 };
