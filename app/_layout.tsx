@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -60,7 +60,7 @@ function RootLayoutContent() {
     Manrope_800ExtraBold,
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
@@ -79,7 +79,9 @@ function RootLayoutContent() {
               headerShown: false,
               contentStyle: { backgroundColor: colors.background },
             }}
+            initialRouteName='auth/login'
           >
+            <Stack.Screen name='auth/login' />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name='book/[id]' getId={({ params }) => params?.id} />
             <Stack.Screen name='book/tracking-settings' getId={({ params }) => params?.bookId}  options={{presentation: Platform.OS === 'ios' ? 'formSheet' : 'card'}}/>

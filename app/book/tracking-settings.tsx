@@ -9,7 +9,7 @@ import { Book, ChapterResponse, Chapter, Source } from '../../types';
 import TabBar, { TabBarTab } from '../../components/TabBar';
 import DropdownSelector from '../../components/DropdownSelector';
 import { useDropdownContext } from '../../contexts/DropdownContext';
-import Button from '../../components/Button';
+import Button from '../../components/ui/Button';
 
 interface SourceWithChapterCount extends Source {
   chapterCount?: number;

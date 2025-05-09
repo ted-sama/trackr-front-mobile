@@ -1,8 +1,8 @@
 import axios, { AxiosInstance } from 'axios';
 import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category } from '@/types';
 
-const api: AxiosInstance = axios.create({
-  baseURL: 'https://7dd4-89-221-127-193.ngrok-free.app/api/v1',
+export const api: AxiosInstance = axios.create({
+  baseURL: 'https://0711-89-221-127-193.ngrok-free.app/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
-import { useTheme } from '../contexts/ThemeContext';
-import { useTypography } from '../hooks/useTypography';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useTypography } from '@/hooks/useTypography';
 
 interface ButtonProps {
   title: string;
