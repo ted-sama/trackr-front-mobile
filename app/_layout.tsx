@@ -82,7 +82,7 @@ function RootLayoutContent() {
               headerShown: false,
               contentStyle: { backgroundColor: colors.background },
             }}
-            initialRouteName='auth/login'
+            initialRouteName='(tabs)'
           >
             <Stack.Screen name='auth/login' />
             <Stack.Screen name="(tabs)" />
