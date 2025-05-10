@@ -29,20 +29,26 @@ import { useBottomSheet } from "../contexts/BottomSheetContext";
 import Toast from "react-native-toast-message";
 import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
+import { useTrackedBooksStore } from '@/state/tracked-books-store';
 
 interface BookCardProps {
   book: Book;
   onPress?: (book: Book) => void;
   onTrackingToggle?: (bookId: string, isTracking: boolean) => void;
+  size?: 'default' | 'compact';
+  showRating?: boolean;
+  showTrackingButton?: boolean;
 }
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.33;
+const COMPACT_CARD_WIDTH = width * 0.29;
 
-const BookCard = ({ book, onPress, onTrackingToggle }: BookCardProps) => {
+const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showRating = true, showTrackingButton = true }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [isTracking, setIsTracking] = useState(book.tracking ?? false);
+  const { isBookTracked, addTrackedBook, removeTrackedBook } = useTrackedBooksStore();
+  const isTracking = isBookTracked(book.id);
   const { colors } = useTheme();
   const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
   const typography = useTypography();
@@ -59,19 +65,19 @@ const BookCard = ({ book, onPress, onTrackingToggle }: BookCardProps) => {
       id: "reading",
       title: "Mettre en cours de lecture",
       icon: CirclePlus,
-      action: () => setIsTracking(true),
+      action: () => addTrackedBook({ ...book, tracking: true }),
     },
     {
       id: "add-to-list",
       title: "Ajouter à une liste",
       icon: ListPlus,
-      action: () => setIsTracking(true),
+      action: () => addTrackedBook({ ...book, tracking: true }),
     },
     {
       id: "stopped",
       title: "Mettre en arrêt",
       icon: CircleStop,
-      action: () => setIsTracking(false),
+      action: () => removeTrackedBook(book.id),
     },
   ];
 
@@ -86,11 +92,21 @@ const BookCard = ({ book, onPress, onTrackingToggle }: BookCardProps) => {
 
   // Function to handle quick add/remove tracking
   const handleTrackingToggle = () => {
-    // Haptic feedback
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setIsTracking((prevTracking: boolean) => !prevTracking);
-    // Emit event to update tracking status
-    onTrackingToggle?.(book.id.toString(), isTracking);
+    if (isTracking) {
+      removeTrackedBook(book.id);
+      Toast.show({
+        type: 'info',
+        text1: 'Livre retiré du suivi',
+      });
+    } else {
+      addTrackedBook({ ...book, tracking: true });
+      Toast.show({
+        type: 'info',
+        text1: 'Livre ajouté au suivi',
+      });
+    }
+    onTrackingToggle?.(book.id.toString(), !isTracking);
   };
 
   // Fonction pour présenter le bottom sheet
@@ -178,9 +194,23 @@ const BookCard = ({ book, onPress, onTrackingToggle }: BookCardProps) => {
         onPress={handlePress}
         onLongPress={handlePresentModalPress}
       >
-        <Animated.View style={[styles.mangaCard, animatedCardStyle]}>
+        <Animated.View
+          style={[
+            styles.mangaCard,
+            animatedCardStyle,
+            size === 'compact' && {
+              width: COMPACT_CARD_WIDTH,
+            },
+          ]}
+        >
           <View
-            style={[styles.imageContainer, { backgroundColor: colors.card }]}
+            style={[
+              styles.imageContainer,
+              { backgroundColor: colors.card },
+              size === 'compact' && {
+                height: COMPACT_CARD_WIDTH * 1.5,
+              },
+            ]}
           >
             {isLoading && (
               <View style={styles.loadingContainer}>
@@ -189,11 +219,17 @@ const BookCard = ({ book, onPress, onTrackingToggle }: BookCardProps) => {
             )}
             <Image
               source={{ uri: book.cover_image }}
-              style={styles.mangaCover}
+              style={[
+                styles.mangaCover,
+                size === 'compact' && {
+                  width: '100%',
+                  height: '100%',
+                },
+              ]}
               onLoad={handleImageLoad}
               onError={handleImageError}
             />
-            {!isLoading && !hasError && (
+            {!isLoading && !hasError && showTrackingButton && (
               <View style={styles.trackButton}>
                 <TrackingIconButton 
                   isTracking={isTracking} 
@@ -213,34 +249,51 @@ const BookCard = ({ book, onPress, onTrackingToggle }: BookCardProps) => {
                   size={24}
                   color={colors.border}
                 />
-                <Text style={[styles.errorText, { color: colors.border }]}>
+                <Text style={[styles.errorText, { color: colors.border }]}> 
                   Image non disponible
                 </Text>
               </View>
             )}
           </View>
 
-          <View style={styles.mangaInfo}>
+          <View style={[styles.mangaInfo, size === 'compact' && { paddingTop: 4 }]}> 
             <Text
-              style={[styles.mangaTitle, typography.h3, { color: colors.text }]}
+              style={[
+                styles.mangaTitle,
+                typography.h3,
+                { color: colors.text },
+                size === 'compact' && { fontSize: 12, marginBottom: 2 },
+              ]}
               numberOfLines={1}
             >
               {book.title}
             </Text>
             <Text
-              style={[styles.mangaAuthor, typography.caption, { color: colors.secondaryText }]}
+              style={[
+                styles.mangaAuthor,
+                typography.caption,
+                { color: colors.secondaryText },
+                size === 'compact' && { fontSize: 10, marginBottom: 2 },
+              ]}
               numberOfLines={1}
             >
               {book.author}
             </Text>
-            <View style={styles.ratingContainer}>
-              <Ionicons name="star" size={14} color={colors.text} />
-              <Text
-                style={[styles.ratingText, typography.caption, { color: colors.secondaryText }]}
-              >
-                {book.rating || "N/A"}
-              </Text>
-            </View>
+            {showRating && (
+              <View style={styles.ratingContainer}>
+                <Ionicons name="star" size={12} color={colors.text} />
+                <Text
+                  style={[
+                    styles.ratingText,
+                    typography.caption,
+                    { color: colors.secondaryText },
+                    size === 'compact' && { fontSize: 10 },
+                  ]}
+                >
+                  {book.rating || "N/A"}
+                </Text>
+              </View>
+            )}
           </View>
         </Animated.View>
       </Pressable>
@@ -251,7 +304,6 @@ const BookCard = ({ book, onPress, onTrackingToggle }: BookCardProps) => {
 const styles = StyleSheet.create({
   mangaCard: {
     width: CARD_WIDTH,
-    marginRight: 12,
     overflow: "hidden",
   },
   bottomSheetContent: {

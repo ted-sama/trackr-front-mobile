@@ -61,6 +61,7 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false,
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.sliderContent}
+        ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
         snapToInterval={ITEM_WIDTH}
         decelerationRate="fast"
         snapToAlignment="start"
@@ -103,6 +104,7 @@ const styles = StyleSheet.create({
   },
   sliderContent: {
     paddingLeft: 16,
+    paddingRight: 16,
   },
 });
 

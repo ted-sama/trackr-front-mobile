@@ -72,6 +72,7 @@ export default function SearchScreen() {
               <Text style={styles.emptyText}>Aucun résultat trouvé</Text>
             </View>
           }
+          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
           initialNumToRender={5}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.2}

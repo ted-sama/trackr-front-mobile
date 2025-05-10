@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { StyleSheet, ScrollView, ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { useFocusEffect } from "expo-router";
-
 import CategorySlider from "@/components/CategorySlider";
 import HeaderDiscover from "@/components/discover/HeaderDiscover";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -73,12 +71,6 @@ export default function Discover() {
       setIsLoading(false);
     }
   }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchData();
-    }, [fetchData])
-  );
 
   useEffect(() => {
     fetchData();

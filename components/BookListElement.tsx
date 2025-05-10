@@ -6,27 +6,35 @@ import TrackingIconButton from "./TrackingIconButton";
 import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
 import { useTypography } from "@/hooks/useTypography";
+import { useTrackedBooksStore } from '@/state/tracked-books-store';
 
 interface BookListElementProps {
   book: Book;
   onPress: () => void;
+  showTrackingButton?: boolean;
 }
 
-const BookListElement = ({ book, onPress }: BookListElementProps) => {
+const BookListElement = ({ book, onPress, showTrackingButton = true }: BookListElementProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
-  const [isTracking, setIsTracking] = useState(book.tracking ?? false);
+  const { isBookTracked, addTrackedBook, removeTrackedBook } = useTrackedBooksStore();
+  const isTracking = isBookTracked(book.id);
 
-   // Function to handle quick add/remove tracking
-   const handleTrackingToggle = () => {
-    // Haptic feedback
+  const handleTrackingToggle = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setIsTracking((prevTracking: boolean) => !prevTracking);
-    // Show toast message
-    Toast.show({
-      type: "info",
-      text1: isTracking ? "Livre retiré du suivi" : "Livre ajouté au suivi",
-    });
+    if (isTracking) {
+      removeTrackedBook(book.id);
+      Toast.show({
+        type: 'info',
+        text1: 'Livre retiré du suivi',
+      });
+    } else {
+      addTrackedBook({ ...book, tracking: true });
+      Toast.show({
+        type: 'info',
+        text1: 'Livre ajouté au suivi',
+      });
+    }
   };
 
   return (
@@ -38,7 +46,7 @@ const BookListElement = ({ book, onPress }: BookListElementProps) => {
           <Text style={[styles.author, typography.caption, { color: colors.secondaryText }]}>{book.author}</Text>
         </View>
       </View>
-      {book.tracking && (
+      {showTrackingButton && (
         <TrackingIconButton isTracking={isTracking} onPress={handleTrackingToggle} />
       )}
     </Pressable>
@@ -51,7 +59,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
     justifyContent: 'space-between',
   },
   detailsGroup: {
