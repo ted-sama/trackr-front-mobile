@@ -19,6 +19,11 @@ interface getBookParams {
     id: string;
 }
 
+interface getMyLibraryBooksParams {
+    offset: number;
+    limit: number;
+}
+
 export const search = async (params: searchParams): Promise<Book[]> => {
   const response = await api.get(`/search?q=${params.query}&types=books&offset=${params.offset}&limit=${params.limit}`);
   return response.data.books;
@@ -71,12 +76,12 @@ export const getChaptersFromSource = async (
   return response.data;
 };
 
-export const getMyLibraryBooks = async (): Promise<BookResponse> => {
+export const getMyLibraryBooks = async (params: getMyLibraryBooksParams): Promise<BookResponse> => {
   const token = await SecureStore.getItemAsync('user_auth_token');
-  const response = await api.get('/me/books', {
+  const response = await api.get(`/me/books?offset=${params.offset}&limit=${params.limit}`, {
     headers: {
       Authorization: `Bearer ${token}`,
-    }
+    },
   });
   return response.data;
 };

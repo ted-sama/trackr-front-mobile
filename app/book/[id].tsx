@@ -1,4 +1,4 @@
-import { getBook, getBooks, getCategory } from "@/api";
+import { addBookToTracking, getBook, getBooks, getCategory, removeBookFromTracking } from "@/api";
 import React, { useEffect, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Book, Category } from "@/types";
@@ -41,6 +41,8 @@ import { DeviceMotion } from "expo-sensors";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import Badge from "@/components/ui/Badge";
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
+import { checkIfBookIsTracked } from "@/api";
+import Toast from "react-native-toast-message";
 
 // Constants for animation
 const COLLAPSED_HEIGHT = 60; // Adjust based on font size/line height for ~3 lines
@@ -56,6 +58,7 @@ export default function BookScreen() {
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const [book, setBook] = useState<Book | null>(null);
+  const [isTracking, setIsTracking] = useState(book?.tracking ?? false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const typography = useTypography();
@@ -200,7 +203,8 @@ export default function BookScreen() {
     const fetchBook = async () => {
       try {
         const book = await getBook({ id: id as string });
-        setBook(book);
+        const isTracked = await checkIfBookIsTracked(id as string);
+        setBook({ ...book, tracking: isTracked });
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Une erreur est survenue"
@@ -275,6 +279,32 @@ export default function BookScreen() {
       return `${book?.release_year} - en cours`;
     }
     return book?.release_year;
+  };
+
+  const onTrackingToggle = async () => {
+    if (book?.tracking) {
+      try {
+        await removeBookFromTracking(book?.id.toString() ?? '');
+        setIsTracking(false);
+        Toast.show({
+          text1: 'Livre retiré de votre bibliothèque',
+          type: 'info',
+        });
+      } catch (error) {
+        console.warn(`Failed to remove book ${book?.id} from tracking:`, error);
+      }
+    } else {
+      try {
+        await addBookToTracking(book?.id.toString() ?? '');
+        setIsTracking(true);
+        Toast.show({
+          text1: 'Livre ajouté à votre bibliothèque',
+          type: 'info',
+        });
+      } catch (error) {
+        console.warn(`Failed to add book ${book?.id} to tracking:`, error);
+      }
+    }
   };
 
   return (
@@ -361,8 +391,8 @@ export default function BookScreen() {
             <View style={styles.trackingContainer}>
               <TrackingIconButton
                 size={32}
-                isTracking={book?.tracking!}
-                onPress={() => {}}
+                isTracking={isTracking}
+                onPress={onTrackingToggle}
               />
             </View>
           </View>

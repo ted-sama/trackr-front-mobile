@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { StyleSheet, ScrollView, ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { useFocusEffect } from "expo-router";
 
 import CategorySlider from "@/components/CategorySlider";
 import HeaderDiscover from "@/components/discover/HeaderDiscover";
@@ -44,46 +45,44 @@ export default function Discover() {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const categoriesData = await getCategories();
-        setCategories(categoriesData.items);
-        // For each category, check if books are tracked
-        for (const category of categoriesData.items) {
-          if (category.books && category.books.length > 0) {
-            // Process books in parallel for better performance
-            const trackedPromises = category.books.map(async (book) => {
-              try {
-                // Check if the book is tracked by the user
-                const isTracked = await checkIfBookIsTracked(book.id.toString());
-                // Add tracked property to the book object
-                return { ...book, tracking: isTracked };
-              } catch (error) {
-                console.warn(`Failed to check tracking status for book ${book.id}:`, error);
-                // Return the original book if tracking check fails
-                return book;
-              }
-            });
-            
-            // Wait for all tracking checks to complete
-            const updatedBooks = await Promise.all(trackedPromises);
-            // Update the books in the category
-            category.books = updatedBooks;
-          }
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const categoriesData = await getCategories();
+      setCategories(categoriesData.items);
+      for (const category of categoriesData.items) {
+        if (category.books && category.books.length > 0) {
+          const trackedPromises = category.books.map(async (book) => {
+            try {
+              const isTracked = await checkIfBookIsTracked(book.id.toString());
+              return { ...book, tracking: isTracked };
+            } catch (error) {
+              console.warn(`Failed to check tracking status for book ${book.id}:`, error);
+              return book;
+            }
+          });
+          const updatedBooks = await Promise.all(trackedPromises);
+          category.books = updatedBooks;
         }
-      } catch (e: any) {
-        console.error("Failed to fetch books:", e);
-        setError("Impossible de charger les livres. Vérifiez votre connexion ou l'API.");
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } catch (e: any) {
+      console.error("Failed to fetch books:", e);
+      setError("Impossible de charger les livres. Vérifiez votre connexion ou l'API.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
+
+  useEffect(() => {
     fetchData();
-  }, []); // Le tableau vide assure que l'effet ne s'exécute qu'au montage
+  }, [fetchData]);
 
   return (
     <SafeAreaView
