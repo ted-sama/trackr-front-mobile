@@ -40,6 +40,7 @@ import { Canvas, Rect, RadialGradient, vec } from "@shopify/react-native-skia";
 import { DeviceMotion } from "expo-sensors";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import Badge from "@/components/ui/Badge";
+import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 
 // Constants for animation
 const COLLAPSED_HEIGHT = 60; // Adjust based on font size/line height for ~3 lines
@@ -551,58 +552,13 @@ export default function BookScreen() {
         </Animated.View>
       </Animated.View>
 
-      {/* Animated Header */}
-      <View style={[
-        styles.headerContainerBase, // Base style for layout
-        { height: 60 + insets.top } // Set height directly
-      ]}>
-        {/* Animated Background Layer */}
-        <Animated.View style={[
-          StyleSheet.absoluteFillObject, // Takes up the whole space
-          styles.headerAnimatedBackground, // Style for background elements
-          animatedHeaderContainerStyle, // Apply container opacity animation for background/border
-          { borderBottomColor: colors.border, borderBottomWidth: 1 } // Border fades with this view
-        ]}>
-          {/* Background fades with container opacity */}
-          <BlurView intensity={80} tint={currentTheme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFillObject} />
-          {/* Optional overlay for darker background */}
-          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: currentTheme === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.1)' }]} />
-        </Animated.View>
-
-        {/* Visible Content Layer (Back button and Title) */}
-        <View style={[styles.headerVisibleContent, { paddingTop: insets.top }]}>
-          {/* Always Visible Back Button (Icon is always visible, background fades) */}
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
-            {/* Animated Background */}
-            <Animated.View
-              style={[
-                StyleSheet.absoluteFillObject,
-                styles.backButtonBackground, // Reuse borderRadius, add backgroundColor
-                { backgroundColor: colors.transparentBackground },
-                animatedBackButtonBackgroundOpacityStyle, // Apply fade-out animation
-              ]}
-            />
-            <Ionicons name="arrow-back" size={22} color={colors.text} />
-          </Pressable>
-
-          {/* Animated Header Title */}
-          <Animated.Text // Use Animated.Text for opacity animation
-            style={[
-              typography.h3,
-              styles.headerTitle, // Central styling
-              { color: colors.text },
-              animatedHeaderTitleStyle, // Apply title opacity animation
-            ]}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {book?.title}
-          </Animated.Text>
-
-          {/* Placeholder for spacing, matches back button width + padding */}
-          <View style={{ width: 28 + 8 }} />
-        </View>
-      </View>
+      {/* Custom animated header */}
+      <AnimatedHeader
+        title={book?.title ?? ''}
+        scrollY={scrollY}
+        collapseThreshold={HEADER_THRESHOLD}
+        onBack={() => router.back()}
+      />
     </SafeAreaView>
   );
 }

@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext'; // Ajustement du chemin
+import { Library } from 'lucide-react-native';
 
 export default function TabLayout() {
   const { colors, currentTheme } = useTheme();
@@ -48,6 +49,15 @@ export default function TabLayout() {
           title: 'Découvrir',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="compass-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="library"
+        options={{
+          title: 'Bibliothèque',
+          tabBarIcon: ({ color, size }) => (
+            <Library size={size} color={color} />
           ),
         }}
       />

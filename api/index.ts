@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import * as SecureStore from 'expo-secure-store';
 import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category } from '@/types';
 
 export const api: AxiosInstance = axios.create({
@@ -68,4 +69,51 @@ export const getChaptersFromSource = async (
   });
   const response = await api.get(`/books/${bookId}/chapters?${params.toString()}`);
   return response.data;
+};
+
+export const getMyLibraryBooks = async (): Promise<BookResponse> => {
+  const token = await SecureStore.getItemAsync('user_auth_token');
+  const response = await api.get('/me/books', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  });
+  return response.data;
+};
+
+export const addBookToTracking = async (bookId: string): Promise<void> => {
+  const token = await SecureStore.getItemAsync('user_auth_token');
+  const response = await api.post(`/me/books`, {
+    id: bookId,
+  }, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+};
+
+export const removeBookFromTracking = async (bookId: string): Promise<void> => {
+  const token = await SecureStore.getItemAsync('user_auth_token');
+  const response = await api.delete(`/me/books`, {
+    data: {
+      id: bookId,
+    },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+};
+
+export const checkIfBookIsTracked = async (bookId: string): Promise<boolean> => {
+  const token = await SecureStore.getItemAsync('user_auth_token');
+  const response = await api.get(`/me/books/contains/${bookId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  });
+  return response.data.is_tracked;
 };

@@ -12,6 +12,7 @@ interface CategorySliderProps {
   onSeeAllPress?: (categoryId: string) => void;
   isBottomSheetVisible?: boolean;
   header?: boolean;
+  onTrackingToggle?: (bookId: string, isTracking: boolean) => void;
 }
 
 const { width } = Dimensions.get('window');
@@ -20,7 +21,7 @@ const ITEM_MARGIN_RIGHT = 12;
 const CONTAINER_PADDING_LEFT = 16;
 const ITEM_WIDTH = CARD_WIDTH + ITEM_MARGIN_RIGHT;
 
-const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false, header = true }: CategorySliderProps) => {
+const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false, header = true, onTrackingToggle }: CategorySliderProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
   
@@ -56,7 +57,7 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false,
       <FlatList
         data={books.slice(0, 8)}
         keyExtractor={(item, index) => `${item.id}-${index}`}
-        renderItem={({ item }) => <BookCard book={item} onPress={() => router.push({pathname: "/book/[id]", params: {id: item.id}})} />}
+        renderItem={({ item }) => <BookCard book={item} onPress={() => router.push({pathname: "/book/[id]", params: {id: item.id}})} onTrackingToggle={onTrackingToggle} />}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.sliderContent}

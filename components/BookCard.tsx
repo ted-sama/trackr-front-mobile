@@ -33,12 +33,13 @@ import { useTypography } from "@/hooks/useTypography";
 interface BookCardProps {
   book: Book;
   onPress?: (book: Book) => void;
+  onTrackingToggle?: (bookId: string, isTracking: boolean) => void;
 }
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.33;
 
-const BookCard = ({ book, onPress }: BookCardProps) => {
+const BookCard = ({ book, onPress, onTrackingToggle }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [isTracking, setIsTracking] = useState(book.tracking ?? false);
@@ -88,11 +89,8 @@ const BookCard = ({ book, onPress }: BookCardProps) => {
     // Haptic feedback
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setIsTracking((prevTracking: boolean) => !prevTracking);
-    // Show toast message
-    Toast.show({
-      type: "info",
-      text1: isTracking ? "Livre retiré du suivi" : "Livre ajouté au suivi",
-    });
+    // Emit event to update tracking status
+    onTrackingToggle?.(book.id.toString(), isTracking);
   };
 
   // Fonction pour présenter le bottom sheet

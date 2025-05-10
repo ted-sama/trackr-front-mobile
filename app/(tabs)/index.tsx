@@ -6,11 +6,14 @@ import { useTheme } from '@/contexts/ThemeContext';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useTypography } from '@/hooks/useTypography';
 import { useRouter } from 'expo-router';
+import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/ui/Button';
+
 export default function Index() {
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const router = useRouter();
+  const { logout } = useAuth();
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -20,6 +23,7 @@ export default function Index() {
           Bienvenue sur Trackr, votre application de suivi et découverte de mangas !
         </Text>
         <Button onPress={() => router.push('/auth/login')} title="Login screen" />
+        <Button onPress={logout} title="Logout" />
         
         {/* <Link href="/discover" asChild>
           <TouchableOpacity style={[styles.discoverButton, { backgroundColor: colors.primary }]}>

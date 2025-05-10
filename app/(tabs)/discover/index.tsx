@@ -8,7 +8,8 @@ import HeaderDiscover from "@/components/discover/HeaderDiscover";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { Book, Category } from "@/types/index";
-import { getBooks, getCategories } from "@/api";
+import { addBookToTracking, checkIfBookIsTracked, getBooks, getCategories, removeBookFromTracking } from "@/api";
+import Toast from "react-native-toast-message";
 
 // Composant principal pour la page Discover
 export default function Discover() {
@@ -19,14 +20,60 @@ export default function Discover() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const onTrackingToggle = async (bookId: string, isTracking: boolean) => {
+    if (isTracking) {
+      try {
+        await removeBookFromTracking(bookId.toString());
+        Toast.show({
+          text1: 'Livre retiré de votre bibliothèque',
+          type: 'info',
+        });
+      } catch (error) {
+        console.warn(`Failed to remove book ${bookId} from tracking:`, error);
+      }
+    } else {
+      try {
+        await addBookToTracking(bookId.toString());
+        Toast.show({
+          text1: 'Livre ajouté à votre bibliothèque',
+          type: 'info',
+        });
+      } catch (error) {
+        console.warn(`Failed to add book ${bookId} to tracking:`, error);
+      }
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
       try {
         const categoriesData = await getCategories();
-        
         setCategories(categoriesData.items);
+        // For each category, check if books are tracked
+        for (const category of categoriesData.items) {
+          if (category.books && category.books.length > 0) {
+            // Process books in parallel for better performance
+            const trackedPromises = category.books.map(async (book) => {
+              try {
+                // Check if the book is tracked by the user
+                const isTracked = await checkIfBookIsTracked(book.id.toString());
+                // Add tracked property to the book object
+                return { ...book, tracking: isTracked };
+              } catch (error) {
+                console.warn(`Failed to check tracking status for book ${book.id}:`, error);
+                // Return the original book if tracking check fails
+                return book;
+              }
+            });
+            
+            // Wait for all tracking checks to complete
+            const updatedBooks = await Promise.all(trackedPromises);
+            // Update the books in the category
+            category.books = updatedBooks;
+          }
+        }
       } catch (e: any) {
         console.error("Failed to fetch books:", e);
         setError("Impossible de charger les livres. Vérifiez votre connexion ou l'API.");
@@ -66,6 +113,7 @@ export default function Discover() {
               key={category.id}
               category={category}
               isBottomSheetVisible={isBottomSheetVisible}
+              onTrackingToggle={onTrackingToggle}
             />
           ))}
         </ScrollView>
