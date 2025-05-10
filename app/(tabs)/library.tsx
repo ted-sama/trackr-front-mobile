@@ -10,12 +10,14 @@ import { getMyLibraryBooks } from '@/api';
 import BookListElement from '@/components/BookListElement';
 import BookListElementSkeleton from '@/components/skeleton-loader/BookListElementSkeleton';
 import BookCard from '@/components/BookCard';
-import { Book } from '@/types';
+import { Book, BookTracking } from '@/types';
 import { useRouter } from 'expo-router';
 import { useTrackedBooksStore } from '@/state/tracked-books-store';
 import SwitchLayoutButton from '@/components/SwitchLayoutButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
+import { addBookToTracking, removeBookFromTracking } from '@/api';
+import Toast from 'react-native-toast-message';
 
 // AsyncStorage key for layout preference
 const LAYOUT_STORAGE_KEY = '@MyApp:layoutPreference';
@@ -39,7 +41,7 @@ export default function Library() {
   const [currentLayout, setCurrentLayout] = useState<"grid" | "list">(DEFAULT_LAYOUT as "grid" | "list");
   const handleBack = () => scrollRef.current?.scrollToOffset({ offset: 0, animated: true });
 
-  const { getTrackedBooks, addTrackedBook } = useTrackedBooksStore();
+  const { getTrackedBooks, addTrackedBook, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
   const books = getTrackedBooks();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +62,9 @@ export default function Library() {
       try {
         const response = await getMyLibraryBooks({ offset: 0, limit: 1000 });
         if (isMounted) {
-          response.items.forEach(book => addTrackedBook({ ...book, tracking: true }));
+          response.items.forEach(book => {
+            addTrackedBook({ ...book, tracking: true, tracking_status: book.tracking_status });
+          });
         }
       } catch (e: any) {
         if (isMounted) setError(e.message || 'Erreur de chargement de la bibliothèque');
@@ -85,6 +89,39 @@ export default function Library() {
   useEffect(() => {
     AsyncStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout);
   }, [currentLayout]);
+
+  const handleTrackingToggleInLibrary = async (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => {
+    if (!bookObject) {
+      console.warn("Book object is missing in handleTrackingToggleInLibrary");
+      Toast.show({ type: 'error', text1: 'Erreur de suivi', text2: 'Données du livre manquantes.' });
+      return;
+    }
+    if (isCurrentlyTracking) {
+      try {
+        await removeBookFromTracking(bookId);
+        removeTrackedBookFromStore(parseInt(bookId, 10));
+        Toast.show({
+          type: 'info',
+          text1: 'Livre retiré de votre bibliothèque',
+        });
+      } catch (err) {
+        console.warn(`Failed to remove book ${bookId} from tracking:`, err);
+        Toast.show({ type: 'error', text1: 'Erreur', text2: 'Impossible de retirer le livre.' });
+      }
+    } else {
+      try {
+        const trackingStatus: BookTracking = await addBookToTracking(bookId);
+        addTrackedBook({ ...bookObject, tracking: true, tracking_status: trackingStatus });
+        Toast.show({
+          type: 'info',
+          text1: 'Livre ajouté à votre bibliothèque',
+        });
+      } catch (err) {
+        console.warn(`Failed to add book ${bookId} to tracking:`, err);
+        Toast.show({ type: 'error', text1: 'Erreur', text2: 'Impossible d\'ajouter le livre.' });
+      }
+    }
+  };
 
   const renderSkeletons = (count: number) => (
     <View style={{ marginTop: 12 }}>
@@ -139,9 +176,11 @@ export default function Library() {
         }
         renderItem={({ item }) =>
           currentLayout === 'grid' ? (
-            <BookCard book={item} onPress={() => { router.push(`/book/${item.id}`); }} size="compact" showTrackingButton={false} showRating={false} />
+            <View style={{ width: '33%' }}>
+              <BookCard book={item} onPress={() => { router.push(`/book/${item.id}`); }} size="compact" showTrackingButton={false} showRating={false} onTrackingToggle={handleTrackingToggleInLibrary} />
+            </View>
           ) : (
-            <BookListElement book={item} onPress={() => { router.push(`/book/${item.id}`); }} showTrackingButton={false} />
+            <BookListElement book={item} onPress={() => { router.push(`/book/${item.id}`); }} showTrackingButton={false} onTrackingToggle={handleTrackingToggleInLibrary} />
           )
         }
         ItemSeparatorComponent={currentLayout === 'grid' ? () => <View style={{ height: 18 }} /> : () => <View style={{ height: 12 }} />}
@@ -150,7 +189,7 @@ export default function Library() {
         ) : (
           <Text style={{ color: colors.secondaryText, textAlign: 'center', marginTop: 32 }}>Aucun livre trouvé dans votre bibliothèque.</Text>
         )}
-        columnWrapperStyle={currentLayout === 'grid' ? { justifyContent: 'space-between' } : undefined}
+        columnWrapperStyle={currentLayout === 'grid' ? { gap: 4 } : undefined}
         onEndReached={() => {}}
         onEndReachedThreshold={0.2}
         ListFooterComponent={null}

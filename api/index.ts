@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category } from '@/types';
+import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category, BookTracking } from '@/types';
 
 export const api: AxiosInstance = axios.create({
   baseURL: 'https://0711-89-221-127-193.ngrok-free.app/api/v1',
@@ -86,7 +86,7 @@ export const getMyLibraryBooks = async (params: getMyLibraryBooksParams): Promis
   return response.data;
 };
 
-export const addBookToTracking = async (bookId: string): Promise<void> => {
+export const addBookToTracking = async (bookId: string): Promise<BookTracking> => {
   const token = await SecureStore.getItemAsync('user_auth_token');
   const response = await api.post(`/me/books`, {
     id: bookId,
@@ -113,12 +113,12 @@ export const removeBookFromTracking = async (bookId: string): Promise<void> => {
   return response.data;
 };
 
-export const checkIfBookIsTracked = async (bookId: string): Promise<boolean> => {
+export const checkIfBookIsTracked = async (bookId: string): Promise<BookTracking> => {
   const token = await SecureStore.getItemAsync('user_auth_token');
   const response = await api.get(`/me/books/contains/${bookId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     }
   });
-  return response.data.is_tracked;
+  return response.data;
 };

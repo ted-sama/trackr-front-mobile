@@ -22,6 +22,7 @@ export default function Badge({ text, color, backgroundColor }: BadgeProps) {
 
 const styles = StyleSheet.create({
   badge: {
+    alignSelf: 'flex-start',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 25,

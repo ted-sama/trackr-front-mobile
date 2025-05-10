@@ -1,5 +1,6 @@
 import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
+import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -22,6 +23,11 @@ const TrackingIconButton = ({
   const backgroundColor = isTracking ? colors.accent : "#16161699"; // Use slightly more opaque grey
   const iconColor = "#FFF";
   const backgroundSize = size * 0.83; // Approx ratio from MangaCard (20/24)
+
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onPress?.();
+  };
 
   const content = (
     <>
@@ -46,7 +52,7 @@ const TrackingIconButton = ({
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={[styles.container, { width: size, height: size }]}>
+      <Pressable onPress={handlePress} style={[styles.container, { width: size, height: size }]}>
         {content}
       </Pressable>
     );

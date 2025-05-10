@@ -32,6 +32,11 @@ interface ThemeContextType {
     buttonText: string;
     transparentBackground: string;
     badgeBackground: string;
+    plan_to_read: string;
+    reading: string;
+    completed: string;
+    on_hold: string;
+    dropped: string;
   };
 };
 
@@ -58,6 +63,11 @@ const lightColors = {
 
   transparentBackground: 'rgba(114, 114, 114, 0.1)',
   badgeBackground: '#965ae933',
+  plan_to_read: '#965ae933',
+  reading: '#965ae933',
+  completed: '#965ae933',
+  on_hold: '#965ae933',
+  dropped: '#965ae933',
 };
 
 const darkColors = {
@@ -82,6 +92,11 @@ const darkColors = {
 
   transparentBackground: 'rgba(160, 160, 160, 0.1)',
   badgeBackground: '#965ae933',
+  plan_to_read: '#965ae933',
+  reading: '#965ae933',
+  completed: '#965ae933',
+  on_hold: '#965ae933',
+  dropped: '#965ae933',
 };
 
 // Création du contexte avec une valeur par défaut initiale (sera mise à jour après chargement)

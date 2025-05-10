@@ -1,5 +1,4 @@
 import React, { useState, useRef, useCallback, useMemo, act } from "react";
-import * as Haptics from "expo-haptics";
 import {
   View,
   Text,
@@ -11,6 +10,7 @@ import {
   ActivityIndicator,
   Pressable,
 } from "react-native";
+import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { CirclePlus, ListPlus, CircleStop } from "lucide-react-native";
 import CardSheetModal from "./CardSheetModal";
@@ -34,7 +34,7 @@ import { useTrackedBooksStore } from '@/state/tracked-books-store';
 interface BookCardProps {
   book: Book;
   onPress?: (book: Book) => void;
-  onTrackingToggle?: (bookId: string, isTracking: boolean) => void;
+  onTrackingToggle?: (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => void;
   size?: 'default' | 'compact';
   showRating?: boolean;
   showTrackingButton?: boolean;
@@ -47,7 +47,7 @@ const COMPACT_CARD_WIDTH = width * 0.29;
 const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showRating = true, showTrackingButton = true }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const { isBookTracked, addTrackedBook, removeTrackedBook } = useTrackedBooksStore();
+  const { isBookTracked } = useTrackedBooksStore();
   const isTracking = isBookTracked(book.id);
   const { colors } = useTheme();
   const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
@@ -65,19 +65,25 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showRatin
       id: "reading",
       title: "Mettre en cours de lecture",
       icon: CirclePlus,
-      action: () => addTrackedBook({ ...book, tracking: true }),
+      action: () => {
+        onTrackingToggle?.(book.id.toString(), false, book);
+      }
     },
     {
       id: "add-to-list",
       title: "Ajouter à une liste",
       icon: ListPlus,
-      action: () => addTrackedBook({ ...book, tracking: true }),
+      action: () => {
+        onTrackingToggle?.(book.id.toString(), false, book);
+      }
     },
     {
       id: "stopped",
       title: "Mettre en arrêt",
       icon: CircleStop,
-      action: () => removeTrackedBook(book.id),
+      action: () => {
+        onTrackingToggle?.(book.id.toString(), true, book);
+      }
     },
   ];
 
@@ -92,21 +98,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showRatin
 
   // Function to handle quick add/remove tracking
   const handleTrackingToggle = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (isTracking) {
-      removeTrackedBook(book.id);
-      Toast.show({
-        type: 'info',
-        text1: 'Livre retiré du suivi',
-      });
-    } else {
-      addTrackedBook({ ...book, tracking: true });
-      Toast.show({
-        type: 'info',
-        text1: 'Livre ajouté au suivi',
-      });
-    }
-    onTrackingToggle?.(book.id.toString(), !isTracking);
+    onTrackingToggle?.(book.id.toString(), isTracking, book);
   };
 
   // Fonction pour présenter le bottom sheet
@@ -262,7 +254,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showRatin
                 styles.mangaTitle,
                 typography.h3,
                 { color: colors.text },
-                size === 'compact' && { fontSize: 12, marginBottom: 2 },
+                size === 'compact' && { fontSize: 14, marginBottom: 2 },
               ]}
               numberOfLines={1}
             >
@@ -273,7 +265,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showRatin
                 styles.mangaAuthor,
                 typography.caption,
                 { color: colors.secondaryText },
-                size === 'compact' && { fontSize: 10, marginBottom: 2 },
+                size === 'compact' && { fontSize: 12, marginBottom: 2 },
               ]}
               numberOfLines={1}
             >

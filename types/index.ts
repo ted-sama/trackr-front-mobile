@@ -28,6 +28,7 @@ export interface Book {
   tags?: string[];
   status: string;
   tracking?: boolean;
+  tracking_status?: BookTracking;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -123,13 +124,11 @@ export type ReadingStatus = 'plan_to_read' | 'reading' | 'completed' | 'on_hold'
  * Interface représentant le suivi de lecture d'un manga par un utilisateur
  */
 export interface BookTracking {
-  userId: string;
-  bookId: string;
   status: ReadingStatus;
-  currentChapter?: number;
-  currentVolume?: number;
+  current_chapter?: number;
+  current_volume?: number;
   rating?: number;
-  startDate?: Date;
-  finishDate?: Date;
+  start_date?: Date;
+  finish_date?: Date;
   notes?: string;
 } 

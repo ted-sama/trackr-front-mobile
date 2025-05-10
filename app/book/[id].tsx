@@ -1,7 +1,7 @@
 import { addBookToTracking, getBook, getBooks, getCategory, removeBookFromTracking } from "@/api";
 import React, { useEffect, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { Book, Category } from "@/types";
+import { Book, Category, BookTracking } from "@/types";
 import {
   Text,
   StyleSheet,
@@ -199,7 +199,7 @@ export default function BookScreen() {
   const GRADIENT_RADIUS = 80;
   const [tiltPos, setTiltPos] = useState<{ x: number; y: number }>({ x: IMAGE_WIDTH / 2, y: IMAGE_HEIGHT / 2 });
 
-  const { addTrackedBook, removeTrackedBook, isBookTracked } = useTrackedBooksStore();
+  const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore, isBookTracked } = useTrackedBooksStore();
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -284,27 +284,31 @@ export default function BookScreen() {
 
   const onTrackingToggle = async () => {
     if (!book) return;
+    const currentBookIdStr = book.id.toString();
+
     if (isBookTracked(book.id)) {
       try {
-        await removeBookFromTracking(book.id.toString());
-        removeTrackedBook(book.id);
+        await removeBookFromTracking(currentBookIdStr);
+        removeTrackedBookFromStore(book.id);
         Toast.show({
           text1: 'Livre retiré de votre bibliothèque',
           type: 'info',
         });
       } catch (error) {
-        console.warn(`Failed to remove book ${book.id} from tracking:`, error);
+        console.warn(`Failed to remove book ${currentBookIdStr} from tracking:`, error);
+        Toast.show({ type: 'error', text1: 'Erreur', text2: 'Impossible de retirer le livre.' });
       }
     } else {
       try {
-        await addBookToTracking(book.id.toString());
-        addTrackedBook({ ...book, tracking: true });
+        const trackingStatus: any = await addBookToTracking(currentBookIdStr);
+        addTrackedBookToStore({ ...book, tracking: true, tracking_status: trackingStatus.book_tracking });
         Toast.show({
           text1: 'Livre ajouté à votre bibliothèque',
           type: 'info',
         });
       } catch (error) {
-        console.warn(`Failed to add book ${book.id} to tracking:`, error);
+        console.warn(`Failed to add book ${currentBookIdStr} to tracking:`, error);
+        Toast.show({ type: 'error', text1: 'Erreur', text2: `Impossible d'ajouter le livre.` });
       }
     }
   };

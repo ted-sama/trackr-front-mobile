@@ -6,9 +6,10 @@ import CategorySlider from "@/components/CategorySlider";
 import HeaderDiscover from "@/components/discover/HeaderDiscover";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
-import { Book, Category } from "@/types/index";
-import { addBookToTracking, checkIfBookIsTracked, getBooks, getCategories, removeBookFromTracking } from "@/api";
+import { Book, Category, BookTracking } from "@/types/index";
+import { addBookToTracking, getCategories, removeBookFromTracking } from "@/api";
 import Toast from "react-native-toast-message";
+import { useTrackedBooksStore } from "@/state/tracked-books-store";
 
 // Composant principal pour la page Discover
 export default function Discover() {
@@ -19,26 +20,38 @@ export default function Discover() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const onTrackingToggle = async (bookId: string, isTracking: boolean) => {
-    if (isTracking) {
+  const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
+
+  const onTrackingToggleInDiscover = async (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => {
+    if (!bookObject) {
+      console.warn("Book object is missing in onTrackingToggleInDiscover");
+      Toast.show({ type: 'error', text1: 'Erreur de suivi', text2: 'Données du livre manquantes.' });
+      return;
+    }
+
+    if (isCurrentlyTracking) {
       try {
-        await removeBookFromTracking(bookId.toString());
+        await removeBookFromTracking(bookId);
+        removeTrackedBookFromStore(parseInt(bookId, 10));
         Toast.show({
           text1: 'Livre retiré de votre bibliothèque',
           type: 'info',
         });
-      } catch (error) {
-        console.warn(`Failed to remove book ${bookId} from tracking:`, error);
+      } catch (err) {
+        console.warn(`Failed to remove book ${bookId} from tracking:`, err);
+        Toast.show({ type: 'error', text1: 'Erreur', text2: 'Impossible de retirer le livre.'});
       }
     } else {
       try {
-        await addBookToTracking(bookId.toString());
+        const trackingStatus: any = await addBookToTracking(bookId);
+        addTrackedBookToStore({ ...bookObject, tracking: true, tracking_status: trackingStatus.book_tracking });
         Toast.show({
           text1: 'Livre ajouté à votre bibliothèque',
           type: 'info',
         });
-      } catch (error) {
-        console.warn(`Failed to add book ${bookId} to tracking:`, error);
+      } catch (err) {
+        console.warn(`Failed to add book ${bookId} to tracking:`, err);
+        Toast.show({ type: 'error', text1: 'Erreur', text2: `Impossible d'ajouter le livre.` });
       }
     }
   };
@@ -49,21 +62,6 @@ export default function Discover() {
     try {
       const categoriesData = await getCategories();
       setCategories(categoriesData.items);
-      for (const category of categoriesData.items) {
-        if (category.books && category.books.length > 0) {
-          const trackedPromises = category.books.map(async (book) => {
-            try {
-              const isTracked = await checkIfBookIsTracked(book.id.toString());
-              return { ...book, tracking: isTracked };
-            } catch (error) {
-              console.warn(`Failed to check tracking status for book ${book.id}:`, error);
-              return book;
-            }
-          });
-          const updatedBooks = await Promise.all(trackedPromises);
-          category.books = updatedBooks;
-        }
-      }
     } catch (e: any) {
       console.error("Failed to fetch books:", e);
       setError("Impossible de charger les livres. Vérifiez votre connexion ou l'API.");
@@ -104,7 +102,7 @@ export default function Discover() {
               key={category.id}
               category={category}
               isBottomSheetVisible={isBottomSheetVisible}
-              onTrackingToggle={onTrackingToggle}
+              onTrackingToggle={onTrackingToggleInDiscover}
             />
           ))}
         </ScrollView>

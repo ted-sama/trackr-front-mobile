@@ -3,38 +3,26 @@ import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import { Book } from "@/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import TrackingIconButton from "./TrackingIconButton";
-import Toast from "react-native-toast-message";
-import * as Haptics from "expo-haptics";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import Badge from "./ui/Badge";
 
 interface BookListElementProps {
   book: Book;
   onPress: () => void;
+  onTrackingToggle?: (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => void;
   showTrackingButton?: boolean;
+  showTrackingStatus?: boolean;
 }
 
-const BookListElement = ({ book, onPress, showTrackingButton = true }: BookListElementProps) => {
+const BookListElement = ({ book, onPress, onTrackingToggle, showTrackingButton = false, showTrackingStatus = false }: BookListElementProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
-  const { isBookTracked, addTrackedBook, removeTrackedBook } = useTrackedBooksStore();
+  const { isBookTracked } = useTrackedBooksStore();
   const isTracking = isBookTracked(book.id);
 
   const handleTrackingToggle = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (isTracking) {
-      removeTrackedBook(book.id);
-      Toast.show({
-        type: 'info',
-        text1: 'Livre retiré du suivi',
-      });
-    } else {
-      addTrackedBook({ ...book, tracking: true });
-      Toast.show({
-        type: 'info',
-        text1: 'Livre ajouté au suivi',
-      });
-    }
+    onTrackingToggle?.(book.id.toString(), isTracking, book);
   };
 
   return (
@@ -44,6 +32,13 @@ const BookListElement = ({ book, onPress, showTrackingButton = true }: BookListE
         <View style={styles.infoContainer}>
           <Text style={[styles.title, typography.bodyBold, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">{book.title}</Text>
           <Text style={[styles.author, typography.caption, { color: colors.secondaryText }]}>{book.author}</Text>
+          {book.tracking_status && showTrackingStatus && (
+            <Badge
+              text={book.tracking_status.status}
+              color={colors[book.tracking_status.status]}
+              backgroundColor={colors.badgeBackground}
+            />
+          )}
         </View>
       </View>
       {showTrackingButton && (
