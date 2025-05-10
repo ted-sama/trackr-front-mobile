@@ -11,10 +11,11 @@ import BookListElement from '@/components/BookListElement';
 import BookListElementSkeleton from '@/components/skeleton-loader/BookListElementSkeleton';
 import { Book } from '@/types';
 import { useFocusEffect } from 'expo-router';
-
+import { useRouter } from 'expo-router';
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<Book>);
 
 export default function Library() {
+  const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const insets = useSafeAreaInsets();
@@ -94,7 +95,7 @@ export default function Library() {
         scrollEventThrottle={16}
         ListHeaderComponent={
           <Text
-            style={[typography.h1, { color: colors.text, marginTop: Platform.OS === 'android' ? 70 : 50, marginBottom: 16 }]}
+            style={[typography.h1, { color: colors.text, marginTop: Platform.OS === 'android' ? 70 : 70, marginBottom: 16 }]}
             onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
             accessibilityRole="header"
             accessibilityLabel="Library"
@@ -104,7 +105,7 @@ export default function Library() {
         }
         renderItem={({ item }) => (
           <View style={{ marginBottom: 12 }}>
-            <BookListElement book={item} onPress={() => {}} />
+            <BookListElement book={item} onPress={() => {router.push(`/book/${item.id}`)}} />
           </View>
         )}
         ListEmptyComponent={isLoading ? renderSkeletons(8) : error ? (
