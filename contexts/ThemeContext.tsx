@@ -16,6 +16,7 @@ interface ThemeContextType {
     background: string;
     card: string;
     text: string;
+    icon: string;
     secondaryText: string;
     border: string;
     primary: string;
@@ -42,6 +43,7 @@ const lightColors = {
   background: '#FFFFFF',
   card: '#f5f5f5',
   text: '#202020',
+  icon: '#666666',
   secondaryText: '#666666',
   border: '#E0E0E0',
   primary: '#6200EE',
@@ -70,6 +72,7 @@ const darkColors = {
   background: '#121212',
   card: '#1E1E1E',
   text: '#FFFFFF',
+  icon: '#acacac',
   secondaryText: '#666666',
   border: '#333333',
   primary: '#6200EE',

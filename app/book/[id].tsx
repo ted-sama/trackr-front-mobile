@@ -44,6 +44,7 @@ import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import { checkIfBookIsTracked } from "@/api";
 import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import { Ellipsis } from "lucide-react-native";
 
 // Constants for animation
 const COLLAPSED_HEIGHT = 60; // Adjust based on font size/line height for ~3 lines
@@ -391,11 +392,11 @@ export default function BookScreen() {
           >
             <View style={{ flex: 3 }}>
               {isLoading ? (
-                <SkeletonLoader width={'100%'} height={40} />
+                <SkeletonLoader width={'90%'} height={40} />
               ) : (
                 <Text
                   style={[styles.title, typography.h1, { color: colors.text }]}
-                  numberOfLines={1}
+                  numberOfLines={3}
                   ellipsizeMode="tail"
               >
                 {book?.title}
@@ -428,7 +429,10 @@ export default function BookScreen() {
                 </Text>
               </View>
             </View>
-            <View style={styles.trackingContainer}>
+            <View style={styles.actionsContainer}>
+              <Pressable>
+                <Ellipsis size={32} color={colors.icon} strokeWidth={2} />
+              </Pressable>
               <TrackingIconButton
                 size={32}
                 isTracking={isBookTracked(book?.id!)}
@@ -649,7 +653,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderRadius: 6,
     shadowColor:
-      Platform.OS === "android" ? "rgba(0, 0, 0, 0.589)" : "rgba(0, 0, 0, 0.1)",
+      Platform.OS === "android" ? "rgba(0, 0, 0, 0.589)" : "rgba(0, 0, 0, 0.18)",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.8,
     shadowRadius: 6,
@@ -678,6 +682,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   title: {
+    marginRight: 32,
     marginBottom: 4,
   },
   titleTextContainer: {
@@ -686,6 +691,10 @@ const styles = StyleSheet.create({
   },
   author: {
     marginBottom: 4,
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    gap: 12,
   },
   trackingContainer: {
     flex: 1,

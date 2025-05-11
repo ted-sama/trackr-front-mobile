@@ -15,13 +15,13 @@ const TrackingIconButton = ({
   onPress,
   size = 24, // Default size matching MangaCard
 }: TrackingIconButtonProps) => {
-  const { colors } = useTheme();
+  const { colors, currentTheme } = useTheme();
 
   const iconName = isTracking
     ? "checkmark-circle-outline"
     : "add-circle-outline";
   const backgroundColor = isTracking ? colors.accent : "#16161699"; // Use slightly more opaque grey
-  const iconColor = "#FFF";
+  const iconColor = isTracking ? "#FFF" : (currentTheme === "light" ? "#FFF" : colors.icon);
   const backgroundSize = size * 0.83; // Approx ratio from MangaCard (20/24)
 
   const handlePress = () => {
