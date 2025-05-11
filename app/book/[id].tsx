@@ -66,8 +66,8 @@ export default function BookScreen() {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State for description expansion
   const [dummyRecommendations, setDummyRecommendations] = useState<Category | null>(null);
   // Animation setup for button
-  const translateY = useSharedValue(150);
-  const scale = useSharedValue(0.1);
+  const translateY = useSharedValue(150); // Initial off-screen position
+  const scale = useSharedValue(0.1); // Initial small scale
   const pressScale = useSharedValue(1);
 
   // Shared value for scroll position
@@ -201,6 +201,9 @@ export default function BookScreen() {
 
   const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore, isBookTracked } = useTrackedBooksStore();
 
+  // State to control button rendering for animation
+  const [isButtonRendered, setIsButtonRendered] = useState(false);
+
   useEffect(() => {
     const fetchBook = async () => {
       try {
@@ -235,18 +238,49 @@ export default function BookScreen() {
     return () => subscription.remove();
   }, []);
 
-  // Trigger animation on mount
+  // Effect to handle button appearance/disappearance animations
+  const isTracked = book ? isBookTracked(book.id) : false;
+
   useEffect(() => {
-    translateY.value = withTiming(0, {
-      duration: 500,
-      easing: Easing.out(Easing.exp),
-    });
-    scale.value = withTiming(1, {
-      // Animate scale to 100%
-      duration: 750,
-      easing: Easing.out(Easing.exp),
-    });
-  }, []);
+    if (isTracked) {
+      setIsButtonRendered(true); // Ensure component is rendered to animate in
+      translateY.value = withTiming(0, {
+        duration: 500,
+        easing: Easing.out(Easing.exp),
+      });
+      scale.value = withTiming(1, {
+        duration: 750,
+        easing: Easing.out(Easing.exp),
+      });
+    } else {
+      // Animate out
+      translateY.value = withTiming(150, {
+        duration: 500,
+        easing: Easing.in(Easing.exp), // Use 'in' easing for disappearing
+      });
+      scale.value = withTiming(0.1, {
+        duration: 750,
+        easing: Easing.in(Easing.exp), // Use 'in' easing for disappearing
+      });
+
+      // If the button is currently rendered, schedule its removal after animation
+      if (isButtonRendered) {
+        const timeoutId = setTimeout(() => {
+          // Re-check tracking status before actually hiding
+          const stillNotTracked = book ? !isBookTracked(book.id) : true;
+          if (stillNotTracked) {
+            setIsButtonRendered(false);
+          }
+        }, 750); // Max of animation durations
+
+        return () => clearTimeout(timeoutId); // Cleanup timeout
+      } else {
+        // If not rendered and not tracked, ensure shared values are reset (safety net)
+        if (translateY.value !== 150) translateY.value = 150; // Ensure hidden state
+        if (scale.value !== 0.1) scale.value = 0.1;     // Ensure hidden state
+      }
+    }
+  }, [book, isTracked, translateY, scale, isButtonRendered]);
 
   if (error) {
     return (
@@ -552,41 +586,43 @@ export default function BookScreen() {
       </View>
 
       {/* Animated Button Container (Handles slide-up and initial scale) */}
-      <Animated.View
-        style={[
-          styles.buttonContainer,
-          { bottom: insets.bottom + 16 },
-          animatedButtonStyle,
-        ]}
-      >
-        {/* Animated Wrapper for Pressable (Handles press scale) */}
-        <Animated.View style={[animatedPressStyle]}>
-          <Pressable
-            style={[styles.button]}
-            onPress={() => router.push({pathname: "/book/tracking-settings", params: {bookId: book?.id}})}
-            onPressIn={() => {
-              pressScale.value = withTiming(0.97, { duration: 100 });
-            }}
-            onPressOut={() => {
-              pressScale.value = withTiming(1, { duration: 100 });
-            }}
-          >
-            <LinearGradient
-              colors={[colors.primary, "#8A2BE2"]}
-              style={[
-                styles.gradient,
-                { borderRadius: styles.button.borderRadius },
-              ]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+      {isButtonRendered && (
+        <Animated.View
+          style={[
+            styles.buttonContainer,
+            { bottom: insets.bottom + 16 },
+            animatedButtonStyle,
+          ]}
+        >
+          {/* Animated Wrapper for Pressable (Handles press scale) */}
+          <Animated.View style={[animatedPressStyle]}>
+            <Pressable
+              style={[styles.button]}
+              onPress={() => router.push({pathname: "/book/tracking-settings", params: {bookId: book?.id}})}
+              onPressIn={() => {
+                pressScale.value = withTiming(0.97, { duration: 100 });
+              }}
+              onPressOut={() => {
+                pressScale.value = withTiming(1, { duration: 100 });
+              }}
             >
-              <Text style={[styles.buttonText, typography.button]}>
-                Gérer le suivi
-              </Text>
-            </LinearGradient>
-          </Pressable>
+              <LinearGradient
+                colors={[colors.primary, "#8A2BE2"]}
+                style={[
+                  styles.gradient,
+                  { borderRadius: styles.button.borderRadius },
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={[styles.buttonText, typography.button]}>
+                  Gérer le suivi
+                </Text>
+              </LinearGradient>
+            </Pressable>
+          </Animated.View>
         </Animated.View>
-      </Animated.View>
+      )}
 
       {/* Custom animated header */}
       <AnimatedHeader
