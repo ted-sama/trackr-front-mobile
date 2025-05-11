@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
-import { Book } from "@/types";
+import { Book, ReadingStatus } from "@/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/state/tracked-books-store';
 import Badge from "./ui/Badge";
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
 
 interface BookListElementProps {
   book: Book;
@@ -13,13 +14,22 @@ interface BookListElementProps {
   onTrackingToggle?: (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => void;
   showTrackingButton?: boolean;
   showTrackingStatus?: boolean;
+  showAuthor?: boolean;
 }
 
-const BookListElement = ({ book, onPress, onTrackingToggle, showTrackingButton = false, showTrackingStatus = false }: BookListElementProps) => {
+const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, showTrackingButton = false, showTrackingStatus = false }: BookListElementProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
   const { isBookTracked } = useTrackedBooksStore();
   const isTracking = isBookTracked(book.id);
+
+  const trackingStatusValues: Record<ReadingStatus, { text: string, bgColor: string, textColor: string, icon: React.ReactNode }> = {
+    'plan_to_read': { text: 'À lire', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Clock3 size={12} color={colors.badgeText} /> },
+    'reading': { text: 'En cours', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookOpenIcon size={12} color={colors.badgeText} /> },
+    'completed': { text: 'Complété', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookCheck size={12} color={colors.badgeText} /> },
+    'on_hold': { text: 'En pause', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Pause size={12} color={colors.badgeText} /> },
+    'dropped': { text: 'Abandonné', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Square size={12} color={colors.badgeText} /> },
+  }
 
   const handleTrackingToggle = () => {
     onTrackingToggle?.(book.id.toString(), isTracking, book);
@@ -30,14 +40,26 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showTrackingButton =
       <View style={styles.detailsGroup}>
         <Image source={{ uri: book.cover_image }} style={styles.image} />
         <View style={styles.infoContainer}>
-          <Text style={[styles.title, typography.bodyBold, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">{book.title}</Text>
-          <Text style={[styles.author, typography.caption, { color: colors.secondaryText }]}>{book.author}</Text>
+          <Text style={[styles.title, typography.h3, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">{book.title}</Text>
+          {book.author && showAuthor && (
+            <Text style={[styles.author, typography.caption, { color: colors.secondaryText }]}>{book.author}</Text>
+          )}
           {book.tracking_status && showTrackingStatus && (
-            <Badge
-              text={book.tracking_status.status}
-              color={colors[book.tracking_status.status]}
-              backgroundColor={colors.badgeBackground}
-            />
+            <View style={styles.badgeContainer}>
+              <Badge
+                text={trackingStatusValues[book.tracking_status.status].text}
+                color={trackingStatusValues[book.tracking_status.status].textColor}
+                backgroundColor={trackingStatusValues[book.tracking_status.status].bgColor}
+                icon={trackingStatusValues[book.tracking_status.status].icon}
+              />
+              {book.tracking_status.current_chapter && (
+                <Badge
+                  text={`Ch. ${book.tracking_status.current_chapter.toString()}`}
+                  color={colors.badgeText}
+                  backgroundColor={trackingStatusValues[book.tracking_status.status].bgColor}
+                />
+              )}
+            </View>
           )}
         </View>
       </View>
@@ -75,5 +97,10 @@ const styles = StyleSheet.create({
   },
   author: {
     marginBottom: 2,
+  },
+  badgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
 });

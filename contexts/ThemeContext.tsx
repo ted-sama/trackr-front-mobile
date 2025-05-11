@@ -32,11 +32,8 @@ interface ThemeContextType {
     buttonText: string;
     transparentBackground: string;
     badgeBackground: string;
-    plan_to_read: string;
-    reading: string;
-    completed: string;
-    on_hold: string;
-    dropped: string;
+    readingStatusBadgeBackground: string;
+    badgeText: string;
   };
 };
 
@@ -62,12 +59,11 @@ const lightColors = {
   buttonText: '#FFFFFF',
 
   transparentBackground: 'rgba(114, 114, 114, 0.1)',
-  badgeBackground: '#965ae933',
-  plan_to_read: '#965ae933',
-  reading: '#965ae933',
-  completed: '#965ae933',
-  on_hold: '#965ae933',
-  dropped: '#965ae933',
+
+  // Badges
+  badgeBackground: '#cfb4f5',
+  readingStatusBadgeBackground: '#e4e4e4',
+  badgeText: '#3b3b3bad',
 };
 
 const darkColors = {
@@ -91,12 +87,11 @@ const darkColors = {
   buttonText: '#FFFFFF',
 
   transparentBackground: 'rgba(160, 160, 160, 0.1)',
-  badgeBackground: '#965ae933',
-  plan_to_read: '#965ae933',
-  reading: '#965ae933',
-  completed: '#965ae933',
-  on_hold: '#965ae933',
-  dropped: '#965ae933',
+
+  // Badges
+  badgeBackground: '#cfb4f5',
+  readingStatusBadgeBackground: '#242424',
+  badgeText: '#c7c7c7ac',
 };
 
 // Création du contexte avec une valeur par défaut initiale (sera mise à jour après chargement)

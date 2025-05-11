@@ -177,13 +177,13 @@ export default function Library() {
         renderItem={({ item }) =>
           currentLayout === 'grid' ? (
             <View style={{ width: '33%' }}>
-              <BookCard book={item} onPress={() => { router.push(`/book/${item.id}`); }} size="compact" showTrackingButton={false} showRating={false} onTrackingToggle={handleTrackingToggleInLibrary} />
+              <BookCard book={item} onPress={() => { router.push(`/book/${item.id}`); }} size="compact" showAuthor={false} showTrackingStatus={true} showTrackingButton={false} showRating={false} onTrackingToggle={handleTrackingToggleInLibrary} />
             </View>
           ) : (
-            <BookListElement book={item} onPress={() => { router.push(`/book/${item.id}`); }} showTrackingButton={false} onTrackingToggle={handleTrackingToggleInLibrary} />
+            <BookListElement book={item} onPress={() => { router.push(`/book/${item.id}`); }} showAuthor={false} showTrackingStatus={true} showTrackingButton={false} onTrackingToggle={handleTrackingToggleInLibrary} />
           )
         }
-        ItemSeparatorComponent={currentLayout === 'grid' ? () => <View style={{ height: 18 }} /> : () => <View style={{ height: 12 }} />}
+        ItemSeparatorComponent={currentLayout === 'grid' ? () => <View style={{ height: 26 }} /> : () => <View style={{ height: 12 }} />}
         ListEmptyComponent={isLoading ? renderSkeletons(8) : error ? (
           <Text style={{ color: colors.error, textAlign: 'center', marginTop: 32 }}>{error}</Text>
         ) : (

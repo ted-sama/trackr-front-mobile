@@ -23,20 +23,24 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { Book } from "../types";
+import { Book, ReadingStatus } from "../types";
 import { useTheme } from "../contexts/ThemeContext";
 import { useBottomSheet } from "../contexts/BottomSheetContext";
 import Toast from "react-native-toast-message";
 import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import Badge from "./ui/Badge";
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
 
 interface BookCardProps {
   book: Book;
   onPress?: (book: Book) => void;
   onTrackingToggle?: (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => void;
   size?: 'default' | 'compact';
+  showAuthor?: boolean;
   showRating?: boolean;
+  showTrackingStatus?: boolean;
   showTrackingButton?: boolean;
 }
 
@@ -44,7 +48,7 @@ const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.33;
 const COMPACT_CARD_WIDTH = width * 0.29;
 
-const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showRating = true, showTrackingButton = true }: BookCardProps) => {
+const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAuthor = true, showRating = true, showTrackingStatus = false, showTrackingButton = true }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const { isBookTracked } = useTrackedBooksStore();
@@ -52,6 +56,14 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showRatin
   const { colors } = useTheme();
   const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
   const typography = useTypography();
+
+  const trackingStatusValues: Record<ReadingStatus, { text: string, bgColor: string, textColor: string, icon: React.ReactNode }> = {
+    'plan_to_read': { text: 'À lire', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Clock3 size={12} color={colors.badgeText} /> },
+    'reading': { text: 'En cours', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookOpenIcon size={12} color={colors.badgeText} /> },
+    'completed': { text: 'Complété', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookCheck size={12} color={colors.badgeText} /> },
+    'on_hold': { text: 'En pause', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Pause size={12} color={colors.badgeText} /> },
+    'dropped': { text: 'Abandonné', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Square size={12} color={colors.badgeText} /> },
+  }
 
   // Shared value for scale animation
   const scale = useSharedValue(1);
@@ -229,6 +241,16 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showRatin
                 />
               </View>
             )}
+            {/* Chapter badge on cover */}
+            {book.tracking_status && book.tracking_status.current_chapter && (
+              <View style={styles.chapterBadgeContainer}>
+                <Badge
+                  text={`Ch. ${book.tracking_status.current_chapter.toString()}`}
+                  color={colors.badgeText}
+                  backgroundColor={trackingStatusValues[book.tracking_status.status].bgColor}
+                />
+              </View>
+            )}
             {hasError && (
               <View
                 style={[
@@ -260,17 +282,19 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showRatin
             >
               {book.title}
             </Text>
-            <Text
-              style={[
-                styles.mangaAuthor,
-                typography.caption,
-                { color: colors.secondaryText },
-                size === 'compact' && { fontSize: 12, marginBottom: 2 },
-              ]}
-              numberOfLines={1}
-            >
-              {book.author}
-            </Text>
+            {showAuthor && (
+                <Text
+                style={[
+                  styles.mangaAuthor,
+                  typography.caption,
+                  { color: colors.secondaryText },
+                  size === 'compact' && { fontSize: 12, marginBottom: 2 },
+                ]}
+                numberOfLines={1}
+              >
+                {book.author}
+              </Text>
+            )}
             {showRating && (
               <View style={styles.ratingContainer}>
                 <Ionicons name="star" size={12} color={colors.text} />
@@ -284,6 +308,16 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showRatin
                 >
                   {book.rating || "N/A"}
                 </Text>
+              </View>
+            )}
+            {book.tracking_status && showTrackingStatus && (
+              <View style={styles.badgeContainer}>
+                <Badge
+                  text={trackingStatusValues[book.tracking_status.status].text}
+                  color={trackingStatusValues[book.tracking_status.status].textColor}
+                  backgroundColor={trackingStatusValues[book.tracking_status.status].bgColor}
+                  icon={trackingStatusValues[book.tracking_status.status].icon}
+                />
               </View>
             )}
           </View>
@@ -376,6 +410,17 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 12,
     marginLeft: 4,
+  },
+  badgeContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 4,
+  },
+  chapterBadgeContainer: {
+    position: 'absolute',
+    left: 4,
+    bottom: 4,
+    zIndex: 2,
   },
 });
 
