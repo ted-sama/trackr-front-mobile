@@ -83,7 +83,7 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
               backButtonBgStyle,
             ]}
           />
-          <Ionicons name="arrow-back" size={22} color={colors.text} />
+          <Ionicons name="arrow-back" size={22} color={colors.icon} />
         </Pressable>
         <Animated.Text
           style={[typography.h3, styles.title, { color: colors.text }, headerTitleStyle]}

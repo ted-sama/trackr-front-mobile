@@ -30,11 +30,11 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   const trackingStatusValues: Record<ReadingStatus, { text: string, bgColor: string, textColor: string, icon: React.ReactNode }> = {
-    'plan_to_read': { text: 'À lire', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Clock3 size={12} color={colors.badgeText} /> },
-    'reading': { text: 'En cours', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookOpenIcon size={12} color={colors.badgeText} /> },
-    'completed': { text: 'Complété', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookCheck size={12} color={colors.badgeText} /> },
-    'on_hold': { text: 'En pause', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Pause size={12} color={colors.badgeText} /> },
-    'dropped': { text: 'Abandonné', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Square size={12} color={colors.badgeText} /> },
+    'plan_to_read': { text: 'À lire', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Clock3 size={12} color={colors.badgeText} />},
+    'reading': { text: 'En cours', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookOpenIcon size={12} color="#0b71dd"/>},
+    'completed': { text: 'Complété', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookCheck size={12} color= "#12ac4d" />},
+    'on_hold': { text: 'En pause', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Pause size={12} color= "#f6c43c" />},
+    'dropped': { text: 'Abandonné', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Square size={12} color= "#d21212" />},
   }
 
   const handleTrackingToggle = () => {
