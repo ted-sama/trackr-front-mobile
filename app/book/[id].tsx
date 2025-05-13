@@ -1,5 +1,5 @@
 import { addBookToTracking, getBook, getBooks, getCategory, removeBookFromTracking } from "@/api";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Book, Category, BookTracking } from "@/types";
 import {
@@ -45,6 +45,10 @@ import { checkIfBookIsTracked } from "@/api";
 import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from '@/state/tracked-books-store';
 import { Ellipsis } from "lucide-react-native";
+import { useBottomSheet } from "@/contexts/BottomSheetContext";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
+import * as Haptics from "expo-haptics";
 
 // Constants for animation
 const COLLAPSED_HEIGHT = 60; // Adjust based on font size/line height for ~3 lines
@@ -59,6 +63,7 @@ export default function BookScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
+  const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +71,10 @@ export default function BookScreen() {
   const insets = useSafeAreaInsets();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State for description expansion
   const [dummyRecommendations, setDummyRecommendations] = useState<Category | null>(null);
+
+  // Bottom sheet ref
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  
   // Animation setup for button
   const translateY = useSharedValue(150); // Initial off-screen position
   const scale = useSharedValue(0.1); // Initial small scale
@@ -193,6 +202,13 @@ export default function BookScreen() {
     });
     setIsDescriptionExpanded(!isDescriptionExpanded);
   };
+
+   // Fonction pour présenter le bottom sheet
+   const handlePresentModalPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setBottomSheetVisible(true);
+    bottomSheetModalRef.current?.present();
+  }, []);
 
   // Reflection effect setup with native Image and Skia overlay
   const IMAGE_WIDTH = 202.5;
@@ -353,6 +369,10 @@ export default function BookScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
       edges={["right", "left"]}
     >
+      {/* Bottom Sheet Modal */}
+      {book && (
+        <BookActionsBottomSheet book={book} ref={bottomSheetModalRef} onDismiss={() => setBottomSheetVisible(false)} backdropDismiss />
+      )}
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedScrollView
         contentContainerStyle={{ paddingHorizontal: 16 }}
@@ -430,7 +450,7 @@ export default function BookScreen() {
               </View>
             </View>
             <View style={styles.actionsContainer}>
-              <Pressable>
+              <Pressable onPress={handlePresentModalPress}>
                 <Ellipsis size={32} color={colors.icon} strokeWidth={2} />
               </Pressable>
               <TrackingIconButton

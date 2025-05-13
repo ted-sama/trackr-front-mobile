@@ -32,6 +32,7 @@ import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/state/tracked-books-store';
 import Badge from "./ui/Badge";
 import { Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
+import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 
 interface BookCardProps {
   book: Book;
@@ -115,8 +116,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
 
   // Fonction pour présenter le bottom sheet
   const handlePresentModalPress = useCallback(() => {
-    // Haptic feedback
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setBottomSheetVisible(true);
     scale.value = withTiming(1, { duration: 100 });
     bottomSheetModalRef.current?.present();
@@ -141,49 +141,8 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
 
   return (
     <>
-      {/* Card Sheet Modal */}
-      <CardSheetModal
-        ref={bottomSheetModalRef}
-        onDismiss={() => setBottomSheetVisible(false)}
-        contentContainerStyle={styles.bottomSheetContent}
-        backdropDismiss
-      >
-        <View style={styles.bottomSheetHeader}>
-          <Image
-            source={{ uri: book.cover_image }}
-            style={{ width: 60, height: 60 * 1.5, borderRadius: 6, marginBottom: 10 }}
-          />
-          <View>
-            <Text style={{ color: colors.text, fontSize: 16, fontWeight: "bold" }}>
-              {book.title}
-            </Text>
-            <Text style={{ color: colors.secondaryText, fontSize: 14, marginTop: 4 }}>
-              {book.author}
-            </Text>
-            <View style={[styles.ratingContainer, { marginTop: 4 }]}> 
-              <Ionicons name="star" size={14} color={colors.text} />
-              <Text style={[styles.ratingText, { color: colors.secondaryText }]}> {book.rating || "N/A"} </Text>
-            </View>
-          </View>
-        </View>
-        <View style={styles.bottomSheetActions}>
-          {bottomSheetTrackingOptions.map((option) => (
-            <TouchableWithoutFeedback
-              key={option.id}
-              onPress={() => {
-                console.log(`Action: ${option.title}`);
-                option.action();
-                bottomSheetModalRef.current?.close();
-              }}
-            >
-              <View style={styles.bottomSheetActionButton}>
-                <option.icon strokeWidth={2} size={24} color={colors.text} style={{ marginRight: 10 }} />
-                <Text style={{ color: colors.text }}>{option.title}</Text>
-              </View>
-            </TouchableWithoutFeedback>
-          ))}
-        </View>
-      </CardSheetModal>
+      {/* Bottom Sheet Modal */}
+      <BookActionsBottomSheet book={book} ref={bottomSheetModalRef} onDismiss={() => setBottomSheetVisible(false)} backdropDismiss />
       {/* Manga Card */}
       <Pressable
         disabled={isBottomSheetVisible}

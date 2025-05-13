@@ -2,12 +2,13 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import * as SecureStore from 'expo-secure-store';
 
 const TOKEN_KEY = 'user_auth_token';
+const REFRESH_TOKEN_KEY = 'user_refresh_token';
 
 interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (newToken: string) => Promise<void>;
+  login: (newToken: string, refreshToken: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -37,10 +38,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         loadToken();    
     }, []);
 
-    const login = async (newToken: string) => {
+    const login = async (newToken: string, refreshToken: string) => {
         setIsLoading(true);
         try {
             await SecureStore.setItemAsync(TOKEN_KEY, newToken);
+            await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
             setToken(newToken);
         } catch (error) {
             console.error('Error saving token:', error);
@@ -53,6 +55,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsLoading(true);
         try {
             await SecureStore.deleteItemAsync(TOKEN_KEY);
+            await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
             setToken(null);
         } catch (error) {
             console.error('Error deleting token:', error);

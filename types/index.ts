@@ -108,11 +108,15 @@ export interface User {
 export interface ReadingList {
   id: string;
   name: string;
-  userId: string;
-  books: Book[];
-  isPublic: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  description?: string;
+  user_id: string;
+  cover_image?: string;
+  tags?: string[];
+  is_public: boolean;
+  is_my_library: boolean;
+  books?: Book[];
+  created_at: Date;
+  updated_at: Date;
 }
 
 /**

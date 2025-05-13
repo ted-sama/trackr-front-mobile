@@ -27,7 +27,7 @@ const DEFAULT_LAYOUT = 'list';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<Book>);
 
-export default function Library() {
+export default function MyLibrary() {
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -39,7 +39,10 @@ export default function Library() {
   const [titleY, setTitleY] = useState<number>(0);
   const scrollRef = useRef<FlatList<any>>(null);
   const [currentLayout, setCurrentLayout] = useState<"grid" | "list">(DEFAULT_LAYOUT as "grid" | "list");
-  const handleBack = () => scrollRef.current?.scrollToOffset({ offset: 0, animated: true });
+  // scrollRef.current?.scrollToOffset({ offset: 0, animated: true });
+  const handleBack = () => {
+    router.back();
+  }
 
   const { getTrackedBooks, addTrackedBook, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
   const books = getTrackedBooks();

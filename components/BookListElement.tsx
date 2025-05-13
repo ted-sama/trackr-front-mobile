@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import { useBottomSheet } from "@/contexts/BottomSheetContext";
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { Book, ReadingStatus } from "@/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/state/tracked-books-store';
 import Badge from "./ui/Badge";
-import { Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Ellipsis } from "lucide-react-native";
+import BookActionsBottomSheet from "./BookActionsBottomSheet";
+import * as Haptics from "expo-haptics";
 
 interface BookListElementProps {
   book: Book;
@@ -20,8 +24,10 @@ interface BookListElementProps {
 const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, showTrackingButton = false, showTrackingStatus = false }: BookListElementProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
+  const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
   const { isBookTracked } = useTrackedBooksStore();
   const isTracking = isBookTracked(book.id);
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   const trackingStatusValues: Record<ReadingStatus, { text: string, bgColor: string, textColor: string, icon: React.ReactNode }> = {
     'plan_to_read': { text: 'À lire', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Clock3 size={12} color={colors.badgeText} /> },
@@ -35,10 +41,20 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
     onTrackingToggle?.(book.id.toString(), isTracking, book);
   };
 
+  // Fonction pour présenter le bottom sheet
+  const handlePresentModalPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setBottomSheetVisible(true);
+    bottomSheetModalRef.current?.present();
+  }, []);
+
   return (
-    <Pressable onPress={onPress} style={styles.container}>
-      <View style={styles.detailsGroup}>
-        <Image source={{ uri: book.cover_image }} style={styles.image} />
+    <>
+      {/* Bottom Sheet Modal */}
+      <BookActionsBottomSheet book={book} ref={bottomSheetModalRef} onDismiss={() => setBottomSheetVisible(false)} backdropDismiss />
+      <Pressable onPress={onPress} style={styles.container}>
+        <View style={styles.detailsGroup}>
+          <Image source={{ uri: book.cover_image }} style={styles.image} />
         <View style={styles.infoContainer}>
           <Text style={[styles.title, typography.h3, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">{book.title}</Text>
           {book.author && showAuthor && (
@@ -66,7 +82,11 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
       {showTrackingButton && (
         <TrackingIconButton isTracking={isTracking} onPress={handleTrackingToggle} />
       )}
-    </Pressable>
+      <Pressable onPress={handlePresentModalPress}>
+        <Ellipsis size={22} color={colors.icon} strokeWidth={2} />
+      </Pressable>
+      </Pressable>
+    </>
   );
 };
 

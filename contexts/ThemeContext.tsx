@@ -26,6 +26,7 @@ interface ThemeContextType {
     searchBar: string;
     review: string;
     list: string;
+    actionButton: string;
     tabBarBackground: string;
     tabBarHighlight: string;
     tabBarText: string;
@@ -53,6 +54,7 @@ const lightColors = {
   searchBar: '#FFFFFF',
   review: '#51d2f9',
   list: '#11d261',
+  actionButton: '#eeebee',
   // TabBar
   tabBarBackground: '#F0F0F3',
   tabBarHighlight: '#fff',
@@ -82,6 +84,7 @@ const darkColors = {
   searchBar: '#434343',
   review: '#51d2f9',
   list: '#11d261',
+  actionButton: '#f5f5f5',
   // TabBar
   tabBarBackground: '#23232a',
   tabBarHighlight: '#333347',

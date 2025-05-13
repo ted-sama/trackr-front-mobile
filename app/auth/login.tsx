@@ -20,9 +20,9 @@ export default function Login() {
     const handleLogin = async () => {
         const response: LoginResponse = await loginApi({ email, password });
         console.log(response);
-        if (response.token) {
+        if (response.access_token && response.refresh_token) {
             try {
-                await login(response.token);
+                await login(response.access_token, response.refresh_token);
                 router.push('/');
             } catch (error) {
                 console.error('Error logging in:', error);

@@ -3,7 +3,7 @@ import { View, TextInput, TouchableOpacity, TouchableWithoutFeedback, StyleSheet
 import { Ionicons } from '@expo/vector-icons';
 import Animated from 'react-native-reanimated';
 import { useTheme } from '../../contexts/ThemeContext';
-
+import { useTypography } from '@/hooks/useTypography';
 interface SearchBarProps {
   value: string;
   onChangeText: (text: string) => void;
@@ -24,6 +24,7 @@ const SearchBar = ({
   containerStyle,
 }: SearchBarProps) => {
   const { colors } = useTheme();
+  const typography = useTypography();
 
   const handleClear = () => {
     onChangeText('');
@@ -50,7 +51,7 @@ const SearchBar = ({
           style={styles.searchIcon}
         />
         <TextInput
-          style={[styles.input, { color: colors.text }]}
+          style={[styles.input, typography.caption, { color: colors.text }]}
           placeholder={placeholder}
           placeholderTextColor={colors.secondaryText}
           value={value}
