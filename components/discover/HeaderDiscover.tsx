@@ -5,7 +5,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS
 import { useTheme } from "@/contexts/ThemeContext";
 import SearchBar from "@/components/discover/SearchBar";
 import { useRouter } from "expo-router";
-
+import { useTypography } from "@/hooks/useTypography";
 interface HeaderDiscoverProps {
   searchMode: 'navigate' | 'search';
   searchText?: string;
@@ -26,6 +26,7 @@ export default function HeaderDiscover({
 }: HeaderDiscoverProps) {
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
+  const typography = useTypography();
   const router = useRouter();
 
   const initialWidth = screenWidth - paddingHorizontal * 2;
@@ -121,7 +122,7 @@ export default function HeaderDiscover({
       {isEditable && (
         <Animated.View style={[styles.cancelButtonContainer, animatedCancelButtonStyle]}>
           <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
-            <Text style={[styles.cancelButtonText, { color: colors.primary }]}>Annuler</Text>
+            <Text style={[typography.h3, { color: colors.primary }]}>Annuler</Text>
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -144,9 +145,5 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     paddingHorizontal: 5,
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
   },
 });

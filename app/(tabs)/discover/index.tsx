@@ -79,7 +79,6 @@ export default function Discover() {
       style={[styles.container, { backgroundColor: colors.background }]}
       edges={["right", "left"]}
     >
-      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <HeaderDiscover searchMode="navigate" />
 
       {isLoading ? (

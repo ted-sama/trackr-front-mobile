@@ -55,7 +55,6 @@ export default function SearchScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["right", "left"]}>
-      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <HeaderDiscover searchMode="search" onSearchTextChange={handleSearch} searchText={searchText} />
 
       {isLoading ? (

@@ -165,6 +165,7 @@ export default function MyLibrary() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 64, flexGrow: 1 }}
         numColumns={currentLayout === 'grid' ? 3 : 1}
         onScroll={scrollHandler}
+        recycleItems
         ListHeaderComponent={
           <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
             <Text
