@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TouchableWithoutFeedback, StyleSheet, Dimensions } from 'react-native';
+import { LegendList } from '@legendapp/list';
 import { Category, Book } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import BookCard from './BookCard';
@@ -54,13 +55,14 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false,
         </TouchableWithoutFeedback>
       </View>
       )}
-      <FlatList
+      <LegendList
         data={books.slice(0, 8)}
         keyExtractor={(item, index) => `${item.id}-${index}`}
         renderItem={({ item }) => <BookCard book={item} onPress={() => router.push({pathname: "/book/[id]", params: {id: item.id}})} onTrackingToggle={onTrackingToggle} />}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.sliderContent}
+        style={{ height: CARD_WIDTH * 2.15 }}
         ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
         snapToInterval={ITEM_WIDTH}
         decelerationRate="fast"
@@ -69,6 +71,7 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false,
         snapToOffsets={books.map((_, index) => {
           return index * ITEM_WIDTH + CONTAINER_PADDING_LEFT - 12; // -12px to show the previous item
         })}
+        recycleItems
       />
     </View>
   );

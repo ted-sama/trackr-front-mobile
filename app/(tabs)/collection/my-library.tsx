@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, FlatList, Platform, StyleSheet } from 'react-native';
+import { View, Text, Platform, StyleSheet, FlatList } from 'react-native';
+import { LegendList, LegendListRef } from '@legendapp/list';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import Animated, { useSharedValue, useAnimatedScrollHandler, withTiming, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
@@ -25,7 +26,7 @@ const LAYOUT_STORAGE_KEY = '@MyApp:layoutPreference';
 // Default layout preference
 const DEFAULT_LAYOUT = 'list';
 
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<Book>);
+const AnimatedList = Animated.createAnimatedComponent(LegendList<Book>);
 
 export default function MyLibrary() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function MyLibrary() {
     scrollY.value = event.contentOffset.y;
   });
   const [titleY, setTitleY] = useState<number>(0);
-  const scrollRef = useRef<FlatList<any>>(null);
+  const scrollRef = useRef<LegendListRef | null>(null);
   const [currentLayout, setCurrentLayout] = useState<"grid" | "list">(DEFAULT_LAYOUT as "grid" | "list");
   // scrollRef.current?.scrollToOffset({ offset: 0, animated: true });
   const handleBack = () => {
@@ -156,7 +157,7 @@ export default function MyLibrary() {
         collapseThreshold={titleY > 0 ? titleY : undefined}
         onBack={handleBack}
       />
-      <AnimatedFlatList
+      <AnimatedList
         ref={scrollRef}
         data={books}
         key={currentLayout}
@@ -164,7 +165,6 @@ export default function MyLibrary() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 64, flexGrow: 1 }}
         numColumns={currentLayout === 'grid' ? 3 : 1}
         onScroll={scrollHandler}
-        scrollEventThrottle={16}
         ListHeaderComponent={
           <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
             <Text

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Button, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -8,6 +8,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Book } from '@/types';
 import BookListElement from '@/components/BookListElement';
 import { search } from '@/api';
+import { LegendList } from '@legendapp/list';
 
 export default function SearchScreen() {
   const { colors, currentTheme } = useTheme();
@@ -62,7 +63,7 @@ export default function SearchScreen() {
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
-        <FlatList
+        <LegendList
           data={searchResults}
           renderItem={({ item }) => <BookListElement book={item} onPress={() => router.push(`/book/${item.id}`)} />}
           keyExtractor={(item) => item.id.toString()}
@@ -73,9 +74,9 @@ export default function SearchScreen() {
             </View>
           }
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-          initialNumToRender={5}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.2}
+          recycleItems
           ListFooterComponent={isFetchingMore ? (
             <View style={styles.footerContainer}>
               <ActivityIndicator size="small" color={colors.primary} />
