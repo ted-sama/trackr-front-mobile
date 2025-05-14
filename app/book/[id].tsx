@@ -473,8 +473,8 @@ export default function BookScreen() {
                   <Badge 
                     key={item}
                     text={item}
-                    color={colors.primary}
-                    backgroundColor={colors.badgeBackground}
+                    color={colors.badgeText}
+                    backgroundColor={colors.readingStatusBadgeBackground}
                   />
                 )}
                 ItemSeparatorComponent={() => <View style={{ width: 4 }} />}

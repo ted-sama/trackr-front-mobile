@@ -33,7 +33,6 @@ interface ThemeContextType {
     tabBarTextActive: string;
     buttonText: string;
     transparentBackground: string;
-    badgeBackground: string;
     readingStatusBadgeBackground: string;
     badgeText: string;
   };
@@ -65,7 +64,6 @@ const lightColors = {
   transparentBackground: 'rgba(114, 114, 114, 0.1)',
 
   // Badges
-  badgeBackground: '#cfb4f5',
   readingStatusBadgeBackground: '#e4e4e4',
   badgeText: '#3b3b3bad',
 };
@@ -94,8 +92,6 @@ const darkColors = {
 
   transparentBackground: 'rgba(160, 160, 160, 0.1)',
 
-  // Badges
-  badgeBackground: '#8b70b2',
   readingStatusBadgeBackground: '#242424',
   badgeText: '#c7c7c7ac',
 };
