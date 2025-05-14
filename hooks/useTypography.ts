@@ -67,8 +67,8 @@ export function useTypography(): Typography {
       letterSpacing: -0.3,
     },
     categoryTitle: {
-      fontFamily: 'Manrope_700Bold',
-      fontSize: 18,
+      fontFamily: 'Manrope_600SemiBold',
+      fontSize: 17,
       lineHeight: 24,
       letterSpacing: -0.3,
     },

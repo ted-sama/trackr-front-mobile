@@ -27,8 +27,6 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
     const isTracking = isBookTracked(book.id);
     const [currentView, setCurrentView] = useState(VIEW_ACTIONS);
 
-    const styles = getStyles(colors, typography);
-
     const handleDismiss = () => {
         setCurrentView(VIEW_ACTIONS); // Reset to default view on dismiss
         if (onDismiss) {
@@ -79,23 +77,23 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
     const statusOptions = [
         {
             label: "En cours",
-            icon: <BookOpenIcon size={16} color={colors.text} />,
+            icon: <BookOpenIcon size={16} strokeWidth={2.75} color={colors.text} />,
         },
         {
             label: "A lire",
-            icon: <Clock3 size={16} color={colors.text} />,
+            icon: <Clock3 size={16} strokeWidth={2.75} color={colors.text} />,
         },
         {
             label: "Complété",
-            icon: <BookCheck size={16} color={colors.text} />,
+            icon: <BookCheck size={16} strokeWidth={2.75} color={colors.text} />,
         },
         {
             label: "En pause",
-            icon: <Pause size={16} color={colors.text} />,
+            icon: <Pause size={16} strokeWidth={2.75} color={colors.text} />,
         },
         {
             label: "Abandonné",
-            icon: <Square size={16} color={colors.text} />,
+            icon: <Square size={16} strokeWidth={2.75} color={colors.text} />,
         },
         
 
@@ -144,7 +142,7 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
                             <View style={styles.bottomSheetActions}>
                                 {actions.map((action, idx) => (
                                     action.show && (
-                                        <Pressable key={idx} style={[styles.actionButton]} onPress={action.onPress}>
+                                        <Pressable key={idx} style={[styles.actionButton, { backgroundColor: colors.actionButton }]} onPress={action.onPress}>
                                             {action.icon}
                                             <Text style={[typography.caption, { color: colors.text }]}>{action.label}</Text>
                                         </Pressable>
@@ -165,7 +163,7 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
                         </View>
                         <View style={styles.bottomSheetActions}>
                             {statusOptions.map((option, idx) => (
-                                <Pressable key={idx} style={[styles.actionButton]} onPress={() => {}}>
+                                <Pressable key={idx} style={[styles.actionButton, { backgroundColor: colors.actionButton }]} onPress={() => {}}>
                                     {option.icon}
                                     <Text style={[typography.caption, { color: colors.text }]}>{option.label}</Text>
                                 </Pressable>
@@ -178,7 +176,7 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
     )
 });
 
-const getStyles = (colors: any, typography: any) => StyleSheet.create({
+const styles = StyleSheet.create({
     backdrop: {
         backgroundColor: 'transparent',
         position: 'absolute',
@@ -210,12 +208,10 @@ const getStyles = (colors: any, typography: any) => StyleSheet.create({
     },
     actionButton: {
         flexDirection: "row",
-        justifyContent: "center",
         alignItems: "center",
         gap: 10,
         padding: 16,
         borderRadius: 16,
-        backgroundColor: colors.actionButton,
     },
     statusEditorHeader: {
         flexDirection: "row",
@@ -232,7 +228,6 @@ const getStyles = (colors: any, typography: any) => StyleSheet.create({
     statusOption: {
         paddingVertical: 12,
         paddingHorizontal: 16,
-        backgroundColor: colors.actionButton,
         borderRadius: 12,
         marginBottom: 10,
         alignItems: "center",

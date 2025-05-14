@@ -59,11 +59,11 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
   const typography = useTypography();
 
   const trackingStatusValues: Record<ReadingStatus, { text: string, bgColor: string, textColor: string, icon: React.ReactNode }> = {
-    'plan_to_read': { text: 'À lire', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Clock3 size={12} color={colors.badgeText} /> },
-    'reading': { text: 'En cours', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookOpenIcon size={12} color= "#0b71dd" /> },
-    'completed': { text: 'Complété', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookCheck size={12} color= "#12ac4d" /> },
-    'on_hold': { text: 'En pause', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Pause size={12} color= "#f6c43c" /> },
-    'dropped': { text: 'Abandonné', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Square size={12} color= "#d21212" /> },
+    'plan_to_read': { text: 'À lire', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Clock3 size={12} strokeWidth={2.75} color={colors.badgeText} /> },
+    'reading': { text: 'En cours', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookOpenIcon size={12} strokeWidth={2.75} color= "#0b71dd" /> },
+    'completed': { text: 'Complété', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookCheck size={12} strokeWidth={2.75} color= "#12ac4d" /> },
+    'on_hold': { text: 'En pause', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Pause size={12} strokeWidth={2.75} color= "#f6c43c" /> },
+    'dropped': { text: 'Abandonné', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Square size={12} strokeWidth={2.75} color= "#d21212" /> },
   }
 
   // Shared value for scale animation
@@ -235,7 +235,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
                 styles.mangaTitle,
                 typography.h3,
                 { color: colors.text },
-                size === 'compact' && { fontSize: 14, marginBottom: 2 },
+                size === 'compact' && { fontSize: 13, marginBottom: 2 },
               ]}
               numberOfLines={1}
             >
@@ -356,11 +356,11 @@ const styles = StyleSheet.create({
   mangaTitle: {
     fontSize: 14,
     fontWeight: "bold",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   mangaAuthor: {
     fontSize: 12,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   ratingContainer: {
     flexDirection: "row",

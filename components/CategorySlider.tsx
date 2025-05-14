@@ -64,13 +64,8 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false,
         contentContainerStyle={styles.sliderContent}
         style={{ height: CARD_WIDTH * 2.15 }}
         ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-        snapToInterval={ITEM_WIDTH}
         decelerationRate="fast"
-        snapToAlignment="start"
         scrollEnabled={!isBottomSheetVisible}
-        snapToOffsets={books.map((_, index) => {
-          return index * ITEM_WIDTH + CONTAINER_PADDING_LEFT - 12; // -12px to show the previous item
-        })}
         recycleItems
       />
     </View>

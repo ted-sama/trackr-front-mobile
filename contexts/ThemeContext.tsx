@@ -84,7 +84,7 @@ const darkColors = {
   searchBar: '#434343',
   review: '#51d2f9',
   list: '#11d261',
-  actionButton: '#f5f5f5',
+  actionButton: '#2b2b2b',
   // TabBar
   tabBarBackground: '#23232a',
   tabBarHighlight: '#333347',
@@ -95,7 +95,7 @@ const darkColors = {
   transparentBackground: 'rgba(160, 160, 160, 0.1)',
 
   // Badges
-  badgeBackground: '#cfb4f5',
+  badgeBackground: '#8b70b2',
   readingStatusBadgeBackground: '#242424',
   badgeText: '#c7c7c7ac',
 };
