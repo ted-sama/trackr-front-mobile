@@ -59,11 +59,11 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
   const typography = useTypography();
 
   const trackingStatusValues: Record<ReadingStatus, { text: string, bgColor: string, textColor: string, icon: React.ReactNode }> = {
-    'plan_to_read': { text: 'À lire', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Clock3 size={12} strokeWidth={2.75} color={colors.badgeText} /> },
-    'reading': { text: 'En cours', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookOpenIcon size={12} strokeWidth={2.75} color= "#0b71dd" /> },
-    'completed': { text: 'Complété', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookCheck size={12} strokeWidth={2.75} color= "#12ac4d" /> },
-    'on_hold': { text: 'En pause', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Pause size={12} strokeWidth={2.75} color= "#f6c43c" /> },
-    'dropped': { text: 'Abandonné', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Square size={12} strokeWidth={2.75} color= "#d21212" /> },
+    'plan_to_read': { text: 'À lire', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Clock3 size={12} strokeWidth={2.75} color={colors.planToRead} /> },
+    'reading': { text: 'En cours', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookOpenIcon size={12} strokeWidth={2.75} color={colors.reading} /> },
+    'completed': { text: 'Complété', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookCheck size={12} strokeWidth={2.75} color={colors.completed} /> },
+    'on_hold': { text: 'En pause', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Pause size={12} strokeWidth={2.75} color={colors.onHold} /> },
+    'dropped': { text: 'Abandonné', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Square size={12} strokeWidth={2.75} color={colors.dropped} /> },
   }
 
   // Shared value for scale animation

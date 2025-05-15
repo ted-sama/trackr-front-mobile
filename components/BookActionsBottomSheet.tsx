@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef, useCallback, useState } from "react";
+import React, { forwardRef, useRef, useCallback, useState, useEffect } from "react";
 import { View, Text, Image, ViewStyle, StyleSheet, Pressable } from "react-native";
 import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop, BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import Animated, { useAnimatedStyle, interpolate, Extrapolation, FadeIn, FadeOut } from 'react-native-reanimated';
@@ -15,20 +15,21 @@ interface BookActionsBottomSheetProps {
     index?: number;
     onDismiss?: () => void;
     backdropDismiss?: boolean;
+    view?: "actions" | "status_editor";
 }
 
 const VIEW_ACTIONS = "actions";
 const VIEW_STATUS_EDITOR = "status_editor";
 
-const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomSheetProps>(({ book, snapPoints, index, onDismiss, backdropDismiss }, ref) => {
+const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomSheetProps>(({ book, snapPoints, index, onDismiss, backdropDismiss, view = VIEW_ACTIONS }, ref) => {
     const { colors } = useTheme();
     const typography = useTypography();
     const { isBookTracked } = useTrackedBooksStore();
     const isTracking = isBookTracked(book.id);
-    const [currentView, setCurrentView] = useState(VIEW_ACTIONS);
+    const [currentView, setCurrentView] = useState(view);
 
     const handleDismiss = () => {
-        setCurrentView(VIEW_ACTIONS); // Reset to default view on dismiss
+        setCurrentView(view); // Reset to default view on dismiss
         if (onDismiss) {
             onDismiss();
         }
@@ -94,10 +95,14 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
         {
             label: "Abandonné",
             icon: <Square size={16} strokeWidth={2.75} color={colors.text} />,
-        },
-        
-
+        },     
     ]
+
+    useEffect(() => {
+        if (view) {
+            setCurrentView(view)
+        }
+    }, [view]);
 
     const renderBackdrop = useCallback((props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop

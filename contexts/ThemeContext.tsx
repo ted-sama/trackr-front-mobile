@@ -35,6 +35,11 @@ interface ThemeContextType {
     transparentBackground: string;
     readingStatusBadgeBackground: string;
     badgeText: string;
+    planToRead: string;
+    reading: string;
+    completed: string;
+    onHold: string;
+    dropped: string;
   };
 };
 
@@ -66,6 +71,13 @@ const lightColors = {
   // Badges
   readingStatusBadgeBackground: '#e4e4e4',
   badgeText: '#3b3b3bad',
+
+  // Status icons
+  planToRead: '#717171',
+  reading: '#0b71dd',
+  completed: '#12ac4d',
+  onHold: '#f6c43c',
+  dropped: '#d21212',
 };
 
 const darkColors = {
@@ -94,8 +106,14 @@ const darkColors = {
 
   readingStatusBadgeBackground: '#242424',
   badgeText: '#c7c7c7ac',
-};
 
+  // Status icons
+  planToRead: '#717171',
+  reading: '#0b71dd',
+  completed: '#12ac4d',
+  onHold: '#f6c43c',
+  dropped: '#d21212',
+};
 // Création du contexte avec une valeur par défaut initiale (sera mise à jour après chargement)
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'system', // Sera écrasé après chargement

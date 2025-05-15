@@ -28,7 +28,7 @@ export interface Book {
   tags?: string[];
   status: string;
   tracking?: boolean;
-  tracking_status?: BookTracking;
+  tracking_status?: BookTracking | null;
   created_at?: Date;
   updated_at?: Date;
 }

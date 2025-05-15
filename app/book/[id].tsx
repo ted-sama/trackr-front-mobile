@@ -34,10 +34,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import CategorySlider from "@/components/CategorySlider";
 import { BlurView } from 'expo-blur';
-// @ts-ignore no type declarations for masked-view
 import MaskedView from '@react-native-masked-view/masked-view';
-import { Canvas, Rect, RadialGradient, vec } from "@shopify/react-native-skia";
-import { DeviceMotion } from "expo-sensors";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import Badge from "@/components/ui/Badge";
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
@@ -49,6 +46,7 @@ import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 import * as Haptics from "expo-haptics";
+import { TrackingTabBar } from "@/components/book/TrackingTabBar";
 
 // Constants for animation
 const COLLAPSED_HEIGHT = 60; // Adjust based on font size/line height for ~3 lines
@@ -63,6 +61,7 @@ export default function BookScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
+  const [bottomSheetView, setBottomSheetView] = useState<"actions" | "status_editor">("actions");
   const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -204,27 +203,43 @@ export default function BookScreen() {
   };
 
    // Fonction pour présenter le bottom sheet
-   const handlePresentModalPress = useCallback(() => {
+   const handlePresentModalPress = useCallback((view: "actions" | "status_editor") => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setBottomSheetView(view);
     setBottomSheetVisible(true);
     bottomSheetModalRef.current?.present();
   }, []);
 
-  // Reflection effect setup with native Image and Skia overlay
   const IMAGE_WIDTH = 202.5;
   const IMAGE_HEIGHT = 303.75;
-  const GRADIENT_RADIUS = 80;
-  const [tiltPos, setTiltPos] = useState<{ x: number; y: number }>({ x: IMAGE_WIDTH / 2, y: IMAGE_HEIGHT / 2 });
 
-  const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore, isBookTracked } = useTrackedBooksStore();
+  const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore, isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
 
   // State to control button rendering for animation
   const [isButtonRendered, setIsButtonRendered] = useState(false);
 
+  // State to control tab bar expansion
+  const [isTabBarExpanded, setIsTabBarExpanded] = useState(false);
+
+  // Helper to get tracking status label
+  function getTrackingStatusLabel() {
+    if (!book || !getTrackedBookStatus(book.id)) return 'Non suivi';
+    const status = getTrackedBookStatus(book.id)?.status;
+    switch (status) {
+      case 'completed': return 'Terminé';
+      case 'reading': return 'En cours';
+      case 'plan_to_read': return 'À lire';
+      case 'on_hold': return 'En pause';
+      case 'dropped': return 'Abandonné';
+      default: return 'Non suivi';
+    }
+  }
+
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const book = await getBook({ id: id as string });
+        let book = await getBook({ id: id as string });
+        book.tracking_status = getTrackedBookStatus(book.id);
         setBook(book);
       } catch (err) {
         setError(
@@ -243,17 +258,6 @@ export default function BookScreen() {
     fetchBook();
     fetchRecommendations();
   }, [id]);
-
-  useEffect(() => {
-    DeviceMotion.setUpdateInterval(50);
-    const subscription = DeviceMotion.addListener((motion) => {
-      const { beta = 0, gamma = 0 } = motion.rotation ?? {};
-      const normX = (gamma / (Math.PI / 2) + 1) / 2;
-      const normY = (beta / (Math.PI / 2) + 1) / 2;
-      setTiltPos({ x: normX * IMAGE_WIDTH, y: normY * IMAGE_HEIGHT });
-    });
-    return () => subscription.remove();
-  }, []);
 
   // Effect to handle button appearance/disappearance animations
   const isTracked = book ? isBookTracked(book.id) : false;
@@ -371,7 +375,7 @@ export default function BookScreen() {
     >
       {/* Bottom Sheet Modal */}
       {book && (
-        <BookActionsBottomSheet book={book} ref={bottomSheetModalRef} onDismiss={() => setBottomSheetVisible(false)} backdropDismiss />
+        <BookActionsBottomSheet book={book} ref={bottomSheetModalRef} onDismiss={() => setBottomSheetVisible(false)} view={bottomSheetView} backdropDismiss />
       )}
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedScrollView
@@ -388,16 +392,6 @@ export default function BookScreen() {
                 <Image source={{ uri: book?.cover_image }} style={styles.imageContent} />
               )
              }
-            <Canvas style={styles.overlayCanvas}> 
-              <Rect x={0} y={0} width={IMAGE_WIDTH} height={IMAGE_HEIGHT}>
-                <RadialGradient
-                  c={vec(tiltPos.x, tiltPos.y)}
-                  r={GRADIENT_RADIUS}
-                  colors={["rgba(255, 255, 255, 0.2)", "rgba(255,255,255,0)"]}
-                  positions={[0, 1]}
-                />
-              </Rect>
-            </Canvas>
           </View>
         </View>
         <View style={styles.detailsContainer}>
@@ -450,7 +444,7 @@ export default function BookScreen() {
               </View>
             </View>
             <View style={styles.actionsContainer}>
-              <Pressable onPress={handlePresentModalPress}>
+              <Pressable onPress={() => handlePresentModalPress("actions")}>
                 <Ellipsis size={32} color={colors.icon} strokeWidth={2} />
               </Pressable>
               <TrackingIconButton
@@ -588,64 +582,21 @@ export default function BookScreen() {
         </View>
       </AnimatedScrollView>
 
-      {/* Blur gradient mask under the button (100% blur bottom → 0% blur top) */}
-      <View pointerEvents="none" style={[
-        styles.blurGradientContainer,
-        { bottom: 0, height: insets.bottom + 16 + 40 },
-      ]}>
-        <MaskedView
-          style={StyleSheet.absoluteFillObject}
-          maskElement={
-            <LinearGradient
-              start={{ x: 0, y: 1 }}
-              end={{ x: 0, y: 0 }}
-              colors={[ '#fff', 'transparent' ]}
-              style={StyleSheet.absoluteFillObject}
-            />
-          }
-        >
-          <BlurView intensity={100} tint={currentTheme === "dark" ? "dark" : "light"} style={StyleSheet.absoluteFillObject} />
-          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.6)' }]} />
-        </MaskedView>
-      </View>
-
       {/* Animated Button Container (Handles slide-up and initial scale) */}
-      {isButtonRendered && (
-        <Animated.View
-          style={[
-            styles.buttonContainer,
-            { bottom: insets.bottom + 16 },
-            animatedButtonStyle,
-          ]}
+      {isButtonRendered && book?.tracking_status && (
+        <TrackingTabBar
+          status={book.tracking_status.status}
+          onManagePress={() => setIsTabBarExpanded(true)}
+          expanded={isTabBarExpanded}
+          onClose={() => setIsTabBarExpanded(false)}
+          onStatusPress={() => handlePresentModalPress("status_editor")}
         >
-          {/* Animated Wrapper for Pressable (Handles press scale) */}
-          <Animated.View style={[animatedPressStyle]}>
-            <Pressable
-              style={[styles.button]}
-              onPress={() => router.push({pathname: "/book/tracking-settings", params: {bookId: book?.id}})}
-              onPressIn={() => {
-                pressScale.value = withTiming(0.97, { duration: 100 });
-              }}
-              onPressOut={() => {
-                pressScale.value = withTiming(1, { duration: 100 });
-              }}
-            >
-              <LinearGradient
-                colors={[colors.primary, "#8A2BE2"]}
-                style={[
-                  styles.gradient,
-                  { borderRadius: styles.button.borderRadius },
-                ]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Text style={[styles.buttonText, typography.button]}>
-                  Gérer le suivi
-                </Text>
-              </LinearGradient>
-            </Pressable>
-          </Animated.View>
-        </Animated.View>
+          {/* Squelette du menu bottom sheet inédit (à personnaliser plus tard) */}
+          <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+            <Text style={{ color: colors.text, fontSize: 18, fontWeight: 'bold' }}>Menu de gestion du suivi</Text>
+            <Text style={{ color: colors.secondaryText, marginTop: 8 }}>Ajoute ici tes boutons et ta logique !</Text>
+          </View>
+        </TrackingTabBar>
       )}
 
       {/* Custom animated header */}
@@ -691,15 +642,6 @@ const styles = StyleSheet.create({
     height: 303.75,
     borderRadius: 6,
     resizeMode: "cover",
-  },
-  overlayCanvas: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: 202.5,
-    height: 303.75,
-    borderRadius: 6,
-    overflow: "hidden",
   },
   title: {
     marginRight: 32,
@@ -815,12 +757,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     marginTop: 24,
     paddingTop: 24,
-  },
-  blurGradientContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    overflow: 'hidden',
   },
   gradientMask: {
     ...StyleSheet.absoluteFillObject,

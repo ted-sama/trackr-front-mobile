@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Book } from '@/types';
+import { Book, BookTracking } from '@/types';
 
 interface TrackedBooksState {
   trackedBooks: Record<number, Book>;
@@ -7,6 +7,7 @@ interface TrackedBooksState {
   removeTrackedBook: (id: number) => void;
   isBookTracked: (id: number) => boolean;
   getTrackedBooks: () => Book[];
+  getTrackedBookStatus: (id: number) => BookTracking | null;
 }
 
 export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
@@ -20,4 +21,5 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   }),
   isBookTracked: (id) => Boolean(get().trackedBooks[id]),
   getTrackedBooks: () => Object.values(get().trackedBooks),
+  getTrackedBookStatus: (id) => get().trackedBooks[id]?.tracking_status || null,
 })); 
