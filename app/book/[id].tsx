@@ -507,7 +507,7 @@ export default function BookScreen() {
                   style={[
                     typography.body,
                     styles.toggleButtonText,
-                    { color: colors.primary },
+                    { color: colors.accent },
                   ]}
                 >
                   {isDescriptionExpanded ? "Réduire" : "Lire la suite"}
@@ -723,6 +723,7 @@ const styles = StyleSheet.create({
     height: 30, // Adjust height as needed for the fade effect
   },
   toggleButton: {
+    width: '100%',
     marginTop: 8,
     alignSelf: "flex-start", // Align to left or center as needed
   },
