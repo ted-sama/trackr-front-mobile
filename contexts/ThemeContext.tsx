@@ -27,6 +27,7 @@ interface ThemeContextType {
     review: string;
     list: string;
     actionButton: string;
+    tabBarBorder: string;
     tabBarBackground: string;
     tabBarHighlight: string;
     tabBarText: string;
@@ -60,6 +61,7 @@ const lightColors = {
   list: '#11d261',
   actionButton: '#eeebee',
   // TabBar
+  tabBarBorder: '#eaeaea',
   tabBarBackground: '#F0F0F3',
   tabBarHighlight: '#fff',
   tabBarText: '#888',
@@ -96,6 +98,7 @@ const darkColors = {
   list: '#11d261',
   actionButton: '#2b2b2b',
   // TabBar
+  tabBarBorder: '#23232a',
   tabBarBackground: '#23232a',
   tabBarHighlight: '#333347',
   tabBarText: '#aaa',

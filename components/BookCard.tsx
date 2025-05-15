@@ -118,7 +118,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
   const handlePresentModalPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setBottomSheetVisible(true);
-    scale.value = withTiming(1, { duration: 100 });
+    scale.value = withTiming(1, { duration: 220 });
     bottomSheetModalRef.current?.present();
   }, []);
 
@@ -149,10 +149,10 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
         onPressIn={() => {
           isBottomSheetVisible
             ? null
-            : scale.value = withTiming(0.98, { duration: 100 });
+            : scale.value = withTiming(0.98, { duration: 220 });
         }}
         onPressOut={() => {
-          scale.value = withTiming(1, { duration: 100 });
+          scale.value = withTiming(1, { duration: 220 });
         }}
         onPress={handlePress}
         onLongPress={handlePresentModalPress}

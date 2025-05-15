@@ -79,7 +79,7 @@ export function TrackingTabBar({
       width,
       height,
       borderWidth,
-      borderColor: colors.border,
+      borderColor: colors.tabBarBorder,
       borderTopLeftRadius: borderRadius,
       borderTopRightRadius: borderRadius,
       borderBottomLeftRadius: interpolate(morphFactor, [0, 1], [50, 0], Extrapolate.CLAMP),
