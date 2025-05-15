@@ -8,6 +8,7 @@ interface TrackedBooksState {
   isBookTracked: (id: number) => boolean;
   getTrackedBooks: () => Book[];
   getTrackedBookStatus: (id: number) => BookTracking | null;
+  clearTrackedBooks: () => void;
 }
 
 export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
@@ -22,4 +23,5 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   isBookTracked: (id) => Boolean(get().trackedBooks[id]),
   getTrackedBooks: () => Object.values(get().trackedBooks),
   getTrackedBookStatus: (id) => get().trackedBooks[id]?.tracking_status || null,
+  clearTrackedBooks: () => set({ trackedBooks: {} }),
 })); 

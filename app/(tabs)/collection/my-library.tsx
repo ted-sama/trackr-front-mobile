@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, Platform, StyleSheet, FlatList } from 'react-native';
 import { LegendList, LegendListRef } from '@legendapp/list';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -9,7 +9,6 @@ import { StatusBar } from 'expo-status-bar';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import { getMyLibraryBooks } from '@/api';
 import BookListElement from '@/components/BookListElement';
-import BookListElementSkeleton from '@/components/skeleton-loader/BookListElementSkeleton';
 import BookCard from '@/components/BookCard';
 import { Book, BookTracking } from '@/types';
 import { useRouter } from 'expo-router';
@@ -47,8 +46,6 @@ export default function MyLibrary() {
 
   const { getTrackedBooks, addTrackedBook, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
   const books = getTrackedBooks();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [isBlurVisible, setIsBlurVisible] = useState(false);
   const blurOpacity = useSharedValue(0);
@@ -57,28 +54,6 @@ export default function MyLibrary() {
   const animatedBlurStyle = useAnimatedStyle(() => ({
     opacity: blurOpacity.value,
   }));
-
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchInitialBooks() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await getMyLibraryBooks({ offset: 0, limit: 1000 });
-        if (isMounted) {
-          response.items.forEach(book => {
-            addTrackedBook({ ...book, tracking: true, tracking_status: book.tracking_status });
-          });
-        }
-      } catch (e: any) {
-        if (isMounted) setError(e.message || 'Erreur de chargement de la bibliothèque');
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    }
-    fetchInitialBooks();
-    return () => { isMounted = false; };
-  }, [addTrackedBook]);
 
   // Load layout preference from AsyncStorage
   useEffect(() => {
@@ -126,16 +101,6 @@ export default function MyLibrary() {
       }
     }
   };
-
-  const renderSkeletons = (count: number) => (
-    <View style={{ marginTop: 12 }}>
-      {Array.from({ length: count }).map((_, idx) => (
-        <View key={idx} style={{ marginBottom: 12 }}>
-          <BookListElementSkeleton />
-        </View>
-      ))}
-    </View>
-  );
 
   const switchLayout = () => {
     setIsBlurVisible(true);
@@ -188,11 +153,9 @@ export default function MyLibrary() {
           )
         }
         ItemSeparatorComponent={currentLayout === 'grid' ? () => <View style={{ height: 26 }} /> : () => <View style={{ height: 12 }} />}
-        ListEmptyComponent={isLoading ? renderSkeletons(8) : error ? (
-          <Text style={{ color: colors.error, textAlign: 'center', marginTop: 32 }}>{error}</Text>
-        ) : (
+        ListEmptyComponent={books.length === 0 ? (
           <Text style={{ color: colors.secondaryText, textAlign: 'center', marginTop: 32 }}>Aucun livre trouvé dans votre bibliothèque.</Text>
-        )}
+        ) : null}
         columnWrapperStyle={currentLayout === 'grid' ? { gap: 4 } : undefined}
         onEndReached={() => {}}
         onEndReachedThreshold={0.2}

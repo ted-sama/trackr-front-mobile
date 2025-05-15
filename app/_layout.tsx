@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -18,7 +18,9 @@ import {
 } from '@expo-google-fonts/manrope';
 import * as SplashScreen from 'expo-splash-screen';
 import { DropdownProvider } from '@/contexts/DropdownContext';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import { fetchAndStoreMyLibraryBooks } from '@/helpers/collection/fetchAndStoreMyLibraryBooks';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -52,6 +54,10 @@ export default function RootLayout() {
 // Nouveau composant pour accéder au contexte du thème
 function RootLayoutContent() {
   const { colors } = useTheme();
+  const { isAuthenticated } = useAuth();
+  const [isLibraryLoading, setIsLibraryLoading] = useState(false);
+  const [libraryError, setLibraryError] = useState<string | null>(null);
+  const hasFetchedLibrary = useRef(false);
 
   const [fontsLoaded] = useFonts({
     Manrope_200ExtraLight,
@@ -68,6 +74,23 @@ function RootLayoutContent() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
+
+  useEffect(() => {
+    if (isAuthenticated && !hasFetchedLibrary.current) {
+      hasFetchedLibrary.current = true;
+      setIsLibraryLoading(true);
+      setLibraryError(null);
+      fetchAndStoreMyLibraryBooks()
+        .then((result) => {
+          if (!result.success) setLibraryError(result.error);
+        })
+        .catch((e) => setLibraryError(e.message || 'Erreur de chargement de la bibliothèque'))
+        .finally(() => setIsLibraryLoading(false));
+    }
+    if (!isAuthenticated) {
+      hasFetchedLibrary.current = false;
+    }
+  }, [isAuthenticated]);
 
   if (!fontsLoaded) {
     return null;

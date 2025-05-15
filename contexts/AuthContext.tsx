@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { useTrackedBooksStore } from '@/state/tracked-books-store';
 
 const TOKEN_KEY = 'user_auth_token';
 const REFRESH_TOKEN_KEY = 'user_refresh_token';
@@ -57,6 +58,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             await SecureStore.deleteItemAsync(TOKEN_KEY);
             await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
             setToken(null);
+            useTrackedBooksStore.getState().clearTrackedBooks();
         } catch (error) {
             console.error('Error deleting token:', error);
         } finally {
