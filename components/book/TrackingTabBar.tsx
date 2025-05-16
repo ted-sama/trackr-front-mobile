@@ -14,6 +14,7 @@ import { BlurView } from "expo-blur";
 
 interface TrackingTabBarProps {
   status: string;
+  currentChapter?: number;
   onManagePress: () => void;
   expanded: boolean;
   onClose: () => void;
@@ -23,6 +24,7 @@ interface TrackingTabBarProps {
 
 export function TrackingTabBar({
   status,
+  currentChapter,
   onManagePress,
   expanded,
   onClose,
@@ -63,10 +65,10 @@ export function TrackingTabBar({
 
   // Animated styles for morphing
   const animatedContainerStyle = useAnimatedStyle(() => {
-    const pillWidth = screenWidth * 0.92;
+    const pillWidth = screenWidth * 0.94;
     const sheetWidth = screenWidth;
     const pillHeight = 64;
-    const sheetHeight = screenHeight * 0.8;
+    const sheetHeight = screenHeight * 0.4;
     // Natural morph: combine expansion anim and dragY for shape/size during drag
     const dragFactor = interpolate(dragY.value, [0, sheetHeight], [1, 0], Extrapolate.CLAMP);
     const morphFactor = anim.value * dragFactor;
@@ -112,6 +114,19 @@ export function TrackingTabBar({
     opacity: interpolate(anim.value, [0.7, 1], [0, 1], Extrapolate.CLAMP),
     transform: [{ translateY: interpolate(anim.value, [0.7, 1], [40, 0], Extrapolate.CLAMP) }],
     pointerEvents: anim.value > 0.5 ? "auto" : "none",
+  }));
+
+  // Backdrop animated style
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(anim.value, [0.7, 1], [0, 0.3], Extrapolate.CLAMP),
+    backgroundColor: '#000',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 99,
+    pointerEvents: anim.value > 0.5 ? 'auto' : 'none',
   }));
 
   // Gesture handler for drag-to-close (modern API)
@@ -163,6 +178,21 @@ export function TrackingTabBar({
         </MaskedView>
       </View>
 
+    {/* Backdrop for closing sheet on outside press */}
+    <Animated.View style={backdropStyle} pointerEvents={expanded ? 'auto' : 'none'}>
+      {expanded && (
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Fermer la gestion du suivi"
+          accessibilityHint="Appuyez pour fermer le panneau de gestion du suivi"
+        >
+          {/* empty, just for press detection */}
+        </Pressable>
+      )}
+    </Animated.View>
+
     <GestureDetector gesture={panGesture}>
       <Animated.View
         entering={FadeIn.duration(300)}
@@ -176,10 +206,18 @@ export function TrackingTabBar({
           <View style={styles.row}>
             <Pressable onPress={onStatusPress}>
               <View style={styles.statusContainer}>
-                {trackingStatusValues[status as ReadingStatus].icon}
-                <Text style={[typography.trackingTabBar, { color: colors.text }]} numberOfLines={1} accessibilityLabel={`Statut de suivi : ${status}`}>{trackingStatusValues[status as ReadingStatus].text}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  {trackingStatusValues[status as ReadingStatus].icon}
+                  <Text style={[typography.trackingTabBarText, { color: colors.text }]} numberOfLines={1} accessibilityLabel={`Statut de suivi : ${status}`}>{trackingStatusValues[status as ReadingStatus].text}</Text>
+                </View>
+                {currentChapter && (
+                  <View>
+                    <Text style={[typography.trackingTabBarText2, { color: colors.icon }]} numberOfLines={1} accessibilityLabel={`Chapitre : ${currentChapter}`}>Ch. {currentChapter}</Text>
+                  </View>
+                )}
               </View>
             </Pressable>
+
             <Pressable
               style={({ pressed }) => [styles.manageButton, { backgroundColor: colors.primary, opacity: pressed ? 0.8 : 1 }]}
               onPress={onManagePress}
@@ -192,7 +230,7 @@ export function TrackingTabBar({
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Text style={[typography.trackingTabBar, { color: "#fff" }]}>Gérer le suivi</Text>
+                <Text style={[typography.trackingTabBarButton, { color: "#fff" }]}>Gérer le suivi</Text>
               </LinearGradient>
             </Pressable>
           </View>
@@ -222,12 +260,9 @@ const styles = StyleSheet.create({
     marginTop: 54,
   },
   statusContainer: {
-    flexDirection: "row",
     marginLeft: 12,
     marginTop: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
+    gap: 4,
   },
   manageButton: {
     borderRadius: 100,

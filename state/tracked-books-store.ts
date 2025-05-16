@@ -5,6 +5,7 @@ interface TrackedBooksState {
   trackedBooks: Record<number, Book>;
   addTrackedBook: (book: Book) => void;
   removeTrackedBook: (id: number) => void;
+  updateTrackedBook: (id: number, book: Book) => void;
   isBookTracked: (id: number) => boolean;
   getTrackedBooks: () => Book[];
   getTrackedBookStatus: (id: number) => BookTracking | null;
@@ -20,6 +21,9 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
     const { [id]: _, ...rest } = state.trackedBooks;
     return { trackedBooks: rest };
   }),
+  updateTrackedBook: (id, book) => set((state) => ({
+    trackedBooks: { ...state.trackedBooks, [id]: book },
+  })),
   isBookTracked: (id) => Boolean(get().trackedBooks[id]),
   getTrackedBooks: () => Object.values(get().trackedBooks),
   getTrackedBookStatus: (id) => get().trackedBooks[id]?.tracking_status || null,

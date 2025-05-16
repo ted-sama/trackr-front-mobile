@@ -135,4 +135,7 @@ export interface BookTracking {
   start_date?: Date;
   finish_date?: Date;
   notes?: string;
+  last_read_at?: Date;
+  created_at?: Date;
+  updated_at?: Date;
 } 

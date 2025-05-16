@@ -34,12 +34,12 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
     transform: [{ scale: scale.value }],
   }));
 
-  const trackingStatusValues: Record<ReadingStatus, { text: string, bgColor: string, textColor: string, icon: React.ReactNode }> = {
-    'plan_to_read': { text: 'À lire', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Clock3 size={12} strokeWidth={2.75} color={colors.planToRead} />},
-    'reading': { text: 'En cours', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookOpenIcon size={12} strokeWidth={2.75} color={colors.reading}/>},
-    'completed': { text: 'Complété', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <BookCheck size={12} strokeWidth={2.75} color={colors.completed} />},
-    'on_hold': { text: 'En pause', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Pause size={12} strokeWidth={2.75} color={colors.onHold} />},
-    'dropped': { text: 'Abandonné', bgColor: colors.readingStatusBadgeBackground, textColor: colors.badgeText, icon: <Square size={12} strokeWidth={2.75} color={colors.dropped} />},
+  const trackingStatusValues: Record<ReadingStatus, { text: string, icon: React.ReactNode }> = {
+    'plan_to_read': { text: 'À lire', icon: <Clock3 size={12} strokeWidth={2.75} color={colors.planToRead} />},
+    'reading': { text: 'En cours', icon: <BookOpenIcon size={12} strokeWidth={2.75} color={colors.reading}/>},
+    'completed': { text: 'Complété', icon: <BookCheck size={12} strokeWidth={2.75} color={colors.completed} />},
+    'on_hold': { text: 'En pause', icon: <Pause size={12} strokeWidth={2.75} color={colors.onHold} />},
+    'dropped': { text: 'Abandonné', icon: <Square size={12} strokeWidth={2.75} color={colors.dropped} />},
   }
 
   const handleTrackingToggle = () => {
@@ -75,15 +75,17 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
               <View style={styles.badgeContainer}>
                 <Badge
                   text={trackingStatusValues[book.tracking_status.status].text}
-                  color={trackingStatusValues[book.tracking_status.status].textColor}
-                  backgroundColor={trackingStatusValues[book.tracking_status.status].bgColor}
+                  color={colors.badgeText}
+                  backgroundColor={colors.badgeBackground}
                   icon={trackingStatusValues[book.tracking_status.status].icon}
+                  borderColor={colors.badgeBorder}
                 />
                 {book.tracking_status.current_chapter && (
                   <Badge
                     text={`Ch. ${book.tracking_status.current_chapter.toString()}`}
                     color={colors.badgeText}
-                    backgroundColor={trackingStatusValues[book.tracking_status.status].bgColor}
+                    backgroundColor={colors.badgeBackground}
+                    borderColor={colors.badgeBorder}
                   />
                 )}
               </View>

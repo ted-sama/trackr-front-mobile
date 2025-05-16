@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 
@@ -8,17 +8,18 @@ interface BadgeProps {
   text: string;
   color: string;
   backgroundColor: string;
+  borderColor?: string;
 }
 
-export default function Badge({ text, color, backgroundColor, icon }: BadgeProps) {   
+export default function Badge({ text, color, backgroundColor, icon, borderColor }: BadgeProps) {   
   const { colors } = useTheme();
   const typography = useTypography();
 
   return (
-    <Pressable style={[styles.badge, { backgroundColor: backgroundColor }]}>
+    <View style={[styles.badge, { backgroundColor: backgroundColor, borderColor: borderColor }]}>
       {icon && icon}
       <Text style={[typography.badge, { color: color }]}>{text}</Text>
-    </Pressable>
+    </View>
   );
 };
 
@@ -31,6 +32,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 25,
+    borderWidth: 0.75
   },
 });
 

@@ -221,19 +221,8 @@ export default function BookScreen() {
   // State to control tab bar expansion
   const [isTabBarExpanded, setIsTabBarExpanded] = useState(false);
 
-  // Helper to get tracking status label
-  function getTrackingStatusLabel() {
-    if (!book || !getTrackedBookStatus(book.id)) return 'Non suivi';
-    const status = getTrackedBookStatus(book.id)?.status;
-    switch (status) {
-      case 'completed': return 'Terminé';
-      case 'reading': return 'En cours';
-      case 'plan_to_read': return 'À lire';
-      case 'on_hold': return 'En pause';
-      case 'dropped': return 'Abandonné';
-      default: return 'Non suivi';
-    }
-  }
+  // Ajout : trackingStatus réactif au store
+  const trackingStatus = book ? getTrackedBookStatus(book.id) : null;
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -410,7 +399,7 @@ export default function BookScreen() {
               ) : (
                 <Text
                   style={[styles.title, typography.h1, { color: colors.text }]}
-                  numberOfLines={3}
+                  numberOfLines={2}
                   ellipsizeMode="tail"
               >
                 {book?.title}
@@ -468,7 +457,8 @@ export default function BookScreen() {
                     key={item}
                     text={item}
                     color={colors.badgeText}
-                    backgroundColor={colors.readingStatusBadgeBackground}
+                    backgroundColor={colors.badgeBackground}
+                    borderColor={colors.badgeBorder}
                   />
                 )}
                 ItemSeparatorComponent={() => <View style={{ width: 4 }} />}
@@ -583,9 +573,10 @@ export default function BookScreen() {
       </AnimatedScrollView>
 
       {/* Animated Button Container (Handles slide-up and initial scale) */}
-      {isButtonRendered && book?.tracking_status && (
+      {isButtonRendered && trackingStatus && (
         <TrackingTabBar
-          status={book.tracking_status.status}
+          status={trackingStatus.status}
+          currentChapter={trackingStatus.current_chapter}
           onManagePress={() => setIsTabBarExpanded(true)}
           expanded={isTabBarExpanded}
           onClose={() => setIsTabBarExpanded(false)}

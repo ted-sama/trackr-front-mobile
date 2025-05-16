@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category, BookTracking } from '@/types';
+import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category, BookTracking, ReadingStatus } from '@/types';
 import { refreshToken } from './auth';
 
 export const api: AxiosInstance = axios.create({
@@ -186,6 +186,30 @@ export const removeBookFromTracking = async (bookId: string): Promise<void> => {
   return response.data;
 };
 
+interface updateBookTrackingParams {
+  bookId: string;
+  status: ReadingStatus;
+  current_chapter?: number;
+  current_volume?: number;
+  rating?: number;
+  start_date?: Date;
+  finish_date?: Date;
+  notes?: string;
+  last_read_at?: Date;
+  created_at?: Date;
+  updated_at?: Date;
+}
+
+export const updateBookTracking = async (params: updateBookTrackingParams): Promise<BookTracking> => {
+  const token = await SecureStore.getItemAsync('user_auth_token');
+  const response = await api.patch(`/me/books/${params.bookId}`, params, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data.book_tracking;
+};
 export const checkIfBookIsTracked = async (bookId: string): Promise<BookTracking> => {
   const token = await SecureStore.getItemAsync('user_auth_token');
   const response = await api.get(`/me/books/contains/${bookId}`, {

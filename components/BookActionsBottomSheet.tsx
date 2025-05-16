@@ -1,14 +1,14 @@
 import React, { forwardRef, useRef, useCallback, useState, useEffect } from "react";
-import { View, Text, Image, ViewStyle, StyleSheet, Pressable } from "react-native";
+import { View, Text, Image, ViewStyle, StyleSheet, Pressable, TouchableOpacity } from "react-native";
 import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop, BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import Animated, { useAnimatedStyle, interpolate, Extrapolation, FadeIn, FadeOut } from 'react-native-reanimated';
-import { Book } from "@/types";
+import { Book, ReadingStatus } from "@/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useTypography } from "@/hooks/useTypography";
 import { PlusIcon, ShareIcon, StarIcon, BookImageIcon, MinusIcon, Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
 import { useTrackedBooksStore } from "@/state/tracked-books-store";
-
+import { addBookToTracking, removeBookFromTracking, updateBookTracking } from "@/api";
 interface BookActionsBottomSheetProps {
     book: Book;
     snapPoints?: string[];
@@ -24,7 +24,7 @@ const VIEW_STATUS_EDITOR = "status_editor";
 const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomSheetProps>(({ book, snapPoints, index, onDismiss, backdropDismiss, view = VIEW_ACTIONS }, ref) => {
     const { colors } = useTheme();
     const typography = useTypography();
-    const { isBookTracked } = useTrackedBooksStore();
+    const { isBookTracked, updateTrackedBook, removeTrackedBook, addTrackedBook } = useTrackedBooksStore();
     const isTracking = isBookTracked(book.id);
     const [currentView, setCurrentView] = useState(view);
 
@@ -40,6 +40,7 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
             label: "Ajouter à ma bibliothèque",
             icon: <PlusIcon size={16} color={colors.text} />,
             show: !isTracking,
+            onPress: () => handleAddBookToTracking(),
         },
         {
             label: "Modifier le statut",
@@ -51,6 +52,7 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
             label: "Supprimer de ma bibliothèque",
             icon: <MinusIcon size={16} color={colors.text} />,
             show: isTracking,
+            onPress: () => handleRemoveBookFromTracking(),
         },
         {
             label: "Ajouter à une liste",
@@ -79,22 +81,27 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
         {
             label: "En cours",
             icon: <BookOpenIcon size={16} strokeWidth={2.75} color={colors.text} />,
+            onPress: () => updateStatus("reading"),
         },
         {
             label: "A lire",
             icon: <Clock3 size={16} strokeWidth={2.75} color={colors.text} />,
+            onPress: () => updateStatus("plan_to_read"),
         },
         {
             label: "Complété",
             icon: <BookCheck size={16} strokeWidth={2.75} color={colors.text} />,
+            onPress: () => updateStatus("completed"),
         },
         {
             label: "En pause",
             icon: <Pause size={16} strokeWidth={2.75} color={colors.text} />,
+            onPress: () => updateStatus("on_hold"),
         },
         {
             label: "Abandonné",
             icon: <Square size={16} strokeWidth={2.75} color={colors.text} />,
+            onPress: () => updateStatus("dropped"),
         },     
     ]
 
@@ -103,6 +110,21 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
             setCurrentView(view)
         }
     }, [view]);
+
+    const updateStatus = async (status: ReadingStatus) => {
+        const updatedBookTracking = await updateBookTracking({ bookId: book.id.toString(), status });
+        updateTrackedBook(book.id, { ...book, tracking_status: updatedBookTracking });
+    }
+
+    const handleAddBookToTracking = async () => {
+        await addBookToTracking(book.id.toString());
+        addTrackedBook(book);
+    }
+
+    const handleRemoveBookFromTracking = async () => {
+        await removeBookFromTracking(book.id.toString());
+        removeTrackedBook(book.id);
+    }
 
     const renderBackdrop = useCallback((props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
@@ -147,10 +169,10 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
                             <View style={styles.bottomSheetActions}>
                                 {actions.map((action, idx) => (
                                     action.show && (
-                                        <Pressable key={idx} style={[styles.actionButton, { backgroundColor: colors.actionButton }]} onPress={action.onPress}>
+                                        <TouchableOpacity key={idx} style={[styles.actionButton, { backgroundColor: colors.actionButton }]} onPress={action.onPress}>
                                             {action.icon}
                                             <Text style={[typography.caption, { color: colors.text }]}>{action.label}</Text>
-                                        </Pressable>
+                                        </TouchableOpacity>
                                     )
                                 ))}
                             </View>
@@ -161,17 +183,17 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
                 {currentView === VIEW_STATUS_EDITOR && (
                     <Animated.View entering={FadeIn} exiting={FadeOut}>
                         <View style={styles.statusEditorHeader}>
-                            <Pressable onPress={() => setCurrentView(VIEW_ACTIONS)} style={[styles.backButton, { backgroundColor: colors.transparentBackground }]}>
+                            <TouchableOpacity onPress={() => setCurrentView(VIEW_ACTIONS)} style={[styles.backButton, { backgroundColor: colors.transparentBackground }]}>
                                 <Ionicons name="arrow-back" size={24} color={colors.icon} />
-                            </Pressable>
+                            </TouchableOpacity>
                             <Text style={[typography.h3, { color: colors.text, textAlign: 'center' }]}>Modifier le statut</Text>
                         </View>
                         <View style={styles.bottomSheetActions}>
                             {statusOptions.map((option, idx) => (
-                                <Pressable key={idx} style={[styles.actionButton, { backgroundColor: colors.actionButton }]} onPress={() => {}}>
+                                <TouchableOpacity key={idx} style={[styles.actionButton, { backgroundColor: colors.actionButton }]} onPress={() => option.onPress()}>
                                     {option.icon}
                                     <Text style={[typography.caption, { color: colors.text }]}>{option.label}</Text>
-                                </Pressable>
+                                </TouchableOpacity>
                             ))}
                         </View>
                     </Animated.View>

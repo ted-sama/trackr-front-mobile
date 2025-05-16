@@ -11,7 +11,9 @@ export interface Typography {
   badge: object;
   button: object;
   categoryTitle: object;
-  trackingTabBar: object;
+  trackingTabBarButton: object;
+  trackingTabBarText: object;
+  trackingTabBarText2: object;
   socialButton: object;
 }
 
@@ -24,8 +26,8 @@ export function useTypography(): Typography {
     },
     h1: {
       fontFamily: 'Manrope_700Bold',
-      fontSize: 26,
-      lineHeight: 34,
+      fontSize: 24,
+      lineHeight: 30,
       letterSpacing: -0.3,
     },
     h2: {
@@ -42,7 +44,7 @@ export function useTypography(): Typography {
     body: {
       fontFamily: 'Manrope_400Regular',
       fontSize: 14,
-      lineHeight: 20,
+      lineHeight: 22,
       letterSpacing: -0.3,
     },
     bodyBold: {
@@ -73,9 +75,21 @@ export function useTypography(): Typography {
       lineHeight: 24,
       letterSpacing: -0.3,
     },
-    trackingTabBar: {
+    trackingTabBarButton: {
       fontFamily: 'Manrope_700Bold',
       fontSize: 15,
+      letterSpacing: -0.3,
+    },
+    trackingTabBarText: {
+      fontFamily: 'Manrope_700Bold',
+      fontSize: 13,
+      lineHeight: 20,
+      letterSpacing: -0.3,
+    },
+    trackingTabBarText2: {
+      fontFamily: 'Manrope_700Bold',
+      fontSize: 12,
+      lineHeight: 18,
       letterSpacing: -0.3,
     },
     socialButton: {

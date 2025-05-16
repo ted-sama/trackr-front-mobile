@@ -6,24 +6,27 @@ import { ReadingList } from "@/types";
 import { useRouter } from "expo-router";
 import HeaderCollection from "@/components/collection/HeaderCollection";
 import { LegendList } from "@legendapp/list";
-
-const lists: ReadingList[] = [
-  {
-    id: "1",
-    user_id: "1",
-    name: "Ma bibliothèque",
-    description: "Ma bibliothèque personnelle",
-    is_public: false,
-    is_my_library: true,
-    books: [],
-    created_at: new Date(),
-    updated_at: new Date(),
-  }
-]
+import { useTrackedBooksStore } from "@/state/tracked-books-store";
 
 export default function Collection() {
   const router = useRouter();
   const [searchText, setSearchText] = useState("");
+  const { getTrackedBooks } = useTrackedBooksStore();
+  const myLibrary = getTrackedBooks();
+  
+  const lists: ReadingList[] = [
+    {
+      id: "1",
+      user_id: "1",
+      name: "Ma bibliothèque",
+      description: "Ma bibliothèque personnelle",
+      is_public: false,
+      is_my_library: true,
+      books: myLibrary,
+      created_at: new Date(),
+      updated_at: new Date(),
+    }
+  ]
 
   const handleSearchTextChange = useCallback((text: string) => {
     setSearchText(text);

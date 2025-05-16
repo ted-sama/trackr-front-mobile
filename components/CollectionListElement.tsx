@@ -18,7 +18,10 @@ export default function CollectionListElement({ list, onPress }: CollectionListE
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <View style={{ width: 80, height: 80, backgroundColor: colors.card, borderRadius: 6 }}> 
         </View>
-        <Text style={[typography.h3, { color: colors.text }]}>{list.name}</Text>
+        <View style={{ flexDirection: "column", gap: 4 }}>
+          <Text style={[typography.h3, { color: colors.text }]}>{list.name}</Text>
+          <Text style={[typography.caption, { color: colors.secondaryText }]}>{list.books?.length} éléments</Text>
+        </View>
       </View>
     </Pressable>
   );
