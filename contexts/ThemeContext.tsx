@@ -60,7 +60,7 @@ const lightColors = {
   searchBar: '#FFFFFF',
   review: '#51d2f9',
   list: '#11d261',
-  actionButton: '#eeebee',
+  actionButton: '#eaeaea',
   // TabBar
   tabBarBorder: '#eaeaea',
   tabBarBackground: '#F0F0F3',

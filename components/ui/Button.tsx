@@ -3,6 +3,7 @@ import { Pressable, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native'
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface ButtonProps {
   title: string;
@@ -49,14 +50,15 @@ export default function Button({ title, onPress, style, textStyle, disabled = fa
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       onPress={handlePress}
-      style={[
-        styles.button,
-        { backgroundColor: colors.primary },
-        animatedStyle,
-        style,
-      ]}
+      style={[styles.button, animatedStyle, style]}
       disabled={disabled}
     >
+      <LinearGradient
+        colors={[colors.primary, '#8A2BE2']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
       <Text style={[typography.button, { color: colors.buttonText }, textStyle]}>
         {title}
       </Text>
@@ -71,11 +73,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 48, // Similar height to TabBar and Dropdown
-    elevation: 1, // Subtle elevation like TabBar highlight
-    shadowColor: '#000', // Consistent shadow
+    minHeight: 48,
+    elevation: 1,
+    shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 1 },
+    overflow: 'hidden',
   },
 }); 

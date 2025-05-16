@@ -29,6 +29,8 @@ import Animated, {
   useAnimatedScrollHandler,
   interpolate,
   Extrapolate,
+  FadeIn,
+  FadeOut,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -41,12 +43,13 @@ import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import { checkIfBookIsTracked } from "@/api";
 import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from '@/state/tracked-books-store';
-import { Ellipsis } from "lucide-react-native";
+import { Ellipsis, Minus, Plus } from "lucide-react-native";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 import * as Haptics from "expo-haptics";
 import { TrackingTabBar } from "@/components/book/TrackingTabBar";
+import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
 
 // Constants for animation
 const COLLAPSED_HEIGHT = 60; // Adjust based on font size/line height for ~3 lines
@@ -73,7 +76,7 @@ export default function BookScreen() {
 
   // Bottom sheet ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  
+  const setChapterBottomSheetRef = useRef<BottomSheetModal>(null);
   // Animation setup for button
   const translateY = useSharedValue(150); // Initial off-screen position
   const scale = useSharedValue(0.1); // Initial small scale
@@ -210,6 +213,12 @@ export default function BookScreen() {
     bottomSheetModalRef.current?.present();
   }, []);
 
+  const handlePresentChapterModalPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setBottomSheetVisible(true);
+    setChapterBottomSheetRef.current?.present();
+  }, []);
+
   const IMAGE_WIDTH = 202.5;
   const IMAGE_HEIGHT = 303.75;
 
@@ -217,9 +226,6 @@ export default function BookScreen() {
 
   // State to control button rendering for animation
   const [isButtonRendered, setIsButtonRendered] = useState(false);
-
-  // State to control tab bar expansion
-  const [isTabBarExpanded, setIsTabBarExpanded] = useState(false);
 
   // Ajout : trackingStatus réactif au store
   const trackingStatus = book ? getTrackedBookStatus(book.id) : null;
@@ -247,50 +253,6 @@ export default function BookScreen() {
     fetchBook();
     fetchRecommendations();
   }, [id]);
-
-  // Effect to handle button appearance/disappearance animations
-  const isTracked = book ? isBookTracked(book.id) : false;
-
-  useEffect(() => {
-    if (isTracked) {
-      setIsButtonRendered(true); // Ensure component is rendered to animate in
-      translateY.value = withTiming(0, {
-        duration: 500,
-        easing: Easing.out(Easing.exp),
-      });
-      scale.value = withTiming(1, {
-        duration: 750,
-        easing: Easing.out(Easing.exp),
-      });
-    } else {
-      // Animate out
-      translateY.value = withTiming(150, {
-        duration: 500,
-        easing: Easing.in(Easing.exp), // Use 'in' easing for disappearing
-      });
-      scale.value = withTiming(0.1, {
-        duration: 750,
-        easing: Easing.in(Easing.exp), // Use 'in' easing for disappearing
-      });
-
-      // If the button is currently rendered, schedule its removal after animation
-      if (isButtonRendered) {
-        const timeoutId = setTimeout(() => {
-          // Re-check tracking status before actually hiding
-          const stillNotTracked = book ? !isBookTracked(book.id) : true;
-          if (stillNotTracked) {
-            setIsButtonRendered(false);
-          }
-        }, 750); // Max of animation durations
-
-        return () => clearTimeout(timeoutId); // Cleanup timeout
-      } else {
-        // If not rendered and not tracked, ensure shared values are reset (safety net)
-        if (translateY.value !== 150) translateY.value = 150; // Ensure hidden state
-        if (scale.value !== 0.1) scale.value = 0.1;     // Ensure hidden state
-      }
-    }
-  }, [book, isTracked, translateY, scale, isButtonRendered]);
 
   if (error) {
     return (
@@ -364,7 +326,10 @@ export default function BookScreen() {
     >
       {/* Bottom Sheet Modal */}
       {book && (
-        <BookActionsBottomSheet book={book} ref={bottomSheetModalRef} onDismiss={() => setBottomSheetVisible(false)} view={bottomSheetView} backdropDismiss />
+        <>
+          <BookActionsBottomSheet book={book} ref={bottomSheetModalRef} onDismiss={() => setBottomSheetVisible(false)} view={bottomSheetView} backdropDismiss />
+          <SetChapterBottomSheet book={book} ref={setChapterBottomSheetRef} onDismiss={() => setBottomSheetVisible(false)} backdropDismiss />
+        </>
       )}
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedScrollView
@@ -573,21 +538,15 @@ export default function BookScreen() {
       </AnimatedScrollView>
 
       {/* Animated Button Container (Handles slide-up and initial scale) */}
-      {isButtonRendered && trackingStatus && (
-        <TrackingTabBar
-          status={trackingStatus.status}
-          currentChapter={trackingStatus.current_chapter}
-          onManagePress={() => setIsTabBarExpanded(true)}
-          expanded={isTabBarExpanded}
-          onClose={() => setIsTabBarExpanded(false)}
-          onStatusPress={() => handlePresentModalPress("status_editor")}
-        >
-          {/* Squelette du menu bottom sheet inédit (à personnaliser plus tard) */}
-          <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-            <Text style={{ color: colors.text, fontSize: 18, fontWeight: 'bold' }}>Menu de gestion du suivi</Text>
-            <Text style={{ color: colors.secondaryText, marginTop: 8 }}>Ajoute ici tes boutons et ta logique !</Text>
-          </View>
-        </TrackingTabBar>
+      {trackingStatus && !isBottomSheetVisible && (
+        <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(150)}>
+          <TrackingTabBar
+            status={trackingStatus.status}
+            currentChapter={trackingStatus.current_chapter}
+            onManagePress={() => handlePresentChapterModalPress()}
+            onStatusPress={() => handlePresentModalPress("status_editor")}
+          />
+        </Animated.View>
       )}
 
       {/* Custom animated header */}
@@ -646,6 +605,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   actionsContainer: {
+    height: 32,
     flexDirection: "row",
     gap: 12,
   },

@@ -4,7 +4,7 @@ import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, C
 import { refreshToken } from './auth';
 
 export const api: AxiosInstance = axios.create({
-  baseURL: 'https://7e8c-89-221-127-193.ngrok-free.app/api/v1',
+  baseURL: 'https://e64d-81-198-118-168.ngrok-free.app/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -188,7 +188,7 @@ export const removeBookFromTracking = async (bookId: string): Promise<void> => {
 
 interface updateBookTrackingParams {
   bookId: string;
-  status: ReadingStatus;
+  status?: ReadingStatus;
   current_chapter?: number;
   current_volume?: number;
   rating?: number;

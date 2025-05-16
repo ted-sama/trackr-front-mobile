@@ -7,7 +7,6 @@ import Animated, { useSharedValue, useAnimatedScrollHandler, withTiming, useAnim
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
-import { getMyLibraryBooks } from '@/api';
 import BookListElement from '@/components/BookListElement';
 import BookCard from '@/components/BookCard';
 import { Book, BookTracking } from '@/types';

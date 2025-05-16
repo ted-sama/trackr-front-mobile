@@ -38,40 +38,40 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
     const actions = [
         {
             label: "Ajouter à ma bibliothèque",
-            icon: <PlusIcon size={16} color={colors.text} />,
+            icon: <PlusIcon size={16} strokeWidth={2.75} color={colors.text} />,
             show: !isTracking,
             onPress: () => handleAddBookToTracking(),
         },
         {
             label: "Modifier le statut",
-            icon: <BookOpenIcon size={16} color={colors.text} />,
+            icon: <BookOpenIcon size={16} strokeWidth={2.75} color={colors.text} />,
             show: isTracking,
             onPress: () => setCurrentView(VIEW_STATUS_EDITOR),
         },
         {
             label: "Supprimer de ma bibliothèque",
-            icon: <MinusIcon size={16} color={colors.text} />,
+            icon: <MinusIcon size={16} strokeWidth={2.75} color={colors.text} />,
             show: isTracking,
             onPress: () => handleRemoveBookFromTracking(),
         },
         {
             label: "Ajouter à une liste",
-            icon: <PlusIcon size={16} color={colors.text} />,
+            icon: <PlusIcon size={16} strokeWidth={2.75} color={colors.text} />,
             show: true,
         },
         {
             label: "Noter",
-            icon: <StarIcon size={16} color={colors.text} />,
+            icon: <StarIcon size={16} strokeWidth={2.75} color={colors.text} />,
             show: true,
         },
         {
             label: "Changer de couverture",
-            icon: <BookImageIcon size={16} color={colors.text} />,
+            icon: <BookImageIcon size={16} strokeWidth={2.75} color={colors.text} />,
             show: true,
         },
         {
             label: "Partager",
-            icon: <ShareIcon size={16} color={colors.text} />,
+            icon: <ShareIcon size={16} strokeWidth={2.75} color={colors.text} />,
             show: true,
         }
         
