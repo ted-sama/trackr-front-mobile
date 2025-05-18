@@ -42,9 +42,9 @@ export function useTypography(): Typography {
       letterSpacing: -0.3,
     },
     body: {
-      fontFamily: 'Manrope_400Regular',
+      fontFamily: 'Manrope_500Medium',
       fontSize: 14,
-      lineHeight: 22,
+      lineHeight: 19,
       letterSpacing: -0.3,
     },
     bodyBold: {

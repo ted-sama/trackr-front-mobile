@@ -1,4 +1,4 @@
-import { addBookToTracking, getBook, getBooks, getCategory, removeBookFromTracking } from "@/api";
+import { addBookToTracking, getBook, getBooks, getCategory, removeBookFromTracking , checkIfBookIsTracked } from "@/api";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Book, Category, BookTracking } from "@/types";
@@ -40,7 +40,6 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import Badge from "@/components/ui/Badge";
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
-import { checkIfBookIsTracked } from "@/api";
 import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from '@/state/tracked-books-store';
 import { Ellipsis, Minus, Plus } from "lucide-react-native";
@@ -50,11 +49,9 @@ import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 import * as Haptics from "expo-haptics";
 import { TrackingTabBar } from "@/components/book/TrackingTabBar";
 import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
+import ExpandableDescription from "@/components/ExpandableDescription";
 
 // Constants for animation
-const COLLAPSED_HEIGHT = 60; // Adjust based on font size/line height for ~3 lines
-const EXPANDED_HEIGHT = 1000; // Use a large enough value for any description size
-const ANIMATION_DURATION = 300; // ms
 const HEADER_THRESHOLD = 320; // Threshold for header animation
 
 // Rename ScrollView to AnimatedScrollView for Animated API usage
@@ -71,7 +68,6 @@ export default function BookScreen() {
   const [error, setError] = useState<string | null>(null);
   const typography = useTypography();
   const insets = useSafeAreaInsets();
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State for description expansion
   const [dummyRecommendations, setDummyRecommendations] = useState<Category | null>(null);
 
   // Bottom sheet ref
@@ -89,7 +85,6 @@ export default function BookScreen() {
   const [titleY, setTitleY] = useState(0);
 
   // Animation setup for description height
-  const descriptionMaxHeight = useSharedValue(COLLAPSED_HEIGHT);
 
   // Add animated values for social buttons
   const reviewsOpacity = useSharedValue(1);
@@ -119,12 +114,6 @@ export default function BookScreen() {
   });
 
   // Animated style for description container
-  const animatedDescriptionStyle = useAnimatedStyle(() => {
-    return {
-      maxHeight: descriptionMaxHeight.value,
-      overflow: "hidden", // Apply overflow hidden here
-    };
-  });
 
   // Style for press animation
   const animatedPressStyle = useAnimatedStyle(() => {
@@ -194,16 +183,6 @@ export default function BookScreen() {
   };
 
   // Toggle function for description expansion
-  const toggleDescription = () => {
-    const targetHeight = isDescriptionExpanded
-      ? COLLAPSED_HEIGHT
-      : EXPANDED_HEIGHT;
-    descriptionMaxHeight.value = withTiming(targetHeight, {
-      duration: ANIMATION_DURATION,
-      easing: Easing.inOut(Easing.ease), // Use a suitable easing function
-    });
-    setIsDescriptionExpanded(!isDescriptionExpanded);
-  };
 
    // Fonction pour présenter le bottom sheet
    const handlePresentModalPress = useCallback((view: "actions" | "status_editor") => {
@@ -433,41 +412,7 @@ export default function BookScreen() {
           {/* Description */}
           {book?.description && (
             <View>
-              <Animated.View
-                style={[styles.descriptionContainer, animatedDescriptionStyle]}
-              >
-                <Text style={[typography.body, { color: colors.text }]}>
-                  {book?.description}
-                </Text>
-                {!isDescriptionExpanded && (
-                  <LinearGradient
-                    // Use background color with varying alpha (Hex8 format)
-                    colors={[
-                      `${colors.background}00`,
-                      `${colors.background}B3`,
-                      colors.background,
-                    ]}
-                    locations={[0, 0.5, 1]} // Adjust fade start/intensity
-                    style={styles.fadeOverlay}
-                    pointerEvents="none" // Allow touches to pass through
-                  />
-                )}
-              </Animated.View>
-              {/* Toggle Button */}
-              <Pressable
-                onPress={toggleDescription}
-                style={styles.toggleButton}
-              >
-                <Text
-                  style={[
-                    typography.body,
-                    styles.toggleButtonText,
-                    { color: colors.accent },
-                  ]}
-                >
-                  {isDescriptionExpanded ? "Réduire" : "Lire la suite"}
-                </Text>
-              </Pressable>
+              <ExpandableDescription text={book.description} />
             </View>
           )}
           {/* Ratings / Socials */}
@@ -659,27 +604,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     backgroundColor: "transparent",
-  },
-  descriptionContainer: {
-    marginTop: 16,
-    position: "relative", // Needed for absolute positioning of the overlay
-    // overflow: 'hidden', // Moved to animated style
-  },
-  fadeOverlay: {
-    // Style for the fade effect
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 30, // Adjust height as needed for the fade effect
-  },
-  toggleButton: {
-    width: '100%',
-    marginTop: 8,
-    alignSelf: "flex-start", // Align to left or center as needed
-  },
-  toggleButtonText: {
-    textDecorationLine: "underline",
   },
   ratingsContainer: {
     borderTopWidth: 1,

@@ -64,7 +64,7 @@ export default function SearchScreen() {
       ) : (
         <LegendList
           data={searchResults}
-          renderItem={({ item }) => <BookListElement book={item} onPress={() => router.push(`/book/${item.id}`)} />}
+          renderItem={({ item }) => <BookListElement book={item} showAuthor showRating showTrackingButton onPress={() => router.push(`/book/${item.id}`)} />}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={

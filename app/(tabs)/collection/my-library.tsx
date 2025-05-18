@@ -68,39 +68,6 @@ export default function MyLibrary() {
     AsyncStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout);
   }, [currentLayout]);
 
-  const handleTrackingToggleInLibrary = async (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => {
-    if (!bookObject) {
-      console.warn("Book object is missing in handleTrackingToggleInLibrary");
-      Toast.show({ type: 'error', text1: 'Erreur de suivi', text2: 'Données du livre manquantes.' });
-      return;
-    }
-    if (isCurrentlyTracking) {
-      try {
-        await removeBookFromTracking(bookId);
-        removeTrackedBookFromStore(parseInt(bookId, 10));
-        Toast.show({
-          type: 'info',
-          text1: 'Livre retiré de votre bibliothèque',
-        });
-      } catch (err) {
-        console.warn(`Failed to remove book ${bookId} from tracking:`, err);
-        Toast.show({ type: 'error', text1: 'Erreur', text2: 'Impossible de retirer le livre.' });
-      }
-    } else {
-      try {
-        const trackingStatus: BookTracking = await addBookToTracking(bookId);
-        addTrackedBook({ ...bookObject, tracking: true, tracking_status: trackingStatus });
-        Toast.show({
-          type: 'info',
-          text1: 'Livre ajouté à votre bibliothèque',
-        });
-      } catch (err) {
-        console.warn(`Failed to add book ${bookId} to tracking:`, err);
-        Toast.show({ type: 'error', text1: 'Erreur', text2: 'Impossible d\'ajouter le livre.' });
-      }
-    }
-  };
-
   const switchLayout = () => {
     setIsBlurVisible(true);
     blurOpacity.value = 1;
@@ -133,9 +100,10 @@ export default function MyLibrary() {
         ListHeaderComponent={
           <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
             <Text
-              style={[typography.h1, { color: colors.text }]}
+              style={[typography.h1, { color: colors.text, maxWidth: '80%' }]}
               accessibilityRole="header"
               accessibilityLabel="Library"
+              numberOfLines={1}
             >
               Ma bibliothèque
             </Text>
@@ -145,10 +113,10 @@ export default function MyLibrary() {
         renderItem={({ item }) =>
           currentLayout === 'grid' ? (
             <View style={{ width: '33%' }}>
-              <BookCard book={item} onPress={() => { router.push(`/book/${item.id}`); }} size="compact" showAuthor={false} showTrackingStatus={true} showTrackingButton={false} showRating={false} onTrackingToggle={handleTrackingToggleInLibrary} />
+              <BookCard book={item} onPress={() => { router.push(`/book/${item.id}`); }} size="compact" showAuthor={false} showTrackingStatus={true} showTrackingButton={false} showRating={false} />
             </View>
           ) : (
-            <BookListElement book={item} onPress={() => { router.push(`/book/${item.id}`); }} showAuthor={false} showTrackingStatus={true} showTrackingButton={false} onTrackingToggle={handleTrackingToggleInLibrary} />
+            <BookListElement book={item} onPress={() => { router.push(`/book/${item.id}`); }} showAuthor={false} showTrackingStatus={true} showTrackingButton={false} showRating={false} />
           )
         }
         ItemSeparatorComponent={currentLayout === 'grid' ? () => <View style={{ height: 26 }} /> : () => <View style={{ height: 12 }} />}

@@ -1,7 +1,8 @@
+/* eslint-disable react/display-name */
 import React, { forwardRef, useRef, useCallback, useState, useEffect } from "react";
 import { View, Text, Image, ViewStyle, StyleSheet, Pressable, TouchableOpacity } from "react-native";
 import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop, BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
-import Animated, { useAnimatedStyle, interpolate, Extrapolation, FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, interpolate, Extrapolation, FadeIn, FadeOut, withTiming, withSpring, EntryAnimationsValues, ExitAnimationsValues } from 'react-native-reanimated';
 import { Book, ReadingStatus } from "@/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,6 +21,28 @@ interface BookActionsBottomSheetProps {
 
 const VIEW_ACTIONS = "actions";
 const VIEW_STATUS_EDITOR = "status_editor";
+
+// Custom morphing animations
+function morphIn(values: EntryAnimationsValues) {
+  'worklet';
+  const initialValues = { opacity: 0, transform: [{ scale: 0.8 }], borderRadius: values.targetBorderRadius ?? 25 };
+  const animations = {
+    opacity: withTiming(1, { duration: 300 }),
+    transform: [{ scale: withSpring(1, { damping: 12, stiffness: 100 }) }],
+    borderRadius: withTiming(0, { duration: 300 }),
+  };
+  return { initialValues, animations };
+}
+function morphOut(values: ExitAnimationsValues) {
+  'worklet';
+  const initialValues = { opacity: 1, transform: [{ scale: 1 }], borderRadius: values.currentBorderRadius };
+  const animations = {
+    opacity: withTiming(0, { duration: 200 }),
+    transform: [{ scale: withSpring(0.8, { damping: 12, stiffness: 100 }) }],
+    borderRadius: withTiming(values.currentBorderRadius, { duration: 200 }),
+  };
+  return { initialValues, animations };
+}
 
 const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomSheetProps>(({ book, snapPoints, index, onDismiss, backdropDismiss, view = VIEW_ACTIONS }, ref) => {
     const { colors } = useTheme();
@@ -150,7 +173,7 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
         >
             <BottomSheetView style={styles.bottomSheetContent}>
                 {currentView === VIEW_ACTIONS && (
-                    <Animated.View entering={FadeIn} exiting={FadeOut}>
+                    <Animated.View entering={morphIn} exiting={morphOut}>
                         <View>
                             <View style={styles.bottomSheetHeader}>
                                 <Image
@@ -181,7 +204,7 @@ const BookActionsBottomSheet = forwardRef<BottomSheetModal, BookActionsBottomShe
                 )}
 
                 {currentView === VIEW_STATUS_EDITOR && (
-                    <Animated.View entering={FadeIn} exiting={FadeOut}>
+                    <Animated.View entering={morphIn} exiting={morphOut}>
                         <View style={styles.statusEditorHeader}>
                             <TouchableOpacity onPress={() => setCurrentView(VIEW_ACTIONS)} style={[styles.backButton, { backgroundColor: colors.transparentBackground }]}>
                                 <Ionicons name="arrow-back" size={24} color={colors.icon} />

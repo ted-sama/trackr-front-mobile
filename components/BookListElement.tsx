@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef } from "react";
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
@@ -12,6 +12,7 @@ import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Ellipsis } from "lucide
 import BookActionsBottomSheet from "./BookActionsBottomSheet";
 import * as Haptics from "expo-haptics";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 interface BookListElementProps {
   book: Book;
@@ -20,9 +21,10 @@ interface BookListElementProps {
   showTrackingButton?: boolean;
   showTrackingStatus?: boolean;
   showAuthor?: boolean;
+  showRating?: boolean;
 }
 
-const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, showTrackingButton = false, showTrackingStatus = false }: BookListElementProps) => {
+const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, showRating = false, showTrackingButton = false, showTrackingStatus = false }: BookListElementProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
   const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
@@ -67,9 +69,23 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
           <View style={styles.detailsGroup}>
             <Image source={{ uri: book.cover_image }} style={styles.image} />
           <View style={styles.infoContainer}>
-            <Text style={[styles.title, typography.h3, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">{book.title}</Text>
+            <Text style={[styles.title, typography.h3, { color: colors.text }]} numberOfLines={2} ellipsizeMode="tail">{book.title}</Text>
             {book.author && showAuthor && (
-              <Text style={[styles.author, typography.caption, { color: colors.secondaryText }]}>{book.author}</Text>
+              <Text style={[styles.author, typography.caption, { color: colors.secondaryText }]} numberOfLines={1} ellipsizeMode="tail">{book.author}</Text>
+            )}
+            {book.rating && showRating && (
+              <View style={styles.ratingContainer}>
+              <Ionicons name="star" size={12} color={colors.text} />
+              <Text
+                style={[
+                  styles.ratingText,
+                  typography.caption,
+                  { color: colors.secondaryText },
+                ]}
+              >
+                {book.rating || "N/A"}
+              </Text>
+            </View>
             )}
             {book.tracking_status && showTrackingStatus && (
               <View style={styles.badgeContainer}>
@@ -92,12 +108,14 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
             )}
           </View>
         </View>
-        {showTrackingButton && (
-          <TrackingIconButton isTracking={isTracking} onPress={handleTrackingToggle} />
-        )}
-        <Pressable onPress={handlePresentModalPress}>
-          <Ellipsis size={22} color={colors.icon} strokeWidth={2} />
-        </Pressable>
+        <View style={styles.actionsContainer}>
+          {showTrackingButton && (
+            <TrackingIconButton isTracking={isTracking} onPress={handleTrackingToggle} />
+          )}
+          <Pressable onPress={handlePresentModalPress}>
+            <Ellipsis size={22} color={colors.icon} strokeWidth={2} />
+          </Pressable>
+        </View>
         </Pressable>
       </Animated.View>
     </>
@@ -136,5 +154,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  ratingText: {
+    fontSize: 12,
+    marginLeft: 4,
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
 });

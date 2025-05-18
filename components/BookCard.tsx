@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
-import { CirclePlus, ListPlus, CircleStop } from "lucide-react-native";
+import { CirclePlus, ListPlus, CircleStop , Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
 import CardSheetModal from "./CardSheetModal";
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import Animated, {
@@ -31,7 +31,6 @@ import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/state/tracked-books-store';
 import Badge from "./ui/Badge";
-import { Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 
 interface BookCardProps {
@@ -184,6 +183,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
               source={{ uri: book.cover_image }}
               style={[
                 styles.mangaCover,
+                { borderWidth: 0.75, borderColor: colors.border },
                 size === 'compact' && {
                   width: '100%',
                   height: '100%',
@@ -263,7 +263,6 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
                     styles.ratingText,
                     typography.caption,
                     { color: colors.secondaryText },
-                    size === 'compact' && { fontSize: 10 },
                   ]}
                 >
                   {book.rating || "N/A"}
@@ -321,6 +320,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     borderRadius: 6,
+    borderWidth: 1,
     resizeMode: "cover",
   },
   loadingContainer: {
