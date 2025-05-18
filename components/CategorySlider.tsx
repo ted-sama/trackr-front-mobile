@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, Text, TouchableWithoutFeedback, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TouchableWithoutFeedback, StyleSheet, Dimensions, Pressable } from 'react-native';
 import { LegendList } from '@legendapp/list';
 import { Category, Book } from '../types';
 import { Ionicons } from '@expo/vector-icons';
@@ -41,7 +41,7 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false,
             ? onSeeAllPress(category.id) 
             : console.log(`Voir tout: ${category.title}`)}
         >
-          <View style={styles.seeAllButtonContainer}>
+          <Pressable style={styles.seeAllButtonContainer} onPress={() => router.push({pathname: "/category-full", params: {id: category.id}})}>
             <Text style={[styles.seeAllButtonText, { color: colors.accent }]} numberOfLines={1}>
               Voir tout
             </Text>
@@ -51,7 +51,7 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false,
               color={colors.accent} 
               style={styles.buttonIcon} 
             />
-          </View>
+          </Pressable>
         </TouchableWithoutFeedback>
       </View>
       )}

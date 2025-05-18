@@ -110,6 +110,7 @@ function RootLayoutContent() {
             <Stack.Screen name='auth/login' />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name='book/[id]' />
+            <Stack.Screen name='category-full' />
             {/* <Stack.Screen name='book/tracking-settings' getId={({ params }) => params?.bookId}  options={{presentation: Platform.OS === 'ios' ? 'formSheet' : 'card'}}/>
             <Stack.Screen name='book/chapter-list' getId={({ params }) => params?.bookId} options={{presentation: Platform.OS === 'ios' ? 'formSheet' : 'card'}} /> */}
           </Stack>

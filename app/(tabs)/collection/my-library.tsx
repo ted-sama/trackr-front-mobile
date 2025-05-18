@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, Platform, StyleSheet, FlatList } from 'react-native';
+import { View, Text, Platform, StyleSheet } from 'react-native';
 import { LegendList, LegendListRef } from '@legendapp/list';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
@@ -113,7 +113,7 @@ export default function MyLibrary() {
   };
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />
       <AnimatedHeader
         title="Ma bibliothèque"
@@ -126,7 +126,7 @@ export default function MyLibrary() {
         data={books}
         key={currentLayout}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 64, flexGrow: 1 }}
+        contentContainerStyle={{ marginTop: insets.top, paddingHorizontal: 16, paddingBottom: 64, flexGrow: 1 }}
         numColumns={currentLayout === 'grid' ? 3 : 1}
         onScroll={scrollHandler}
         recycleItems
@@ -168,7 +168,7 @@ export default function MyLibrary() {
           <BlurView intensity={40} tint={currentTheme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
         </Animated.View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
