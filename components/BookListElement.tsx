@@ -1,5 +1,6 @@
 import React, { useCallback, useRef } from "react";
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
+import { Image } from "expo-image";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { Book, ReadingStatus } from "@/types";

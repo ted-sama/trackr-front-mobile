@@ -6,12 +6,12 @@ import {
   Text,
   StyleSheet,
   View,
-  Image,
   Platform,
   Pressable,
   ScrollView as DefaultScrollView,
   FlatList,
 } from "react-native";
+import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import {
   SafeAreaView,

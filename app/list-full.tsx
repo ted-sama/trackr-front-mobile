@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
-import { View, Text, Platform, StyleSheet, Image } from "react-native";
+import { View, Text, Platform, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { LegendList, LegendListRef } from "@legendapp/list";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";

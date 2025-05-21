@@ -1,7 +1,6 @@
 /* eslint-disable react/display-name */
 import React, {
   forwardRef,
-  useRef,
   useCallback,
   useState,
   useEffect,
@@ -9,13 +8,10 @@ import React, {
 import {
   View,
   Text,
-  Image,
-  ViewStyle,
   StyleSheet,
-  Pressable,
   TouchableOpacity,
-  TextInput,
 } from "react-native";
+import { Image } from "expo-image";
 import { LegendList } from "@legendapp/list";
 import {
   BottomSheetModal,

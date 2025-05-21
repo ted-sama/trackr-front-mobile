@@ -1,19 +1,16 @@
-import React, { useState, useRef, useCallback, useMemo, act } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
-  Image,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
   StyleSheet,
   Dimensions,
   ActivityIndicator,
   Pressable,
 } from "react-native";
+import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { CirclePlus, ListPlus, CircleStop , Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
-import CardSheetModal from "./CardSheetModal";
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import Animated, {
   useAnimatedStyle,
