@@ -3,7 +3,7 @@ import React, { forwardRef, useCallback, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useBottomSheet } from '@/contexts/BottomSheetContext';
-import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useTypography } from '@/hooks/useTypography';
 import { Book } from '@/types';

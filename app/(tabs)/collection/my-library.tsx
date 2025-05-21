@@ -10,12 +10,13 @@ import BookListElement from '@/components/BookListElement';
 import BookCard from '@/components/BookCard';
 import { Book, BookTracking } from '@/types';
 import { useRouter } from 'expo-router';
-import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import SwitchLayoutButton from '@/components/SwitchLayoutButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import { addBookToTracking, removeBookFromTracking } from '@/api';
 import Toast from 'react-native-toast-message';
+import { useUIStore } from '@/stores/uiStore';
 
 // AsyncStorage key for layout preference
 const LAYOUT_STORAGE_KEY = '@MyApp:layoutPreference';
@@ -36,7 +37,8 @@ export default function MyLibrary() {
   });
   const [titleY, setTitleY] = useState<number>(0);
   const scrollRef = useRef<FlatList<Book> | null>(null);
-  const [currentLayout, setCurrentLayout] = useState<"grid" | "list">(DEFAULT_LAYOUT as "grid" | "list");
+  const currentLayout = useUIStore(state => state.myLibraryLayout);
+  const setLayout = useUIStore(state => state.setMyLibraryLayout);
   // scrollRef.current?.scrollToOffset({ offset: 0, animated: true });
   const handleBack = () => {
     router.back();
@@ -53,16 +55,14 @@ export default function MyLibrary() {
     opacity: blurOpacity.value,
   }));
 
-  // Load layout preference from AsyncStorage
+  // Load saved layout preference
   useEffect(() => {
-    const loadLayoutPreference = async () => {
-      const storedLayout: "grid" | "list" = await AsyncStorage.getItem(LAYOUT_STORAGE_KEY) as "grid" | "list";
-      if (storedLayout) setCurrentLayout(storedLayout);
-    };
-    loadLayoutPreference();
-  }, []);
+    AsyncStorage.getItem(LAYOUT_STORAGE_KEY).then((layout) => {
+      if (layout === 'grid' || layout === 'list') setLayout(layout);
+    });
+  }, [setLayout]);
 
-  // Save layout preference to AsyncStorage
+  // Persist layout changes
   useEffect(() => {
     AsyncStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout);
   }, [currentLayout]);
@@ -75,7 +75,8 @@ export default function MyLibrary() {
         if (finished) runOnJS(setIsBlurVisible)(false);
       });
     }, 50);
-    setCurrentLayout(currentLayout === 'grid' ? 'list' : 'grid');
+    const newLayout = currentLayout === 'grid' ? 'list' : 'grid';
+    setLayout(newLayout);
   };
 
   return (

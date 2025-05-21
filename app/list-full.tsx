@@ -17,15 +17,16 @@ import BookListElement from "@/components/BookListElement";
 import BookCard from "@/components/BookCard";
 import { Book, ReadingList, BookTracking } from "@/types";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useTrackedBooksStore } from "@/state/tracked-books-store";
+import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import { getMyLists, addBookToTracking, removeBookFromTracking, getList } from "@/api";
+import { addBookToTracking, removeBookFromTracking } from "@/api";
 import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import BadgeSlider from "@/components/BadgeSlider";
+import { useListStore } from '@/stores/listStore';
 
 // AsyncStorage key for layout preference
 const LAYOUT_STORAGE_KEY = "@MyApp:layoutPreference";
@@ -54,7 +55,8 @@ export default function ListFull() {
     removeTrackedBook: removeTrackedBookFromStore,
   } = useTrackedBooksStore();
 
-  const [list, setList] = useState<ReadingList | null>(null);
+  const list = useListStore(state => state.readingListsById[id as string] || null);
+  const fetchList = useListStore(state => state.fetchList);
   const [isBlurVisible, setIsBlurVisible] = useState(false);
   const blurOpacity = useSharedValue(0);
 
@@ -64,15 +66,7 @@ export default function ListFull() {
   }));
 
   useEffect(() => {
-    const fetchList = async () => {
-      try {
-        const response = await getList(id as string);
-        setList(response);
-      } catch (err) {
-        console.warn("Failed to fetch list:", err);
-      }
-    };
-    fetchList();
+    if (id) fetchList(id as string);
   }, [id]);
 
   // Load layout preference

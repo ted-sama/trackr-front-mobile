@@ -29,7 +29,7 @@ import { useBottomSheet } from "../contexts/BottomSheetContext";
 import Toast from "react-native-toast-message";
 import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
-import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import Badge from "./ui/Badge";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 

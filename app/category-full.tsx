@@ -17,13 +17,15 @@ import BookListElement from "@/components/BookListElement";
 import BookCard from "@/components/BookCard";
 import { Book, Category, BookTracking } from "@/types";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useTrackedBooksStore } from "@/state/tracked-books-store";
+import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BlurView } from "expo-blur";
-import { getCategory, addBookToTracking, removeBookFromTracking } from "@/api";
+import { addBookToTracking, removeBookFromTracking } from "@/api";
 import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";
+import { useCategoryStore } from "@/stores/categoryStore";
+import type { CategoryState } from "@/stores/categoryStore";
 
 // AsyncStorage key for layout preference
 const LAYOUT_STORAGE_KEY = "@MyApp:layoutPreference";
@@ -54,7 +56,8 @@ export default function CategoryFull() {
     removeTrackedBook: removeTrackedBookFromStore,
   } = useTrackedBooksStore();
 
-  const [category, setCategory] = useState<Category | null>(null);
+  const category = useCategoryStore((state: CategoryState) => state.categoriesById[id as string] || null);
+  const fetchCategory = useCategoryStore((state: CategoryState) => state.fetchCategory);
   const [isBlurVisible, setIsBlurVisible] = useState(false);
   const blurOpacity = useSharedValue(0);
 
@@ -64,12 +67,8 @@ export default function CategoryFull() {
   }));
 
   useEffect(() => {
-    const fetchCategory = async () => {
-      const fetchedCategory = await getCategory(id as string);
-      setCategory(fetchedCategory);
-    };
-    fetchCategory();
-  });
+    if (id) fetchCategory(id as string);
+  }, [id]);
 
   // Load layout preference
   useEffect(() => {

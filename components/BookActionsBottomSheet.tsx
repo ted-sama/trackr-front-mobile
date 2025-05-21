@@ -53,7 +53,7 @@ import {
   Square,
 } from "lucide-react-native";
 import { useTypography } from "@/hooks/useTypography";
-import { useTrackedBooksStore } from "@/state/tracked-books-store";
+import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import {
   addBookToTracking,
   removeBookFromTracking,

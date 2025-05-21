@@ -7,18 +7,22 @@ import HeaderDiscover from "@/components/discover/HeaderDiscover";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { Book, Category, BookTracking } from "@/types/index";
-import { addBookToTracking, getCategories, removeBookFromTracking } from "@/api";
+import { addBookToTracking, removeBookFromTracking } from "@/api";
 import Toast from "react-native-toast-message";
-import { useTrackedBooksStore } from "@/state/tracked-books-store";
+import { useTrackedBooksStore } from "@/stores/trackedBookStore";
+import { useCategoryStore, CategoryState } from '@/stores/categoryStore';
 
 // Composant principal pour la page Discover
 export default function Discover() {
   const { colors, currentTheme } = useTheme();
   const { isBottomSheetVisible } = useBottomSheet();
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const fetchCategories = useCategoryStore((state: CategoryState) => state.fetchCategories);
+  const categoryIds = useCategoryStore((state: CategoryState) => state.allIds);
+  const categoriesById = useCategoryStore((state: CategoryState) => state.categoriesById);
+  const categories = categoryIds.map(id => categoriesById[id]);
+  const isLoading = useCategoryStore((state: CategoryState) => state.isLoading);
+  const error = useCategoryStore((state: CategoryState) => state.error);
 
   const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
 
@@ -56,23 +60,9 @@ export default function Discover() {
     }
   };
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const categoriesData = await getCategories();
-      setCategories(categoriesData.items);
-    } catch (e: any) {
-      console.error("Failed to fetch books:", e);
-      setError("Impossible de charger les livres. Vérifiez votre connexion ou l'API.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchCategories();
+  }, [fetchCategories]);
 
   return (
     <SafeAreaView

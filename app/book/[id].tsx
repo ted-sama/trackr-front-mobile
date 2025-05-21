@@ -1,4 +1,4 @@
-import { addBookToTracking, getBook, getBooks, getCategory, removeBookFromTracking , checkIfBookIsTracked } from "@/api";
+import { addBookToTracking, getBooks, getCategory, removeBookFromTracking, checkIfBookIsTracked } from "@/api";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Book, Category, BookTracking } from "@/types";
@@ -41,7 +41,7 @@ import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import Badge from "@/components/ui/Badge";
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import Toast from "react-native-toast-message";
-import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { Ellipsis, Minus, Plus } from "lucide-react-native";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -51,6 +51,7 @@ import { TrackingTabBar } from "@/components/book/TrackingTabBar";
 import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import BadgeSlider from "@/components/BadgeSlider";
+import { useBookDetailStore, BookDetailState } from '@/stores/bookDetailStore';
 
 // Constants for animation
 const HEADER_THRESHOLD = 320; // Threshold for header animation
@@ -64,9 +65,10 @@ export default function BookScreen() {
   const { colors, currentTheme } = useTheme();
   const [bottomSheetView, setBottomSheetView] = useState<"actions" | "status_editor">("actions");
   const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
-  const [book, setBook] = useState<Book | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const book = useBookDetailStore((state: BookDetailState) => state.bookById[id as string] || null);
+  const isLoading = useBookDetailStore((state: BookDetailState) => state.isLoading);
+  const error = useBookDetailStore((state: BookDetailState) => state.error);
+  const fetchBook = useBookDetailStore((state: BookDetailState) => state.fetchBook);
   const typography = useTypography();
   const insets = useSafeAreaInsets();
   const [dummyRecommendations, setDummyRecommendations] = useState<Category | null>(null);
@@ -211,26 +213,11 @@ export default function BookScreen() {
   const trackingStatus = book ? getTrackedBookStatus(book.id) : null;
 
   useEffect(() => {
-    const fetchBook = async () => {
-      try {
-        let book = await getBook({ id: id as string });
-        book.tracking_status = getTrackedBookStatus(book.id);
-        setBook(book);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Une erreur est survenue"
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
+    if (id) fetchBook(id as string);
     const fetchRecommendations = async () => {
       const recommendations = await getCategory('1');
       setDummyRecommendations(recommendations);
     };
-
-    fetchBook();
     fetchRecommendations();
   }, [id]);
 

@@ -6,28 +6,27 @@ import { ReadingList } from "@/types";
 import { useRouter } from "expo-router";
 import HeaderCollection from "@/components/collection/HeaderCollection";
 import { LegendList } from "@legendapp/list";
-import { useTrackedBooksStore } from "@/state/tracked-books-store";
+import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { useTypography } from "@/hooks/useTypography";
 import { useTheme } from "@/contexts/ThemeContext";
-import { getMyLists } from "@/api";
+import { useListStore } from '@/stores/listStore';
 
 export default function Collection() {
   const router = useRouter();
   const typography = useTypography();
   const { colors } = useTheme();
   const [searchText, setSearchText] = useState("");
-  const [lists, setLists] = useState<ReadingList[]>([]);
   const { getTrackedBooks } = useTrackedBooksStore();
   const myLibrary = getTrackedBooks();
   const mosaicBooks = myLibrary.slice(0, 8);
+  const fetchMyLists = useListStore(state => state.fetchMyLists);
+  const myListsIds = useListStore(state => state.myListsIds);
+  const myListsById = useListStore(state => state.myListsById);
+  const lists = myListsIds.map(id => myListsById[id]);
   
   useEffect(() => {
-    const fetchLists = async () => {
-      const lists = await getMyLists();
-      setLists(lists.items);
-    };
-    fetchLists();
-  }, []);
+    fetchMyLists();
+  }, [fetchMyLists]);
   
   const handleSearchTextChange = useCallback((text: string) => {
     setSearchText(text);

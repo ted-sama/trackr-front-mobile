@@ -1,5 +1,5 @@
 import { getMyLibraryBooks } from '@/api';
-import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { Book } from '@/types';
 
 export async function fetchAndStoreMyLibraryBooks() {

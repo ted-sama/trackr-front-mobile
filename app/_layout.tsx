@@ -19,8 +19,7 @@ import {
 import * as SplashScreen from 'expo-splash-screen';
 import { DropdownProvider } from '@/contexts/DropdownContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { useTrackedBooksStore } from '@/state/tracked-books-store';
-import { fetchAndStoreMyLibraryBooks } from '@/helpers/collection/fetchAndStoreMyLibraryBooks';
+import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -55,9 +54,9 @@ export default function RootLayout() {
 function RootLayoutContent() {
   const { colors } = useTheme();
   const { isAuthenticated } = useAuth();
-  const [isLibraryLoading, setIsLibraryLoading] = useState(false);
-  const [libraryError, setLibraryError] = useState<string | null>(null);
-  const hasFetchedLibrary = useRef(false);
+  const fetchMyLibraryBooks = useTrackedBooksStore(state => state.fetchMyLibraryBooks);
+  const isLibraryLoading = useTrackedBooksStore(state => state.isLoading);
+  const libraryError = useTrackedBooksStore(state => state.error);
 
   const [fontsLoaded] = useFonts({
     Manrope_200ExtraLight,
@@ -76,19 +75,8 @@ function RootLayoutContent() {
   }, [fontsLoaded]);
 
   useEffect(() => {
-    if (isAuthenticated && !hasFetchedLibrary.current) {
-      hasFetchedLibrary.current = true;
-      setIsLibraryLoading(true);
-      setLibraryError(null);
-      fetchAndStoreMyLibraryBooks()
-        .then((result) => {
-          if (!result.success) setLibraryError(result.error);
-        })
-        .catch((e) => setLibraryError(e.message || 'Erreur de chargement de la bibliothèque'))
-        .finally(() => setIsLibraryLoading(false));
-    }
-    if (!isAuthenticated) {
-      hasFetchedLibrary.current = false;
+    if (isAuthenticated) {
+      fetchMyLibraryBooks();
     }
   }, [isAuthenticated]);
 
