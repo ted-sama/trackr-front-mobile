@@ -27,13 +27,15 @@ interface ThemeContextType {
     review: string;
     list: string;
     actionButton: string;
+    secondaryButton: string;
+    secondaryButtonText: string;
     tabBarBorder: string;
     tabBarBackground: string;
     tabBarHighlight: string;
     tabBarText: string;
     tabBarTextActive: string;
     buttonText: string;
-    transparentBackground: string;
+    backButtonBackground: string;
     badgeBackground: string;
     badgeBorder: string;
     badgeText: string;
@@ -61,6 +63,8 @@ const lightColors = {
   review: '#51d2f9',
   list: '#11d261',
   actionButton: '#eaeaea',
+  secondaryButton: '#121212',
+  secondaryButtonText: '#FFFFFF',
   // TabBar
   tabBarBorder: '#eaeaea',
   tabBarBackground: '#F0F0F3',
@@ -69,8 +73,7 @@ const lightColors = {
   tabBarTextActive: '#222',
   buttonText: '#FFFFFF',
 
-  transparentBackground: 'rgba(114, 114, 114, 0.1)',
-
+  backButtonBackground: '#f1f1f1',
   // Badges
   badgeBackground: '#f6f6f6',
   badgeBorder: '#e6e6e6',
@@ -95,10 +98,12 @@ const darkColors = {
   secondary: '#03DAC6',
   accent: '#955ae9',
   error: '#B00020',
-  searchBar: '#434343',
+  searchBar: '#2b2b2b',
   review: '#51d2f9',
   list: '#11d261',
   actionButton: '#2b2b2b',
+  secondaryButton: '#FFFFFF',
+  secondaryButtonText: '#202020',
   // TabBar
   tabBarBorder: '#23232a',
   tabBarBackground: '#23232a',
@@ -107,7 +112,7 @@ const darkColors = {
   tabBarTextActive: '#fff',
   buttonText: '#FFFFFF',
 
-  transparentBackground: 'rgba(160, 160, 160, 0.1)',
+  backButtonBackground: '#222222',
 
   badgeBackground: '#1c1c1c',
   badgeBorder: '#242424',

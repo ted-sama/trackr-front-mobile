@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category, BookTracking, ReadingStatus } from '@/types';
+import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category, BookTracking, ReadingStatus, ListResponse, List, ReadingList } from '@/types';
 import { refreshToken } from './auth';
 
 export const api: AxiosInstance = axios.create({
@@ -13,7 +13,7 @@ export const api: AxiosInstance = axios.create({
 // Variable to prevent multiple refresh attempts simultaneously
 let isRefreshing = false;
 // Queue for requests that failed due to token expiry
-let failedQueue: Array<{ resolve: (value?: any) => void; reject: (reason?: any) => void; }> = [];
+let failedQueue: { resolve: (value?: any) => void; reject: (reason?: any) => void; }[] = [];
 
 const processQueue = (error: AxiosError | null, token: string | null = null) => {
   failedQueue.forEach(prom => {
@@ -112,6 +112,11 @@ export const getCategory = async (id: string): Promise<Category> => {
   return response.data;
 };
 
+export const getList = async (id: string): Promise<ReadingList> => {
+  const response = await api.get(`/lists/${id}`);
+  return response.data;
+};
+
 export const getBook = async (params: getBookParams): Promise<Book> => {
   const response = await api.get(`/books/${params.id}`);
   return response.data;
@@ -152,6 +157,16 @@ export const getChaptersFromSource = async (
 export const getMyLibraryBooks = async (params: getMyLibraryBooksParams): Promise<BookResponse> => {
   const token = await SecureStore.getItemAsync('user_auth_token');
   const response = await api.get(`/me/books?offset=${params.offset}&limit=${params.limit}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
+export const getMyLists = async (): Promise<ListResponse> => {
+  const token = await SecureStore.getItemAsync('user_auth_token');
+  const response = await api.get('/me/lists', {
     headers: {
       Authorization: `Bearer ${token}`,
     },

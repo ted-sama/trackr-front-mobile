@@ -50,6 +50,7 @@ import * as Haptics from "expo-haptics";
 import { TrackingTabBar } from "@/components/book/TrackingTabBar";
 import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
 import ExpandableDescription from "@/components/ExpandableDescription";
+import BadgeSlider from "@/components/BadgeSlider";
 
 // Constants for animation
 const HEADER_THRESHOLD = 320; // Threshold for header animation
@@ -390,23 +391,7 @@ export default function BookScreen() {
           {/* Badge */}
           {book?.genres && book?.tags && (
             <View style={styles.badgeContainer}>
-              <FlatList
-                data={[...(book?.genres || []), ...(book?.tags || [])]}
-                horizontal
-                style={{ marginHorizontal: -16 }}
-                contentContainerStyle={{ paddingHorizontal: 16 }}
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => (
-                  <Badge 
-                    key={item}
-                    text={item}
-                    color={colors.badgeText}
-                    backgroundColor={colors.badgeBackground}
-                    borderColor={colors.badgeBorder}
-                  />
-                )}
-                ItemSeparatorComponent={() => <View style={{ width: 4 }} />}
-              />
+              <BadgeSlider data={[...(book?.genres || []), ...(book?.tags || [])]} />
             </View>
           )}
           {/* Description */}

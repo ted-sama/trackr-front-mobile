@@ -23,7 +23,7 @@ const DEFAULT_COLLAPSED_HEIGHT = 60; // Default height for ~3 lines
 const EXPANDED_HEIGHT_PLACEHOLDER = 1000; // A large enough value for any description size
 const ANIMATION_DURATION = 300; // ms
 
-export function ExpandableDescription({
+export default function ExpandableDescription({
   text,
   initialCollapsedHeight = DEFAULT_COLLAPSED_HEIGHT,
   textStyle,
@@ -109,5 +109,3 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
 });
-
-export default ExpandableDescription; 

@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import { View, StyleSheet, Image, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CollectionListElement from "@/components/CollectionListElement";
 import { ReadingList } from "@/types";
@@ -7,27 +7,28 @@ import { useRouter } from "expo-router";
 import HeaderCollection from "@/components/collection/HeaderCollection";
 import { LegendList } from "@legendapp/list";
 import { useTrackedBooksStore } from "@/state/tracked-books-store";
+import { useTypography } from "@/hooks/useTypography";
+import { useTheme } from "@/contexts/ThemeContext";
+import { getMyLists } from "@/api";
 
 export default function Collection() {
   const router = useRouter();
+  const typography = useTypography();
+  const { colors } = useTheme();
   const [searchText, setSearchText] = useState("");
+  const [lists, setLists] = useState<ReadingList[]>([]);
   const { getTrackedBooks } = useTrackedBooksStore();
   const myLibrary = getTrackedBooks();
+  const mosaicBooks = myLibrary.slice(0, 8);
   
-  const lists: ReadingList[] = [
-    {
-      id: "1",
-      user_id: "1",
-      name: "Ma bibliothèque",
-      description: "Ma bibliothèque personnelle",
-      is_public: false,
-      is_my_library: true,
-      books: myLibrary,
-      created_at: new Date(),
-      updated_at: new Date(),
-    }
-  ]
-
+  useEffect(() => {
+    const fetchLists = async () => {
+      const lists = await getMyLists();
+      setLists(lists.items);
+    };
+    fetchLists();
+  }, []);
+  
   const handleSearchTextChange = useCallback((text: string) => {
     setSearchText(text);
   }, []);
@@ -46,7 +47,24 @@ export default function Collection() {
       <View>
         <LegendList
           data={lists}
-          renderItem={({ item }) => <CollectionListElement list={item} onPress={() => {router.push("/collection/my-library")}} />}
+          ListHeaderComponent={() => (
+            <Pressable onPress={() => {router.push("/collection/my-library")}}>
+              <View style={[styles.myLibraryHeaderMenu, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <View style={styles.stackContainer}>
+                {mosaicBooks.map((book, index) => (
+                  <Image
+                    key={book.id}
+                    source={book.cover_image ? { uri: book.cover_image } : { uri: "" }}
+                    style={[styles.coverImage, { left: index * 25, zIndex: index, borderColor: colors.border }]}
+                  />
+                ))}
+              </View>
+              <Text style={[typography.h3, { marginTop: 16, color: colors.text }]}>Ma bibliothèque</Text>
+              <Text style={[typography.caption, { color: colors.secondaryText }]}>{myLibrary.length} livres</Text>
+            </View>
+            </Pressable>
+          )}
+          renderItem={({ item }) => <CollectionListElement list={item} onPress={() => {router.push({pathname: "/list-full", params: {id: item.id}})}} />}
           keyExtractor={(item) => item.id.toString()}
           recycleItems
           contentContainerStyle={styles.listContainer}
@@ -57,6 +75,30 @@ export default function Collection() {
 }
 
 const styles = StyleSheet.create({
+  myLibraryHeaderMenu: {
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  stackContainer: {
+    width: 185,
+    height: 90,
+    position: 'relative',
+  },
+  coverImage: {
+    width: 60,
+    height: 90,
+    borderRadius: 4,
+    borderWidth: 0.75,
+    position: 'absolute',
+    shadowColor: '#000',
+    shadowOffset: { width: -3, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 3,
+  },
   listContainer: {
     paddingVertical: 16,
     paddingHorizontal: 16,

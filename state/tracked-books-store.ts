@@ -15,14 +15,14 @@ interface TrackedBooksState {
 export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   trackedBooks: {},
   addTrackedBook: (book) => set((state) => ({
-    trackedBooks: { ...state.trackedBooks, [book.id]: book },
+    trackedBooks: { ...state.trackedBooks, [book.id]: { ...book, updated_at: new Date() } },
   })),
   removeTrackedBook: (id) => set((state) => {
     const { [id]: _, ...rest } = state.trackedBooks;
     return { trackedBooks: rest };
   }),
   updateTrackedBook: (id, book) => set((state) => ({
-    trackedBooks: { ...state.trackedBooks, [id]: book },
+    trackedBooks: { ...state.trackedBooks, [id]: { ...book, updated_at: new Date() } },
   })),
   isBookTracked: (id) => Boolean(get().trackedBooks[id]),
   getTrackedBooks: () => Object.values(get().trackedBooks),

@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, Platform, StyleSheet } from 'react-native';
-import { LegendList, LegendListRef } from '@legendapp/list';
+import { View, Text, FlatList, Platform, StyleSheet } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import Animated, { useSharedValue, useAnimatedScrollHandler, withTiming, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
@@ -24,7 +23,7 @@ const LAYOUT_STORAGE_KEY = '@MyApp:layoutPreference';
 // Default layout preference
 const DEFAULT_LAYOUT = 'list';
 
-const AnimatedList = Animated.createAnimatedComponent(LegendList<Book>);
+const AnimatedList = Animated.createAnimatedComponent(FlatList<Book>);
 
 export default function MyLibrary() {
   const router = useRouter();
@@ -36,7 +35,7 @@ export default function MyLibrary() {
     scrollY.value = event.contentOffset.y;
   });
   const [titleY, setTitleY] = useState<number>(0);
-  const scrollRef = useRef<LegendListRef | null>(null);
+  const scrollRef = useRef<FlatList<Book> | null>(null);
   const [currentLayout, setCurrentLayout] = useState<"grid" | "list">(DEFAULT_LAYOUT as "grid" | "list");
   // scrollRef.current?.scrollToOffset({ offset: 0, animated: true });
   const handleBack = () => {
@@ -96,7 +95,6 @@ export default function MyLibrary() {
         contentContainerStyle={{ marginTop: insets.top, paddingHorizontal: 16, paddingBottom: 64, flexGrow: 1 }}
         numColumns={currentLayout === 'grid' ? 3 : 1}
         onScroll={scrollHandler}
-        recycleItems
         ListHeaderComponent={
           <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
             <Text

@@ -183,7 +183,6 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
               source={{ uri: book.cover_image }}
               style={[
                 styles.mangaCover,
-                { borderWidth: 0.75, borderColor: colors.border },
                 size === 'compact' && {
                   width: '100%',
                   height: '100%',
@@ -257,7 +256,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
             )}
             {showRating && (
               <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={12} color={colors.text} />
+                <Ionicons name="star" size={12} color={colors.secondaryText} />
                 <Text
                   style={[
                     styles.ratingText,
@@ -320,7 +319,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     borderRadius: 6,
-    borderWidth: 1,
     resizeMode: "cover",
   },
   loadingContainer: {

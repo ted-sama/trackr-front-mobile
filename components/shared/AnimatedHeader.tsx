@@ -79,7 +79,7 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
             style={[
               StyleSheet.absoluteFillObject,
               styles.backButtonBg,
-              { backgroundColor: colors.transparentBackground },
+              { backgroundColor: colors.backButtonBackground },
               backButtonBgStyle,
             ]}
           />

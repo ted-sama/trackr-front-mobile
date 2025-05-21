@@ -75,7 +75,7 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
             )}
             {book.rating && showRating && (
               <View style={styles.ratingContainer}>
-              <Ionicons name="star" size={12} color={colors.text} />
+              <Ionicons name="star" size={12} color={colors.secondaryText} />
               <Text
                 style={[
                   styles.ratingText,
@@ -136,8 +136,8 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   image: {
-    width: 45,
-    height: 68,
+    width: 60,
+    height: 90,
     borderRadius: 4,
   },
   infoContainer: {
