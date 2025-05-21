@@ -18,9 +18,9 @@ import {
 } from '@expo-google-fonts/manrope';
 import * as SplashScreen from 'expo-splash-screen';
 import { DropdownProvider } from '@/contexts/DropdownContext';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { useTrackedBooksStore } from '@/state/tracked-books-store';
-import { fetchAndStoreMyLibraryBooks } from '@/helpers/collection/fetchAndStoreMyLibraryBooks';
+// import { AuthProvider, useAuth } from '@/contexts/AuthContext'; // Removed
+import { useAuthStore } from '@/state/authStore'; // Added
+import { useTrackedBooksStore } from '@/state/tracked-books-store'; // Ensure this is active
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -40,24 +40,21 @@ const toastConfig: ToastConfig = {
 
 // Composant racine qui fournit les contextes globaux
 export default function RootLayout() {
+  // AuthProvider removed
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <DropdownProvider>
-          <RootLayoutContent />
-        </DropdownProvider>
-      </ThemeProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <DropdownProvider>
+        <RootLayoutContent />
+      </DropdownProvider>
+    </ThemeProvider>
   );
 }
 
 // Nouveau composant pour accéder au contexte du thème
 function RootLayoutContent() {
   const { colors } = useTheme();
-  const { isAuthenticated } = useAuth();
-  const [isLibraryLoading, setIsLibraryLoading] = useState(false);
-  const [libraryError, setLibraryError] = useState<string | null>(null);
-  const hasFetchedLibrary = useRef(false);
+  // const { isAuthenticated } = useAuth(); // Removed
+  const { isAuthenticated, isLoading: authIsLoading, user } = useAuthStore(); // Added
 
   const [fontsLoaded] = useFonts({
     Manrope_200ExtraLight,
@@ -70,29 +67,27 @@ function RootLayoutContent() {
   });
 
   useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
+    // Call checkAuthStatus on initial load
+    useAuthStore.getState().checkAuthStatus();
+  }, []);
 
   useEffect(() => {
-    if (isAuthenticated && !hasFetchedLibrary.current) {
-      hasFetchedLibrary.current = true;
-      setIsLibraryLoading(true);
-      setLibraryError(null);
-      fetchAndStoreMyLibraryBooks()
-        .then((result) => {
-          if (!result.success) setLibraryError(result.error);
-        })
-        .catch((e) => setLibraryError(e.message || 'Erreur de chargement de la bibliothèque'))
-        .finally(() => setIsLibraryLoading(false));
+    if (fontsLoaded && !authIsLoading) { // Updated condition
+      SplashScreen.hideAsync();
     }
-    if (!isAuthenticated) {
-      hasFetchedLibrary.current = false;
+  }, [fontsLoaded, authIsLoading]); // Updated dependencies
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      useTrackedBooksStore.getState().fetchMyLibrary();
+    } else {
+      // Ensure library is cleared if user is not authenticated
+      // This is also handled in authStore.logout, but good for safety.
+      useTrackedBooksStore.getState().clearTrackedBooks();
     }
   }, [isAuthenticated]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || authIsLoading) { // Updated condition to keep splash visible while auth is loading
     return null;
   }
 

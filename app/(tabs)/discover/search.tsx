@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react'; // Removed useState, useCallback
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,75 +7,70 @@ import HeaderDiscover from '@/components/discover/HeaderDiscover';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Book } from '@/types';
 import BookListElement from '@/components/BookListElement';
-import { search } from '@/api';
+// import { search } from '@/api'; // Removed
 import { LegendList } from '@legendapp/list';
+import { useSearchStore } from '@/state/searchStore'; // Added
 
 export default function SearchScreen() {
   const { colors, currentTheme } = useTheme();
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [searchResults, setSearchResults] = useState<Book[]>([]);
-  const [searchText, setSearchText] = useState<string>('');
-  const [offset, setOffset] = useState<number>(0);
-  const [isFetchingMore, setIsFetchingMore] = useState<boolean>(false);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const limit = 15;
+  // Integrate useSearchStore
+  const {
+    results,
+    query,
+    isLoading,
+    isFetchingMore,
+    error,
+    hasMore,
+    setQuery,
+    fetchMore,
+    // clearSearch // Not used for now, but available
+  } = useSearchStore();
 
-  const handleSearch = (text: string) => {
-    setError(null);
-    setSearchText(text);
-    setOffset(0);
-    setHasMore(true);
-    setSearchResults([]);
-    fetchBooks(text, 0, false);
-  }
-
-  // Function to fetch paginated search results
-  const fetchBooks = useCallback(async (text: string, newOffset = 0, append = false) => {
-    if (!text) return;
-    if (append) setIsFetchingMore(true); else setIsLoading(true);
-    try {
-      const results = await search({ query: text, offset: newOffset, limit });
-      setOffset(newOffset + results.length);
-      setSearchResults(prev => append ? [...prev, ...results] : results);
-      setHasMore(results.length === limit);
-    } catch (e: any) {
-      setError(e.message || 'Erreur de recherche');
-    } finally {
-      if (append) setIsFetchingMore(false); else setIsLoading(false);
-    }
-  }, [limit]);
+  // handleSearch is replaced by setQuery directly
+  // fetchBooks function is removed
 
   // Handler for infinite scroll
   const handleEndReached = () => {
-    if (isFetchingMore || isLoading || !hasMore) return;
-    fetchBooks(searchText, offset, true);
+    // fetchMore from the store already checks hasMore and loading states
+    fetchMore();
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["right", "left"]}>
-      <HeaderDiscover searchMode="search" onSearchTextChange={handleSearch} searchText={searchText} />
+      {/* Pass setQuery for onSearchTextChange and query for searchText */}
+      <HeaderDiscover searchMode="search" onSearchTextChange={setQuery} searchText={query} />
 
-      {isLoading ? (
+      {/* Display error message if any */}
+      {error && !isLoading && (
+        <View style={styles.errorContainer}>
+          <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>
+        </View>
+      )}
+
+      {/* Use isLoading for the initial loading indicator */}
+      {isLoading && !isFetchingMore && results.length === 0 ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <LegendList
-          data={searchResults}
+          data={results} // Use results from store
           renderItem={({ item }) => <BookListElement book={item} showAuthor showRating showTrackingButton onPress={() => router.push(`/book/${item.id}`)} />}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Aucun résultat trouvé</Text>
-            </View>
+            !isLoading && !error && query !== '' ? ( // Show "No results" only if not loading, no error, and query is not empty
+              <View style={styles.emptyContainer}>
+                <Text style={[styles.emptyText, { color: colors.secondaryText }]}>Aucun résultat trouvé pour "{query}"</Text>
+              </View>
+            ) : null 
           }
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-          onEndReached={handleEndReached}
-          onEndReachedThreshold={0.2}
+          onEndReached={handleEndReached} // Use updated handleEndReached
+          onEndReachedThreshold={0.2} // Standard threshold
           recycleItems
+          // Use isFetchingMore for the footer loading indicator
           ListFooterComponent={isFetchingMore ? (
             <View style={styles.footerContainer}>
               <ActivityIndicator size="small" color={colors.primary} />
@@ -90,6 +85,14 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  errorContainer: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 16,
+    textAlign: 'center',
   },
   text: {
     fontSize: 24,
@@ -114,5 +117,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
+    textAlign: 'center',
   },
 });

@@ -1,7 +1,8 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category, BookTracking, ReadingStatus, ListResponse, List, ReadingList } from '@/types';
-import { refreshToken } from './auth';
+import { refreshToken } from './auth'; // Internal use for interceptor
+export { getMe } from './auth'; // Export getMe
 
 export const api: AxiosInstance = axios.create({
   baseURL: 'https://e64d-81-198-118-168.ngrok-free.app/api/v1',
@@ -163,6 +164,11 @@ export const getMyLibraryBooks = async (params: getMyLibraryBooksParams): Promis
   });
   return response.data;
 };
+
+// It seems like the other auth functions (login, register) are not currently exported from api/index.ts.
+// If they should be, they can be added to the export statement:
+// export { getMe, login, register } from './auth';
+// For now, only adding getMe as per the subtask.
 
 export const getMyLists = async (): Promise<ListResponse> => {
   const token = await SecureStore.getItemAsync('user_auth_token');

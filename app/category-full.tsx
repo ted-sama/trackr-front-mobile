@@ -15,13 +15,14 @@ import { StatusBar } from "expo-status-bar";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import BookListElement from "@/components/BookListElement";
 import BookCard from "@/components/BookCard";
-import { Book, Category, BookTracking } from "@/types";
+import { Book, Category } from "@/types"; // Removed BookTracking
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTrackedBooksStore } from "@/state/tracked-books-store";
+import { useCategoriesStore } from "@/state/categoriesStore"; // Added
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BlurView } from "expo-blur";
-import { getCategory, addBookToTracking, removeBookFromTracking } from "@/api";
+// Removed: getCategory, addBookToTracking, removeBookFromTracking from "@/api"
 import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";
 
@@ -34,7 +35,7 @@ const DEFAULT_LAYOUT = "list";
 const AnimatedList = Animated.createAnimatedComponent(LegendList<Book>);
 
 export default function CategoryFull() {
-  const { id } = useLocalSearchParams();
+  const { id: categoryId } = useLocalSearchParams<{ id: string }>(); // Renamed for clarity
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -49,14 +50,18 @@ export default function CategoryFull() {
     DEFAULT_LAYOUT as "grid" | "list"
   );
 
-  const {
-    addTrackedBook: addTrackedBookToStore,
-    removeTrackedBook: removeTrackedBookFromStore,
-  } = useTrackedBooksStore();
+  // Categories Store Integration
+  const category = useCategoriesStore(state => categoryId ? state.detailedCategories[categoryId] : null);
+  const isLoading = useCategoriesStore(state => categoryId ? (state.isLoadingDetail[categoryId] ?? true) : true);
+  const error = useCategoriesStore(state => categoryId ? state.errorDetail[categoryId] : null);
+  const fetchCategoryById = useCategoriesStore(state => state.fetchCategoryById);
 
-  const [category, setCategory] = useState<Category | null>(null);
-  const [isBlurVisible, setIsBlurVisible] = useState(false);
-  const blurOpacity = useSharedValue(0);
+  // Tracked Books Store Integration for actions
+  const { trackBook, untrackBook } = useTrackedBooksStore();
+
+  // const [category, setCategory] = useState<Category | null>(null); // Removed
+  const [isBlurVisible, setIsBlurVisible] = useState(false); // UI state, keep
+  const blurOpacity = useSharedValue(0); // UI state, keep
 
   // Animated opacity for blur
   const animatedBlurStyle = useAnimatedStyle(() => ({
@@ -64,12 +69,10 @@ export default function CategoryFull() {
   }));
 
   useEffect(() => {
-    const fetchCategory = async () => {
-      const fetchedCategory = await getCategory(id as string);
-      setCategory(fetchedCategory);
-    };
-    fetchCategory();
-  });
+    if (categoryId) {
+      fetchCategoryById(categoryId);
+    }
+  }, [categoryId, fetchCategoryById]);
 
   // Load layout preference
   useEffect(() => {
@@ -97,7 +100,7 @@ export default function CategoryFull() {
     bookObject?: Book
   ) => {
     if (!bookObject) {
-      console.warn("Book object is missing in onTrackingToggleInDiscover");
+      console.warn("Book object is missing in onTrackingToggleInCategory"); // Corrected log message
       Toast.show({
         type: "error",
         text1: "Erreur de suivi",
@@ -106,42 +109,28 @@ export default function CategoryFull() {
       return;
     }
 
-    if (isCurrentlyTracking) {
-      try {
-        await removeBookFromTracking(bookId);
-        removeTrackedBookFromStore(parseInt(bookId, 10));
+    try {
+      if (isCurrentlyTracking) {
+        await untrackBook(bookId);
         Toast.show({
           text1: "Livre retiré de votre bibliothèque",
           type: "info",
         });
-      } catch (err) {
-        console.warn(`Failed to remove book ${bookId} from tracking:`, err);
-        Toast.show({
-          type: "error",
-          text1: "Erreur",
-          text2: "Impossible de retirer le livre.",
-        });
-      }
-    } else {
-      try {
-        const trackingStatus: any = await addBookToTracking(bookId);
-        addTrackedBookToStore({
-          ...bookObject,
-          tracking: true,
-          tracking_status: trackingStatus.book_tracking,
-        });
+      } else {
+        await trackBook(bookId);
         Toast.show({
           text1: "Livre ajouté à votre bibliothèque",
           type: "info",
         });
-      } catch (err) {
-        console.warn(`Failed to add book ${bookId} to tracking:`, err);
-        Toast.show({
-          type: "error",
-          text1: "Erreur",
-          text2: `Impossible d'ajouter le livre.`,
-        });
       }
+    } catch (err) {
+      console.warn(`Failed to update tracking for book ${bookId}:`, err); // Generic error log
+      const action = isCurrentlyTracking ? "retirer" : "d'ajouter";
+      Toast.show({
+        type: "error",
+        text1: "Erreur",
+        text2: `Impossible de ${action} le livre.`,
+      });
     }
   };
 
@@ -165,10 +154,23 @@ export default function CategoryFull() {
         collapseThreshold={titleY > 0 ? titleY : undefined}
         onBack={handleBack}
       />
-      {category && (
+      
+      {/* Loading and Error States */}
+      {isLoading && !category && (
+        <View style={styles.centeredLoader}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      )}
+      {error && (
+         <View style={styles.centeredLoader}>
+          <Text style={{ color: colors.danger }}>{error}</Text>
+        </View>
+      )}
+
+      {!isLoading && !error && category && ( // Render list only if not loading, no error, and category exists
         <AnimatedList
           ref={scrollRef}
-          data={category.books}
+          data={category.books || []} // Ensure category.books is not undefined
           key={currentLayout}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{
@@ -240,7 +242,7 @@ export default function CategoryFull() {
               : () => <View style={{ height: 12 }} />
           }
           ListEmptyComponent={
-            category.books.length === 0 ? (
+            !category.books || category.books.length === 0 ? ( // Check if books array is undefined or empty
               <Text
                 style={{
                   color: colors.secondaryText,
@@ -284,4 +286,9 @@ const styles = StyleSheet.create({
     marginTop: Platform.OS === "android" ? 70 : 70,
     marginBottom: 16,
   },
+  centeredLoader: { // Added style for centering loader/error
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });

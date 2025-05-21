@@ -9,26 +9,35 @@ import { LegendList } from "@legendapp/list";
 import { useTrackedBooksStore } from "@/state/tracked-books-store";
 import { useTypography } from "@/hooks/useTypography";
 import { useTheme } from "@/contexts/ThemeContext";
-import { getMyLists } from "@/api";
+// import { getMyLists } from "@/api"; // Removed
+import { useListsStore } from "@/state/listsStore"; // Added
 
 export default function Collection() {
   const router = useRouter();
   const typography = useTypography();
   const { colors } = useTheme();
   const [searchText, setSearchText] = useState("");
-  const [lists, setLists] = useState<ReadingList[]>([]);
+  // const [lists, setLists] = useState<ReadingList[]>([]); // Removed
+  const { lists, isLoading: listsLoading, error: listsError, fetchMyLists } = useListsStore(); // Added
   const { getTrackedBooks } = useTrackedBooksStore();
   const myLibrary = getTrackedBooks();
   const mosaicBooks = myLibrary.slice(0, 8);
   
   useEffect(() => {
-    const fetchLists = async () => {
-      const lists = await getMyLists();
-      setLists(lists.items);
-    };
-    fetchLists();
+    // fetchLists(); // Old call removed
+    useListsStore.getState().fetchMyLists(); // Added - fetch on mount
   }, []);
   
+  // Basic loading/error handling (optional for this task, but good practice)
+  useEffect(() => {
+    if (listsLoading) {
+      console.log("Lists are loading...");
+    }
+    if (listsError) {
+      console.error("Error fetching lists:", listsError);
+    }
+  }, [listsLoading, listsError]);
+
   const handleSearchTextChange = useCallback((text: string) => {
     setSearchText(text);
   }, []);

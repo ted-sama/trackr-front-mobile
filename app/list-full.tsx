@@ -15,14 +15,15 @@ import { StatusBar } from "expo-status-bar";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import BookListElement from "@/components/BookListElement";
 import BookCard from "@/components/BookCard";
-import { Book, ReadingList, BookTracking } from "@/types";
+import { Book, ReadingList } from "@/types"; // Removed BookTracking
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTrackedBooksStore } from "@/state/tracked-books-store";
+import { useListsStore } from "@/state/listsStore"; // Added
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import { getMyLists, addBookToTracking, removeBookFromTracking, getList } from "@/api";
+// Removed: getMyLists, addBookToTracking, removeBookFromTracking, getList from "@/api"
 import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import BadgeSlider from "@/components/BadgeSlider";
@@ -35,7 +36,7 @@ const DEFAULT_LAYOUT = "list";
 const AnimatedList = Animated.createAnimatedComponent(LegendList<Book>);
 
 export default function ListFull() {
-  const { id } = useLocalSearchParams();
+  const { id: listId } = useLocalSearchParams<{ id: string }>(); // Renamed for clarity
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -49,14 +50,18 @@ export default function ListFull() {
   const [currentLayout, setCurrentLayout] =
     useState<"grid" | "list">(DEFAULT_LAYOUT as "grid" | "list");
 
-  const {
-    addTrackedBook: addTrackedBookToStore,
-    removeTrackedBook: removeTrackedBookFromStore,
-  } = useTrackedBooksStore();
+  // Lists Store Integration
+  const list = useListsStore(state => listId ? state.detailedLists[listId] : null);
+  const isLoading = useListsStore(state => listId ? (state.isLoadingDetail[listId] ?? true) : true);
+  const error = useListsStore(state => listId ? state.errorDetail[listId] : null);
+  const fetchListById = useListsStore(state => state.fetchListById);
 
-  const [list, setList] = useState<ReadingList | null>(null);
-  const [isBlurVisible, setIsBlurVisible] = useState(false);
-  const blurOpacity = useSharedValue(0);
+  // Tracked Books Store Integration for actions
+  const { trackBook, untrackBook } = useTrackedBooksStore();
+  
+  // const [list, setList] = useState<ReadingList | null>(null); // Removed
+  const [isBlurVisible, setIsBlurVisible] = useState(false); // UI state, keep
+  const blurOpacity = useSharedValue(0); // UI state, keep
 
   // Animated opacity for blur
   const animatedBlurStyle = useAnimatedStyle(() => ({
@@ -64,16 +69,10 @@ export default function ListFull() {
   }));
 
   useEffect(() => {
-    const fetchList = async () => {
-      try {
-        const response = await getList(id as string);
-        setList(response);
-      } catch (err) {
-        console.warn("Failed to fetch list:", err);
-      }
-    };
-    fetchList();
-  }, [id]);
+    if (listId) {
+      fetchListById(listId);
+    }
+  }, [listId, fetchListById]);
 
   // Load layout preference
   useEffect(() => {
@@ -104,24 +103,17 @@ export default function ListFull() {
       Toast.show({ type: "error", text1: "Erreur de suivi", text2: "Données du livre manquantes." });
       return;
     }
-    if (isCurrentlyTracking) {
-      try {
-        await removeBookFromTracking(bookId);
-        removeTrackedBookFromStore(parseInt(bookId, 10));
+    try {
+      if (isCurrentlyTracking) {
+        await untrackBook(bookId);
         Toast.show({ type: "info", text1: "Livre retiré de votre bibliothèque" });
-      } catch (err) {
-        console.warn(`Failed to remove book ${bookId}:`, err);
-        Toast.show({ type: "error", text1: "Erreur", text2: "Impossible de retirer le livre." });
-      }
-    } else {
-      try {
-        const trackingStatus: BookTracking = await addBookToTracking(bookId);
-        addTrackedBookToStore({ ...bookObject, tracking: true, tracking_status: trackingStatus });
+      } else {
+        await trackBook(bookId); // Assumes trackBook(bookId) is the correct usage
         Toast.show({ type: "info", text1: "Livre ajouté à votre bibliothèque" });
-      } catch (err) {
-        console.warn(`Failed to add book ${bookId}:`, err);
-        Toast.show({ type: "error", text1: "Erreur", text2: `Impossible d'ajouter le livre.` });
       }
+    } catch (err) {
+      const action = isCurrentlyTracking ? "retirer" : "d'ajouter";
+      Toast.show({ type: "error", text1: "Erreur", text2: `Impossible de ${action} le livre.`});
     }
   };
 
@@ -145,10 +137,23 @@ export default function ListFull() {
         collapseThreshold={titleY > 0 ? titleY : undefined}
         onBack={handleBack}
       />
-      {list && (
+
+      {/* Loading and Error States */}
+      {isLoading && !list && (
+        <View style={styles.centeredLoader}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      )}
+      {error && (
+         <View style={styles.centeredLoader}>
+          <Text style={{ color: colors.danger }}>{error}</Text>
+        </View>
+      )}
+
+      {!isLoading && !error && list && ( // Render list only if not loading, no error, and list exists
         <AnimatedList
           ref={scrollRef}
-          data={list.books || []}
+          data={list.books || []} // Ensure list.books is not undefined
           key={currentLayout}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 64, flexGrow: 1 }}
@@ -225,7 +230,7 @@ export default function ListFull() {
               : () => <View style={{ height: 12 }} />
           }
           ListEmptyComponent={
-            list.books?.length === 0 ? (
+            !list.books || list.books.length === 0 ? ( // Check if books array is undefined or empty
               <Text style={{ color: colors.secondaryText, textAlign: "center", marginTop: 32 }}>
                 Aucun livre trouvé dans cette liste.
               </Text>
@@ -259,4 +264,9 @@ const styles = StyleSheet.create({
   badgeContainer: {
     marginBottom: 32,
   },
+  centeredLoader: { // Added style for centering loader/error
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });

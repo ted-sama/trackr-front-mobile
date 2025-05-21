@@ -1,7 +1,8 @@
-import { addBookToTracking, getBook, getBooks, getCategory, removeBookFromTracking , checkIfBookIsTracked } from "@/api";
+// Removed: getBook, addBookToTracking, removeBookFromTracking, checkIfBookIsTracked from "@/api"
+import { getCategory } from "@/api"; 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { Book, Category, BookTracking } from "@/types";
+import { Book, Category, BookTracking } from "@/types"; 
 import {
   Text,
   StyleSheet,
@@ -42,6 +43,7 @@ import Badge from "@/components/ui/Badge";
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import { useBookDetailStore } from '@/state/bookDetailStore'; // Added
 import { Ellipsis, Minus, Plus } from "lucide-react-native";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -59,14 +61,22 @@ const HEADER_THRESHOLD = 320; // Threshold for header animation
 const AnimatedScrollView = Animated.createAnimatedComponent(DefaultScrollView);
 
 export default function BookScreen() {
-  const { id } = useLocalSearchParams();
+  const { id: bookIdString } = useLocalSearchParams<{ id: string }>(); // Renamed for clarity
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const [bottomSheetView, setBottomSheetView] = useState<"actions" | "status_editor">("actions");
   const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
-  const [book, setBook] = useState<Book | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [book, setBook] = useState<Book | null>(null); // Removed
+  // const [isLoading, setIsLoading] = useState(true); // Removed
+  // const [error, setError] = useState<string | null>(null); // Removed
+
+  // Book Detail Store Integration
+  const book = useBookDetailStore(state => state.books[bookIdString!]);
+  const isLoadingBook = useBookDetailStore(state => state.isLoading[bookIdString!] ?? true);
+  const errorBook = useBookDetailStore(state => state.error[bookIdString!]);
+  const fetchBookDetails = useBookDetailStore(state => state.fetchBook);
+  const injectTrackedStatusIntoDetail = useBookDetailStore(state => state.injectTrackedStatus);
+
   const typography = useTypography();
   const insets = useSafeAreaInsets();
   const [dummyRecommendations, setDummyRecommendations] = useState<Category | null>(null);
@@ -202,42 +212,42 @@ export default function BookScreen() {
   const IMAGE_WIDTH = 202.5;
   const IMAGE_HEIGHT = 303.75;
 
-  const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore, isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
+  // Tracked Books Store Integration
+  const { isBookTracked, getTrackedBookStatus, trackBook, untrackBook } = useTrackedBooksStore();
+  const currentTrackingStatus = book ? getTrackedBookStatus(book.id) : null;
 
-  // State to control button rendering for animation
+  // State to control button rendering for animation (This seems specific to UI, can leave as is)
   const [isButtonRendered, setIsButtonRendered] = useState(false);
 
-  // Ajout : trackingStatus réactif au store
-  const trackingStatus = book ? getTrackedBookStatus(book.id) : null;
+  // Ajout : trackingStatus réactif au store (now currentTrackingStatus)
+  const trackingStatus = currentTrackingStatus; // For usage in TrackingTabBar
 
   useEffect(() => {
-    const fetchBook = async () => {
-      try {
-        let book = await getBook({ id: id as string });
-        book.tracking_status = getTrackedBookStatus(book.id);
-        setBook(book);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Une erreur est survenue"
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (bookIdString) {
+      fetchBookDetails(bookIdString);
+    }
+  }, [bookIdString, fetchBookDetails]);
 
+  useEffect(() => {
+    if (bookIdString && book) { // Ensure book is loaded before trying to inject
+      injectTrackedStatusIntoDetail(bookIdString, currentTrackingStatus);
+    }
+  }, [bookIdString, book, currentTrackingStatus, injectTrackedStatusIntoDetail]);
+  
+  useEffect(() => {
+    // This part is for dummy recommendations, leave as is per instructions
     const fetchRecommendations = async () => {
-      const recommendations = await getCategory('1');
+      const recommendations = await getCategory('1'); // getCategory is still directly imported
       setDummyRecommendations(recommendations);
     };
-
-    fetchBook();
     fetchRecommendations();
-  }, [id]);
+  }, []);
 
-  if (error) {
+
+  if (errorBook) { // Use errorBook from store
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: colors.text }}>Une erreur est survenue</Text>
+        <Text style={{ color: colors.text }}>{errorBook || "Une erreur est survenue"}</Text>
       </View>
     );
   }
@@ -270,12 +280,12 @@ export default function BookScreen() {
 
   const onTrackingToggle = async () => {
     if (!book) return;
-    const currentBookIdStr = book.id.toString();
+    const currentBookIdStr = book.id.toString(); // book.id is number, API expects string
 
     if (isBookTracked(book.id)) {
       try {
-        await removeBookFromTracking(currentBookIdStr);
-        removeTrackedBookFromStore(book.id);
+        await untrackBook(currentBookIdStr); // Use store action
+        // removeTrackedBookFromStore(book.id); // Redundant, handled by untrackBook action
         Toast.show({
           text1: 'Livre retiré de votre bibliothèque',
           type: 'info',
@@ -286,8 +296,9 @@ export default function BookScreen() {
       }
     } else {
       try {
-        const trackingStatus: any = await addBookToTracking(currentBookIdStr);
-        addTrackedBookToStore({ ...book, tracking: true, tracking_status: trackingStatus.book_tracking });
+        await trackBook(currentBookIdStr); // Use store action
+        // const trackingStatus: any = await addBookToTracking(currentBookIdStr); // Old API call
+        // addTrackedBookToStore({ ...book, tracking: true, tracking_status: trackingStatus.book_tracking }); // Redundant
         Toast.show({
           text1: 'Livre ajouté à votre bibliothèque',
           type: 'info',
@@ -320,7 +331,7 @@ export default function BookScreen() {
         <View style={styles.shadowContainer}>
           <View style={styles.imageContainer}>
              {
-              isLoading ? (
+              isLoadingBook ? ( // Use isLoadingBook from store
                 <SkeletonLoader width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
               ) : (
                 <Image source={{ uri: book?.cover_image }} style={styles.imageContent} />
@@ -339,7 +350,7 @@ export default function BookScreen() {
             }}
           >
             <View style={{ flex: 3 }}>
-              {isLoading ? (
+              {isLoadingBook ? ( // Use isLoadingBook from store
                 <SkeletonLoader width={'90%'} height={40} />
               ) : (
                 <Text

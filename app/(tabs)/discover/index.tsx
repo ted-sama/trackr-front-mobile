@@ -1,78 +1,65 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect } from "react"; // Removed useState, useCallback
 import { StyleSheet, ScrollView, ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
+// import { StatusBar } from "expo-status-bar"; // StatusBar not used
 import CategorySlider from "@/components/CategorySlider";
 import HeaderDiscover from "@/components/discover/HeaderDiscover";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
-import { Book, Category, BookTracking } from "@/types/index";
-import { addBookToTracking, getCategories, removeBookFromTracking } from "@/api";
+import { Book, Category } from "@/types/index"; // Removed BookTracking as it's not directly used here
+// Removed: addBookToTracking, getCategories, removeBookFromTracking from "@/api"
 import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from "@/state/tracked-books-store";
+import { useCategoriesStore } from "@/state/categoriesStore"; // Added
 
 // Composant principal pour la page Discover
 export default function Discover() {
-  const { colors, currentTheme } = useTheme();
+  const { colors } = useTheme(); // currentTheme not used
   const { isBottomSheetVisible } = useBottomSheet();
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
+  // Categories Store Integration
+  const { categories, isLoadingList, errorList, fetchAllCategories } = useCategoriesStore();
+  
+  // Tracked Books Store Integration for actions
+  const { trackBook, untrackBook } = useTrackedBooksStore();
 
   const onTrackingToggleInDiscover = async (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => {
-    if (!bookObject) {
+    // bookObject is passed but trackBook action in store currently only uses bookId.
+    // If bookObject is crucial for efficiency, trackBook action would need an update.
+    // For now, we proceed with the current store action signature.
+    if (!bookObject) { // Still good to have this check for clarity, even if bookObject isn't directly used by trackBook(bookId)
       console.warn("Book object is missing in onTrackingToggleInDiscover");
       Toast.show({ type: 'error', text1: 'Erreur de suivi', text2: 'Données du livre manquantes.' });
       return;
     }
 
-    if (isCurrentlyTracking) {
-      try {
-        await removeBookFromTracking(bookId);
-        removeTrackedBookFromStore(parseInt(bookId, 10));
+    try {
+      if (isCurrentlyTracking) {
+        await untrackBook(bookId); // Assumes bookId is the string ID the store expects
         Toast.show({
           text1: 'Livre retiré de votre bibliothèque',
           type: 'info',
         });
-      } catch (err) {
-        console.warn(`Failed to remove book ${bookId} from tracking:`, err);
-        Toast.show({ type: 'error', text1: 'Erreur', text2: 'Impossible de retirer le livre.'});
-      }
-    } else {
-      try {
-        const trackingStatus: any = await addBookToTracking(bookId);
-        addTrackedBookToStore({ ...bookObject, tracking: true, tracking_status: trackingStatus.book_tracking });
+      } else {
+        await trackBook(bookId); // Assumes bookId is the string ID the store expects
         Toast.show({
           text1: 'Livre ajouté à votre bibliothèque',
           type: 'info',
         });
-      } catch (err) {
-        console.warn(`Failed to add book ${bookId} to tracking:`, err);
-        Toast.show({ type: 'error', text1: 'Erreur', text2: `Impossible d'ajouter le livre.` });
       }
+    } catch (err) {
+      console.warn(`Failed to update tracking for book ${bookId}:`, err);
+      const action = isCurrentlyTracking ? "retirer" : "d'ajouter";
+      Toast.show({ type: 'error', text1: 'Erreur', text2: `Impossible de ${action} le livre.`});
     }
   };
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const categoriesData = await getCategories();
-      setCategories(categoriesData.items);
-    } catch (e: any) {
-      console.error("Failed to fetch books:", e);
-      setError("Impossible de charger les livres. Vérifiez votre connexion ou l'API.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // fetchData removed
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    // fetchAllCategories(); // Original plan
+    useCategoriesStore.getState().fetchAllCategories(); // Ensures it's called once on mount
+  }, []); // Empty dependency array is correct here when using getState()
 
   return (
     <SafeAreaView
@@ -81,13 +68,13 @@ export default function Discover() {
     >
       <HeaderDiscover searchMode="navigate" />
 
-      {isLoading ? (
+      {isLoadingList ? ( // Use isLoadingList from store
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
-      ) : error ? (
+      ) : errorList ? ( // Use errorList from store
         <View style={styles.centered}>
-          <Text style={{ color: colors.text }}>{error}</Text>
+          <Text style={{ color: colors.text }}>{errorList}</Text>
         </View>
       ) : (
         <ScrollView
@@ -96,7 +83,7 @@ export default function Discover() {
           showsVerticalScrollIndicator={false}
           scrollEnabled={!isBottomSheetVisible}
         >
-          {categories.map((category) => (
+          {categories.map((category) => ( // Use categories from store
             <CategorySlider
               key={category.id}
               category={category}

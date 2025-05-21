@@ -1,6 +1,7 @@
 import { api } from './index';
 import * as SecureStore from 'expo-secure-store';
 import { RegisterResponse, LoginResponse, RefreshTokenResponse } from '@/types/auth';
+import { User } from '../../types/user'; // Added User import
 
 const REFRESH_TOKEN_KEY = 'user_refresh_token';
 const TOKEN_KEY = 'user_auth_token';
@@ -47,5 +48,25 @@ export const refreshToken = async (): Promise<RefreshTokenResponse> => {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
     throw error; // Re-throw error to be caught by the interceptor
+  }
+};
+
+// Fetches the current user's profile information
+export const getMe = async (): Promise<User | null> => {
+  // No token is explicitly passed as an argument here
+  // because the token should be automatically included in the
+  // api instance's headers by an interceptor (as configured in api/index.ts typically)
+  try {
+    const response = await api.get<User>('/auth/me'); // Corrected endpoint and added type
+    return response.data;
+  } catch (error) {
+    // If the /auth/me endpoint returns 401 or other errors,
+    // it indicates an issue with the token or user session.
+    // console.error('Failed to fetch user data:', error);
+    // It's often better to let the caller handle the error,
+    // especially if it's an auth error that should trigger logout.
+    // For now, returning null as per previous placeholder logic.
+    // In a real app, this error handling might be more sophisticated.
+    return null;
   }
 };
