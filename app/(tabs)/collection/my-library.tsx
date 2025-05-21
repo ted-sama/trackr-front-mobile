@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, FlatList, Platform, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Platform, StyleSheet, ActivityIndicator } from 'react-native'; // Added ActivityIndicator
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import Animated, { useSharedValue, useAnimatedScrollHandler, withTiming, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
@@ -8,14 +8,14 @@ import { StatusBar } from 'expo-status-bar';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import BookListElement from '@/components/BookListElement';
 import BookCard from '@/components/BookCard';
-import { Book, BookTracking } from '@/types';
-import { useRouter } from 'expo-router';
-import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import { Book } from '@/types'; // Removed comment about BookTracking
+import { useRouter, useFocusEffect } from 'expo-router'; // Added useFocusEffect
+import { useTrackingStore } from '../../store/trackingStore'; // Adjusted path
 import SwitchLayoutButton from '@/components/SwitchLayoutButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
-import { addBookToTracking, removeBookFromTracking } from '@/api';
-import Toast from 'react-native-toast-message';
+// Removed direct API imports: addBookToTracking, removeBookFromTracking
+// Toast might not be needed here if tracking actions are in child components
 
 // AsyncStorage key for layout preference
 const LAYOUT_STORAGE_KEY = '@MyApp:layoutPreference';
@@ -37,13 +37,26 @@ export default function MyLibrary() {
   const [titleY, setTitleY] = useState<number>(0);
   const scrollRef = useRef<FlatList<Book> | null>(null);
   const [currentLayout, setCurrentLayout] = useState<"grid" | "list">(DEFAULT_LAYOUT as "grid" | "list");
-  // scrollRef.current?.scrollToOffset({ offset: 0, animated: true });
-  const handleBack = () => {
-    router.back();
-  }
+  
+  const { 
+    trackedBooks: booksMap, // Renamed to avoid conflict with the `books` array
+    isLoading: isLoadingTrackedBooks, 
+    error: errorTrackedBooks, 
+    fetchTrackedBooks,
+    getTrackedBooks // Selector to get books array
+  } = useTrackingStore();
 
-  const { getTrackedBooks, addTrackedBook, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
+  // Get the array of books using the selector
   const books = getTrackedBooks();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Fetch if booksMap is empty or a refresh is needed
+      if (Object.keys(booksMap).length === 0) {
+        fetchTrackedBooks();
+      }
+    }, [fetchTrackedBooks, booksMap])
+  );
 
   const [isBlurVisible, setIsBlurVisible] = useState(false);
   const blurOpacity = useSharedValue(0);
@@ -56,7 +69,7 @@ export default function MyLibrary() {
   // Load layout preference from AsyncStorage
   useEffect(() => {
     const loadLayoutPreference = async () => {
-      const storedLayout: "grid" | "list" = await AsyncStorage.getItem(LAYOUT_STORAGE_KEY) as "grid" | "list";
+      const storedLayout = await AsyncStorage.getItem(LAYOUT_STORAGE_KEY) as "grid" | "list" | null;
       if (storedLayout) setCurrentLayout(storedLayout);
     };
     loadLayoutPreference();
@@ -67,16 +80,40 @@ export default function MyLibrary() {
     AsyncStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout);
   }, [currentLayout]);
 
+  const handleBack = () => { // Added handleBack for AnimatedHeader
+    router.back();
+  };
+
   const switchLayout = () => {
     setIsBlurVisible(true);
-    blurOpacity.value = 1;
+    blurOpacity.value = 1; // Show blur immediately
+    // Start fade out animation after a short delay
     setTimeout(() => {
       blurOpacity.value = withTiming(0, { duration: 600 }, (finished) => {
-        if (finished) runOnJS(setIsBlurVisible)(false);
+        if (finished) {
+          runOnJS(setIsBlurVisible)(false); // Hide blur view after animation
+        }
       });
-    }, 50);
+    }, 50); // Small delay to ensure blur is visible before starting fade
     setCurrentLayout(currentLayout === 'grid' ? 'list' : 'grid');
   };
+  
+  // Conditional rendering for loading and error states
+  if (isLoadingTrackedBooks && books.length === 0) { // Only show full screen loader if no books are displayed yet
+    return (
+      <View style={[styles.centeredContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (errorTrackedBooks) {
+    return (
+      <View style={[styles.centeredContainer, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.text }}>Erreur: {errorTrackedBooks}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -84,13 +121,13 @@ export default function MyLibrary() {
       <AnimatedHeader
         title="Ma bibliothèque"
         scrollY={scrollY}
-        collapseThreshold={titleY > 0 ? titleY : undefined}
+        collapseThreshold={titleY > 0 ? titleY : undefined} // Use measured titleY
         onBack={handleBack}
       />
       <AnimatedList
         ref={scrollRef}
         data={books}
-        key={currentLayout}
+        key={currentLayout} // Ensures re-render on layout change
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ marginTop: insets.top, paddingHorizontal: 16, paddingBottom: 64, flexGrow: 1 }}
         numColumns={currentLayout === 'grid' ? 3 : 1}
@@ -100,7 +137,7 @@ export default function MyLibrary() {
             <Text
               style={[typography.h1, { color: colors.text, maxWidth: '80%' }]}
               accessibilityRole="header"
-              accessibilityLabel="Library"
+              accessibilityLabel="Ma bibliothèque" // Corrected label
               numberOfLines={1}
             >
               Ma bibliothèque
@@ -110,21 +147,39 @@ export default function MyLibrary() {
         }
         renderItem={({ item }) =>
           currentLayout === 'grid' ? (
-            <View style={{ width: '33%' }}>
-              <BookCard book={item} onPress={() => { router.push(`/book/${item.id}`); }} size="compact" showAuthor={false} showTrackingStatus={true} showTrackingButton={false} showRating={false} />
+            <View style={{ width: '33.33%', padding: 2}}> 
+              {/* Added padding for grid items if needed, or manage gap with columnWrapperStyle */}
+              <BookCard 
+                book={item} 
+                onPress={() => { router.push(`/book/${item.id}`); }} 
+                size="compact" 
+                showAuthor={false} 
+                showTrackingStatus={true} 
+                showTrackingButton={false} // Tracking button usually not shown in library view directly on card
+                showRating={false} 
+              />
             </View>
           ) : (
-            <BookListElement book={item} onPress={() => { router.push(`/book/${item.id}`); }} showAuthor={false} showTrackingStatus={true} showTrackingButton={false} showRating={false} />
+            <BookListElement 
+              book={item} 
+              onPress={() => { router.push(`/book/${item.id}`); }} 
+              showAuthor={true} // Show author in list view
+              showTrackingStatus={true} 
+              showTrackingButton={true} // Show tracking button in list view
+              showRating={true} // Show rating in list view
+            />
           )
         }
-        ItemSeparatorComponent={currentLayout === 'grid' ? () => <View style={{ height: 26 }} /> : () => <View style={{ height: 12 }} />}
-        ListEmptyComponent={books.length === 0 ? (
-          <Text style={{ color: colors.secondaryText, textAlign: 'center', marginTop: 32 }}>Aucun livre trouvé dans votre bibliothèque.</Text>
+        ItemSeparatorComponent={currentLayout === 'grid' ? undefined : () => <View style={{ height: 12 }} />}
+        ListEmptyComponent={!isLoadingTrackedBooks && books.length === 0 ? ( // Show only if not loading and books empty
+          <View style={styles.centeredContainer}>
+            <Text style={{ color: colors.secondaryText, textAlign: 'center', marginTop: 32 }}>Aucun livre trouvé dans votre bibliothèque.</Text>
+          </View>
         ) : null}
-        columnWrapperStyle={currentLayout === 'grid' ? { gap: 4 } : undefined}
-        onEndReached={() => {}}
-        onEndReachedThreshold={0.2}
-        ListFooterComponent={null}
+        columnWrapperStyle={currentLayout === 'grid' ? { justifyContent: 'space-between' } : undefined}
+        // onEndReached={() => {}} // Add pagination logic if needed
+        // onEndReachedThreshold={0.2}
+        ListFooterComponent={isLoadingTrackedBooks && books.length > 0 ? <ActivityIndicator style={{marginVertical: 20}} color={colors.primary}/> : null}
         showsVerticalScrollIndicator={true}
         accessibilityRole="list"
       />
@@ -139,6 +194,12 @@ export default function MyLibrary() {
 }
 
 const styles = StyleSheet.create({
+  centeredContainer: { // Added for centering loading/error/empty messages
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',

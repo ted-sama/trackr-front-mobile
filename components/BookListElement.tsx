@@ -6,7 +6,7 @@ import { Book, ReadingStatus } from "@/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
-import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import { useTrackingStore } from "../store/trackingStore"; // Adjusted path
 import Badge from "./ui/Badge";
 import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Ellipsis } from "lucide-react-native";
 import BookActionsBottomSheet from "./BookActionsBottomSheet";
@@ -27,9 +27,17 @@ interface BookListElementProps {
 const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, showRating = false, showTrackingButton = false, showTrackingStatus = false }: BookListElementProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
-  const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
-  const { isBookTracked } = useTrackedBooksStore();
-  const isTracking = isBookTracked(book.id);
+  const { setBottomSheetVisible } = useBottomSheet(); // isBottomSheetVisible might not be needed here
+  
+  const { 
+    isBookTracked, 
+    addTrackedBook, 
+    removeTrackedBook, 
+    isUpdating, 
+    // updateError // Not directly used for toast here, onTrackingToggle handles it
+  } = useTrackingStore();
+
+  const isCurrentlyTracked = isBookTracked(book.id);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -42,10 +50,28 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
     'completed': { text: 'Complété', icon: <BookCheck size={12} strokeWidth={2.75} color={colors.completed} />},
     'on_hold': { text: 'En pause', icon: <Pause size={12} strokeWidth={2.75} color={colors.onHold} />},
     'dropped': { text: 'Abandonné', icon: <Square size={12} strokeWidth={2.75} color={colors.dropped} />},
-  }
+  };
 
-  const handleTrackingToggle = () => {
-    onTrackingToggle?.(book.id.toString(), isTracking, book);
+  const handleTrackingToggleInternal = async () => {
+    // If onTrackingToggle is provided, it means the parent component (e.g., Discover screen)
+    // wants to handle the logic, perhaps with different Toast messages or side effects.
+    if (onTrackingToggle) {
+      onTrackingToggle(book.id.toString(), isCurrentlyTracked, book);
+    } else {
+      // Default behavior: use the store actions directly
+      // Toast messages will be handled by the screen that uses this component,
+      // or could be added here if a global Toast is desired for all BookListElement instances.
+      try {
+        if (isCurrentlyTracked) {
+          await removeTrackedBook(book.id);
+        } else {
+          await addTrackedBook(book);
+        }
+      } catch (error) {
+        // Error is handled in the store and potentially by parent component
+        console.error("BookListElement: Failed to toggle tracking", error);
+      }
+    }
   };
 
   // Fonction pour présenter le bottom sheet
@@ -53,7 +79,7 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setBottomSheetVisible(true);
     bottomSheetModalRef.current?.present();
-  }, []);
+  }, [setBottomSheetVisible]);
 
   return (
     <>
@@ -110,7 +136,11 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
         </View>
         <View style={styles.actionsContainer}>
           {showTrackingButton && (
-            <TrackingIconButton isTracking={isTracking} onPress={handleTrackingToggle} />
+            <TrackingIconButton 
+              isTracking={isCurrentlyTracked} 
+              isLoading={isUpdating[book.id]} // Pass loading state for this specific book
+              onPress={handleTrackingToggleInternal} 
+            />
           )}
           <Pressable onPress={handlePresentModalPress}>
             <Ellipsis size={22} color={colors.icon} strokeWidth={2} />

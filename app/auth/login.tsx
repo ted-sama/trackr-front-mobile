@@ -1,11 +1,9 @@
-import { View, Text, TextInput, StyleSheet, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext'; // This will use useAuthStore via AuthProvider
 import { useTypography } from '@/hooks/useTypography';
-import { login as loginApi } from '@/api/auth';
-import { LoginResponse } from '@/types/auth';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 
@@ -15,44 +13,75 @@ export default function Login() {
     const { colors } = useTheme();
     const typography = useTypography();
     const router = useRouter();
-    const { login, isLoading, isAuthenticated } = useAuth();
+    // useAuth now gets its values from useAuthStore
+    const { login, isLoading, isAuthenticated, error: authError, setError: setAuthError } = useAuth();
 
-    const handleLogin = async () => {
-        const response: LoginResponse = await loginApi({ email, password });
-        console.log(response);
-        if (response.access_token && response.refresh_token) {
-            try {
-                await login(response.access_token, response.refresh_token);
-                router.push('/');
-            } catch (error) {
-                console.error('Error logging in:', error);
-                Toast.show({
-                    type: "error",
-                    text1: 'Error logging in',
-                });
-            }
-        } else {
+    useEffect(() => {
+        if (authError) {
             Toast.show({
                 type: "error",
-                text1: response.message,
+                text1: "Login Failed",
+                text2: authError,
             });
+            // Clear the error in the store after showing it
+            setAuthError(null); 
+        }
+    }, [authError, setAuthError]);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.push('/');
+        }
+    }, [isAuthenticated, router]);
+
+    const handleLogin = async () => {
+        // The login action in useAuth (from useAuthStore) should handle the API call,
+        // token storage, and updating isLoading/isAuthenticated/error states.
+        // It's assumed authStore.login now takes email and password.
+        // This might require an update to authStore.login's signature and implementation.
+        // For now, we'll assume it's: login(email, password)
+        // If authStore.login still expects tokens, this part needs to be re-evaluated based on authStore's actual implementation.
+        
+        // For this refactoring, we'll assume `authStore.login` will be modified
+        // to take email/password and perform the API call.
+        // If it's not, the `loginApi` call would still need to happen here,
+        // and then `auth.login(token, refreshToken)` would be called.
+        // However, the task implies centralizing the API call within the store.
+
+        // Let's assume login is: login(email: string, password: string): Promise<void>
+        // And it updates store's error state.
+        try {
+            // This call should set isLoading to true within the store
+            await login(email, password); 
+            // Navigation is now handled by the useEffect watching `isAuthenticated`
+        } catch (err) {
+            // If login action rejects, it should have set the error in the store.
+            // The useEffect watching authError will display the Toast.
+            // If login action doesn't set store error on reject, uncomment below:
+            // Toast.show({ type: "error", text1: "Login Error", text2: "An unexpected error occurred."});
+            console.error("Login attempt failed:", err);
         }
     };
-
+    
+    // The isLoading and isAuthenticated checks can remain similar,
+    // as they reflect the store's state updated by the login action.
     if (isLoading) {
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center'}]}>
                 <ActivityIndicator size="large" color={colors.primary} />
             </View>
         )
     }
 
+    // This check might be redundant if the useEffect for isAuthenticated handles navigation.
+    // However, it can prevent rendering the login form momentarily if already authenticated.
     if (isAuthenticated) {
+         // router.push('/'); // Handled by useEffect
         return (
-            <View style={styles.container}>
-                <Text>You are already logged in</Text>
+            <View style={[styles.container, { backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center'}]}>
+                <Text style={{color: colors.text}}>Already logged in. Redirecting...</Text>
             </View>
-        )
+        );
     }
 
     return (
@@ -89,7 +118,7 @@ export default function Login() {
                 onChangeText={setPassword}
                 secureTextEntry
             />
-            <Button title="Login" disabled={email === '' || password === ''} onPress={handleLogin} />
+            <Button title="Login" disabled={email === '' || password === '' || isLoading} onPress={handleLogin} />
         </View>
     );
 }

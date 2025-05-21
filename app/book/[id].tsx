@@ -1,16 +1,16 @@
-import { addBookToTracking, getBook, getBooks, getCategory, removeBookFromTracking , checkIfBookIsTracked } from "@/api";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { Book, Category, BookTracking } from "@/types";
+import { Book } from "@/types"; // Category and BookTracking might be removed if not used directly
 import {
+  Text,
   Text,
   StyleSheet,
   View,
   Image,
-  Platform,
+  // Platform, // Removed
   Pressable,
   ScrollView as DefaultScrollView,
-  FlatList,
+  // FlatList, // Removed
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import {
@@ -24,25 +24,26 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  Easing,
-  withSpring,
+  // Easing, // Removed
+  // withSpring, // Removed
   useAnimatedScrollHandler,
-  interpolate,
-  Extrapolate,
+  // interpolate, // Removed (handled by AnimatedHeader)
+  // Extrapolate, // Removed (handled by AnimatedHeader)
+  FadeIn,
   FadeIn,
   FadeOut,
 } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
+// import { LinearGradient } from "expo-linear-gradient"; // Kept commented if needed later
 import Ionicons from "@expo/vector-icons/Ionicons";
 import CategorySlider from "@/components/CategorySlider";
-import { BlurView } from 'expo-blur';
-import MaskedView from '@react-native-masked-view/masked-view';
+// import { BlurView } from 'expo-blur'; // Kept commented if needed later
+// import MaskedView from '@react-native-masked-view/masked-view'; // Kept commented if needed later
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import Badge from "@/components/ui/Badge";
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import Toast from "react-native-toast-message";
-import { useTrackedBooksStore } from '@/state/tracked-books-store';
-import { Ellipsis, Minus, Plus } from "lucide-react-native";
+// Removed useTrackedBooksStore, will use useTrackingStore
+import { Ellipsis } from "lucide-react-native"; // Minus, Plus might be removed if not used
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
@@ -51,6 +52,8 @@ import { TrackingTabBar } from "@/components/book/TrackingTabBar";
 import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import BadgeSlider from "@/components/BadgeSlider";
+import { useBookStore } from "../../store/bookStore"; // Adjusted path
+import { useTrackingStore } from "../../store/trackingStore"; // Adjusted path
 
 // Constants for animation
 const HEADER_THRESHOLD = 320; // Threshold for header animation
@@ -59,33 +62,50 @@ const HEADER_THRESHOLD = 320; // Threshold for header animation
 const AnimatedScrollView = Animated.createAnimatedComponent(DefaultScrollView);
 
 export default function BookScreen() {
-  const { id } = useLocalSearchParams();
+  const { id: bookIdParam } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const [bottomSheetView, setBottomSheetView] = useState<"actions" | "status_editor">("actions");
   const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
-  const [book, setBook] = useState<Book | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const typography = useTypography();
   const insets = useSafeAreaInsets();
-  const [dummyRecommendations, setDummyRecommendations] = useState<Category | null>(null);
+
+  const {
+    currentBook: book,
+    isLoadingBookDetail,
+    errorBookDetail,
+    recommendations,
+    isLoadingRecommendations,
+    errorRecommendations,
+    fetchBookDetail,
+    fetchRecommendations: fetchRecs, // Renamed to avoid conflict
+    clearCurrentBook,
+    clearRecommendations: clearRecs, // Renamed to avoid conflict
+  } = useBookStore();
+
+  const {
+    isBookTracked,
+    getTrackedBookStatus,
+    addTrackedBook,
+    removeTrackedBook,
+    isUpdating,
+    updateError,
+  } = useTrackingStore();
+
 
   // Bottom sheet ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const setChapterBottomSheetRef = useRef<BottomSheetModal>(null);
-  // Animation setup for button
-  const translateY = useSharedValue(150); // Initial off-screen position
-  const scale = useSharedValue(0.1); // Initial small scale
-  const pressScale = useSharedValue(1);
+  // Animation setup for button (translateY, scale, pressScale and their styles seem unused)
+  // const translateY = useSharedValue(150); // Removed
+  // const scale = useSharedValue(0.1); // Removed
+  // const pressScale = useSharedValue(1); // Removed
 
   // Shared value for scroll position
   const scrollY = useSharedValue(0);
 
   // State to store title Y position
   const [titleY, setTitleY] = useState(0);
-
-  // Animation setup for description height
 
   // Add animated values for social buttons
   const reviewsOpacity = useSharedValue(1);
@@ -108,65 +128,6 @@ export default function BookScreen() {
     };
   });
 
-  const animatedButtonStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: translateY.value }, { scale: scale.value }],
-    };
-  });
-
-  // Animated style for description container
-
-  // Style for press animation
-  const animatedPressStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: pressScale.value }],
-    };
-  });
-
-  // Animated style for the header container (controls overall opacity including border/background)
-  const animatedHeaderContainerStyle = useAnimatedStyle(() => {
-    // Ensure titleY has been measured before calculating range
-    const effectiveTitleY = titleY || HEADER_THRESHOLD; // Fallback if titleY is 0
-    const opacity = interpolate(
-      scrollY.value,
-      [0, effectiveTitleY - 10], // Start fading from scroll 0, fully visible before title gone
-      [0, 1], // Opacity from 0 to 1
-      Extrapolate.CLAMP
-    );
-
-    return {
-      opacity: opacity,
-    };
-  });
-
-  // Animated style for the header title text
-  const animatedHeaderTitleStyle = useAnimatedStyle(() => {
-    const effectiveTitleY = titleY || HEADER_THRESHOLD;
-    const opacity = interpolate(
-      scrollY.value,
-      [effectiveTitleY, effectiveTitleY + 40], // Start fading in *after* title is gone
-      [0, 1],
-      Extrapolate.CLAMP
-    );
-    return {
-      opacity: opacity,
-    };
-  });
-
-  // Animated style for the back button background opacity (fades out as header fades in)
-  const animatedBackButtonBackgroundOpacityStyle = useAnimatedStyle(() => {
-    const effectiveTitleY = titleY || HEADER_THRESHOLD;
-    const opacity = interpolate(
-      scrollY.value,
-      [0, effectiveTitleY - 10],
-      [1, 0], // Inverse opacity: 1 (visible) -> 0 (invisible)
-      Extrapolate.CLAMP
-    );
-    return {
-      opacity: opacity,
-    };
-  });
-
   // Scroll handler to update scrollY
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -183,62 +144,61 @@ export default function BookScreen() {
     other: "Autre",
   };
 
-  // Toggle function for description expansion
-
    // Fonction pour présenter le bottom sheet
    const handlePresentModalPress = useCallback((view: "actions" | "status_editor") => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setBottomSheetView(view);
     setBottomSheetVisible(true);
     bottomSheetModalRef.current?.present();
-  }, []);
+  }, [setBottomSheetVisible]);
 
   const handlePresentChapterModalPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setBottomSheetVisible(true);
     setChapterBottomSheetRef.current?.present();
-  }, []);
+  }, [setBottomSheetVisible]);
 
   const IMAGE_WIDTH = 202.5;
   const IMAGE_HEIGHT = 303.75;
 
-  const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore, isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
-
-  // State to control button rendering for animation
-  const [isButtonRendered, setIsButtonRendered] = useState(false);
-
-  // Ajout : trackingStatus réactif au store
   const trackingStatus = book ? getTrackedBookStatus(book.id) : null;
 
   useEffect(() => {
-    const fetchBook = async () => {
-      try {
-        let book = await getBook({ id: id as string });
-        book.tracking_status = getTrackedBookStatus(book.id);
-        setBook(book);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Une erreur est survenue"
-        );
-      } finally {
-        setIsLoading(false);
-      }
+    if (bookIdParam) {
+      fetchBookDetail(bookIdParam);
+      fetchRecs(bookIdParam); // Assuming fetchRecs uses bookIdParam
+    }
+    return () => {
+      clearCurrentBook();
+      clearRecs();
     };
+  }, [bookIdParam, fetchBookDetail, fetchRecs, clearCurrentBook, clearRecs]);
 
-    const fetchRecommendations = async () => {
-      const recommendations = await getCategory('1');
-      setDummyRecommendations(recommendations);
-    };
 
-    fetchBook();
-    fetchRecommendations();
-  }, [id]);
-
-  if (error) {
+  // Loading and error states from the store
+  if (isLoadingBookDetail) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: colors.text }}>Une erreur est survenue</Text>
-      </View>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }]} edges={["right", "left"]}>
+        <SkeletonLoader width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+        {/* Add more skeleton components for text details if desired */}
+      </SafeAreaView>
+    );
+  }
+
+  if (errorBookDetail) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }]} edges={["right", "left"]}>
+        <Text style={{ color: colors.text }}>{errorBookDetail}</Text>
+      </SafeAreaView>
+    );
+  }
+  
+  if (!book) {
+    // This case might occur if not loading and no error, but book is null (e.g., after clearing)
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }]} edges={["right", "left"]}>
+        <Text style={{ color: colors.text }}>Livre non trouvé.</Text>
+      </SafeAreaView>
     );
   }
 
@@ -270,32 +230,35 @@ export default function BookScreen() {
 
   const onTrackingToggle = async () => {
     if (!book) return;
-    const currentBookIdStr = book.id.toString();
+    const bookId = book.id; // Already a number
 
-    if (isBookTracked(book.id)) {
-      try {
-        await removeBookFromTracking(currentBookIdStr);
-        removeTrackedBookFromStore(book.id);
+    // Show loading state for this specific book
+    const specificBookIsUpdating = isUpdating[bookId]; 
+    if (specificBookIsUpdating) return; // Prevent multiple clicks
+
+    try {
+      if (isBookTracked(bookId)) {
+        await removeTrackedBook(bookId);
         Toast.show({
           text1: 'Livre retiré de votre bibliothèque',
           type: 'info',
         });
-      } catch (error) {
-        console.warn(`Failed to remove book ${currentBookIdStr} from tracking:`, error);
-        Toast.show({ type: 'error', text1: 'Erreur', text2: 'Impossible de retirer le livre.' });
-      }
-    } else {
-      try {
-        const trackingStatus: any = await addBookToTracking(currentBookIdStr);
-        addTrackedBookToStore({ ...book, tracking: true, tracking_status: trackingStatus.book_tracking });
+      } else {
+        await addTrackedBook(book); // addTrackedBook from store expects the Book object
         Toast.show({
           text1: 'Livre ajouté à votre bibliothèque',
           type: 'info',
         });
-      } catch (error) {
-        console.warn(`Failed to add book ${currentBookIdStr} to tracking:`, error);
-        Toast.show({ type: 'error', text1: 'Erreur', text2: `Impossible d'ajouter le livre.` });
       }
+    } catch (err) {
+      // Errors are handled by the store and reflected in updateError[bookId]
+      const specificError = updateError[bookId];
+      console.warn(`Failed to toggle tracking for book ${bookId}:`, err, specificError);
+      Toast.show({
+        type: 'error',
+        text1: 'Erreur de suivi',
+        text2: specificError || `Impossible de mettre à jour le suivi.`
+      });
     }
   };
 
@@ -319,13 +282,12 @@ export default function BookScreen() {
       >
         <View style={styles.shadowContainer}>
           <View style={styles.imageContainer}>
-             {
-              isLoading ? (
-                <SkeletonLoader width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-              ) : (
-                <Image source={{ uri: book?.cover_image }} style={styles.imageContent} />
-              )
-             }
+            {/* isLoadingBookDetail is handled globally now, so direct SkeletonLoader here might be based on `!book` */}
+            {!book ? (
+              <SkeletonLoader width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            ) : (
+              <Image source={{ uri: book.cover_image }} style={styles.imageContent} />
+            )}
           </View>
         </View>
         <View style={styles.detailsContainer}>
@@ -334,21 +296,20 @@ export default function BookScreen() {
             style={styles.titleTextContainer}
             onLayout={(event) => {
               const layout = event.nativeEvent.layout;
-              // Use pageY if relative to screen, or y if relative to parent ScrollView
-              setTitleY(layout.y); // Store the Y position relative to ScrollView
+              setTitleY(layout.y); 
             }}
           >
             <View style={{ flex: 3 }}>
-              {isLoading ? (
+              {!book ? (
                 <SkeletonLoader width={'90%'} height={40} />
               ) : (
                 <Text
                   style={[styles.title, typography.h1, { color: colors.text }]}
                   numberOfLines={2}
                   ellipsizeMode="tail"
-              >
-                {book?.title}
-              </Text>
+                >
+                  {book.title}
+                </Text>
               )}
               <Text
                 style={[
@@ -381,17 +342,20 @@ export default function BookScreen() {
               <Pressable onPress={() => handlePresentModalPress("actions")}>
                 <Ellipsis size={32} color={colors.icon} strokeWidth={2} />
               </Pressable>
-              <TrackingIconButton
-                size={32}
-                isTracking={isBookTracked(book?.id!)}
-                onPress={onTrackingToggle}
-              />
+              {book && ( // Ensure book is not null before rendering TrackingIconButton
+                <TrackingIconButton
+                  size={32}
+                  isTracking={isBookTracked(book.id)}
+                  isLoading={isUpdating[book.id]} // Pass loading state for this specific book
+                  onPress={onTrackingToggle}
+                />
+              )}
             </View>
           </View>
           {/* Badge */}
           {book?.genres && book?.tags && (
             <View style={styles.badgeContainer}>
-              <BadgeSlider data={[...(book?.genres || []), ...(book?.tags || [])]} />
+              <BadgeSlider data={[...(book.genres || []), ...(book.tags || [])]} />
             </View>
           )}
           {/* Description */}
@@ -412,7 +376,7 @@ export default function BookScreen() {
                   { color: colors.text, marginLeft: 4 },
                 ]}
               >
-                {book?.rating} {separator()} 1004 trackings
+                {book?.rating} {separator()} 1004 trackings {/* Placeholder for tracking count */}
               </Text>
             </View>
             <View style={styles.socialsContainer}>
@@ -458,9 +422,15 @@ export default function BookScreen() {
             <Text style={[typography.categoryTitle, { color: colors.text }]}>
               Les utilisateurs suivent aussi
             </Text>
-            {dummyRecommendations && (
+            {isLoadingRecommendations && <ActivityIndicator color={colors.primary} style={{ marginTop: 10}} />}
+            {errorRecommendations && <Text style={{color: colors.destructive, marginTop: 10}}>{errorRecommendations}</Text>}
+            {recommendations && recommendations.length > 0 && (
               <View style={{ marginHorizontal: -16 }}>
-                <CategorySlider category={dummyRecommendations} isBottomSheetVisible={false} header={false} />
+                {/* Assuming recommendations is an array of Book, and CategorySlider can handle Book[] or a Category with Book[] */}
+                {/* If recommendations is Category[], map through it. If it's a single Category object with books, pass it directly. */}
+                {/* Based on bookStore, recommendations is Book[], so we might need a wrapper Category or adjust CategorySlider */}
+                {/* For now, assuming CategorySlider can take a { title: "Recommendations", books: recommendations } like structure */}
+                <CategorySlider category={{ id: 'recs', title: 'Recommandations', books: recommendations }} isBottomSheetVisible={false} header={false} />
               </View>
             )}
           </View>
@@ -468,11 +438,11 @@ export default function BookScreen() {
       </AnimatedScrollView>
 
       {/* Animated Button Container (Handles slide-up and initial scale) */}
-      {trackingStatus && !isBottomSheetVisible && (
+      {trackingStatus && !isBottomSheetVisible && book && ( // Ensure book is not null for TrackingTabBar
         <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(150)}>
           <TrackingTabBar
             status={trackingStatus.status}
-            currentChapter={trackingStatus.current_chapter}
+            currentChapter={trackingStatus.current_chapter} // Ensure these fields are available on trackingStatus
             onManagePress={() => handlePresentChapterModalPress()}
             onStatusPress={() => handlePresentModalPress("status_editor")}
           />

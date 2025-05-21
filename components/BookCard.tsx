@@ -1,10 +1,10 @@
-import React, { useState, useRef, useCallback, useMemo, act } from "react";
+import React, { useState, useRef, useCallback } from "react"; // Removed useMemo, act
 import {
   View,
   Text,
   Image,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
+  // TouchableOpacity, // Removed
+  // TouchableWithoutFeedback, // Removed
   StyleSheet,
   Dimensions,
   ActivityIndicator,
@@ -12,24 +12,25 @@ import {
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
-import { CirclePlus, ListPlus, CircleStop , Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
-import CardSheetModal from "./CardSheetModal";
+// Removed CirclePlus, ListPlus, CircleStop from lucide-react-native
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native"; 
+// import CardSheetModal from "./CardSheetModal"; // Removed
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import Animated, {
   useAnimatedStyle,
-  interpolate,
-  Extrapolation,
+  // interpolate, // Removed
+  // Extrapolation, // Removed
   useSharedValue,
-  withSpring,
+  // withSpring, // Removed
   withTiming,
 } from "react-native-reanimated";
 import { Book, ReadingStatus } from "../types";
 import { useTheme } from "../contexts/ThemeContext";
 import { useBottomSheet } from "../contexts/BottomSheetContext";
-import Toast from "react-native-toast-message";
+// import Toast from "react-native-toast-message"; // Removed
 import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
-import { useTrackedBooksStore } from '@/state/tracked-books-store';
+import { useTrackingStore } from "../store/trackingStore"; // Adjusted path
 import Badge from "./ui/Badge";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 
@@ -49,10 +50,18 @@ const CARD_WIDTH = width * 0.33;
 const COMPACT_CARD_WIDTH = width * 0.29;
 
 const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAuthor = true, showRating = true, showTrackingStatus = false, showTrackingButton = true }: BookCardProps) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [imageIsLoading, setImageIsLoading] = useState(true); // Renamed to avoid conflict with store's isLoading
   const [hasError, setHasError] = useState(false);
-  const { isBookTracked } = useTrackedBooksStore();
-  const isTracking = isBookTracked(book.id);
+  
+  const { 
+    isBookTracked, 
+    addTrackedBook, 
+    removeTrackedBook, 
+    isUpdating 
+    // updateError // Not directly used for toast here, parent usually handles it
+  } = useTrackingStore();
+
+  const isCurrentlyTracked = isBookTracked(book.id);
   const { colors } = useTheme();
   const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
   const typography = useTypography();
@@ -63,7 +72,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
     'completed': { text: 'Complété', icon: <BookCheck size={12} strokeWidth={2.75} color={colors.completed} /> },
     'on_hold': { text: 'En pause', icon: <Pause size={12} strokeWidth={2.75} color={colors.onHold} /> },
     'dropped': { text: 'Abandonné', icon: <Square size={12} strokeWidth={2.75} color={colors.dropped} /> },
-  }
+  };
 
   // Shared value for scale animation
   const scale = useSharedValue(1);
@@ -71,55 +80,42 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
   // Référence au bottom sheet modal
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  // Options for the bottom sheet tracking actions
-  const bottomSheetTrackingOptions = [
-    {
-      id: "reading",
-      title: "Mettre en cours de lecture",
-      icon: CirclePlus,
-      action: () => {
-        onTrackingToggle?.(book.id.toString(), false, book);
-      }
-    },
-    {
-      id: "add-to-list",
-      title: "Ajouter à une liste",
-      icon: ListPlus,
-      action: () => {
-        onTrackingToggle?.(book.id.toString(), false, book);
-      }
-    },
-    {
-      id: "stopped",
-      title: "Mettre en arrêt",
-      icon: CircleStop,
-      action: () => {
-        onTrackingToggle?.(book.id.toString(), true, book);
-      }
-    },
-  ];
-
   const handleImageLoad = () => {
-    setIsLoading(false);
+    setImageIsLoading(false);
   };
 
   const handleImageError = () => {
-    setIsLoading(false);
+    setImageIsLoading(false);
     setHasError(true);
   };
 
   // Function to handle quick add/remove tracking
-  const handleTrackingToggle = () => {
-    onTrackingToggle?.(book.id.toString(), isTracking, book);
+  const handleTrackingToggleInternal = async () => {
+    if (onTrackingToggle) {
+      onTrackingToggle(book.id.toString(), isCurrentlyTracked, book);
+    } else {
+      try {
+        if (isCurrentlyTracked) {
+          await removeTrackedBook(book.id);
+        } else {
+          await addTrackedBook(book);
+        }
+        // Optional: Show local toast if not handled by parent
+        // Toast.show({ type: 'info', text1: isCurrentlyTracked ? 'Retiré' : 'Ajouté' });
+      } catch (error) {
+        console.error("BookCard: Failed to toggle tracking", error);
+        // Toast.show({ type: 'error', text1: 'Erreur de suivi' });
+      }
+    }
   };
 
   // Fonction pour présenter le bottom sheet
   const handlePresentModalPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setBottomSheetVisible(true);
-    scale.value = withTiming(1, { duration: 220 });
+    scale.value = withTiming(1, { duration: 220 }); // Reset scale if it was pressed
     bottomSheetModalRef.current?.present();
-  }, []);
+  }, [setBottomSheetVisible, scale]);
 
   // Create animated style for scale animation
   const animatedCardStyle = useAnimatedStyle(() => {
@@ -132,8 +128,6 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
     if (onPress) {
       onPress(book);
     } else {
-      // Default behavior if no onPress is provided
-      // Example: Navigate to a detail screen or log
       console.log(`Livre sélectionné: ${book.title}`);
     }
   };
@@ -174,7 +168,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
               },
             ]}
           >
-            {isLoading && (
+            {imageIsLoading && ( // Use renamed imageIsLoading
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color={colors.accent} />
               </View>
@@ -191,11 +185,12 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
               onLoad={handleImageLoad}
               onError={handleImageError}
             />
-            {!isLoading && !hasError && showTrackingButton && (
+            {!imageIsLoading && !hasError && showTrackingButton && (
               <View style={styles.trackButton}>
                 <TrackingIconButton 
-                  isTracking={isTracking} 
-                  onPress={handleTrackingToggle} 
+                  isTracking={isCurrentlyTracked} 
+                  isLoading={isUpdating[book.id]} // Use isUpdating from the store
+                  onPress={handleTrackingToggleInternal} 
                 />
               </View>
             )}
