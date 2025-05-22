@@ -10,6 +10,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
 import { Image } from "expo-image";
 import { LegendList } from "@legendapp/list";
@@ -54,7 +55,8 @@ import { useListStore } from "@/stores/listStore";
 import CollectionListElement from "./CollectionListElement";
 import Button from "./ui/Button";
 import SecondaryButton from "./ui/SecondaryButton";
-interface BookActionsBottomSheetProps {
+
+export interface BookActionsBottomSheetProps {
   book: Book;
   snapPoints?: string[];
   index?: number;
@@ -133,6 +135,7 @@ const BookActionsBottomSheet = forwardRef<
     const isTracking = isBookTracked(book.id);
     const [currentView, setCurrentView] = useState(view);
     const [newListName, setNewListName] = useState("");
+    const [selectedListIds, setSelectedListIds] = useState<number[]>([]);
 
     useEffect(() => {
       if (view) {
@@ -262,6 +265,14 @@ const BookActionsBottomSheet = forwardRef<
     const handleRemoveBookFromTracking = async () => {
       await removeTrackedBook(book.id);
     };
+
+    function toggleListSelection(listId: number) {
+      setSelectedListIds((prev) =>
+        prev.includes(listId)
+          ? prev.filter((id) => id !== listId)
+          : [...prev, listId]
+      );
+    }
 
     const renderBackdrop = useCallback(
       (props: BottomSheetBackdropProps) => (
@@ -432,18 +443,33 @@ const BookActionsBottomSheet = forwardRef<
               </View>
               {/* Liste des listes */}
               <View style={{ height: 380 }}>
-                <LegendList
+                <FlatList
                   data={lists}
                   renderItem={({ item }) => (
-                    <CollectionListElement list={item} onPress={() => {}} size="compact" />
+                    <CollectionListElement
+                      list={item}
+                      onPress={() => toggleListSelection(item.id)}
+                      size="compact"
+                      isSelected={selectedListIds.includes(item.id)}
+                    />
                   )}
                   keyExtractor={(item) => item.id.toString()}
                   ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-                  recycleItems
                   contentContainerStyle={{ flexGrow: 1 }}
                 />
               </View>
-              <Button title="Ajouter" onPress={() => {}} style={{ marginTop: 64 }} />
+              <Button
+                title="Ajouter"
+                onPress={async () => {
+                  await Promise.all(
+                    selectedListIds.map((listId) => addBookToList(listId, book.id))
+                  );
+                  setSelectedListIds([]);
+                  handleDismiss();
+                }}
+                style={{ marginTop: 64 }}
+                disabled={selectedListIds.length === 0}
+              />
             </Animated.View>
           )}
 

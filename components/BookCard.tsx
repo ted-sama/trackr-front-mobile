@@ -11,7 +11,6 @@ import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { CirclePlus, ListPlus, CircleStop , Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import Animated, {
   useAnimatedStyle,
   interpolate,
@@ -28,7 +27,6 @@ import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import Badge from "./ui/Badge";
-import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 
 interface BookCardProps {
   book: Book;
@@ -51,7 +49,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
   const { isBookTracked } = useTrackedBooksStore();
   const isTracking = isBookTracked(book.id);
   const { colors } = useTheme();
-  const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
+  const { isBottomSheetVisible, openBookActions } = useBottomSheet();
   const typography = useTypography();
 
   const trackingStatusValues: Record<ReadingStatus, { text: string, icon: React.ReactNode }> = {
@@ -64,9 +62,6 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
 
   // Shared value for scale animation
   const scale = useSharedValue(1);
-
-  // Référence au bottom sheet modal
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   // Options for the bottom sheet tracking actions
   const bottomSheetTrackingOptions = [
@@ -110,13 +105,12 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
     onTrackingToggle?.(book.id.toString(), isTracking, book);
   };
 
-  // Fonction pour présenter le bottom sheet
+  // Présenter le bottom sheet via context
   const handlePresentModalPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setBottomSheetVisible(true);
     scale.value = withTiming(1, { duration: 220 });
-    bottomSheetModalRef.current?.present();
-  }, []);
+    openBookActions(book);
+  }, [book]);
 
   // Create animated style for scale animation
   const animatedCardStyle = useAnimatedStyle(() => {
@@ -137,8 +131,6 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
 
   return (
     <>
-      {/* Bottom Sheet Modal */}
-      <BookActionsBottomSheet book={book} ref={bottomSheetModalRef} onDismiss={() => setBottomSheetVisible(false)} backdropDismiss />
       {/* Manga Card */}
       <Pressable
         disabled={isBottomSheetVisible}

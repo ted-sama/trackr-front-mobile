@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import ThemeProvider, { useTheme } from '../contexts/ThemeContext';
-import { BottomSheetProvider } from '../contexts/BottomSheetContext';
+import { BottomSheetProvider , useBottomSheet } from '../contexts/BottomSheetContext';
 import Toast, { BaseToast, ToastConfig } from 'react-native-toast-message';
 import { Stack } from 'expo-router';
 import {
@@ -20,6 +20,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { DropdownProvider } from '@/contexts/DropdownContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
+import BookActionsBottomSheet from '@/components/BookActionsBottomSheet';
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -40,13 +42,19 @@ const toastConfig: ToastConfig = {
 // Composant racine qui fournit les contextes globaux
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <DropdownProvider>
-          <RootLayoutContent />
-        </DropdownProvider>
-      </ThemeProvider>
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <ThemeProvider>
+          <DropdownProvider>
+            <BottomSheetProvider>
+              <BottomSheetModalProvider>
+                <RootLayoutContent />
+              </BottomSheetModalProvider>
+            </BottomSheetProvider>
+          </DropdownProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }
 
@@ -57,6 +65,8 @@ function RootLayoutContent() {
   const fetchMyLibraryBooks = useTrackedBooksStore(state => state.fetchMyLibraryBooks);
   const isLibraryLoading = useTrackedBooksStore(state => state.isLoading);
   const libraryError = useTrackedBooksStore(state => state.error);
+  const { isBottomSheetVisible, selectedBook, view, closeBookActions } = useBottomSheet();
+  const globalBottomSheetRef = useRef<BottomSheetModal>(null);
 
   const [fontsLoaded] = useFonts({
     Manrope_200ExtraLight,
@@ -80,32 +90,45 @@ function RootLayoutContent() {
     }
   }, [isAuthenticated]);
 
+  // Present or dismiss global bottom sheet when visibility changes
+  useEffect(() => {
+    if (isBottomSheetVisible) {
+      globalBottomSheetRef.current?.present();
+    } else {
+      globalBottomSheetRef.current?.dismiss();
+    }
+  }, [isBottomSheetVisible]);
+
   if (!fontsLoaded) {
     return null;
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
-      <BottomSheetProvider>
-        <BottomSheetModalProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.background },
-            }}
-            initialRouteName='(tabs)'
-          >
-            <Stack.Screen name='auth/login' />
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name='book/[id]' />
-            <Stack.Screen name='category-full' />
-            <Stack.Screen name='list-full' />
-            {/* <Stack.Screen name='book/tracking-settings' getId={({ params }) => params?.bookId}  options={{presentation: Platform.OS === 'ios' ? 'formSheet' : 'card'}}/>
-            <Stack.Screen name='book/chapter-list' getId={({ params }) => params?.bookId} options={{presentation: Platform.OS === 'ios' ? 'formSheet' : 'card'}} /> */}
-          </Stack>
-          <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
-        </BottomSheetModalProvider>
-      </BottomSheetProvider>
-    </GestureHandlerRootView>
+    <React.Fragment>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+        }}
+        initialRouteName='(tabs)'
+      >
+        <Stack.Screen name='auth/login' />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name='book/[id]' />
+        <Stack.Screen name='category-full' />
+        <Stack.Screen name='list-full' />
+      </Stack>
+      {/* Global Book Actions BottomSheet */}
+      {selectedBook && (
+        <BookActionsBottomSheet
+          ref={globalBottomSheetRef}
+          book={selectedBook}
+          view={view}
+          onDismiss={closeBookActions}
+          backdropDismiss
+        />
+      )}
+      <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
+    </React.Fragment>
   );
 }

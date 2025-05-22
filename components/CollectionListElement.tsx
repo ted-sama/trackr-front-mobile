@@ -5,14 +5,16 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { List } from "@/types";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { Ionicons } from "@expo/vector-icons";
 
 interface CollectionListElementProps {
   list: List;
   onPress: () => void;
   size?: 'default' | 'compact';
+  isSelected?: boolean;
 }
 
-export default function CollectionListElement({ list, onPress, size = 'default' }: CollectionListElementProps) {
+export default function CollectionListElement({ list, onPress, size = 'default', isSelected }: CollectionListElementProps) {
   const { colors } = useTheme();
   const typography = useTypography();
 
@@ -76,7 +78,7 @@ export default function CollectionListElement({ list, onPress, size = 'default' 
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      <Animated.View style={[{ flexDirection: "row", alignItems: "center", gap: mainGap }, animatedStyle]}>
+      <Animated.View style={[{ flexDirection: "row", alignItems: "center", gap: mainGap, justifyContent: "space-between" }, animatedStyle]}>
         <View style={styles.coverStackContainer}>  
           {[0, 1, 2].map((_, index) => {
             const book = list.first_book_covers?.[index];
@@ -95,7 +97,7 @@ export default function CollectionListElement({ list, onPress, size = 'default' 
             );
           })}
         </View>
-        <View style={{ flexDirection: "column", gap: textGap }}>
+        <View style={{ flexDirection: "column", gap: textGap, flex: 1 }}>
           <Text style={[typography.h3, { color: colors.text }]}>{list.name}</Text>
           <Text style={[typography.caption, { color: colors.secondaryText }]}>
             {list.total_books} {list.total_books > 1 ? "éléments" : "élément"}
@@ -104,6 +106,9 @@ export default function CollectionListElement({ list, onPress, size = 'default' 
             <Text style={[typography.caption, { color: colors.secondaryText }]}>Par {list.owner.username}</Text>
           )}
         </View>
+        {isSelected && (
+          <Ionicons name="checkmark-circle" size={28} color={colors.primary} style={{ marginLeft: 8 }} />
+        )}
       </Animated.View>
     </Pressable>
   );

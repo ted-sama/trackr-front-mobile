@@ -43,7 +43,6 @@ import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { Ellipsis, Minus, Plus } from "lucide-react-native";
-import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 import * as Haptics from "expo-haptics";
@@ -64,7 +63,6 @@ export default function BookScreen() {
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const [bottomSheetView, setBottomSheetView] = useState<"actions" | "status_editor">("actions");
-  const { isBottomSheetVisible, setBottomSheetVisible } = useBottomSheet();
   const book = useBookDetailStore((state: BookDetailState) => state.bookById[id as string] || null);
   const isLoading = useBookDetailStore((state: BookDetailState) => state.isLoading);
   const error = useBookDetailStore((state: BookDetailState) => state.error);
@@ -185,19 +183,15 @@ export default function BookScreen() {
     other: "Autre",
   };
 
-  // Toggle function for description expansion
-
-   // Fonction pour présenter le bottom sheet
-   const handlePresentModalPress = useCallback((view: "actions" | "status_editor") => {
+  // Présenter le bottom sheet d'actions
+  const handlePresentModalPress = useCallback((view: "actions" | "status_editor") => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setBottomSheetView(view);
-    setBottomSheetVisible(true);
     bottomSheetModalRef.current?.present();
   }, []);
 
   const handlePresentChapterModalPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setBottomSheetVisible(true);
     setChapterBottomSheetRef.current?.present();
   }, []);
 
@@ -292,8 +286,8 @@ export default function BookScreen() {
       {/* Bottom Sheet Modal */}
       {book && (
         <>
-          <BookActionsBottomSheet book={book} ref={bottomSheetModalRef} onDismiss={() => setBottomSheetVisible(false)} view={bottomSheetView} backdropDismiss />
-          <SetChapterBottomSheet book={book} ref={setChapterBottomSheetRef} onDismiss={() => setBottomSheetVisible(false)} backdropDismiss />
+          <BookActionsBottomSheet book={book} ref={bottomSheetModalRef} view={bottomSheetView} backdropDismiss />
+          <SetChapterBottomSheet book={book} ref={setChapterBottomSheetRef} backdropDismiss />
         </>
       )}
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
@@ -453,7 +447,7 @@ export default function BookScreen() {
       </AnimatedScrollView>
 
       {/* Animated Button Container (Handles slide-up and initial scale) */}
-      {trackingStatus && !isBottomSheetVisible && (
+      {trackingStatus && (
         <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(150)}>
           <TrackingTabBar
             status={trackingStatus.status}
