@@ -1,4 +1,4 @@
-import { addBookToTracking, getBooks, getCategory, removeBookFromTracking, checkIfBookIsTracked } from "@/api";
+import { getBooks, getCategory } from "@/services/api";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Book, Category, BookTracking } from "@/types";
@@ -261,8 +261,7 @@ export default function BookScreen() {
 
     if (isBookTracked(book.id)) {
       try {
-        await removeBookFromTracking(currentBookIdStr);
-        removeTrackedBookFromStore(book.id);
+        await removeTrackedBookFromStore(book.id);
         Toast.show({
           text1: 'Livre retiré de votre bibliothèque',
           type: 'info',
@@ -273,8 +272,7 @@ export default function BookScreen() {
       }
     } else {
       try {
-        const trackingStatus: any = await addBookToTracking(currentBookIdStr);
-        addTrackedBookToStore({ ...book, tracking: true, tracking_status: trackingStatus.book_tracking });
+        await addTrackedBookToStore(book);
         Toast.show({
           text1: 'Livre ajouté à votre bibliothèque',
           type: 'info',

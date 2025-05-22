@@ -14,7 +14,6 @@ import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import SwitchLayoutButton from '@/components/SwitchLayoutButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
-import { addBookToTracking, removeBookFromTracking } from '@/api';
 import Toast from 'react-native-toast-message';
 import { useUIStore } from '@/stores/uiStore';
 

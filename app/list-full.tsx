@@ -16,14 +16,13 @@ import { StatusBar } from "expo-status-bar";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import BookListElement from "@/components/BookListElement";
 import BookCard from "@/components/BookCard";
-import { Book, ReadingList, BookTracking } from "@/types";
+import { Book, List, BookTracking } from "@/types";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import { addBookToTracking, removeBookFromTracking } from "@/api";
 import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import BadgeSlider from "@/components/BadgeSlider";
@@ -101,8 +100,7 @@ export default function ListFull() {
     }
     if (isCurrentlyTracking) {
       try {
-        await removeBookFromTracking(bookId);
-        removeTrackedBookFromStore(parseInt(bookId, 10));
+        await removeTrackedBookFromStore(parseInt(bookId, 10));
         Toast.show({ type: "info", text1: "Livre retiré de votre bibliothèque" });
       } catch (err) {
         console.warn(`Failed to remove book ${bookId}:`, err);
@@ -110,8 +108,7 @@ export default function ListFull() {
       }
     } else {
       try {
-        const trackingStatus: BookTracking = await addBookToTracking(bookId);
-        addTrackedBookToStore({ ...bookObject, tracking: true, tracking_status: trackingStatus });
+        await addTrackedBookToStore(bookObject);
         Toast.show({ type: "info", text1: "Livre ajouté à votre bibliothèque" });
       } catch (err) {
         console.warn(`Failed to add book ${bookId}:`, err);
@@ -152,20 +149,26 @@ export default function ListFull() {
           recycleItems
           ListHeaderComponent={
             <View>
-              {list.backdrop_image && (
                 <View style={{ position: "relative", width: "110%", height: 275, alignSelf: "center", marginHorizontal: -16, zIndex: -99 }}>
-                  <Image
-                    source={{ uri: list.backdrop_image }}
-                    style={{ width: "100%", height: "100%" }}
-                    resizeMode="cover"
-                  />
+                  {list.backdrop_image ? (
+                    <Image
+                      source={{ uri: list.backdrop_image }}
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  ) : (
+                    <View style={{ width: "100%", height: "100%", backgroundColor: colors.accent }} />
+                  )}
+
                   <LinearGradient
                     colors={["transparent", colors.background]}
                     style={{ position: "absolute", left: 0, right: 0, bottom: 0, width: "100%", height: "50%" }}
                     pointerEvents="none"
                   />
                 </View>
-              )}
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 16 }}>
+                  <View style={{ width: 28, height: 28, backgroundColor: colors.accent, borderRadius: 16 }} />
+                  <Text style={[typography.username, { color: colors.secondaryText }]}>{list.owner.username}</Text>
+                </View>
               <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
                 <Text
                   style={[typography.h1, { color: colors.text, maxWidth: "80%" }]}

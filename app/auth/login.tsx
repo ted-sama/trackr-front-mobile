@@ -4,7 +4,7 @@ import Button from '@/components/ui/Button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTypography } from '@/hooks/useTypography';
-import { login as loginApi } from '@/api/auth';
+import { login as loginApi } from '@/services/api/auth';
 import { LoginResponse } from '@/types/auth';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';

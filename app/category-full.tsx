@@ -21,7 +21,6 @@ import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BlurView } from "expo-blur";
-import { addBookToTracking, removeBookFromTracking } from "@/api";
 import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import { useCategoryStore } from "@/stores/categoryStore";
@@ -107,8 +106,7 @@ export default function CategoryFull() {
 
     if (isCurrentlyTracking) {
       try {
-        await removeBookFromTracking(bookId);
-        removeTrackedBookFromStore(parseInt(bookId, 10));
+        await removeTrackedBookFromStore(parseInt(bookId, 10));
         Toast.show({
           text1: "Livre retiré de votre bibliothèque",
           type: "info",
@@ -123,12 +121,7 @@ export default function CategoryFull() {
       }
     } else {
       try {
-        const trackingStatus: any = await addBookToTracking(bookId);
-        addTrackedBookToStore({
-          ...bookObject,
-          tracking: true,
-          tracking_status: trackingStatus.book_tracking,
-        });
+        await addTrackedBookToStore(bookObject);
         Toast.show({
           text1: "Livre ajouté à votre bibliothèque",
           type: "info",

@@ -7,7 +7,7 @@ import HeaderDiscover from '@/components/discover/HeaderDiscover';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Book } from '@/types';
 import BookListElement from '@/components/BookListElement';
-import { search } from '@/api';
+import { search } from '@/services/api';
 import { LegendList } from '@legendapp/list';
 
 export default function SearchScreen() {

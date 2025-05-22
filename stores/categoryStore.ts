@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getCategories, getCategory } from '@/api';
+import { getCategories, getCategory } from '@/services/api';
 import { Category } from '@/types';
 
 export interface CategoryState {

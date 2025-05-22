@@ -7,7 +7,6 @@ import HeaderDiscover from "@/components/discover/HeaderDiscover";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { Book, Category, BookTracking } from "@/types/index";
-import { addBookToTracking, removeBookFromTracking } from "@/api";
 import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { useCategoryStore, CategoryState } from '@/stores/categoryStore';
@@ -35,8 +34,7 @@ export default function Discover() {
 
     if (isCurrentlyTracking) {
       try {
-        await removeBookFromTracking(bookId);
-        removeTrackedBookFromStore(parseInt(bookId, 10));
+        await removeTrackedBookFromStore(parseInt(bookId, 10));
         Toast.show({
           text1: 'Livre retiré de votre bibliothèque',
           type: 'info',
@@ -47,8 +45,7 @@ export default function Discover() {
       }
     } else {
       try {
-        const trackingStatus: any = await addBookToTracking(bookId);
-        addTrackedBookToStore({ ...bookObject, tracking: true, tracking_status: trackingStatus.book_tracking });
+        await addTrackedBookToStore(bookObject);
         Toast.show({
           text1: 'Livre ajouté à votre bibliothèque',
           type: 'info',

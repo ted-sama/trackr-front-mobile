@@ -1,4 +1,4 @@
-import { getMyLibraryBooks } from '@/api';
+import { getMyLibraryBooks } from '@/services/api';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { Book } from '@/types';
 

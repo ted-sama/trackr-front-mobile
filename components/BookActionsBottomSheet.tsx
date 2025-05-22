@@ -31,7 +31,7 @@ import Animated, {
   EntryAnimationsValues,
   ExitAnimationsValues,
 } from "react-native-reanimated";
-import { Book, ReadingStatus, ReadingList } from "@/types";
+import { Book, ReadingStatus, List } from "@/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -50,12 +50,7 @@ import {
 } from "lucide-react-native";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
-import {
-  addBookToTracking,
-  removeBookFromTracking,
-  updateBookTracking,
-  getMyLists,
-} from "@/api";
+import { useListStore } from "@/stores/listStore";
 import CollectionListElement from "./CollectionListElement";
 import Button from "./ui/Button";
 import SecondaryButton from "./ui/SecondaryButton";
@@ -126,15 +121,38 @@ const BookActionsBottomSheet = forwardRef<
       removeTrackedBook,
       addTrackedBook,
     } = useTrackedBooksStore();
+    const {
+      myListsById,
+      myListsIds,
+      fetchMyLists,
+      createList,
+      addBookToList,
+      isLoading: isListsLoading,
+    } = useListStore();
+    const lists = myListsIds.map((id) => myListsById[id]);
     const isTracking = isBookTracked(book.id);
     const [currentView, setCurrentView] = useState(view);
-    const [lists, setLists] = useState<ReadingList[]>([]);
     const [newListName, setNewListName] = useState("");
+
+    useEffect(() => {
+      if (view) {
+        setCurrentView(view);
+      }
+    }, [view]);
+
+    // Fetch lists when entering list editor or creator
+    useEffect(() => {
+      if (
+        currentView === VIEW_LIST_EDITOR ||
+        currentView === VIEW_LIST_CREATOR
+      ) {
+        fetchMyLists();
+      }
+    }, [currentView, fetchMyLists]);
 
     const handleDismiss = () => {
       setCurrentView(view); // Reset to default view on dismiss
       setNewListName(""); // Clear the input
-      setLists([]); // Clear the lists
       if (onDismiss) {
         onDismiss();
       }
@@ -142,21 +160,14 @@ const BookActionsBottomSheet = forwardRef<
 
     const handleCreateList = async () => {
       if (!newListName.trim()) return; // Prevent creating empty lists
-
-      console.log("Attempting to create list:", newListName);
-      // TODO: Replace with actual API call
-      // const newList = await createListAPI(newListName);
-      // if (newList) {
-      //   setLists(prevLists => [...prevLists, newList]);
-      // }
-
-      // For now, let's simulate adding and re-fetch or update locally
-      // For simplicity in this step, we'll just log and navigate back.
-      // In a real app, you'd update the `lists` state here or refetch.
-      
-      fetchLists(); // Re-fetch lists to include the new one (or update locally)
-      setNewListName(""); // Clear the input
-      setCurrentView(VIEW_LIST_EDITOR); // Go back to the list editor view
+      console.log("lists before createList", myListsById);
+      const newList = await createList(newListName.trim());
+      console.log("lists after createList (from store return)", newList);
+      if (newList) {
+        await addBookToList(newList.id, book.id);
+      }
+      setNewListName("");
+      handleDismiss();
     };
 
     const actions = [
@@ -183,7 +194,6 @@ const BookActionsBottomSheet = forwardRef<
         icon: <PlusIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: true,
         onPress: () => {
-          fetchLists();
           setCurrentView(VIEW_LIST_EDITOR);
         },
       },
@@ -235,12 +245,6 @@ const BookActionsBottomSheet = forwardRef<
       },
     ];
 
-    const fetchLists = async () => {
-      const response = await getMyLists();
-      setLists(response.items);
-      console.log("fetching lists");
-    };
-
     useEffect(() => {
       if (view) {
         setCurrentView(view);
@@ -248,24 +252,15 @@ const BookActionsBottomSheet = forwardRef<
     }, [view]);
 
     const updateStatus = async (status: ReadingStatus) => {
-      const updatedBookTracking = await updateBookTracking({
-        bookId: book.id.toString(),
-        status,
-      });
-      updateTrackedBook(book.id, {
-        ...book,
-        tracking_status: updatedBookTracking,
-      });
+      await updateTrackedBook(book.id, { status });
     };
 
     const handleAddBookToTracking = async () => {
-      await addBookToTracking(book.id.toString());
-      addTrackedBook(book);
+      await addTrackedBook(book);
     };
 
     const handleRemoveBookFromTracking = async () => {
-      await removeBookFromTracking(book.id.toString());
-      removeTrackedBook(book.id);
+      await removeTrackedBook(book.id);
     };
 
     const renderBackdrop = useCallback(
@@ -436,12 +431,18 @@ const BookActionsBottomSheet = forwardRef<
                 />
               </View>
               {/* Liste des listes */}
-              <LegendList
-                data={lists}
+              <View style={{ height: 380 }}>
+                <LegendList
+                  data={lists}
                   renderItem={({ item }) => (
-                    <CollectionListElement list={item} onPress={() => {}} />
+                    <CollectionListElement list={item} onPress={() => {}} size="compact" />
                   )}
-              />
+                  keyExtractor={(item) => item.id.toString()}
+                  ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+                  recycleItems
+                  contentContainerStyle={{ flexGrow: 1 }}
+                />
+              </View>
               <Button title="Ajouter" onPress={() => {}} style={{ marginTop: 64 }} />
             </Animated.View>
           )}

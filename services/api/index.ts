@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category, BookTracking, ReadingStatus, ListResponse, List, ReadingList } from '@/types';
+import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category, BookTracking, ReadingStatus, ListResponse, List } from '@/types';
 import { refreshToken } from './auth';
 
 export const api: AxiosInstance = axios.create({
@@ -112,7 +112,7 @@ export const getCategory = async (id: string): Promise<Category> => {
   return response.data;
 };
 
-export const getList = async (id: string): Promise<ReadingList> => {
+export const getList = async (id: string): Promise<List> => {
   const response = await api.get(`/lists/${id}`);
   return response.data;
 };
@@ -184,7 +184,7 @@ export const addBookToTracking = async (bookId: string): Promise<BookTracking> =
       'Content-Type': 'application/json'
     }
   });
-  return response.data;
+  return response.data.book_tracking;
 };
 
 export const removeBookFromTracking = async (bookId: string): Promise<void> => {

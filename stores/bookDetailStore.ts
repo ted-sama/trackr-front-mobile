@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getBook } from '@/api';
+import { getBook } from '@/services/api';
 import { Book } from '@/types';
 
 export interface BookDetailState {

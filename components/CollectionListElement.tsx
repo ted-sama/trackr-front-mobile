@@ -3,15 +3,16 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { ReadingList } from "@/types";
+import { List } from "@/types";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 interface CollectionListElementProps {
-  list: ReadingList;
+  list: List;
   onPress: () => void;
+  size?: 'default' | 'compact';
 }
 
-export default function CollectionListElement({ list, onPress }: CollectionListElementProps) {
+export default function CollectionListElement({ list, onPress, size = 'default' }: CollectionListElementProps) {
   const { colors } = useTheme();
   const typography = useTypography();
 
@@ -28,18 +29,28 @@ export default function CollectionListElement({ list, onPress }: CollectionListE
     scale.value = withTiming(1, { duration: 220 });
   };
 
+  // Define sizes based on size prop
+  const isCompact = size === 'compact';
+  const coverWidth = isCompact ? 40 : 60;
+  const coverHeight = isCompact ? 60 : 90;
+  const stackOffset = isCompact ? 10 : 20;
+  const containerWidth = isCompact ? coverWidth + stackOffset * 2 : 100;
+  const containerHeight = isCompact ? coverHeight : 90;
+  const mainGap = isCompact ? 8 : 10;
+  const textGap = isCompact ? 2 : 4;
+
   const styles = StyleSheet.create({
     // container for stacked covers
     coverStackContainer: {
-      width: 100, // cover width (60) + offset*2
-      height: 90,
+      width: containerWidth,
+      height: containerHeight,
       position: 'relative',
     },
     // actual cover image
     coverStackImage: {
-      width: 60,
-      height: 90,
-      borderRadius: 4,
+      width: coverWidth,
+      height: coverHeight,
+      borderRadius: isCompact ? 3 : 4,
       borderWidth: 0.75,
       position: 'absolute',
       shadowColor: '#000',
@@ -50,17 +61,12 @@ export default function CollectionListElement({ list, onPress }: CollectionListE
     },
     // placeholder when no cover
     coverStackPlaceholder: {
-      width: 60,
-      height: 90,
-      borderRadius: 4,
+      width: coverWidth,
+      height: coverHeight,
+      borderRadius: isCompact ? 3 : 4,
       borderWidth: 0.75,
       position: 'absolute',
       backgroundColor: '#ccc',
-      shadowColor: '#000',
-      shadowOffset: { width: -3, height: 0 },
-      shadowOpacity: 0.3,
-      shadowRadius: 2,
-      elevation: 3,
     },
   });
 
@@ -70,11 +76,11 @@ export default function CollectionListElement({ list, onPress }: CollectionListE
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      <Animated.View style={[{ flexDirection: "row", alignItems: "center", gap: 10 }, animatedStyle]}>
+      <Animated.View style={[{ flexDirection: "row", alignItems: "center", gap: mainGap }, animatedStyle]}>
         <View style={styles.coverStackContainer}>  
           {[0, 1, 2].map((_, index) => {
             const book = list.first_book_covers?.[index];
-            const leftOffset = index * 20;
+            const leftOffset = index * stackOffset;
             return book ? (
               <Image
                 key={book}
@@ -89,9 +95,14 @@ export default function CollectionListElement({ list, onPress }: CollectionListE
             );
           })}
         </View>
-        <View style={{ flexDirection: "column", gap: 4 }}>
+        <View style={{ flexDirection: "column", gap: textGap }}>
           <Text style={[typography.h3, { color: colors.text }]}>{list.name}</Text>
-          <Text style={[typography.caption, { color: colors.secondaryText }]}>{list.total_books} éléments</Text>
+          <Text style={[typography.caption, { color: colors.secondaryText }]}>
+            {list.total_books} {list.total_books > 1 ? "éléments" : "élément"}
+          </Text>
+          {size === 'default' && (
+            <Text style={[typography.caption, { color: colors.secondaryText }]}>Par {list.owner.username}</Text>
+          )}
         </View>
       </Animated.View>
     </Pressable>

@@ -8,6 +8,7 @@ export interface Typography {
   body: object;
   bodyBold: object;
   caption: object;
+  username: object;
   badge: object;
   button: object;
   categoryTitle: object;
@@ -56,6 +57,11 @@ export function useTypography(): Typography {
     caption: {
       fontFamily: 'Manrope_600SemiBold',
       fontSize: 13,
+      letterSpacing: -0.3,
+    },
+    username: {
+      fontFamily: 'Manrope_800ExtraBold',
+      fontSize: 14,
       letterSpacing: -0.3,
     },
     badge: {

@@ -9,7 +9,6 @@ import { useTypography } from '@/hooks/useTypography';
 import { Book } from '@/types';
 import { Plus, Minus } from 'lucide-react-native';
 import Button from '@/components/ui/Button';
-import { updateBookTracking } from '@/api';
 
 
 interface SetChapterBottomSheetProps {
@@ -43,9 +42,8 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
 
     const handleSave = async () => {
         if (isTracking) {
-            const updatedBookTracking = await updateBookTracking({ bookId: book.id.toString(), current_chapter: Number(chapter) });
-            updateTrackedBook(book.id, { ...book, tracking_status: updatedBookTracking });
-            setChapter(updatedBookTracking.current_chapter?.toString() ?? '0');
+            await updateTrackedBook(book.id, { current_chapter: Number(chapter) });
+            setChapter(chapter);
             if (ref && typeof ref === 'object' && 'current' in ref) {
                 ref.current?.dismiss();
             }

@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../..//contexts/ThemeContext';
 import { useTypography } from '../../hooks/useTypography';
-import { getBook, getChaptersFromBook, getSources, getChaptersFromSource } from '../../api';
+import { getBook, getChaptersFromBook, getSources, getChaptersFromSource } from '../../services/api';
 import { Book, ChapterResponse, Chapter, Source } from '../../types';
 import TabBar, { TabBarTab } from '../../components/TabBar';
 import DropdownSelector from '../../components/DropdownSelector';

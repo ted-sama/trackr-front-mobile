@@ -106,38 +106,21 @@ export interface ListResponse {
   limit: number;
   offset: number;
   total: number;
-  items: ReadingList[];
+  items: List[];
 }
 
 export interface List {
-  id: string;
+  id: number;
   name: string;
   description?: string | null;
-  user_id: string;
-  cover_image?: string | null;
   backdrop_image?: string | null;
   tags?: string[] | null;
+  owner: {
+    id: string;
+    username: string;
+    avatar?: string | null;
+  };
   is_public: boolean;
-  is_my_library: boolean;
-  total_books: number;
-  books?: Book[];
-  created_at: Date;
-  updated_at: Date;
-}
-
-/**
- * Interface représentant une liste de lecture
- */
-export interface ReadingList {
-  id: string;
-  name: string;
-  description?: string;
-  user_id: string;
-  cover_image?: string;
-  backdrop_image?: string;
-  tags?: string[];
-  is_public: boolean;
-  is_my_library: boolean;
   first_book_covers?: string[];
   total_books: number;
   books?: Book[];

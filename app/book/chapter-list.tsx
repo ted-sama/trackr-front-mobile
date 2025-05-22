@@ -5,7 +5,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import ChapterListElement from "@/components/ChapterListElement";
 import { Chapter, ChapterResponse } from "@/types";
 import { useLocalSearchParams } from "expo-router";
-import { getChaptersFromSource } from "@/api";
+import { getChaptersFromSource } from "@/services/api";
 import ChapterListElementSkeleton from "@/components/skeleton-loader/ChapterListElementSkeleton";
 
 export default function ChapterList() {
