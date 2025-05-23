@@ -67,8 +67,9 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
             onDismiss={handleDismiss}
             backgroundStyle={{
                 backgroundColor: colors.card,
-                borderRadius: 25,
+                borderRadius: 30,
             }}
+            handleComponent={null}
             handleIndicatorStyle={{ backgroundColor: colors.icon }}
             backdropComponent={renderBackdrop}
         >
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
         bottom: 0,
     },
     bottomSheetContent: {
-        padding: 16,
+        padding: 24,
         paddingBottom: 64,
     },
     title: {

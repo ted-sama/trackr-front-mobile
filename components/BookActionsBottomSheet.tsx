@@ -129,6 +129,8 @@ const BookActionsBottomSheet = forwardRef<
       fetchMyLists,
       createList,
       addBookToList,
+      removeBookFromList,
+      getListsContainingBook,
       isLoading: isListsLoading,
     } = useListStore();
     const lists = myListsIds.map((id) => myListsById[id]);
@@ -136,6 +138,7 @@ const BookActionsBottomSheet = forwardRef<
     const [currentView, setCurrentView] = useState(view);
     const [newListName, setNewListName] = useState("");
     const [selectedListIds, setSelectedListIds] = useState<number[]>([]);
+    const [initialListIds, setInitialListIds] = useState<number[]>([]);
 
     useEffect(() => {
       if (view) {
@@ -153,9 +156,27 @@ const BookActionsBottomSheet = forwardRef<
       }
     }, [currentView, fetchMyLists]);
 
+    // Load lists containing the book when entering list editor
+    useEffect(() => {
+      if (currentView === VIEW_LIST_EDITOR) {
+        const loadBookLists = async () => {
+          try {
+            const bookListIds = await getListsContainingBook(book.id);
+            setSelectedListIds(bookListIds);
+            setInitialListIds(bookListIds);
+          } catch (error) {
+            console.error('Erreur lors du chargement des listes du livre:', error);
+          }
+        };
+        loadBookLists();
+      }
+    }, [currentView, book.id, getListsContainingBook]);
+
     const handleDismiss = () => {
       setCurrentView(view); // Reset to default view on dismiss
       setNewListName(""); // Clear the input
+      setSelectedListIds([]); // Reset selected lists
+      setInitialListIds([]); // Reset initial lists
       if (onDismiss) {
         onDismiss();
       }
@@ -294,8 +315,9 @@ const BookActionsBottomSheet = forwardRef<
         onDismiss={handleDismiss}
         backgroundStyle={{
           backgroundColor: colors.card,
-          borderRadius: 25,
+          borderRadius: 30,
         }}
+        handleComponent={null}
         handleIndicatorStyle={{ backgroundColor: colors.icon }}
         backdropComponent={renderBackdrop}
         keyboardBlurBehavior="restore"
@@ -459,16 +481,29 @@ const BookActionsBottomSheet = forwardRef<
                 />
               </View>
               <Button
-                title="Ajouter"
+                title="Sauvegarder"
                 onPress={async () => {
-                  await Promise.all(
-                    selectedListIds.map((listId) => addBookToList(listId, book.id))
-                  );
-                  setSelectedListIds([]);
-                  handleDismiss();
+                  // Determine which lists to add to and which to remove from
+                  const listsToAdd = selectedListIds.filter(id => !initialListIds.includes(id));
+                  const listsToRemove = initialListIds.filter(id => !selectedListIds.includes(id));
+                  
+                  try {
+                    // Add book to new lists
+                    await Promise.all(
+                      listsToAdd.map((listId) => addBookToList(listId, book.id))
+                    );
+                    
+                    // Remove book from unchecked lists
+                    await Promise.all(
+                      listsToRemove.map((listId) => removeBookFromList(listId, book.id))
+                    );
+                    
+                    handleDismiss();
+                  } catch (error) {
+                    console.error('Erreur lors de la sauvegarde des listes:', error);
+                  }
                 }}
                 style={{ marginTop: 64 }}
-                disabled={selectedListIds.length === 0}
               />
             </Animated.View>
           )}
@@ -567,7 +602,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   bottomSheetContent: {
-    padding: 16,
+    padding: 24,
     paddingBottom: 64,
   },
   bottomSheetHeader: {

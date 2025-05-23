@@ -21,6 +21,16 @@ export const addBookToList = async (listId: number, bookId: number): Promise<voi
   });
 };
 
+export const removeBookFromList = async (listId: number, bookId: number): Promise<void> => {
+  const token = await SecureStore.getItemAsync('user_auth_token');
+  await api.delete(`/lists/${listId}/books`, {
+    data: { id: bookId },
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+};
+
 export const getMyLists = async () => {
   const response = await api.get('/lists');
   return response.data;

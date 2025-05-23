@@ -207,10 +207,7 @@ interface updateBookTrackingParams {
   current_chapter?: number;
   current_volume?: number;
   rating?: number;
-  start_date?: Date;
-  finish_date?: Date;
   notes?: string;
-  last_read_at?: Date;
   created_at?: Date;
   updated_at?: Date;
 }

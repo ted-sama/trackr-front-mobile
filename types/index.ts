@@ -17,6 +17,7 @@ export interface Book {
   title: string;
   author?: string;
   rating?: number;
+  rating_count: number;
   release_year?: number;
   end_year?: number;
   volumes?: number;

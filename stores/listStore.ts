@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { getMyLists, getList, getBook } from '@/services/api';
-import { addBookToList, createList } from '@/services/api/list';
+import { addBookToList, createList, removeBookFromList } from '@/services/api/list';
 import { Book, List } from '@/types';
 
 export interface ListState {
@@ -11,6 +11,8 @@ export interface ListState {
   error: string | null;
   createList: (name: string) => Promise<List | undefined>;
   addBookToList: (listId: number, bookId: number) => Promise<void>;
+  removeBookFromList: (listId: number, bookId: number) => Promise<void>;
+  getListsContainingBook: (bookId: number) => Promise<number[]>;
   fetchMyLists: () => Promise<void>;
   fetchList: (id: string) => Promise<void>;
 }
@@ -67,6 +69,56 @@ export const useListStore = create<ListState>((set, get) => ({
     } finally {
       set({ isLoading: false });
     }
+  },
+
+  removeBookFromList: async (listId: number, bookId: number) => {
+    set({ isLoading: true, error: null });
+    try {
+      await removeBookFromList(listId, bookId);
+      
+      // Fetch the book details to get the cover image to remove
+      const book = await getBook({ id: bookId.toString() });
+      
+      set(state => ({
+        myListsById: {
+          ...state.myListsById,
+          [listId]: {
+            ...state.myListsById[listId],
+            total_books: Math.max(0, state.myListsById[listId].total_books - 1),
+            first_book_covers: (() => {
+              const covers = state.myListsById[listId].first_book_covers || [];
+              // Remove the book's cover if it's present in first_book_covers
+              return covers.filter(cover => cover !== book.cover_image);
+            })(),
+          }
+        },
+      }));
+    } catch (e: any) {
+      set({ error: e.message || 'Erreur de suppression du livre de la liste' });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  getListsContainingBook: async (bookId: number) => {
+    const { myListsIds } = get();
+    const listsContainingBook: number[] = [];
+    
+    // Pour chaque liste, récupérer ses livres et vérifier si le livre est présent
+    await Promise.all(
+      myListsIds.map(async (listId) => {
+        try {
+          const list = await getList(listId.toString());
+          if (list.books && list.books.some(book => book.id === bookId)) {
+            listsContainingBook.push(listId);
+          }
+        } catch (error) {
+          console.warn(`Erreur lors de la vérification de la liste ${listId}:`, error);
+        }
+      })
+    );
+    
+    return listsContainingBook;
   },
 
   fetchMyLists: async () => {
