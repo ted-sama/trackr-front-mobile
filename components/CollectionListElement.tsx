@@ -15,6 +15,7 @@ interface CollectionListElementProps {
   list: List;
   onPress: () => void;
   size?: "default" | "compact";
+  showDescription?: boolean;
   isSelected?: boolean;
 }
 
@@ -22,6 +23,7 @@ export default function CollectionListElement({
   list,
   onPress,
   size = "default",
+  showDescription = false,
   isSelected,
 }: CollectionListElementProps) {
   const { colors } = useTheme();
@@ -177,6 +179,11 @@ export default function CollectionListElement({
                 {list.is_public ? "Public" : "Privé"}
               </Text>
             </View>
+          )}
+          {showDescription && (
+            <Text style={[typography.bodyCaption, { color: colors.secondaryText }]} numberOfLines={2}>
+              {list.description}
+            </Text>
           )}
         </View>
         {isSelected && (

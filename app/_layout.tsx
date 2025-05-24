@@ -104,7 +104,7 @@ function RootLayoutContent() {
   }
 
   return (
-    <React.Fragment>
+    <>
       <Stack
         screenOptions={{
           headerShown: false,
@@ -129,6 +129,6 @@ function RootLayoutContent() {
         />
       )}
       <Toast autoHide={true} visibilityTime={2000} position='bottom' bottomOffset={100} config={toastConfig} />
-    </React.Fragment>
+    </>
   );
 }

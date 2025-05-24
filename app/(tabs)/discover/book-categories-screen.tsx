@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { StyleSheet, ScrollView, ActivityIndicator, Text, View } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { StyleSheet, ScrollView, ActivityIndicator, Text, View, RefreshControl } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { Book } from "@/types/index";
@@ -13,6 +13,8 @@ interface BookCategoriesScreenProps {}
 export default function BookCategoriesScreen({}: BookCategoriesScreenProps) {
   const { colors } = useTheme();
   const { isBottomSheetVisible } = useBottomSheet();
+  const [refreshing, setRefreshing] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   const fetchCategories = useCategoryStore((state: CategoryState) => state.fetchCategories);
   const categoryIds = useCategoryStore((state: CategoryState) => state.allIds);
@@ -22,6 +24,15 @@ export default function BookCategoriesScreen({}: BookCategoriesScreenProps) {
   const error = useCategoryStore((state: CategoryState) => state.error);
 
   const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchCategories();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchCategories]);
 
   const onTrackingToggleInDiscover = async (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => {
     if (!bookObject) {
@@ -56,20 +67,24 @@ export default function BookCategoriesScreen({}: BookCategoriesScreenProps) {
   };
 
   useEffect(() => {
-    fetchCategories();
+    const loadInitialData = async () => {
+      await fetchCategories();
+      setHasLoadedOnce(true);
+    };
+    loadInitialData();
   }, [fetchCategories]);
 
-  if (isLoading) {
+  if (isLoading && !hasLoadedOnce && !refreshing) {
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
-  if (error) {
+  if (error && !hasLoadedOnce) {
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, { backgroundColor: colors.background }]}>
         <Text style={{ color: colors.text }}>{error}</Text>
       </View>
     );
@@ -81,6 +96,14 @@ export default function BookCategoriesScreen({}: BookCategoriesScreenProps) {
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
       scrollEnabled={!isBottomSheetVisible}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      }
     >
       {categories.map((category) => (
         <CategorySlider

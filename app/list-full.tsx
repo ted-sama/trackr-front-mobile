@@ -138,7 +138,7 @@ export default function ListFull() {
 
                   <LinearGradient
                     colors={["transparent", colors.background]}
-                    style={{ position: "absolute", left: 0, right: 0, bottom: 0, width: "100%", height: "50%" }}
+                    style={{ position: "absolute", left: 0, right: 0, bottom: 0, width: "100%", height: "100%" }}
                     pointerEvents="none"
                   />
                 </View>

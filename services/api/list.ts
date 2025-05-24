@@ -1,4 +1,4 @@
-import { List } from "@/types";
+import { List, ListResponse } from "@/types";
 import { api } from "./index";
 import * as SecureStore from 'expo-secure-store';
 
@@ -31,7 +31,17 @@ export const removeBookFromList = async (listId: number, bookId: number): Promis
   });
 };
 
-export const getMyLists = async () => {
+export const getMyLists = async (): Promise<ListResponse> => {
+  const token = await SecureStore.getItemAsync('user_auth_token');
+  const response = await api.get('/me/lists', {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  return response.data;
+};
+
+export const getLists = async (): Promise<ListResponse> => {
   const response = await api.get('/lists');
   return response.data;
 };

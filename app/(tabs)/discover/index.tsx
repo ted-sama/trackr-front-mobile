@@ -40,7 +40,7 @@ export default function Discover() {
         }}
         
       >
-        <Tab.Screen name="Categories" component={BookCategoriesScreen} />
+        <Tab.Screen name="Livres" component={BookCategoriesScreen} />
         <Tab.Screen name="Listes" component={UserListsScreen} />
       </Tab.Navigator>
     </SafeAreaView>

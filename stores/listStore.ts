@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import { getMyLists, getList, getBook } from '@/services/api';
-import { addBookToList, createList, removeBookFromList } from '@/services/api/list';
+import { addBookToList, createList, getLists, removeBookFromList } from '@/services/api/list';
 import { Book, List } from '@/types';
 
 export interface ListState {
+  listsById: Record<string, List>;
+  listsIds: number[];
   myListsById: Record<string, List>;
   myListsIds: number[];
   readingListsById: Record<string, List>;
@@ -13,11 +15,14 @@ export interface ListState {
   addBookToList: (listId: number, bookId: number) => Promise<void>;
   removeBookFromList: (listId: number, bookId: number) => Promise<void>;
   getListsContainingBook: (bookId: number) => Promise<number[]>;
+  fetchLists: () => Promise<void>;
   fetchMyLists: () => Promise<void>;
   fetchList: (id: string) => Promise<void>;
 }
 
 export const useListStore = create<ListState>((set, get) => ({
+  listsById: {},
+  listsIds: [],
   myListsById: {},
   myListsIds: [],
   readingListsById: {},
@@ -141,6 +146,21 @@ export const useListStore = create<ListState>((set, get) => ({
     );
     
     return listsContainingBook;
+  },
+
+  fetchLists: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await getLists();
+      set({ listsById: response.items.reduce<Record<string, List>>((acc, list) => {
+        acc[list.id] = list;
+        return acc;
+      }, {}), listsIds: response.items.map(l => l.id) });
+    } catch (e: any) {
+      set({ error: e.message || 'Erreur de chargement des listes' });
+    } finally {
+      set({ isLoading: false });
+    }
   },
 
   fetchMyLists: async () => {
