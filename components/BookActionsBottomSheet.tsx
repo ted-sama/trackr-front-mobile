@@ -32,12 +32,11 @@ import Animated, {
   EntryAnimationsValues,
   ExitAnimationsValues,
 } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 import { Book, ReadingStatus, List } from "@/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import {
-  Star,
-  StarHalf,
   PlusIcon,
   ShareIcon,
   StarIcon,
@@ -52,9 +51,11 @@ import {
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { useListStore } from "@/stores/listStore";
+import { hexToRgba } from "@/utils/colors";
 import CollectionListElement from "./CollectionListElement";
 import Button from "./ui/Button";
 import SecondaryButton from "./ui/SecondaryButton";
+import RatingSlider from "./ui/RatingSlider";
 
 export interface BookActionsBottomSheetProps {
   book: Book;
@@ -62,12 +63,12 @@ export interface BookActionsBottomSheetProps {
   index?: number;
   onDismiss?: () => void;
   backdropDismiss?: boolean;
-  view?: "actions" | "status_editor" | "note_editor" | "list_editor" | "list_creator";
+  view?: "actions" | "status_editor" | "rating_editor" | "list_editor" | "list_creator";
 }
 
 const VIEW_ACTIONS = "actions";
 const VIEW_STATUS_EDITOR = "status_editor";
-const VIEW_NOTE_EDITOR = "note_editor";
+const VIEW_RATING_EDITOR = "rating_editor";
 const VIEW_LIST_EDITOR = "list_editor";
 const VIEW_LIST_CREATOR = "list_creator";
 // Custom morphing animations
@@ -119,6 +120,7 @@ const BookActionsBottomSheet = forwardRef<
     const typography = useTypography();
     const {
       isBookTracked,
+      getTrackedBookStatus,
       updateTrackedBook,
       removeTrackedBook,
       addTrackedBook,
@@ -133,12 +135,15 @@ const BookActionsBottomSheet = forwardRef<
       getListsContainingBook,
       isLoading: isListsLoading,
     } = useListStore();
+
     const lists = myListsIds.map((id) => myListsById[id]);
     const isTracking = isBookTracked(book.id);
     const [currentView, setCurrentView] = useState(view);
     const [newListName, setNewListName] = useState("");
     const [selectedListIds, setSelectedListIds] = useState<number[]>([]);
     const [initialListIds, setInitialListIds] = useState<number[]>([]);
+    const [tempStatus, setTempStatus] = useState<ReadingStatus>();
+    const [tempRating, setTempRating] = useState<number>(0);
 
     useEffect(() => {
       if (view) {
@@ -172,6 +177,13 @@ const BookActionsBottomSheet = forwardRef<
       }
     }, [currentView, book.id, getListsContainingBook]);
 
+    // Synchronise tempStatus et tempRating avec trackedStatus à chaque changement
+    useEffect(() => {
+      const trackedStatus = getTrackedBookStatus(book.id);
+      setTempStatus(trackedStatus?.status || "plan_to_read");
+      setTempRating(trackedStatus?.rating || 0);
+    }, [book.id, getTrackedBookStatus]);
+
     const handleDismiss = () => {
       setCurrentView(view); // Reset to default view on dismiss
       setNewListName(""); // Clear the input
@@ -184,9 +196,7 @@ const BookActionsBottomSheet = forwardRef<
 
     const handleCreateList = async () => {
       if (!newListName.trim()) return; // Prevent creating empty lists
-      console.log("lists before createList", myListsById);
       const newList = await createList(newListName.trim());
-      console.log("lists after createList (from store return)", newList);
       if (newList) {
         await addBookToList(newList.id, book.id);
       }
@@ -224,8 +234,8 @@ const BookActionsBottomSheet = forwardRef<
       {
         label: "Noter",
         icon: <StarIcon size={16} strokeWidth={2.75} color={colors.text} />,
-        show: true,
-        onPress: () => setCurrentView(VIEW_NOTE_EDITOR),
+        show: isTracking,
+        onPress: () => setCurrentView(VIEW_RATING_EDITOR),
       },
       {
         label: "Changer de couverture",
@@ -243,26 +253,31 @@ const BookActionsBottomSheet = forwardRef<
 
     const statusOptions = [
       {
+        status: "reading",
         label: "En cours",
         icon: <BookOpenIcon size={16} strokeWidth={2.75} color={colors.text} />,
         onPress: () => updateStatus("reading"),
       },
       {
+        status: "plan_to_read",
         label: "A lire",
         icon: <Clock3 size={16} strokeWidth={2.75} color={colors.text} />,
         onPress: () => updateStatus("plan_to_read"),
       },
       {
+        status: "completed",
         label: "Complété",
         icon: <BookCheck size={16} strokeWidth={2.75} color={colors.text} />,
         onPress: () => updateStatus("completed"),
       },
       {
+        status: "on_hold",
         label: "En pause",
         icon: <Pause size={16} strokeWidth={2.75} color={colors.text} />,
         onPress: () => updateStatus("on_hold"),
       },
       {
+        status: "dropped",
         label: "Abandonné",
         icon: <Square size={16} strokeWidth={2.75} color={colors.text} />,
         onPress: () => updateStatus("dropped"),
@@ -276,6 +291,7 @@ const BookActionsBottomSheet = forwardRef<
     }, [view]);
 
     const updateStatus = async (status: ReadingStatus) => {
+      setTempStatus(status);
       await updateTrackedBook(book.id, { status });
     };
 
@@ -306,6 +322,21 @@ const BookActionsBottomSheet = forwardRef<
       ),
       [backdropDismiss]
     );
+
+    const handleSaveRating = async () => {
+      try {
+        // If book is not tracked, add it first
+        if (!isTracking) {
+          await addTrackedBook(book);
+        }
+        
+        // Update the book with the new rating
+        await updateTrackedBook(book.id, { rating: tempRating });
+        handleDismiss();
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde de la note:', error);
+      }
+    };
 
     return (
       <BottomSheetModal
@@ -353,7 +384,7 @@ const BookActionsBottomSheet = forwardRef<
                       {book.author}
                     </Text>
                     <View style={[styles.ratingContainer, { marginTop: 4 }]}>
-                      <Ionicons name="star" size={14} color={colors.text} />
+                      <Ionicons name="star" size={14} color={colors.secondaryText} />
                       <Text
                         style={[
                           typography.caption,
@@ -420,8 +451,10 @@ const BookActionsBottomSheet = forwardRef<
                     style={[
                       styles.actionButton,
                       { backgroundColor: colors.actionButton },
+                      { opacity: tempStatus === option.status ? 0.5 : 1 },
                     ]}
-                    onPress={() => option.onPress()}
+                    disabled={tempStatus === option.status}
+                    onPress={option.onPress}
                   >
                     {option.icon}
                     <Text style={[typography.caption, { color: colors.text }]}>
@@ -465,6 +498,11 @@ const BookActionsBottomSheet = forwardRef<
               </View>
               {/* Liste des listes */}
               <View style={{ height: 380 }}>
+                <LinearGradient
+                  colors={[hexToRgba(colors.card, 1), hexToRgba(colors.card, 0)]}
+                  style={styles.fadeTop}
+                  pointerEvents="none"
+                />
                 <FlatList
                   data={lists}
                   renderItem={({ item }) => (
@@ -477,7 +515,12 @@ const BookActionsBottomSheet = forwardRef<
                   )}
                   keyExtractor={(item) => item.id.toString()}
                   ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-                  contentContainerStyle={{ flexGrow: 1 }}
+                  contentContainerStyle={{ flexGrow: 1, paddingTop: 12 }}
+                />
+                <LinearGradient
+                  colors={[hexToRgba(colors.card, 0), hexToRgba(colors.card, 1)]}
+                  style={styles.fadeBottom}
+                  pointerEvents="none"
                 />
               </View>
               <Button
@@ -503,7 +546,7 @@ const BookActionsBottomSheet = forwardRef<
                     console.error('Erreur lors de la sauvegarde des listes:', error);
                   }
                 }}
-                style={{ marginTop: 64 }}
+                style={{ marginTop: 36 }}
               />
             </Animated.View>
           )}
@@ -529,7 +572,7 @@ const BookActionsBottomSheet = forwardRef<
                   Créer une nouvelle liste
                 </Text>
               </View>
-              <View style={{ marginBottom: 16 }}>
+              <View style={{ marginBottom: 36 }}>
                 <View style={{
                   backgroundColor: colors.background,
                   borderRadius: 16,
@@ -556,7 +599,7 @@ const BookActionsBottomSheet = forwardRef<
             </Animated.View>
           )}
 
-          {currentView === VIEW_NOTE_EDITOR && (
+          {currentView === VIEW_RATING_EDITOR && (
             <Animated.View entering={morphIn} exiting={morphOut}>
               <View style={styles.subMenuHeader}>
                 <TouchableOpacity
@@ -578,12 +621,17 @@ const BookActionsBottomSheet = forwardRef<
                 </Text>
               </View>
               <View style={styles.ratingAction}>
-                <Star size={52} color={colors.text} strokeWidth={0.75} />
-                <Star size={52} color={colors.text} strokeWidth={0.75} />
-                <Star size={52} color={colors.text} strokeWidth={0.75} />
-                <Star size={52} color={colors.text} strokeWidth={0.75} />
-                <Star size={52} color={colors.text} strokeWidth={0.75} />
+                <RatingSlider
+                  value={tempRating}
+                  onValueChange={setTempRating}
+                  showValue={true}
+                />
               </View>
+              <Button
+                title="Sauvegarder la note"
+                onPress={handleSaveRating}
+                style={{ marginTop: 36 }}
+              />
             </Animated.View>
           )}
         </BottomSheetView>
@@ -653,7 +701,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 2,
-    marginBottom: 64,
+  },
+  fadeTop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 20,
+    zIndex: 1,
+  },
+  fadeBottom: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 20,
+    zIndex: 1,
   },
 });
 

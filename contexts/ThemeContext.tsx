@@ -49,7 +49,7 @@ interface ThemeContextType {
 
 // Définition des couleurs pour chaque thème
 const lightColors = {
-  background: '#FFFFFF',
+  background: '#fcfcfc',
   card: '#f5f5f5',
   text: '#202020',
   icon: '#666666',

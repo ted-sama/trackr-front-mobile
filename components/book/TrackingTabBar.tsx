@@ -63,7 +63,7 @@ export function TrackingTabBar({
       <View style={styles.row}>
         <Pressable onPress={onStatusPress} accessibilityRole="button" accessibilityLabel="Changer le statut de suivi">
           <View style={styles.statusContainer}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               {trackingStatusValues[status as ReadingStatus].icon}
               <Text style={[typography.trackingTabBarText, { color: colors.text }]} numberOfLines={1} accessibilityLabel={`Statut de suivi : ${status}`}>{trackingStatusValues[status as ReadingStatus].text}</Text>
             </View>

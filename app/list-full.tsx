@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect , useCallback } from "react";
 import { View, Text, Platform, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { LegendList, LegendListRef } from "@legendapp/list";
@@ -17,7 +17,7 @@ import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import BookListElement from "@/components/BookListElement";
 import BookCard from "@/components/BookCard";
 import { Book, List, BookTracking } from "@/types";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -57,6 +57,7 @@ export default function ListFull() {
 
   const list = useListStore(state => state.readingListsById[id as string] || null);
   const fetchList = useListStore(state => state.fetchList);
+  const isLoading = useListStore(state => state.isLoading);
   const [isBlurVisible, setIsBlurVisible] = useState(false);
   const blurOpacity = useSharedValue(0);
 
@@ -65,9 +66,14 @@ export default function ListFull() {
     opacity: blurOpacity.value,
   }));
 
-  useEffect(() => {
-    if (id) fetchList(id as string);
-  }, [id]);
+  // Charger la liste initialement et quand on revient sur l'écran
+  useFocusEffect(
+    useCallback(() => {
+      if (id) {
+        fetchList(id as string);
+      }
+    }, [id, fetchList])
+  );
 
   // Load layout preference
   useEffect(() => {
@@ -86,35 +92,6 @@ export default function ListFull() {
 
   const handleBack = () => {
     router.back();
-  };
-
-  const handleTrackingToggleInList = async (
-    bookId: string,
-    isCurrentlyTracking: boolean,
-    bookObject?: Book
-  ) => {
-    if (!bookObject) {
-      console.warn("Book object is missing in handleTrackingToggleInList");
-      Toast.show({ type: "error", text1: "Erreur de suivi", text2: "Données du livre manquantes." });
-      return;
-    }
-    if (isCurrentlyTracking) {
-      try {
-        await removeTrackedBookFromStore(parseInt(bookId, 10));
-        Toast.show({ type: "info", text1: "Livre retiré de votre bibliothèque" });
-      } catch (err) {
-        console.warn(`Failed to remove book ${bookId}:`, err);
-        Toast.show({ type: "error", text1: "Erreur", text2: "Impossible de retirer le livre." });
-      }
-    } else {
-      try {
-        await addTrackedBookToStore(bookObject);
-        Toast.show({ type: "info", text1: "Livre ajouté à votre bibliothèque" });
-      } catch (err) {
-        console.warn(`Failed to add book ${bookId}:`, err);
-        Toast.show({ type: "error", text1: "Erreur", text2: `Impossible d'ajouter le livre.` });
-      }
-    }
   };
 
   const switchLayout = () => {
@@ -165,9 +142,12 @@ export default function ListFull() {
                     pointerEvents="none"
                   />
                 </View>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 16 }}>
-                  <View style={{ width: 28, height: 28, backgroundColor: colors.accent, borderRadius: 16 }} />
-                  <Text style={[typography.username, { color: colors.secondaryText }]}>{list.owner.username}</Text>
+                <View style={{ marginTop: 16, flexDirection: "row", justifyContent: "space-between" }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <View style={{ width: 28, height: 28, backgroundColor: colors.accent, borderRadius: 16 }} />
+                    <Text style={[typography.username, { color: colors.secondaryText }]}>{list.owner.username}</Text>
+                  </View>
+                  {}
                 </View>
               <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
                 <Text
@@ -199,21 +179,19 @@ export default function ListFull() {
                   book={item}
                   onPress={() => router.push(`/book/${item.id}`)}
                   size="compact"
-                  showAuthor={false}
+                  showAuthor={true}
                   showTrackingStatus={true}
                   showTrackingButton={false}
                   showRating={false}
-                  onTrackingToggle={handleTrackingToggleInList}
                 />
               </View>
             ) : (
               <BookListElement
                 book={item}
                 onPress={() => router.push(`/book/${item.id}`)}
-                showAuthor={false}
+                showAuthor={true}
                 showTrackingStatus={true}
                 showTrackingButton={false}
-                onTrackingToggle={handleTrackingToggleInList}
               />
             )
           }

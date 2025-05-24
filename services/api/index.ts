@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category, BookTracking, ReadingStatus, ListResponse, List } from '@/types';
+import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category, BookTracking, ReadingStatus, ListResponse, List, User } from '@/types';
 import { refreshToken } from './auth';
 
 export const api: AxiosInstance = axios.create({
@@ -199,6 +199,27 @@ export const removeBookFromTracking = async (bookId: string): Promise<void> => {
     }
   });
   return response.data;
+};
+
+export const getMe = async (): Promise<{ user: User }> => {
+  const token = await SecureStore.getItemAsync('user_auth_token');
+  const response = await api.get('/me', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
+export const updateUserProfile = async (userData: Partial<User>): Promise<User> => {
+  const token = await SecureStore.getItemAsync('user_auth_token');
+  const response = await api.patch('/me', userData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+  });
+  return response.data.user;
 };
 
 interface updateBookTrackingParams {

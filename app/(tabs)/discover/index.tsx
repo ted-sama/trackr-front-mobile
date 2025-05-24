@@ -1,65 +1,18 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { StyleSheet, ScrollView, ActivityIndicator, Text, View } from "react-native";
+import React from "react";
+import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
-import CategorySlider from "@/components/CategorySlider";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import HeaderDiscover from "@/components/discover/HeaderDiscover";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useBottomSheet } from "@/contexts/BottomSheetContext";
-import { Book, Category, BookTracking } from "@/types/index";
-import Toast from "react-native-toast-message";
-import { useTrackedBooksStore } from "@/stores/trackedBookStore";
-import { useCategoryStore, CategoryState } from '@/stores/categoryStore';
+import { useTypography } from "@/hooks/useTypography";
+import BookCategoriesScreen from "./book-categories-screen";
+import UserListsScreen from "./user-lists-screen";
 
-// Composant principal pour la page Discover
+const Tab = createMaterialTopTabNavigator();
+
 export default function Discover() {
-  const { colors, currentTheme } = useTheme();
-  const { isBottomSheetVisible } = useBottomSheet();
-
-  const fetchCategories = useCategoryStore((state: CategoryState) => state.fetchCategories);
-  const categoryIds = useCategoryStore((state: CategoryState) => state.allIds);
-  const categoriesById = useCategoryStore((state: CategoryState) => state.categoriesById);
-  const categories = categoryIds.map(id => categoriesById[id]);
-  const isLoading = useCategoryStore((state: CategoryState) => state.isLoading);
-  const error = useCategoryStore((state: CategoryState) => state.error);
-
-  const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
-
-  const onTrackingToggleInDiscover = async (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => {
-    if (!bookObject) {
-      console.warn("Book object is missing in onTrackingToggleInDiscover");
-      Toast.show({ type: 'error', text1: 'Erreur de suivi', text2: 'Données du livre manquantes.' });
-      return;
-    }
-
-    if (isCurrentlyTracking) {
-      try {
-        await removeTrackedBookFromStore(parseInt(bookId, 10));
-        Toast.show({
-          text1: 'Livre retiré de votre bibliothèque',
-          type: 'info',
-        });
-      } catch (err) {
-        console.warn(`Failed to remove book ${bookId} from tracking:`, err);
-        Toast.show({ type: 'error', text1: 'Erreur', text2: 'Impossible de retirer le livre.'});
-      }
-    } else {
-      try {
-        await addTrackedBookToStore(bookObject);
-        Toast.show({
-          text1: 'Livre ajouté à votre bibliothèque',
-          type: 'info',
-        });
-      } catch (err) {
-        console.warn(`Failed to add book ${bookId} to tracking:`, err);
-        Toast.show({ type: 'error', text1: 'Erreur', text2: `Impossible d'ajouter le livre.` });
-      }
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+  const { colors } = useTheme();
+  const typography = useTypography();
 
   return (
     <SafeAreaView
@@ -67,32 +20,29 @@ export default function Discover() {
       edges={["right", "left"]}
     >
       <HeaderDiscover searchMode="navigate" />
-
-      {isLoading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      ) : error ? (
-        <View style={styles.centered}>
-          <Text style={{ color: colors.text }}>{error}</Text>
-        </View>
-      ) : (
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          scrollEnabled={!isBottomSheetVisible}
-        >
-          {categories.map((category) => (
-            <CategorySlider
-              key={category.id}
-              category={category}
-              isBottomSheetVisible={isBottomSheetVisible}
-              onTrackingToggle={onTrackingToggleInDiscover}
-            />
-          ))}
-        </ScrollView>
-      )}
+      <Tab.Navigator
+        screenOptions={{
+          tabBarActiveTintColor: colors.text,
+          tabBarInactiveTintColor: colors.secondaryText,
+          tabBarIndicatorStyle: {
+            backgroundColor: colors.primary,
+            height: 3,
+          },
+          tabBarStyle: {
+            backgroundColor: colors.background,
+          },
+          tabBarLabelStyle: {
+            ...typography.caption,
+          },
+          swipeEnabled: false,
+          lazy: true,
+          animationEnabled: true,
+        }}
+        
+      >
+        <Tab.Screen name="Categories" component={BookCategoriesScreen} />
+        <Tab.Screen name="Listes" component={UserListsScreen} />
+      </Tab.Navigator>
     </SafeAreaView>
   );
 }
@@ -100,16 +50,5 @@ export default function Discover() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 20,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });

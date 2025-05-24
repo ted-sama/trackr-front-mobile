@@ -35,13 +35,13 @@ import Animated, {
 import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import CategorySlider from "@/components/CategorySlider";
-import { BlurView } from 'expo-blur';
-import MaskedView from '@react-native-masked-view/masked-view';
+import { BlurView } from "expo-blur";
+import MaskedView from "@react-native-masked-view/masked-view";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import Badge from "@/components/ui/Badge";
-import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
+import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import Toast from "react-native-toast-message";
-import { useTrackedBooksStore } from '@/stores/trackedBookStore';
+import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { Ellipsis, Minus, Plus } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
@@ -50,8 +50,8 @@ import { TrackingTabBar } from "@/components/book/TrackingTabBar";
 import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import BadgeSlider from "@/components/BadgeSlider";
-import { useBookDetailStore, BookDetailState } from '@/stores/bookDetailStore';
-
+import { useBookDetailStore, BookDetailState } from "@/stores/bookDetailStore";
+import RatingStars from "@/components/ui/RatingStars";
 // Constants for animation
 const HEADER_THRESHOLD = 320; // Threshold for header animation
 
@@ -62,14 +62,29 @@ export default function BookScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
-  const [bottomSheetView, setBottomSheetView] = useState<"actions" | "status_editor">("actions");
-  const book = useBookDetailStore((state: BookDetailState) => state.bookById[id as string] || null);
-  const isLoading = useBookDetailStore((state: BookDetailState) => state.isLoading);
+  const [bottomSheetView, setBottomSheetView] = useState<
+    "actions" | "status_editor" | "rating_editor"
+  >("actions");
+  const book = useBookDetailStore(
+    (state: BookDetailState) => state.bookById[id as string] || null
+  );
+  const isLoading = useBookDetailStore(
+    (state: BookDetailState) => state.isLoading
+  );
   const error = useBookDetailStore((state: BookDetailState) => state.error);
-  const fetchBook = useBookDetailStore((state: BookDetailState) => state.fetchBook);
+  const fetchBook = useBookDetailStore(
+    (state: BookDetailState) => state.fetchBook
+  );
   const typography = useTypography();
   const insets = useSafeAreaInsets();
-  const [dummyRecommendations, setDummyRecommendations] = useState<Category | null>(null);
+  const [dummyRecommendations, setDummyRecommendations] =
+    useState<Category | null>(null);
+
+  // Get the full BookTracking object
+  const getTrackedBookStatus = useTrackedBooksStore(
+    (state) => state.getTrackedBookStatus
+  );
+  const bookTracking = book ? getTrackedBookStatus(book.id) : null;
 
   // Bottom sheet ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -184,11 +199,14 @@ export default function BookScreen() {
   };
 
   // Présenter le bottom sheet d'actions
-  const handlePresentModalPress = useCallback((view: "actions" | "status_editor") => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setBottomSheetView(view);
-    bottomSheetModalRef.current?.present();
-  }, []);
+  const handlePresentModalPress = useCallback(
+    (view: "actions" | "status_editor" | "rating_editor") => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      setBottomSheetView(view);
+      bottomSheetModalRef.current?.present();
+    },
+    []
+  );
 
   const handlePresentChapterModalPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -198,18 +216,19 @@ export default function BookScreen() {
   const IMAGE_WIDTH = 202.5;
   const IMAGE_HEIGHT = 303.75;
 
-  const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore, isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
+  const {
+    addTrackedBook: addTrackedBookToStore,
+    removeTrackedBook: removeTrackedBookFromStore,
+    isBookTracked,
+  } = useTrackedBooksStore();
 
   // State to control button rendering for animation
   const [isButtonRendered, setIsButtonRendered] = useState(false);
 
-  // Ajout : trackingStatus réactif au store
-  const trackingStatus = book ? getTrackedBookStatus(book.id) : null;
-
   useEffect(() => {
     if (id) fetchBook(id as string);
     const fetchRecommendations = async () => {
-      const recommendations = await getCategory('1');
+      const recommendations = await getCategory("1");
       setDummyRecommendations(recommendations);
     };
     fetchRecommendations();
@@ -217,7 +236,7 @@ export default function BookScreen() {
 
   if (error) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text style={{ color: colors.text }}>Une erreur est survenue</Text>
       </View>
     );
@@ -257,24 +276,46 @@ export default function BookScreen() {
       try {
         await removeTrackedBookFromStore(book.id);
         Toast.show({
-          text1: 'Livre retiré de votre bibliothèque',
-          type: 'info',
+          text1: "Livre retiré de votre bibliothèque",
+          type: "info",
         });
       } catch (error) {
-        console.warn(`Failed to remove book ${currentBookIdStr} from tracking:`, error);
-        Toast.show({ type: 'error', text1: 'Erreur', text2: 'Impossible de retirer le livre.' });
+        console.warn(
+          `Failed to remove book ${currentBookIdStr} from tracking:`,
+          error
+        );
+        Toast.show({
+          type: "error",
+          text1: "Erreur",
+          text2: "Impossible de retirer le livre.",
+        });
       }
     } else {
       try {
         await addTrackedBookToStore(book);
         Toast.show({
-          text1: 'Livre ajouté à votre bibliothèque',
-          type: 'info',
+          text1: "Livre ajouté à votre bibliothèque",
+          type: "info",
         });
       } catch (error) {
-        console.warn(`Failed to add book ${currentBookIdStr} to tracking:`, error);
-        Toast.show({ type: 'error', text1: 'Erreur', text2: `Impossible d'ajouter le livre.` });
+        console.warn(
+          `Failed to add book ${currentBookIdStr} to tracking:`,
+          error
+        );
+        Toast.show({
+          type: "error",
+          text1: "Erreur",
+          text2: `Impossible d'ajouter le livre.`,
+        });
       }
+    }
+  };
+
+  const handleRatingCardPress = () => {
+    if (bookTracking) {
+      handlePresentModalPress("rating_editor");
+    } else {
+      handlePresentModalPress("actions");
     }
   };
 
@@ -286,8 +327,17 @@ export default function BookScreen() {
       {/* Bottom Sheet Modal */}
       {book && (
         <>
-          <BookActionsBottomSheet book={book} ref={bottomSheetModalRef} view={bottomSheetView} backdropDismiss />
-          <SetChapterBottomSheet book={book} ref={setChapterBottomSheetRef} backdropDismiss />
+          <BookActionsBottomSheet
+            book={book}
+            ref={bottomSheetModalRef}
+            view={bottomSheetView}
+            backdropDismiss
+          />
+          <SetChapterBottomSheet
+            book={book}
+            ref={setChapterBottomSheetRef}
+            backdropDismiss
+          />
         </>
       )}
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
@@ -298,13 +348,14 @@ export default function BookScreen() {
       >
         <View style={styles.shadowContainer}>
           <View style={styles.imageContainer}>
-             {
-              isLoading ? (
-                <SkeletonLoader width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-              ) : (
-                <Image source={{ uri: book?.cover_image }} style={styles.imageContent} />
-              )
-             }
+            {isLoading ? (
+              <SkeletonLoader width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            ) : (
+              <Image
+                source={{ uri: book?.cover_image }}
+                style={styles.imageContent}
+              />
+            )}
           </View>
         </View>
         <View style={styles.detailsContainer}>
@@ -319,15 +370,15 @@ export default function BookScreen() {
           >
             <View style={{ flex: 3 }}>
               {isLoading ? (
-                <SkeletonLoader width={'90%'} height={40} />
+                <SkeletonLoader width={"90%"} height={40} />
               ) : (
                 <Text
                   style={[styles.title, typography.h1, { color: colors.text }]}
                   numberOfLines={2}
                   ellipsizeMode="tail"
-              >
-                {book?.title}
-              </Text>
+                >
+                  {book?.title}
+                </Text>
               )}
               <Text
                 style={[
@@ -370,7 +421,9 @@ export default function BookScreen() {
           {/* Badge */}
           {book?.genres && book?.tags && (
             <View style={styles.badgeContainer}>
-              <BadgeSlider data={[...(book?.genres || []), ...(book?.tags || [])]} />
+              <BadgeSlider
+                data={[...(book?.genres || []), ...(book?.tags || [])]}
+              />
             </View>
           )}
           {/* Description */}
@@ -383,63 +436,110 @@ export default function BookScreen() {
           <View
             style={[styles.ratingsContainer, { borderColor: colors.border }]}
           >
-            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
-              <Ionicons name="star" size={24} color={colors.primary} />
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 4,
+                marginBottom: 16,
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Ionicons name="star" size={24} color={colors.primary} />
+                <Text
+                  style={[
+                    typography.categoryTitle,
+                    { color: colors.text, marginLeft: 4 },
+                  ]}
+                >
+                  {book?.rating ? book?.rating : "N/A"}
+                </Text>
+              </View>
+              {separator()}
               <Text
-                style={[
-                  typography.categoryTitle,
-                  { color: colors.text, marginLeft: 4 },
-                ]}
+                style={[typography.caption, { color: colors.secondaryText }]}
               >
-                {book?.rating} {separator()} 1004 trackings
+                {book?.rating_count}{" "}
+                {book?.rating_count
+                  ? book?.rating_count > 1
+                    ? "notes"
+                    : "note"
+                  : "note"}
               </Text>
             </View>
             <View style={styles.socialsContainer}>
               <Pressable
                 onPressIn={() => {
-                  reviewsOpacity.value = withTiming(0.7, { duration: 100 });
-                  reviewsScale.value = withTiming(0.95, { duration: 100 });
+                  reviewsOpacity.value = withTiming(0.7, { duration: 220 });
+                  reviewsScale.value = withTiming(0.98, { duration: 220 });
                 }}
                 onPressOut={() => {
-                  reviewsOpacity.value = withTiming(1, { duration: 100 });
-                  reviewsScale.value = withTiming(1, { duration: 100 });
+                  reviewsOpacity.value = withTiming(1, { duration: 220 });
+                  reviewsScale.value = withTiming(1, { duration: 220 });
                 }}
-                onPress={() => console.log('Reviews pressed')}
+                onPress={handleRatingCardPress}
                 style={{ flex: 1 }}
               >
-                <Animated.View style={[styles.socialAction, { backgroundColor: colors.card }, reviewsAnimatedStyle]}>
-                  <Ionicons name="chatbox-ellipses-outline" size={24} color={colors.text} />
-                  <Text style={[typography.socialButton, { color: colors.text, marginTop: 16 }]}>Reviews</Text>
-                </Animated.View>
-              </Pressable>
-
-              <Pressable
-                onPressIn={() => {
-                  listsOpacity.value = withTiming(0.7, { duration: 100 });
-                  listsScale.value = withTiming(0.95, { duration: 100 });
-                }}
-                onPressOut={() => {
-                  listsOpacity.value = withTiming(1, { duration: 100 });
-                  listsScale.value = withTiming(1, { duration: 100 });
-                }}
-                onPress={() => console.log('Lists pressed')}
-                style={{ flex: 1 }}
-              >
-                <Animated.View style={[styles.socialAction, { backgroundColor: colors.card }, listsAnimatedStyle]}>
-                  <Ionicons name="list" size={24} color={colors.text} />
-                  <Text style={[typography.socialButton, { color: colors.text, marginTop: 16 }]}>Listes</Text>
+                <Animated.View
+                  style={[
+                    styles.socialAction,
+                    {
+                      backgroundColor: colors.card,
+                      borderColor: colors.border,
+                      borderWidth: 1,
+                    },
+                    reviewsAnimatedStyle,
+                  ]}
+                >
+                  {bookTracking?.rating ? (
+                    <View>
+                      <Text
+                        style={[
+                          typography.socialButton,
+                          { color: colors.text, marginBottom: 6 },
+                        ]}
+                      >
+                        Vous avez noté ce livre
+                      </Text>
+                      {bookTracking?.rating && (
+                        <RatingStars
+                          rating={bookTracking.rating}
+                          size={14}
+                          color={colors.text}
+                        />
+                      )}
+                    </View>
+                  ) : (
+                    <Text
+                      style={[
+                        typography.socialButton,
+                        { color: colors.secondaryText },
+                      ]}
+                    >
+                      Ajoutez ce livre, suivez-le et notez-le
+                    </Text>
+                  )}
                 </Animated.View>
               </Pressable>
             </View>
           </View>
           {/* Recommendations */}
-          <View style={[styles.recommendationsContainer, { borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.recommendationsContainer,
+              { borderColor: colors.border },
+            ]}
+          >
             <Text style={[typography.categoryTitle, { color: colors.text }]}>
               Les utilisateurs suivent aussi
             </Text>
             {dummyRecommendations && (
               <View style={{ marginHorizontal: -16 }}>
-                <CategorySlider category={dummyRecommendations} isBottomSheetVisible={false} header={false} />
+                <CategorySlider
+                  category={dummyRecommendations}
+                  isBottomSheetVisible={false}
+                  header={false}
+                />
               </View>
             )}
           </View>
@@ -447,20 +547,58 @@ export default function BookScreen() {
       </AnimatedScrollView>
 
       {/* Animated Button Container (Handles slide-up and initial scale) */}
-      {trackingStatus && (
-        <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(150)}>
-          <TrackingTabBar
-            status={trackingStatus.status}
-            currentChapter={trackingStatus.current_chapter}
-            onManagePress={() => handlePresentChapterModalPress()}
-            onStatusPress={() => handlePresentModalPress("status_editor")}
-          />
-        </Animated.View>
+      {bookTracking && (
+        <>
+          {/* Blur gradient mask under the button (100% blur bottom → 0% blur top) */}
+          <View
+            pointerEvents="none"
+            style={[
+              styles.blurGradientContainer,
+              { bottom: 0, height: insets.bottom + 16 + 40 },
+            ]}
+          >
+            <MaskedView
+              style={StyleSheet.absoluteFillObject}
+              maskElement={
+                <LinearGradient
+                  start={{ x: 0, y: 1 }}
+                  end={{ x: 0, y: 0 }}
+                  colors={["#fff", "transparent"]}
+                  style={StyleSheet.absoluteFillObject}
+                />
+              }
+            >
+              <BlurView
+                intensity={100}
+                tint={currentTheme === "dark" ? "dark" : "light"}
+                style={StyleSheet.absoluteFillObject}
+              />
+              <View
+                style={[
+                  StyleSheet.absoluteFillObject,
+                  { backgroundColor: "rgba(0,0,0,0.6)" },
+                ]}
+              />
+            </MaskedView>
+          </View>
+
+          <Animated.View
+            entering={FadeIn.duration(150)}
+            exiting={FadeOut.duration(150)}
+          >
+            <TrackingTabBar
+              status={bookTracking.status}
+              currentChapter={bookTracking.current_chapter}
+              onManagePress={() => handlePresentChapterModalPress()}
+              onStatusPress={() => handlePresentModalPress("status_editor")}
+            />
+          </Animated.View>
+        </>
       )}
 
       {/* Custom animated header */}
       <AnimatedHeader
-        title={book?.title ?? ''}
+        title={book?.title ?? ""}
         scrollY={scrollY}
         collapseThreshold={HEADER_THRESHOLD}
         onBack={() => router.back()}
@@ -483,7 +621,9 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderRadius: 6,
     shadowColor:
-      Platform.OS === "android" ? "rgba(0, 0, 0, 0.589)" : "rgba(0, 0, 0, 0.18)",
+      Platform.OS === "android"
+        ? "rgba(0, 0, 0, 0.589)"
+        : "rgba(0, 0, 0, 0.18)",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.8,
     shadowRadius: 6,
@@ -602,33 +742,36 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   // Header Styles
-  headerContainerBase: { // Renamed base style for layout
-    position: 'absolute',
+  headerContainerBase: {
+    // Renamed base style for layout
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     // height and paddingTop are set inline
     // No background/border here
   },
-  headerAnimatedBackground: { // Style for the view containing animated background/border
-    overflow: 'hidden', // Clip the BlurView/gradient
+  headerAnimatedBackground: {
+    // Style for the view containing animated background/border
+    overflow: "hidden", // Clip the BlurView/gradient
   },
-  headerVisibleContent: { // Contains always-visible and animated visible elements
-    position: 'absolute',
+  headerVisibleContent: {
+    // Contains always-visible and animated visible elements
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16, // Padding for left/right spacing
     // paddingTop applied inline
   },
   headerTitle: {
     flex: 1, // Take available space
-    textAlign: 'center', // Center text horizontally
+    textAlign: "center", // Center text horizontally
     marginHorizontal: 8, // Add some space between title and potential icons/placeholders
   },
   backButton: {
@@ -636,14 +779,20 @@ const styles = StyleSheet.create({
     // Positioned by flexbox in headerVisibleContent
     // Background color and borderRadius removed, handled by Animated.View inside
     // Ensure content (icon) is centered if needed, padding handles size
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     // Minimum size based on padding + icon size (approx)
     minWidth: 22 + 16,
     minHeight: 22 + 16,
-    overflow: 'hidden', // Clip the background Animated.View to the Pressable bounds
+    overflow: "hidden", // Clip the background Animated.View to the Pressable bounds
   },
   backButtonBackground: {
     borderRadius: 25, // Keep the rounding here
+  },
+  blurGradientContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    overflow: "hidden",
   },
 });

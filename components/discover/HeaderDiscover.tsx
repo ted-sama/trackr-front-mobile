@@ -103,6 +103,7 @@ export default function HeaderDiscover({
           height: 72 + insets.top,
           backgroundColor: colors.background,
           borderBottomColor: colors.border,
+          borderBottomWidth: isEditable ? 1 : 0,
         },
       ]}
     >
@@ -136,7 +137,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: paddingHorizontal,
     paddingBottom: 10,
-    borderBottomWidth: 1,
   },
   cancelButtonContainer: {
     marginLeft: searchBarMarginRight,

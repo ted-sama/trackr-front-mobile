@@ -63,6 +63,17 @@ export const useListStore = create<ListState>((set, get) => ({
             })(),
           }
         },
+        // Also update readingListsById if the list is loaded there
+        readingListsById: state.readingListsById[listId] ? {
+          ...state.readingListsById,
+          [listId]: {
+            ...state.readingListsById[listId],
+            books: state.readingListsById[listId].books 
+              ? [...state.readingListsById[listId].books, book]
+              : [book],
+            total_books: (state.readingListsById[listId].total_books || 0) + 1,
+          }
+        } : state.readingListsById,
       }));
     } catch (e: any) {
       set({ error: e.message || 'Erreur d\'ajout du livre à la liste' });
@@ -92,6 +103,17 @@ export const useListStore = create<ListState>((set, get) => ({
             })(),
           }
         },
+        // Also update readingListsById if the list is loaded there
+        readingListsById: state.readingListsById[listId] ? {
+          ...state.readingListsById,
+          [listId]: {
+            ...state.readingListsById[listId],
+            books: state.readingListsById[listId].books 
+              ? state.readingListsById[listId].books.filter(b => b.id !== bookId)
+              : [],
+            total_books: Math.max(0, (state.readingListsById[listId].total_books || 0) - 1),
+          }
+        } : state.readingListsById,
       }));
     } catch (e: any) {
       set({ error: e.message || 'Erreur de suppression du livre de la liste' });
