@@ -31,3 +31,23 @@ export const getLists = async (): Promise<ListResponse> => {
   return response.data;
 };
 
+export const reorderBookInList = async (
+  listId: number, 
+  bookId: number, 
+  newPosition: number
+): Promise<void> => {
+  await api.patch(`/lists/${listId}/reorder`, {
+    bookId,
+    newPosition,
+  });
+};
+
+export const reorderBooksInListBulk = async (
+  listId: number, 
+  bookOrders: { bookId: number; position: number }[]
+): Promise<void> => {
+  await api.patch(`/lists/${listId}/reorder-bulk`, {
+    bookOrders,
+  });
+};
+

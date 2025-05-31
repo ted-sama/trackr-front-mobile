@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { getMyLists, getList, getBook } from '@/services/api';
-import { addBookToList, createList, getLists, removeBookFromList, updateList } from '@/services/api/list';
+import { addBookToList, createList, getLists, removeBookFromList, updateList, reorderBookInList, reorderBooksInListBulk } from '@/services/api/list';
 import { Book, List } from '@/types';
 
 export interface ListState {
@@ -14,6 +14,8 @@ export interface ListState {
   updateList: (listId: number, updatedList: Partial<List>) => Promise<void>;
   addBookToList: (listId: number, bookId: number) => Promise<void>;
   removeBookFromList: (listId: number, bookId: number) => Promise<void>;
+  reorderBookInList: (listId: number, bookId: number, newPosition: number) => Promise<void>;
+  reorderBooksInListBulk: (listId: number, bookOrders: { bookId: number; position: number }[]) => Promise<void>;
   getListsContainingBook: (bookId: number) => Promise<number[]>;
   fetchLists: () => Promise<void>;
   fetchMyLists: () => Promise<void>;
@@ -144,6 +146,72 @@ export const useListStore = create<ListState>((set, get) => ({
       }));
     } catch (e: any) {
       set({ error: e.message || 'Erreur de suppression du livre de la liste' });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  reorderBookInList: async (listId: number, bookId: number, newPosition: number) => {
+    set({ isLoading: true, error: null });
+    try {
+      await reorderBookInList(listId, bookId, newPosition);
+      set(state => ({
+        myListsById: {
+          ...state.myListsById,
+          [listId]: {
+            ...state.myListsById[listId],
+            books: state.myListsById[listId]?.books?.map(book =>
+              book.id === bookId ? { ...book, position: newPosition } : book
+            ) || [],
+          }
+        },
+        // Also update listsById if the list is loaded there
+        listsById: state.listsById[listId] ? {
+          ...state.listsById,
+          [listId]: {
+            ...state.listsById[listId],
+            books: state.listsById[listId]?.books?.map(book =>
+              book.id === bookId ? { ...book, position: newPosition } : book
+            ) || [],
+          }
+        } : state.listsById,
+      }));
+    } catch (e: any) {
+      set({ error: e.message || 'Erreur de réordonnancement du livre dans la liste' });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  reorderBooksInListBulk: async (listId: number, bookOrders: { bookId: number; position: number }[]) => {
+    set({ isLoading: true, error: null });
+    try {
+      await reorderBooksInListBulk(listId, bookOrders);
+      set(state => ({
+        myListsById: {
+          ...state.myListsById,
+          [listId]: {
+            ...state.myListsById[listId],
+            books: state.myListsById[listId]?.books?.map(book => {
+              const order = bookOrders.find(order => order.bookId === book.id);
+              return order ? { ...book, position: order.position } : book;
+            }) || [],
+          }
+        },
+        // Also update listsById if the list is loaded there
+        listsById: state.listsById[listId] ? {
+          ...state.listsById,
+          [listId]: {
+            ...state.listsById[listId],
+            books: state.listsById[listId]?.books?.map(book => {
+              const order = bookOrders.find(order => order.bookId === book.id);
+              return order ? { ...book, position: order.position } : book;
+            }) || [],
+          }
+        } : state.listsById,
+      }));
+    } catch (e: any) {
+      set({ error: e.message || 'Erreur de réordonnancement des livres dans la liste' });
     } finally {
       set({ isLoading: false });
     }
