@@ -42,7 +42,7 @@ import Badge from "@/components/ui/Badge";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
-import { Ellipsis, Minus, Plus } from "lucide-react-native";
+import { Ellipsis, Minus, Plus, ChartPie } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 import * as Haptics from "expo-haptics";
@@ -319,6 +319,28 @@ export default function BookScreen() {
     }
   };
 
+  const handleSummaryPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push({
+      pathname: '/book/summary',
+      params: {
+        bookId: book?.id.toString(),
+        bookTitle: book?.title
+      }
+    });
+  };
+
+  const handleChatPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push({
+      pathname: '/book/chat',
+      params: {
+        bookId: book?.id.toString(),
+        bookTitle: book?.title
+      }
+    });
+  };
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
@@ -405,6 +427,14 @@ export default function BookScreen() {
                 >
                   {dates()}
                 </Text>
+                {book?.chapters && (
+                  <>
+                    {separator()}
+                    <Text style={[typography.caption, { color: colors.secondaryText }]}>
+                      {book?.chapters} chapitres
+                    </Text>
+                  </>
+                )}
               </View>
             </View>
             <View style={styles.actionsContainer}>
@@ -591,6 +621,7 @@ export default function BookScreen() {
               currentChapter={bookTracking.current_chapter}
               onManagePress={() => handlePresentChapterModalPress()}
               onStatusPress={() => handlePresentModalPress("status_editor")}
+              onChatPress={handleChatPress}
             />
           </Animated.View>
         </>
@@ -602,6 +633,11 @@ export default function BookScreen() {
         scrollY={scrollY}
         collapseThreshold={HEADER_THRESHOLD}
         onBack={() => router.back()}
+        rightButton={bookTracking ? (
+          <Pressable onPress={handleSummaryPress}>
+            <ChartPie size={22} color={colors.icon} />
+          </Pressable>
+        ) : undefined}
       />
     </SafeAreaView>
   );

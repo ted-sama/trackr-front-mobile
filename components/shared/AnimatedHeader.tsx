@@ -12,11 +12,12 @@ interface AnimatedHeaderProps {
   scrollY: SharedValue<number>;
   collapseThreshold?: number;
   onBack: () => void;
+  rightButton?: React.ReactNode;
 }
 
 const DEFAULT_THRESHOLD = 320;
 
-export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack }: AnimatedHeaderProps) {
+export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, rightButton }: AnimatedHeaderProps) {
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -92,7 +93,23 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
         >
           {title}
         </Animated.Text>
-        <View style={{ width: 36 }} />
+        <View style={styles.rightContainer}>
+          {rightButton ? (
+            <View style={styles.rightButton}>
+              <Animated.View
+                style={[
+                  StyleSheet.absoluteFillObject,
+                  styles.backButtonBg,
+                  { backgroundColor: colors.backButtonBackground },
+                  backButtonBgStyle,
+                ]}
+              />
+              {rightButton}
+            </View>
+          ) : (
+            <View style={{ width: 36 }} />
+          )}
+        </View>
       </View>
     </View>
   );
@@ -135,5 +152,17 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     marginHorizontal: 8,
+  },
+  rightContainer: {
+    width: 36,
+    alignItems: 'center',
+  },
+  rightButton: {
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 38,
+    minHeight: 38,
+    overflow: 'hidden',
   },
 }); 

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect , useCallback } from "react";
-import { View, Text, Platform, StyleSheet } from "react-native";
+import { View, Text, Platform, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { LegendList, LegendListRef } from "@legendapp/list";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -27,6 +27,8 @@ import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import BadgeSlider from "@/components/BadgeSlider";
 import { useListStore } from '@/stores/listStore';
+import MaskedView from "@react-native-masked-view/masked-view";
+import { Pencil } from "lucide-react-native";
 
 // AsyncStorage key for layout preference
 const LAYOUT_STORAGE_KEY = "@MyApp:layoutPreference";
@@ -55,9 +57,10 @@ export default function ListFull() {
     removeTrackedBook: removeTrackedBookFromStore,
   } = useTrackedBooksStore();
 
-  const list = useListStore(state => state.readingListsById[id as string] || null);
+  const list = useListStore(state => state.listsById[id as string] || state.myListsById[id as string] || null);
   const fetchList = useListStore(state => state.fetchList);
   const isLoading = useListStore(state => state.isLoading);
+  const isOwner = useListStore(state => state.isOwner);
   const [isBlurVisible, setIsBlurVisible] = useState(false);
   const blurOpacity = useSharedValue(0);
 
@@ -128,26 +131,42 @@ export default function ListFull() {
             <View>
                 <View style={{ position: "relative", width: "110%", height: 275, alignSelf: "center", marginHorizontal: -16, zIndex: -99 }}>
                   {list.backdrop_image ? (
-                    <Image
-                      source={{ uri: list.backdrop_image }}
-                      style={{ width: "100%", height: "100%" }}
-                    />
+                    <MaskedView
+                      style={{ flex: 1 }}
+                      maskElement={
+                        <LinearGradient
+                          colors={["rgba(0,0,0,1)", "rgba(0,0,0,0)"]}
+                          style={{ flex: 1 }}
+                        />
+                      }
+                    >
+                      <Image
+                        source={{ uri: list.backdrop_image }}
+                        style={{ width: "100%", height: "100%" }}
+                      />
+                    </MaskedView>
                   ) : (
                     <View style={{ width: "100%", height: "100%", backgroundColor: colors.accent }} />
                   )}
-
-                  <LinearGradient
-                    colors={["transparent", colors.background]}
-                    style={{ position: "absolute", left: 0, right: 0, bottom: 0, width: "100%", height: "100%" }}
-                    pointerEvents="none"
-                  />
                 </View>
-                <View style={{ marginTop: 16, flexDirection: "row", justifyContent: "space-between" }}>
+                <View style={{ marginTop: 16, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                     <View style={{ width: 28, height: 28, backgroundColor: colors.accent, borderRadius: 16 }} />
-                    <Text style={[typography.username, { color: colors.secondaryText }]}>{list.owner.username}</Text>
+                    <Text style={[typography.username, { color: colors.secondaryText }]} numberOfLines={1} ellipsizeMode="tail">{list.owner.username}</Text>
                   </View>
-                  {}
+                  {isOwner(list.id) && (
+                    <TouchableOpacity onPress={() => router.push({
+                      pathname: "/list-edit",
+                      params: {
+                        listId: list.id.toString(),
+                      }
+                    })}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                        <Pencil size={16} color={colors.secondaryText} />
+                        <Text style={[typography.body, { color: colors.secondaryText }]}>Modifier</Text>
+                      </View>
+                    </TouchableOpacity>
+                  )}
                 </View>
               <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
                 <Text

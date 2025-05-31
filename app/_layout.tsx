@@ -115,8 +115,31 @@ function RootLayoutContent() {
         <Stack.Screen name='auth/login' />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name='book/[id]' />
+        <Stack.Screen 
+          name='book/summary' 
+          options={{
+            presentation: 'modal',
+            ...(Platform.OS === 'ios' && {
+              presentation: 'formSheet',
+            }),
+            gestureEnabled: true,
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen name='book/chat' />
         <Stack.Screen name='category-full' />
         <Stack.Screen name='list-full' />
+        <Stack.Screen 
+          name='list-edit' 
+          options={{
+            presentation: 'modal',
+            ...(Platform.OS === 'ios' && {
+              presentation: 'formSheet',
+            }),
+            gestureEnabled: true,
+            headerShown: false,
+          }}
+        />
       </Stack>
       {/* Global Book Actions BottomSheet */}
       {selectedBook && (

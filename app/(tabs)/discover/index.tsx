@@ -26,6 +26,7 @@ export default function Discover() {
           tabBarInactiveTintColor: colors.secondaryText,
           tabBarIndicatorStyle: {
             backgroundColor: colors.primary,
+            borderRadius: 10,
             height: 3,
           },
           tabBarStyle: {

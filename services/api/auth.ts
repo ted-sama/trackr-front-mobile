@@ -1,4 +1,5 @@
 import { api } from './index';
+import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { RegisterResponse, LoginResponse, RefreshTokenResponse } from '@/types/auth';
 
@@ -23,7 +24,37 @@ export const register = async ({ username, email, password }: RegisterParams): P
 
 export const login = async ({ email, password }: LoginParams): Promise<LoginResponse> => {
   const response = await api.post('/auth/login', { email, password });
+  
+  // Store tokens and update API headers
+  if (response.data.access_token) {
+    await setAuthTokens(response.data.access_token, response.data.refresh_token);
+  }
+  
   return response.data;
+};
+
+// Utility function to set auth tokens and update API headers
+export const setAuthTokens = async (accessToken: string, refreshToken?: string) => {
+  await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+  if (refreshToken) {
+    await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
+  }
+  
+  // Update API default headers
+  api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+};
+
+// Utility function to clear auth tokens and update API headers
+export const clearAuthTokens = async () => {
+  await SecureStore.deleteItemAsync(TOKEN_KEY);
+  await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+  
+  // Clear API default headers
+  delete api.defaults.headers.common['Authorization'];
+};
+
+export const logout = async () => {
+  await clearAuthTokens();
 };
 
 export const refreshToken = async (): Promise<RefreshTokenResponse> => {
@@ -31,21 +62,28 @@ export const refreshToken = async (): Promise<RefreshTokenResponse> => {
   if (!storedRefreshToken) {
     throw new Error('No refresh token found');
   }
+  
   try {
-    const response = await api.post('/auth/refresh', { refreshToken: storedRefreshToken });
-    const { access_token } = response.data;
+    // Use axios directly instead of api instance to avoid interceptor interference
+    const response = await axios.post('https://fddc-89-221-127-193.ngrok-free.app/api/v1/auth/refresh', 
+      { refreshToken: storedRefreshToken },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    
+    const { access_token, refresh_token } = response.data;
+    
     if (access_token) {
-      await SecureStore.setItemAsync(TOKEN_KEY, access_token);
-      // Optionally, if the backend sends a new refresh token, store it as well
-      // if (response.data.refresh_token) {
-      //   await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, response.data.refresh_token);
-      // }
+      await setAuthTokens(access_token, refresh_token);
     }
+    
     return response.data;
   } catch (error) {
     // If refresh fails, clear tokens to force logout
-    await SecureStore.deleteItemAsync(TOKEN_KEY);
-    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-    throw error; // Re-throw error to be caught by the interceptor
+    await clearAuthTokens();
+    throw error;
   }
 };

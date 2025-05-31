@@ -68,7 +68,7 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
             {book.author && showAuthor && (
               <Text style={[styles.author, typography.caption, { color: colors.secondaryText }]} numberOfLines={1} ellipsizeMode="tail">{book.author}</Text>
             )}
-            {book.rating && showRating && (
+            {showRating && (
               <View style={styles.ratingContainer}>
               <Ionicons name="star" size={12} color={colors.secondaryText} />
               <Text

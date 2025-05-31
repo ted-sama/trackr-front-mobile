@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { getMyLists, getList, getBook } from '@/services/api';
-import { addBookToList, createList, getLists, removeBookFromList } from '@/services/api/list';
+import { addBookToList, createList, getLists, removeBookFromList, updateList } from '@/services/api/list';
 import { Book, List } from '@/types';
 
 export interface ListState {
@@ -8,16 +8,17 @@ export interface ListState {
   listsIds: number[];
   myListsById: Record<string, List>;
   myListsIds: number[];
-  readingListsById: Record<string, List>;
   isLoading: boolean;
   error: string | null;
   createList: (name: string) => Promise<List | undefined>;
+  updateList: (listId: number, updatedList: Partial<List>) => Promise<void>;
   addBookToList: (listId: number, bookId: number) => Promise<void>;
   removeBookFromList: (listId: number, bookId: number) => Promise<void>;
   getListsContainingBook: (bookId: number) => Promise<number[]>;
   fetchLists: () => Promise<void>;
   fetchMyLists: () => Promise<void>;
   fetchList: (id: string) => Promise<void>;
+  isOwner: (listId: number) => boolean;
 }
 
 export const useListStore = create<ListState>((set, get) => ({
@@ -25,7 +26,6 @@ export const useListStore = create<ListState>((set, get) => ({
   listsIds: [],
   myListsById: {},
   myListsIds: [],
-  readingListsById: {},
   isLoading: false,
   error: null,
 
@@ -38,6 +38,28 @@ export const useListStore = create<ListState>((set, get) => ({
     } catch (e: any) {
       set({ error: e.message || 'Erreur de création de la liste' });
       return undefined;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  updateList: async (listId: number, updatedList: Partial<List>) => {
+    set({ isLoading: true, error: null });
+    try {
+      const freshList = await updateList(listId, updatedList);
+      set(state => ({
+        myListsById: {
+          ...state.myListsById,
+          [listId]: freshList,
+        },
+        // Also update listsById if the list is loaded there
+        listsById: state.listsById[listId] ? {
+          ...state.listsById,
+          [listId]: freshList,
+        } : state.listsById,
+      }));
+    } catch (e: any) {
+      set({ error: e.message || 'Erreur de mise à jour de la liste' });
     } finally {
       set({ isLoading: false });
     }
@@ -68,17 +90,17 @@ export const useListStore = create<ListState>((set, get) => ({
             })(),
           }
         },
-        // Also update readingListsById if the list is loaded there
-        readingListsById: state.readingListsById[listId] ? {
-          ...state.readingListsById,
+        // Also update listsById if the list is loaded there
+        listsById: state.listsById[listId] ? {
+          ...state.listsById,
           [listId]: {
-            ...state.readingListsById[listId],
-            books: state.readingListsById[listId].books 
-              ? [...state.readingListsById[listId].books, book]
+            ...state.listsById[listId],
+            books: state.listsById[listId].books 
+              ? [...state.listsById[listId].books, book]
               : [book],
-            total_books: (state.readingListsById[listId].total_books || 0) + 1,
+            total_books: (state.listsById[listId].total_books || 0) + 1,
           }
-        } : state.readingListsById,
+        } : state.listsById,
       }));
     } catch (e: any) {
       set({ error: e.message || 'Erreur d\'ajout du livre à la liste' });
@@ -108,17 +130,17 @@ export const useListStore = create<ListState>((set, get) => ({
             })(),
           }
         },
-        // Also update readingListsById if the list is loaded there
-        readingListsById: state.readingListsById[listId] ? {
-          ...state.readingListsById,
+        // Also update listsById if the list is loaded there
+        listsById: state.listsById[listId] ? {
+          ...state.listsById,
           [listId]: {
-            ...state.readingListsById[listId],
-            books: state.readingListsById[listId].books 
-              ? state.readingListsById[listId].books.filter(b => b.id !== bookId)
+            ...state.listsById[listId],
+            books: state.listsById[listId].books 
+              ? state.listsById[listId].books.filter(b => b.id !== bookId)
               : [],
-            total_books: Math.max(0, (state.readingListsById[listId].total_books || 0) - 1),
+            total_books: Math.max(0, (state.listsById[listId].total_books || 0) - 1),
           }
-        } : state.readingListsById,
+        } : state.listsById,
       }));
     } catch (e: any) {
       set({ error: e.message || 'Erreur de suppression du livre de la liste' });
@@ -184,13 +206,29 @@ export const useListStore = create<ListState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const list = await getList(id);
-      set(state => ({
-        readingListsById: { ...state.readingListsById, [id]: list },
-      }));
+      set(state => {
+        const existingList = state.listsById[id];
+        // If there's an existing list, preserve important metadata
+        const mergedList = existingList ? {
+          ...list,
+          // Preserve metadata from collections if they exist
+          first_book_covers: existingList.first_book_covers || list.first_book_covers,
+          total_books: existingList.total_books || list.total_books,
+        } : list;
+        
+        return {
+          listsById: { ...state.listsById, [id]: mergedList },
+        };
+      });
     } catch (e: any) {
       set({ error: e.message || 'Erreur de chargement de la liste' });
     } finally {
       set({ isLoading: false });
     }
+  },
+
+  isOwner: (listId: number) => {
+    const { myListsIds } = get();
+    return myListsIds.includes(listId);
   },
 })); 

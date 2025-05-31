@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import * as Haptics from "expo-haptics";
 import { ReadingStatus } from "@/types";
 import { Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
 
@@ -13,6 +12,7 @@ interface TrackingTabBarProps {
   currentChapter?: number;
   onManagePress: () => void;
   onStatusPress: () => void;
+  onChatPress?: () => void;
 }
 
 export function TrackingTabBar({
@@ -20,6 +20,7 @@ export function TrackingTabBar({
   currentChapter,
   onManagePress,
   onStatusPress,
+  onChatPress,
 }: TrackingTabBarProps) {
   const { width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -34,63 +35,86 @@ export function TrackingTabBar({
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          width: screenWidth * 0.94,
-          height: 64,
-          borderRadius: 50,
-          borderWidth: 1,
-          borderColor: colors.tabBarBorder,
-          backgroundColor: colors.card,
-          position: "absolute",
-          left: (screenWidth - screenWidth * 0.94) / 2,
-          right: (screenWidth - screenWidth * 0.94) / 2,
-          bottom: insets.bottom + 16,
-          shadowColor: Platform.OS === "android" ? "rgba(0,0,0,0.589)" : "rgba(0,0,0,0.1)",
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
-          elevation: 12,
-          overflow: "hidden",
-          zIndex: 100,
-        },
-      ]}
-      accessibilityRole="menu"
-      accessibilityLabel="Gestion du suivi"
-    >
-      <View style={styles.row}>
-        <Pressable onPress={onStatusPress} accessibilityRole="button" accessibilityLabel="Changer le statut de suivi">
-          <View style={styles.statusContainer}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              {trackingStatusValues[status as ReadingStatus].icon}
-              <Text style={[typography.trackingTabBarText, { color: colors.text }]} numberOfLines={1} accessibilityLabel={`Statut de suivi : ${status}`}>{trackingStatusValues[status as ReadingStatus].text}</Text>
-            </View>
-            {currentChapter && (
-              <View>
-                <Text style={[typography.trackingTabBarText2, { color: colors.icon }]} numberOfLines={1} accessibilityLabel={`Chapitre : ${currentChapter}`}>Ch. {currentChapter}</Text>
+    <>
+      {/* Chatbot floating button */}
+      <Pressable
+        style={[
+          styles.chatbotButton,
+          {
+            right: (screenWidth - screenWidth * 0.94) / 2,
+            bottom: insets.bottom + 16 + 64 + 16,
+            shadowColor: Platform.OS === "android" ? "rgba(0,0,0,0.589)" : "rgba(0,0,0,0.1)",
+          },
+        ]}
+        onPress={onChatPress}
+        accessibilityRole="button"
+        accessibilityLabel="Chatbot button"
+      >
+        <LinearGradient
+          colors={[colors.primary, "#8A2BE2"]}
+          style={styles.chatbotGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+      </Pressable>
+      <View
+        style={[
+          styles.container,
+          {
+            width: screenWidth * 0.94,
+            height: 64,
+            borderRadius: 50,
+            borderWidth: 1,
+            borderColor: colors.tabBarBorder,
+            backgroundColor: colors.card,
+            position: "absolute",
+            left: (screenWidth - screenWidth * 0.94) / 2,
+            right: (screenWidth - screenWidth * 0.94) / 2,
+            bottom: insets.bottom + 16,
+            shadowColor: Platform.OS === "android" ? "rgba(0,0,0,0.589)" : "rgba(0,0,0,0.1)",
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+            elevation: 12,
+            overflow: "hidden",
+            zIndex: 100,
+          },
+        ]}
+        accessibilityRole="menu"
+        accessibilityLabel="Gestion du suivi"
+      >
+        <View style={styles.row}>
+          <Pressable onPress={onStatusPress} accessibilityRole="button" accessibilityLabel="Changer le statut de suivi">
+            <View style={styles.statusContainer}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                {trackingStatusValues[status as ReadingStatus].icon}
+                <Text style={[typography.trackingTabBarText, { color: colors.text }]} numberOfLines={1} accessibilityLabel={`Statut de suivi : ${status}`}>{trackingStatusValues[status as ReadingStatus].text}</Text>
               </View>
-            )}
-          </View>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.manageButton, { backgroundColor: colors.primary, opacity: pressed ? 0.8 : 1 }]}
-          onPress={onManagePress}
-          accessibilityRole="button"
-          accessibilityLabel="Bookmark"
-        >
-          <LinearGradient
-            colors={[colors.primary, "#8A2BE2"]}
-            style={styles.gradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+              {currentChapter && (
+                <View>
+                  <Text style={[typography.trackingTabBarText2, { color: colors.icon }]} numberOfLines={1} accessibilityLabel={`Chapitre : ${currentChapter}`}>Ch. {currentChapter}</Text>
+                </View>
+              )}
+            </View>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.manageButton, { backgroundColor: colors.primary, opacity: pressed ? 0.8 : 1 }]}
+            onPress={onManagePress}
+            accessibilityRole="button"
+            accessibilityLabel="Bookmark"
           >
-            <Text style={[typography.trackingTabBarButton, { color: "#fff" }]}>Marque-pages</Text>
-          </LinearGradient>
-        </Pressable>
+            <LinearGradient
+              colors={[colors.primary, "#8A2BE2"]}
+              style={styles.gradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Text style={[typography.trackingTabBarButton, { color: "#fff" }]}>Marque-pages</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
       </View>
-    </View>
+    </>
   );
 }
 
@@ -134,5 +158,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "100%",
     height: "100%",
+  },
+  chatbotButton: {
+    position: "absolute",
+    borderRadius: 100,
+    width: 60,
+    height: 60,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 12,
+    overflow: "hidden",
+    zIndex: 101,
+  },
+  chatbotGradient: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 100,
+    alignItems: "center",
+    justifyContent: "center",
   },
 }); 

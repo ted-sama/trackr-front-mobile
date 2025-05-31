@@ -1,14 +1,26 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, CategoryResponse, Category, BookTracking, ReadingStatus, ListResponse, List, User } from '@/types';
-import { refreshToken } from './auth';
+import { refreshToken, clearAuthTokens } from './auth';
 
 export const api: AxiosInstance = axios.create({
-  baseURL: 'https://e64d-81-198-118-168.ngrok-free.app/api/v1',
+  baseURL: 'https://fddc-89-221-127-193.ngrok-free.app/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Initialize API with stored token
+export const initializeAPI = async () => {
+  try {
+    const token = await SecureStore.getItemAsync('user_auth_token');
+    if (token) {
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+  } catch (error) {
+    console.error('Failed to initialize API with stored token:', error);
+  }
+};
 
 // Variable to prevent multiple refresh attempts simultaneously
 let isRefreshing = false;
@@ -31,53 +43,59 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config;
 
-    // Check if error is 401 and not a an error from the refresh token endpoint itself
-    if (error.response?.status === 401 && originalRequest && !originalRequest.url?.includes('/auth/refresh')) {
+    // Check if error is 401 and request hasn't been retried yet
+    if (error.response?.status === 401 && originalRequest && !(originalRequest as any)._retry) {
       if (isRefreshing) {
         // If token is already being refreshed, queue the original request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
         .then(async token => {
-          if (originalRequest.headers) {
+          if (originalRequest.headers && token) {
             originalRequest.headers['Authorization'] = 'Bearer ' + token;
           }
-          return axios(originalRequest); // Use axios instead of api to avoid infinite loop
+          return api(originalRequest);
         })
         .catch(err => {
           return Promise.reject(err);
         });
       }
 
+      // Mark this request as retried to prevent infinite loops
+      (originalRequest as any)._retry = true;
       isRefreshing = true;
 
       try {
         const refreshResponse = await refreshToken();
-        if (refreshResponse.access_token && originalRequest.headers) {
+        if (refreshResponse.access_token) {
           const newAccessToken = refreshResponse.access_token;
-          api.defaults.headers.common['Authorization'] = 'Bearer ' + newAccessToken;
-          originalRequest.headers['Authorization'] = 'Bearer ' + newAccessToken;
+          
+          // Update the current request's authorization header
+          if (originalRequest.headers) {
+            originalRequest.headers['Authorization'] = 'Bearer ' + newAccessToken;
+          }
+          
+          // Process the queue with the new token
           processQueue(null, newAccessToken);
-          return axios(originalRequest); // Use axios instead of api to avoid infinite loop
+          
+          // Retry the original request
+          return api(originalRequest);
         } else {
           // If refresh response does not contain access_token, treat as failure
-          await SecureStore.deleteItemAsync('user_auth_token');
-          await SecureStore.deleteItemAsync('user_refresh_token');
+          await clearAuthTokens();
           processQueue(error, null);
-          // Optionally, trigger a global logout event or redirect here
-          // Example: EventEmitter.emit('logout');
           return Promise.reject(error);
         }
       } catch (refreshError) {
-        // refreshToken already clears tokens in SecureStore on failure
+        // Clear tokens and process queue with error
+        await clearAuthTokens();
         processQueue(refreshError as AxiosError, null);
-        // Optionally, trigger a global logout event or redirect here
-        // Example: EventEmitter.emit('logout');
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
     }
+    
     return Promise.reject(error);
   }
 );
@@ -155,70 +173,38 @@ export const getChaptersFromSource = async (
 };
 
 export const getMyLibraryBooks = async (params: getMyLibraryBooksParams): Promise<BookResponse> => {
-  const token = await SecureStore.getItemAsync('user_auth_token');
-  const response = await api.get(`/me/books?offset=${params.offset}&limit=${params.limit}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await api.get(`/me/books?offset=${params.offset}&limit=${params.limit}`);
   return response.data;
 };
 
 export const getMyLists = async (): Promise<ListResponse> => {
-  const token = await SecureStore.getItemAsync('user_auth_token');
-  const response = await api.get('/me/lists', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await api.get('/me/lists');
   return response.data;
 };
 
 export const addBookToTracking = async (bookId: string): Promise<BookTracking> => {
-  const token = await SecureStore.getItemAsync('user_auth_token');
   const response = await api.post(`/me/books`, {
     id: bookId,
-  }, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
   });
   return response.data.book_tracking;
 };
 
 export const removeBookFromTracking = async (bookId: string): Promise<void> => {
-  const token = await SecureStore.getItemAsync('user_auth_token');
   const response = await api.delete(`/me/books`, {
     data: {
       id: bookId,
-    },
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
     }
   });
   return response.data;
 };
 
 export const getMe = async (): Promise<{ user: User }> => {
-  const token = await SecureStore.getItemAsync('user_auth_token');
-  const response = await api.get('/me', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await api.get('/me');
   return response.data;
 };
 
 export const updateUserProfile = async (userData: Partial<User>): Promise<User> => {
-  const token = await SecureStore.getItemAsync('user_auth_token');
-  const response = await api.patch('/me', userData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-  });
+  const response = await api.patch('/me', userData);
   return response.data.user;
 };
 
@@ -234,21 +220,11 @@ interface updateBookTrackingParams {
 }
 
 export const updateBookTracking = async (params: updateBookTrackingParams): Promise<BookTracking> => {
-  const token = await SecureStore.getItemAsync('user_auth_token');
-  const response = await api.patch(`/me/books/${params.bookId}`, params, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
+  const response = await api.patch(`/me/books/${params.bookId}`, params);
   return response.data.book_tracking;
 };
+
 export const checkIfBookIsTracked = async (bookId: string): Promise<BookTracking> => {
-  const token = await SecureStore.getItemAsync('user_auth_token');
-  const response = await api.get(`/me/books/contains/${bookId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    }
-  });
+  const response = await api.get(`/me/books/contains/${bookId}`);
   return response.data;
 };
