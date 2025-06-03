@@ -8,6 +8,7 @@ export const createList = async (name: string): Promise<List> => {
 
 export const updateList = async (listId: number, params: Partial<List>): Promise<List> => {
   const response = await api.patch(`/lists/${listId}`, params);
+  console.log(response.data);
   return response.data.list;
 };
 
@@ -36,18 +37,51 @@ export const reorderBookInList = async (
   bookId: number, 
   newPosition: number
 ): Promise<void> => {
-  await api.patch(`/lists/${listId}/reorder`, {
-    bookId,
-    newPosition,
-  });
+  try {
+    console.log('Sending reorder request:', { listId, bookId, newPosition });
+    await api.patch(`/lists/${listId}/reorder`, {
+      bookId,
+      newPosition,
+    });
+  } catch (error: any) {
+    console.error('Reorder API error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw error;
+  }
 };
 
 export const reorderBooksInListBulk = async (
   listId: number, 
   bookOrders: { bookId: number; position: number }[]
 ): Promise<void> => {
-  await api.patch(`/lists/${listId}/reorder-bulk`, {
-    bookOrders,
-  });
+  try {
+    console.log('Sending bulk reorder request:', { listId, bookOrders });
+    await api.patch(`/lists/${listId}/reorder-bulk`, {
+      bookOrders,
+    });
+  } catch (error: any) {
+    console.error('Bulk reorder API error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw error;
+  }
+};
+
+export const deleteList = async (listId: number): Promise<void> => {
+  try {
+    await api.delete(`/lists/${listId}`);
+  } catch (error: any) {
+    console.error('Delete list API error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw error;
+  }
 };
 

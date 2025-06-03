@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
-import { View, StyleSheet, Text, Pressable } from "react-native";
+import { View, StyleSheet, Text, Pressable, FlatList } from "react-native";
 import { Image as ExpoImage } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } from 'react-native-reanimated';
@@ -135,13 +135,12 @@ export default function Collection() {
         onSubmitSearch={handleSubmitSearch}
       />
       <View>
-        <LegendList
+        <FlatList
           data={lists}
           ListHeaderComponent={renderListHeader}
           renderItem={({ item }) => <CollectionListElement list={item} onPress={() => {router.push({pathname: "/list-full", params: {id: item.id.toString()}})}} />}
           keyExtractor={(item) => item.id.toString()}
           ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-          recycleItems
           contentContainerStyle={styles.listContainer}
         />
       </View>

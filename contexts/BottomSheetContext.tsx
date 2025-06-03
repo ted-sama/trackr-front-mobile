@@ -7,7 +7,9 @@ interface BottomSheetContextType {
   isBottomSheetVisible: boolean;
   selectedBook: Book | null;
   view: BookActionsBottomSheetProps['view'];
-  openBookActions: (book: Book, view?: BookActionsBottomSheetProps['view']) => void;
+  currentListId?: number;
+  isFromListPage?: boolean;
+  openBookActions: (book: Book, view?: BookActionsBottomSheetProps['view'], currentListId?: number, isFromListPage?: boolean) => void;
   closeBookActions: () => void;
 }
 
@@ -16,6 +18,8 @@ const BottomSheetContext = createContext<BottomSheetContextType>({
   isBottomSheetVisible: false,
   selectedBook: null,
   view: 'actions',
+  currentListId: undefined,
+  isFromListPage: false,
   openBookActions: () => {},
   closeBookActions: () => {},
 });
@@ -30,10 +34,14 @@ export const BottomSheetProvider = ({ children }: BottomSheetProviderProps) => {
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [view, setView] = useState<BookActionsBottomSheetProps['view']>('actions');
+  const [currentListIdForSheet, setCurrentListIdForSheet] = useState<number | undefined>(undefined);
+  const [isFromListPageForSheet, setIsFromListPageForSheet] = useState<boolean>(false);
 
-  const openBookActions = (book: Book, viewArg?: BookActionsBottomSheetProps['view']) => {
+  const openBookActions = (book: Book, viewArg?: BookActionsBottomSheetProps['view'], listId?: number, fromList?: boolean) => {
     setSelectedBook(book);
     setView(viewArg ?? 'actions');
+    setCurrentListIdForSheet(listId);
+    setIsFromListPageForSheet(fromList || false);
     setIsBottomSheetVisible(true);
   };
 
@@ -46,6 +54,8 @@ export const BottomSheetProvider = ({ children }: BottomSheetProviderProps) => {
       isBottomSheetVisible,
       selectedBook,
       view,
+      currentListId: currentListIdForSheet,
+      isFromListPage: isFromListPageForSheet,
       openBookActions,
       closeBookActions,
     }}>

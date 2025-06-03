@@ -37,13 +37,16 @@ interface BookCardProps {
   showRating?: boolean;
   showTrackingStatus?: boolean;
   showTrackingButton?: boolean;
+  rank?: number;
+  currentListId?: number;
+  isFromListPage?: boolean;
 }
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.33;
 const COMPACT_CARD_WIDTH = width * 0.29;
 
-const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAuthor = true, showRating = true, showTrackingStatus = false, showTrackingButton = true }: BookCardProps) => {
+const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAuthor = true, showRating = true, showTrackingStatus = false, showTrackingButton = true, rank, currentListId, isFromListPage }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const { isBookTracked } = useTrackedBooksStore();
@@ -109,8 +112,8 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
   const handlePresentModalPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     scale.value = withTiming(1, { duration: 220 });
-    openBookActions(book);
-  }, [book]);
+    openBookActions(book, 'actions', currentListId, isFromListPage);
+  }, [book, openBookActions, currentListId, isFromListPage, scale]);
 
   // Create animated style for scale animation
   const animatedCardStyle = useAnimatedStyle(() => {
@@ -169,7 +172,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
               </View>
             )}
             <Image
-              source={{ uri: book.cover_image }}
+              source={book.cover_image}
               style={[
                 styles.mangaCover,
                 size === 'compact' && {
@@ -219,6 +222,11 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
           </View>
 
           <View style={[styles.mangaInfo, size === 'compact' && { paddingTop: 4 }]}> 
+            {rank && (
+              <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: 4 }]}>
+                {rank}
+              </Text>
+            )}
             <Text
               style={[
                 styles.mangaTitle,

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { getMyLists, getList, getBook } from '@/services/api';
-import { addBookToList, createList, getLists, removeBookFromList, updateList, reorderBookInList, reorderBooksInListBulk } from '@/services/api/list';
+import { addBookToList, createList, getLists, removeBookFromList, updateList, reorderBookInList, reorderBooksInListBulk, deleteList as deleteListAPI } from '@/services/api/list';
 import { Book, List } from '@/types';
 
 export interface ListState {
@@ -21,6 +21,7 @@ export interface ListState {
   fetchMyLists: () => Promise<void>;
   fetchList: (id: string) => Promise<void>;
   isOwner: (listId: number) => boolean;
+  deleteList: (listId: number) => Promise<void>;
 }
 
 export const useListStore = create<ListState>((set, get) => ({
@@ -49,17 +50,37 @@ export const useListStore = create<ListState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const freshList = await updateList(listId, updatedList);
-      set(state => ({
-        myListsById: {
-          ...state.myListsById,
-          [listId]: freshList,
-        },
-        // Also update listsById if the list is loaded there
-        listsById: state.listsById[listId] ? {
-          ...state.listsById,
-          [listId]: freshList,
-        } : state.listsById,
-      }));
+      set(state => {
+        const existingMyList = state.myListsById[listId];
+        const existingPublicList = state.listsById[listId];
+        
+        // Preserve metadata from existing list if it exists
+        const mergedMyList = existingMyList ? {
+          ...freshList,
+          // Preserve collection metadata
+          total_books: existingMyList.total_books || 0,
+          first_book_covers: existingMyList.first_book_covers || [],
+        } : freshList;
+        
+        const mergedPublicList = existingPublicList ? {
+          ...freshList,
+          // Preserve collection metadata
+          total_books: existingPublicList.total_books || 0,
+          first_book_covers: existingPublicList.first_book_covers || [],
+        } : freshList;
+        
+        return {
+          myListsById: {
+            ...state.myListsById,
+            [listId]: mergedMyList,
+          },
+          // Also update listsById if the list is loaded there
+          listsById: state.listsById[listId] ? {
+            ...state.listsById,
+            [listId]: mergedPublicList,
+          } : state.listsById,
+        };
+      });
     } catch (e: any) {
       set({ error: e.message || 'Erreur de mise à jour de la liste' });
     } finally {
@@ -155,27 +176,8 @@ export const useListStore = create<ListState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await reorderBookInList(listId, bookId, newPosition);
-      set(state => ({
-        myListsById: {
-          ...state.myListsById,
-          [listId]: {
-            ...state.myListsById[listId],
-            books: state.myListsById[listId]?.books?.map(book =>
-              book.id === bookId ? { ...book, position: newPosition } : book
-            ) || [],
-          }
-        },
-        // Also update listsById if the list is loaded there
-        listsById: state.listsById[listId] ? {
-          ...state.listsById,
-          [listId]: {
-            ...state.listsById[listId],
-            books: state.listsById[listId]?.books?.map(book =>
-              book.id === bookId ? { ...book, position: newPosition } : book
-            ) || [],
-          }
-        } : state.listsById,
-      }));
+      // Refetch the list from backend to get the correct order and covers
+      await get().fetchList(String(listId));
     } catch (e: any) {
       set({ error: e.message || 'Erreur de réordonnancement du livre dans la liste' });
     } finally {
@@ -187,29 +189,8 @@ export const useListStore = create<ListState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await reorderBooksInListBulk(listId, bookOrders);
-      set(state => ({
-        myListsById: {
-          ...state.myListsById,
-          [listId]: {
-            ...state.myListsById[listId],
-            books: state.myListsById[listId]?.books?.map(book => {
-              const order = bookOrders.find(order => order.bookId === book.id);
-              return order ? { ...book, position: order.position } : book;
-            }) || [],
-          }
-        },
-        // Also update listsById if the list is loaded there
-        listsById: state.listsById[listId] ? {
-          ...state.listsById,
-          [listId]: {
-            ...state.listsById[listId],
-            books: state.listsById[listId]?.books?.map(book => {
-              const order = bookOrders.find(order => order.bookId === book.id);
-              return order ? { ...book, position: order.position } : book;
-            }) || [],
-          }
-        } : state.listsById,
-      }));
+      // Refetch the list from backend to get the correct order and covers
+      await get().fetchList(String(listId));
     } catch (e: any) {
       set({ error: e.message || 'Erreur de réordonnancement des livres dans la liste' });
     } finally {
@@ -290,6 +271,37 @@ export const useListStore = create<ListState>((set, get) => ({
       });
     } catch (e: any) {
       set({ error: e.message || 'Erreur de chargement de la liste' });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  deleteList: async (listId: number) => {
+    set({ isLoading: true, error: null });
+    try {
+      await deleteListAPI(listId);
+      set(state => {
+        const newMyListsById = { ...state.myListsById };
+        delete newMyListsById[listId];
+        const newMyListsIds = state.myListsIds.filter(id => id !== listId);
+
+        const newListsById = { ...state.listsById };
+        let newListsIds = [...state.listsIds];
+        if (newListsById[listId]) {
+          delete newListsById[listId];
+          newListsIds = state.listsIds.filter(id => id !== listId);
+        }
+
+        return {
+          myListsById: newMyListsById,
+          myListsIds: newMyListsIds,
+          listsById: newListsById,
+          listsIds: newListsIds,
+        };
+      });
+    } catch (e: any) {
+      set({ error: e.message || 'Erreur de suppression de la liste' });
+      throw e;
     } finally {
       set({ isLoading: false });
     }

@@ -21,9 +21,12 @@ interface BookListElementProps {
   showTrackingStatus?: boolean;
   showAuthor?: boolean;
   showRating?: boolean;
+  rank?: number;
+  currentListId?: number;
+  isFromListPage?: boolean;
 }
 
-const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, showRating = false, showTrackingButton = false, showTrackingStatus = false }: BookListElementProps) => {
+const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, showRating = false, showTrackingButton = false, showTrackingStatus = false, rank, currentListId, isFromListPage }: BookListElementProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
   const { isBottomSheetVisible, openBookActions } = useBottomSheet();
@@ -49,8 +52,8 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
   // Présenter le bottom sheet via context
   const handlePresentModalPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    openBookActions(book);
-  }, [book]);
+    openBookActions(book, 'actions', currentListId, isFromListPage);
+  }, [book, openBookActions, currentListId, isFromListPage]);
 
   return (
     <>
@@ -62,8 +65,13 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
           style={styles.container}
         >
           <View style={styles.detailsGroup}>
-            <Image source={{ uri: book.cover_image }} style={styles.image} />
+            <Image source={book.cover_image} style={styles.image} />
           <View style={styles.infoContainer}>
+            {rank && (
+              <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: 4 }]}>
+                {rank}
+              </Text>
+            )}
             <Text style={[styles.title, typography.h3, { color: colors.text }]} numberOfLines={2} ellipsizeMode="tail">{book.title}</Text>
             {book.author && showAuthor && (
               <Text style={[styles.author, typography.caption, { color: colors.secondaryText }]} numberOfLines={1} ellipsizeMode="tail">{book.author}</Text>

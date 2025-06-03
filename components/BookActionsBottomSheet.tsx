@@ -64,6 +64,8 @@ export interface BookActionsBottomSheetProps {
   onDismiss?: () => void;
   backdropDismiss?: boolean;
   view?: "actions" | "status_editor" | "rating_editor" | "list_editor" | "list_creator";
+  currentListId?: number;
+  isFromListPage?: boolean;
 }
 
 const VIEW_ACTIONS = "actions";
@@ -113,6 +115,8 @@ const BookActionsBottomSheet = forwardRef<
       onDismiss,
       backdropDismiss,
       view = VIEW_ACTIONS,
+      currentListId,
+      isFromListPage,
     },
     ref
   ) => {
@@ -134,6 +138,7 @@ const BookActionsBottomSheet = forwardRef<
       removeBookFromList,
       getListsContainingBook,
       isLoading: isListsLoading,
+      isOwner,
     } = useListStore();
 
     const lists = myListsIds.map((id) => myListsById[id]);
@@ -222,6 +227,18 @@ const BookActionsBottomSheet = forwardRef<
         icon: <MinusIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: isTracking,
         onPress: () => handleRemoveBookFromTracking(),
+      },
+      {
+        label: "Supprimer de la liste",
+        icon: <MinusIcon size={16} strokeWidth={2.75} color={colors.text} />,
+        show: !!(isFromListPage && currentListId && isOwner(currentListId)),
+        onPress: async () => {
+          if (currentListId) {
+            await removeBookFromList(currentListId, book.id);
+            // @ts-expect-error bottom sheet ref
+            ref.current?.dismiss(); // Dismiss bottom sheet after action
+          }
+        },
       },
       {
         label: "Ajouter à une liste",

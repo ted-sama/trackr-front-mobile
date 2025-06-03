@@ -65,7 +65,7 @@ export const refreshToken = async (): Promise<RefreshTokenResponse> => {
   
   try {
     // Use axios directly instead of api instance to avoid interceptor interference
-    const response = await axios.post('https://fddc-89-221-127-193.ngrok-free.app/api/v1/auth/refresh', 
+    const response = await axios.post('https://0gkclppoo967.share.zrok.io/api/v1/auth/refresh', 
       { refreshToken: storedRefreshToken },
       {
         headers: {

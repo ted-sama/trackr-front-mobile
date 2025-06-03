@@ -32,6 +32,7 @@ export interface Book {
   tracking_status?: BookTracking | null;
   created_at?: Date;
   updated_at?: Date;
+  item_number?: number;
 }
 
 export interface ChapterResponse {
@@ -122,6 +123,7 @@ export interface List {
     avatar?: string | null;
   };
   is_public: boolean;
+  ranked: boolean;
   first_book_covers?: string[];
   total_books: number;
   books?: Book[];

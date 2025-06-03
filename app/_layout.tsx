@@ -65,7 +65,14 @@ function RootLayoutContent() {
   const fetchMyLibraryBooks = useTrackedBooksStore(state => state.fetchMyLibraryBooks);
   const isLibraryLoading = useTrackedBooksStore(state => state.isLoading);
   const libraryError = useTrackedBooksStore(state => state.error);
-  const { isBottomSheetVisible, selectedBook, view, closeBookActions } = useBottomSheet();
+  const { 
+    isBottomSheetVisible, 
+    selectedBook, 
+    view, 
+    closeBookActions, 
+    currentListId, 
+    isFromListPage 
+  } = useBottomSheet();
   const globalBottomSheetRef = useRef<BottomSheetModal>(null);
 
   const [fontsLoaded] = useFonts({
@@ -140,6 +147,17 @@ function RootLayoutContent() {
             headerShown: false,
           }}
         />
+        <Stack.Screen 
+          name='list-order' 
+          options={{
+            presentation: 'modal',
+            ...(Platform.OS === 'ios' && {
+              presentation: 'formSheet',
+            }),
+            gestureEnabled: true,
+            headerShown: false,
+          }}
+        />
       </Stack>
       {/* Global Book Actions BottomSheet */}
       {selectedBook && (
@@ -147,6 +165,8 @@ function RootLayoutContent() {
           ref={globalBottomSheetRef}
           book={selectedBook}
           view={view}
+          currentListId={currentListId}
+          isFromListPage={isFromListPage}
           onDismiss={closeBookActions}
           backdropDismiss
         />
