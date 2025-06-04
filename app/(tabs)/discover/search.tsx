@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,43 +21,112 @@ export default function SearchScreen() {
   const [isFetchingMore, setIsFetchingMore] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const limit = 15;
+  const debounceTimeoutRef = useRef<number | null>(null);
 
-  const handleSearch = (text: string) => {
-    setError(null);
-    setSearchText(text);
-    setOffset(0);
-    setHasMore(true);
-    setSearchResults([]);
-    fetchBooks(text, 0, false);
-  }
-
-  // Function to fetch paginated search results
   const fetchBooks = useCallback(async (text: string, newOffset = 0, append = false) => {
-    if (!text) return;
-    if (append) setIsFetchingMore(true); else setIsLoading(true);
+    const trimmedText = text.trim();
+    if (!trimmedText) {
+      setSearchResults([]);
+      setIsLoading(false);
+      setIsFetchingMore(false);
+      setHasMore(true);
+      setOffset(0);
+      setError(null);
+      return;
+    }
+
+    setError(null);
+    if (append) {
+      setIsFetchingMore(true);
+    } else {
+      setSearchResults([]);
+      setOffset(0);
+      setHasMore(true);
+      setIsLoading(true);
+    }
+
     try {
-      const results = await search({ query: text, offset: newOffset, limit });
+      const results = await search({ query: trimmedText, offset: newOffset, limit });
+      
+      if (append) {
+        setSearchResults(prevSearchResults => {
+          const existingIds = new Set(prevSearchResults.map(book => book.id));
+          const uniqueNewBooks = results.filter(book => !existingIds.has(book.id));
+          return [...prevSearchResults, ...uniqueNewBooks];
+        });
+      } else {
+        setSearchResults(results);
+      }
+      
       setOffset(newOffset + results.length);
-      setSearchResults(prev => append ? [...prev, ...results] : results);
       setHasMore(results.length === limit);
+
     } catch (e: any) {
-      setError(e.message || 'Erreur de recherche');
+      setError(e.message || 'Une erreur est survenue lors de la recherche.');
+      setHasMore(false);
     } finally {
-      if (append) setIsFetchingMore(false); else setIsLoading(false);
+      if (append) {
+        setIsFetchingMore(false);
+      } else {
+        setIsLoading(false);
+      }
     }
   }, [limit]);
 
-  // Handler for infinite scroll
-  const handleEndReached = () => {
-    if (isFetchingMore || isLoading || !hasMore) return;
-    fetchBooks(searchText, offset, true);
+  const debouncedFetchBooks = useCallback((text: string) => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    setSearchResults([]);
+    setOffset(0);
+    setHasMore(true);
+    setIsLoading(true);
+    setError(null);
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      fetchBooks(text, 0, false);
+    }, 500);
+  }, [fetchBooks]);
+
+  const handleSearchTextChange = (text: string) => {
+    setSearchText(text);
+    if (!text.trim()) {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+      setError(null);
+      setSearchResults([]);
+      setIsLoading(false);
+      setIsFetchingMore(false);
+      setHasMore(true);
+      setOffset(0);
+    } else {
+      debouncedFetchBooks(text);
+    }
   };
+
+  const loadMoreBooks = useCallback(() => {
+    if (isFetchingMore || isLoading || !hasMore || !searchText.trim()) return;
+    fetchBooks(searchText, offset, true);
+  }, [isFetchingMore, isLoading, hasMore, searchText, offset, fetchBooks]);
+
+  const handleEndReached = () => {
+    loadMoreBooks();
+  };
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["right", "left"]}>
-      <HeaderDiscover searchMode="search" onSearchTextChange={handleSearch} searchText={searchText} />
+      <HeaderDiscover searchMode="search" onSearchTextChange={handleSearchTextChange} searchText={searchText} />
 
-      {isLoading ? (
+      {isLoading && searchResults.length === 0 && !error ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -69,13 +138,14 @@ export default function SearchScreen() {
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Aucun résultat trouvé</Text>
+              <Text style={[styles.emptyText, { color: colors.text }]}>
+                {error ? error : (searchText.trim() ? "Aucun résultat trouvé" : "Commencez votre recherche en tapant ci-dessus.")}
+              </Text>
             </View>
           }
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.2}
-          recycleItems
           ListFooterComponent={isFetchingMore ? (
             <View style={styles.footerContainer}>
               <ActivityIndicator size="small" color={colors.primary} />
@@ -108,11 +178,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
   footerContainer: {
     padding: 16,
   },
   emptyText: {
     fontSize: 16,
+    textAlign: 'center',
   },
 });
