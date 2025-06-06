@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { getMyLists, getList, getBook } from '@/services/api';
-import { addBookToList, createList, getLists, removeBookFromList, updateList, reorderBookInList, reorderBooksInListBulk, deleteList as deleteListAPI } from '@/services/api/list';
+import { addBookToList, createList, getLists, removeBookFromList, updateList, reorderBookInList, reorderBooksInListBulk, deleteList as deleteListAPI, updateListImage as updateListImageAPI } from '@/services/api/list';
 import { Book, List } from '@/types';
+import { ImagePickerAsset } from 'expo-image-picker';
 
 export interface ListState {
   listsById: Record<string, List>;
@@ -22,6 +23,7 @@ export interface ListState {
   fetchList: (id: string) => Promise<void>;
   isOwner: (listId: number) => boolean;
   deleteList: (listId: number) => Promise<void>;
+  updateListImage: (listId: number, image: ImagePickerAsset) => Promise<void>;
 }
 
 export const useListStore = create<ListState>((set, get) => ({
@@ -223,10 +225,10 @@ export const useListStore = create<ListState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await getLists();
-      set({ listsById: response.items.reduce<Record<string, List>>((acc, list) => {
+      set({ listsById: response.items.reduce<Record<string, List>>((acc: Record<string, List>, list: List) => {
         acc[list.id] = list;
         return acc;
-      }, {}), listsIds: response.items.map(l => l.id) });
+      }, {}), listsIds: response.items.map((l: List) => l.id) });
     } catch (e: any) {
       set({ error: e.message || 'Erreur de chargement des listes' });
     } finally {
@@ -301,6 +303,19 @@ export const useListStore = create<ListState>((set, get) => ({
       });
     } catch (e: any) {
       set({ error: e.message || 'Erreur de suppression de la liste' });
+      throw e;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  updateListImage: async (listId: number, image: ImagePickerAsset) => {
+    set({ isLoading: true, error: null });
+    try {
+      await updateListImageAPI(listId, image);
+      await get().fetchList(String(listId)); // Refetch to get new image URL
+    } catch (e: any) {
+      set({ error: e.message || "Erreur de mise à jour de l'image de la liste" });
       throw e;
     } finally {
       set({ isLoading: false });

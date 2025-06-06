@@ -1,5 +1,6 @@
 import { List, ListResponse } from "@/types";
 import { api } from "./index";
+import { ImagePickerAsset } from "expo-image-picker";
 
 export const createList = async (name: string): Promise<List> => {
   const response = await api.post('/lists', { name });
@@ -80,6 +81,36 @@ export const deleteList = async (listId: number): Promise<void> => {
       status: error.response?.status,
       data: error.response?.data,
       message: error.message
+    });
+    throw error;
+  }
+};
+
+export const updateListImage = async (listId: number, image: ImagePickerAsset): Promise<void> => {
+  const formData = new FormData();
+
+  const uri = image.uri;
+  const fileName = image.fileName || uri.split('/').pop() || 'photo.jpg';
+  const mimeType = image.mimeType || 'image/jpeg';
+
+  const imagePayload: any = {
+    uri: uri,
+    name: fileName,
+    type: mimeType,
+  }
+  formData.append('image', imagePayload);
+
+  try {
+    await api.put(`/lists/${listId}/images`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  } catch (error: any) {
+    console.error('Update list image API error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
     });
     throw error;
   }

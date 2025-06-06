@@ -4,12 +4,13 @@ import {
   Text,
   TextInput,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   Alert,
   Platform,
   KeyboardAvoidingView,
+  ImageBackground,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -30,6 +31,9 @@ import { X, Plus, Check, Globe, Lock, Trophy, Users } from "lucide-react-native"
 import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
+import { Camera } from "lucide-react-native";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
@@ -39,12 +43,6 @@ export default function ListEdit() {
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
 
-  // Animation
-  const scrollY = useSharedValue(0);
-  const scrollHandler = useAnimatedScrollHandler((event) => {
-    scrollY.value = event.contentOffset.y;
-  });
-
   // Store
   const list = useListStore(
     (state) =>
@@ -53,6 +51,7 @@ export default function ListEdit() {
   const updateList = useListStore((state) => state.updateList);
   const fetchList = useListStore((state) => state.fetchList);
   const isLoading = useListStore((state) => state.isLoading);
+  const updateListImage = useListStore((state) => state.updateListImage);
 
   // Form state
   const [name, setName] = useState("");
@@ -62,6 +61,7 @@ export default function ListEdit() {
   const [isPublic, setIsPublic] = useState(false);
   const [ranked, setRanked] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
 
   // Load list data
   useEffect(() => {
@@ -91,9 +91,9 @@ export default function ListEdit() {
         JSON.stringify((list.tags || []).sort());
       const isPublicChanged = isPublic !== (list.is_public || false);
       const rankedChanged = ranked !== (list.ranked || false);
-      setHasChanges(nameChanged || descriptionChanged || tagsChanged || isPublicChanged || rankedChanged);
+      setHasChanges(nameChanged || descriptionChanged || tagsChanged || isPublicChanged || rankedChanged || !!selectedImage);
     }
-  }, [name, description, tags, isPublic, ranked, list]);
+  }, [name, description, tags, isPublic, ranked, list, selectedImage]);
 
   const handleBack = () => {
     if (hasChanges) {
@@ -111,6 +111,20 @@ export default function ListEdit() {
       );
     } else {
       router.back();
+    }
+  };
+
+  const handlePickImage = async () => {
+    Haptics.selectionAsync();
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0]);
     }
   };
 
@@ -140,6 +154,11 @@ export default function ListEdit() {
 
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+      if(selectedImage) {
+        await updateListImage(Number(listId), selectedImage);
+      }
+
       await updateList(Number(listId), {
         name: name.trim(),
         description: description.trim() || null,
@@ -189,11 +208,6 @@ export default function ListEdit() {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-        <AnimatedHeader
-          title="Modifier la liste"
-          scrollY={scrollY}
-          onBack={handleBack}
-        />
         <View style={styles.loadingContainer}>
           <Text style={[typography.body, { color: colors.secondaryText }]}>
             Chargement...
@@ -233,20 +247,35 @@ export default function ListEdit() {
         </TouchableOpacity>
       </View>
 
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-      >
-        <AnimatedScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={styles.scrollContent}
-          onScroll={scrollHandler}
-          showsVerticalScrollIndicator={false}
+        <View style={{ flex: 1 }}>
+        <ScrollView
+          style={{ paddingBottom: 120 }}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 120, paddingTop: 120 }]}
+          showsVerticalScrollIndicator={true}
+          nestedScrollEnabled={true}
+          scrollEnabled={true}
         >
-          <View
-            style={styles.formContainer}
-          >
+          {/* Backdrop Image */}
+          <TouchableOpacity onPress={handlePickImage} activeOpacity={0.8}>
+              <ImageBackground
+                source={{ uri: selectedImage?.uri || list.backdrop_image || undefined }}
+                style={[styles.backdrop, { backgroundColor: colors.card }]}
+                imageStyle={{ borderRadius: 16 }}
+              >
+                <LinearGradient
+                  colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.5)']}
+                  style={styles.backdropOverlay}
+                >
+                  <View style={styles.cameraIconContainer}>
+                    <Camera size={24} color="white" />
+                    <Text style={[typography.body, styles.cameraText]}>
+                      Changer la bannière
+                    </Text>
+                  </View>
+                </LinearGradient>
+              </ImageBackground>
+            </TouchableOpacity>
+
             {/* Name Field */}
             <View style={styles.fieldContainer}>
               <Text
@@ -475,9 +504,8 @@ export default function ListEdit() {
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
-        </AnimatedScrollView>
-      </KeyboardAvoidingView>
+        </ScrollView>
+        </View>
     </SafeAreaView>
   );
 }
@@ -597,5 +625,30 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
+  },
+  backdrop: {
+    height: 150,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 16,
+    marginBottom: 24,
+  },
+  backdropOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 16,
+  },
+  cameraIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  cameraText: {
+    color: 'white',
+    marginLeft: 8,
+    fontWeight: '600',
   },
 });
