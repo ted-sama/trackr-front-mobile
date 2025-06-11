@@ -2,15 +2,14 @@ import React, { useRef } from 'react';
 import { View, Text, TouchableWithoutFeedback, StyleSheet, Dimensions, Pressable } from 'react-native';
 import { LegendList } from '@legendapp/list';
 import { Category, Book } from '../types';
-import { Ionicons } from '@expo/vector-icons';
 import BookCard from './BookCard';
 import { useTheme } from '../contexts/ThemeContext';
 import { router } from 'expo-router';
 import { useTypography } from '@/hooks/useTypography';
+import { ChevronRight } from 'lucide-react-native';
 
 interface CategorySliderProps {
   category: Category;
-  onSeeAllPress?: (categoryId: string) => void;
   isBottomSheetVisible?: boolean;
   header?: boolean;
   onTrackingToggle?: (bookId: string, isTracking: boolean) => void;
@@ -22,7 +21,7 @@ const ITEM_MARGIN_RIGHT = 12;
 const CONTAINER_PADDING_LEFT = 16;
 const ITEM_WIDTH = CARD_WIDTH + ITEM_MARGIN_RIGHT;
 
-const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false, header = true, onTrackingToggle }: CategorySliderProps) => {
+const CategorySlider = ({ category, isBottomSheetVisible = false, header = true, onTrackingToggle }: CategorySliderProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
   
@@ -32,28 +31,12 @@ const CategorySlider = ({ category, onSeeAllPress, isBottomSheetVisible = false,
   return (
     <View style={styles.categoryContainer}>
       {header && (
-        <View style={styles.categoryHeader}>
-        <Text style={[styles.categoryTitle, typography.categoryTitle, { color: colors.text }]} numberOfLines={1}>
-          {category.title}
-        </Text>
-        <TouchableWithoutFeedback
-          onPress={() => onSeeAllPress 
-            ? onSeeAllPress(category.id) 
-            : console.log(`Voir tout: ${category.title}`)}
-        >
-          <Pressable style={styles.seeAllButtonContainer} onPress={() => router.push({pathname: "/category-full", params: {id: category.id}})}>
-            <Text style={[styles.seeAllButtonText, { color: colors.accent }]} numberOfLines={1}>
-              Voir tout
-            </Text>
-            <Ionicons 
-              name="arrow-forward" 
-              size={20} 
-              color={colors.accent} 
-              style={styles.buttonIcon} 
-            />
-          </Pressable>
-        </TouchableWithoutFeedback>
-      </View>
+        <Pressable style={styles.categoryHeader} onPress={() => router.push({pathname: "/category-full", params: {id: category.id}})}>
+          <Text style={[styles.categoryTitle, typography.categoryTitle, { color: colors.text }]} numberOfLines={1}>
+            {category.title}
+          </Text>
+          <ChevronRight size={20} strokeWidth={2.5} color={colors.secondaryText} />
+        </Pressable>
       )}
       <LegendList
         data={books.slice(0, 8)}
@@ -78,7 +61,7 @@ const styles = StyleSheet.create({
   },
   categoryHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 8,
     alignItems: 'center',
     paddingHorizontal: 16,
     marginBottom: 12,
@@ -86,19 +69,7 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    maxWidth: '70%',
-  },
-  seeAllButtonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  seeAllButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginRight: 4,
-  },
-  buttonIcon: {
-    fontSize: 14,
+    maxWidth: '95%',
   },
   sliderContent: {
     paddingLeft: 16,

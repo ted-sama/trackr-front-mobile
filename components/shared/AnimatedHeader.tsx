@@ -59,7 +59,7 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
           StyleSheet.absoluteFillObject,
           styles.background,
           headerContainerStyle,
-          { borderBottomColor: colors.border, borderBottomWidth: 1 },
+          { borderBottomColor: colors.tabBarBorder, borderBottomWidth: 1 },
         ]}
       >
         <BlurView

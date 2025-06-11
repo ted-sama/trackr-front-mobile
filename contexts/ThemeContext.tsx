@@ -66,7 +66,7 @@ const lightColors = {
   secondaryButton: '#121212',
   secondaryButtonText: '#FFFFFF',
   // TabBar
-  tabBarBorder: '#eaeaea',
+  tabBarBorder: '#F6F6F6',
   tabBarBackground: '#F0F0F3',
   tabBarHighlight: '#fff',
   tabBarText: '#888',
@@ -105,7 +105,7 @@ const darkColors = {
   secondaryButton: '#FFFFFF',
   secondaryButtonText: '#202020',
   // TabBar
-  tabBarBorder: '#23232a',
+  tabBarBorder: '#18181d',
   tabBarBackground: '#23232a',
   tabBarHighlight: '#333347',
   tabBarText: '#aaa',

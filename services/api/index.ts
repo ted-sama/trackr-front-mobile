@@ -104,6 +104,18 @@ interface searchParams {
     query: string;
     limit: number;
     offset: number;
+    types?: ('books' | 'chapters' | 'lists')[];
+}
+
+interface SearchResponse {
+  books: Book[];
+  chapters: Chapter[];
+  lists: List[];
+  totalBooks: number;
+  totalChapters: number;
+  totalLists: number;
+  limit: number;
+  offset: number;
 }
 
 interface getBookParams {
@@ -115,9 +127,11 @@ interface getMyLibraryBooksParams {
     limit: number;
 }
 
-export const search = async (params: searchParams): Promise<Book[]> => {
-  const response = await api.get(`/search?q=${params.query}&types=books&offset=${params.offset}&limit=${params.limit}`);
-  return response.data.books;
+export const search = async (params: searchParams): Promise<SearchResponse> => {
+  const types = params.types || ['books'];
+  const typesParam = types.join(',');
+  const response = await api.get(`/search?q=${params.query}&types=${typesParam}&offset=${params.offset}&limit=${params.limit}`);
+  return response.data;
 };
 
 export const getCategories = async (): Promise<CategoryResponse> => {

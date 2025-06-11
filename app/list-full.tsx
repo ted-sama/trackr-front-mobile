@@ -207,6 +207,7 @@ export default function ListFull() {
                     <Image
                       source={{ uri: list.backdrop_image }}
                       style={{ width: "100%", height: "100%" }}
+                      contentFit="cover"
                     />
                   </MaskedView>
                 ) : (

@@ -9,8 +9,8 @@ import {
   Platform,
   KeyboardAvoidingView,
   ImageBackground,
+  ScrollView,
 } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -119,7 +119,7 @@ export default function ListEdit() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [16, 9],
+      aspect: [3, 2], // Ratio ajusté pour correspondre à la bannière (275px height, ~412px width)
       quality: 0.8,
     });
 
@@ -247,13 +247,10 @@ export default function ListEdit() {
         </TouchableOpacity>
       </View>
 
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1 }} collapsable={false}>
         <ScrollView
-          style={{ paddingBottom: 120 }}
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: 120, paddingTop: 120 }]}
-          showsVerticalScrollIndicator={true}
-          nestedScrollEnabled={true}
-          scrollEnabled={true}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 120}]}
+          showsVerticalScrollIndicator={false}
         >
           {/* Backdrop Image */}
           <TouchableOpacity onPress={handlePickImage} activeOpacity={0.8}>
@@ -627,7 +624,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backdrop: {
-    height: 150,
+    height: 275,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 16,

@@ -65,7 +65,7 @@ export function TrackingTabBar({
             height: 64,
             borderRadius: 50,
             borderWidth: 1,
-            borderColor: colors.tabBarBorder,
+            borderColor: colors.border,
             backgroundColor: colors.card,
             position: "absolute",
             left: (screenWidth - screenWidth * 0.94) / 2,

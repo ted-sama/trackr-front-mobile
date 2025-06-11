@@ -1,32 +1,36 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Pressable } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import HeaderDiscover from '@/components/discover/HeaderDiscover';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Book } from '@/types';
+import { Book, List, Chapter } from '@/types';
 import BookListElement from '@/components/BookListElement';
+import CollectionListElement from '@/components/CollectionListElement';
 import { search } from '@/services/api';
 import { LegendList } from '@legendapp/list';
+import { useTypography } from '@/hooks/useTypography';
 
 export default function SearchScreen() {
   const { colors, currentTheme } = useTheme();
+  const typography = useTypography();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchResults, setSearchResults] = useState<Book[]>([]);
+  const [searchResults, setSearchResults] = useState<{ books: Book[], lists: List[], chapters: Chapter[] }>({ books: [], lists: [], chapters: [] });
   const [searchText, setSearchText] = useState<string>('');
   const [offset, setOffset] = useState<number>(0);
   const [isFetchingMore, setIsFetchingMore] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const [activeFilters, setActiveFilters] = useState<('books' | 'chapters' | 'lists')[]>(['books']);
   const limit = 15;
   const debounceTimeoutRef = useRef<number | null>(null);
 
-  const fetchBooks = useCallback(async (text: string, newOffset = 0, append = false) => {
+  const fetchResults = useCallback(async (text: string, newOffset = 0, append = false) => {
     const trimmedText = text.trim();
     if (!trimmedText) {
-      setSearchResults([]);
+      setSearchResults({ books: [], lists: [], chapters: [] });
       setIsLoading(false);
       setIsFetchingMore(false);
       setHasMore(true);
@@ -39,27 +43,38 @@ export default function SearchScreen() {
     if (append) {
       setIsFetchingMore(true);
     } else {
-      setSearchResults([]);
+      setSearchResults({ books: [], lists: [], chapters: [] });
       setOffset(0);
       setHasMore(true);
       setIsLoading(true);
     }
 
     try {
-      const results = await search({ query: trimmedText, offset: newOffset, limit });
+      const results = await search({ query: trimmedText, offset: newOffset, limit, types: activeFilters });
       
       if (append) {
         setSearchResults(prevSearchResults => {
-          const existingIds = new Set(prevSearchResults.map(book => book.id));
-          const uniqueNewBooks = results.filter(book => !existingIds.has(book.id));
-          return [...prevSearchResults, ...uniqueNewBooks];
+          const existingBookIds = new Set(prevSearchResults.books.map(book => book.id));
+          const existingListIds = new Set(prevSearchResults.lists.map(list => list.id));
+          const existingChapterIds = new Set(prevSearchResults.chapters.map(chapter => chapter.id));
+          
+          const uniqueNewBooks = results.books.filter(book => !existingBookIds.has(book.id));
+          const uniqueNewLists = results.lists.filter(list => !existingListIds.has(list.id));
+          const uniqueNewChapters = results.chapters.filter(chapter => !existingChapterIds.has(chapter.id));
+          
+          return {
+            books: [...prevSearchResults.books, ...uniqueNewBooks],
+            lists: [...prevSearchResults.lists, ...uniqueNewLists],
+            chapters: [...prevSearchResults.chapters, ...uniqueNewChapters]
+          };
         });
       } else {
         setSearchResults(results);
       }
       
-      setOffset(newOffset + results.length);
-      setHasMore(results.length === limit);
+      const totalResults = results.books.length + results.lists.length + results.chapters.length;
+      setOffset(newOffset + totalResults);
+      setHasMore(totalResults === limit);
 
     } catch (e: any) {
       setError(e.message || 'Une erreur est survenue lors de la recherche.');
@@ -71,22 +86,22 @@ export default function SearchScreen() {
         setIsLoading(false);
       }
     }
-  }, [limit]);
+  }, [limit, activeFilters]);
 
-  const debouncedFetchBooks = useCallback((text: string) => {
+  const debouncedFetchResults = useCallback((text: string) => {
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
-    setSearchResults([]);
+    setSearchResults({ books: [], lists: [], chapters: [] });
     setOffset(0);
     setHasMore(true);
     setIsLoading(true);
     setError(null);
 
     debounceTimeoutRef.current = setTimeout(() => {
-      fetchBooks(text, 0, false);
+      fetchResults(text, 0, false);
     }, 500);
-  }, [fetchBooks]);
+  }, [fetchResults]);
 
   const handleSearchTextChange = (text: string) => {
     setSearchText(text);
@@ -95,24 +110,58 @@ export default function SearchScreen() {
         clearTimeout(debounceTimeoutRef.current);
       }
       setError(null);
-      setSearchResults([]);
+      setSearchResults({ books: [], lists: [], chapters: [] });
       setIsLoading(false);
       setIsFetchingMore(false);
       setHasMore(true);
       setOffset(0);
     } else {
-      debouncedFetchBooks(text);
+      debouncedFetchResults(text);
     }
   };
 
-  const loadMoreBooks = useCallback(() => {
+  const loadMoreResults = useCallback(() => {
     if (isFetchingMore || isLoading || !hasMore || !searchText.trim()) return;
-    fetchBooks(searchText, offset, true);
-  }, [isFetchingMore, isLoading, hasMore, searchText, offset, fetchBooks]);
+    fetchResults(searchText, offset, true);
+  }, [isFetchingMore, isLoading, hasMore, searchText, offset, fetchResults]);
 
   const handleEndReached = () => {
-    loadMoreBooks();
+    loadMoreResults();
   };
+
+  const toggleFilter = (filter: 'books' | 'chapters' | 'lists') => {
+    setActiveFilters(prev => {
+      const newFilters = prev.includes(filter) 
+        ? prev.filter(f => f !== filter)
+        : [...prev, filter];
+      
+      // Au moins un filtre doit être actif
+      return newFilters.length > 0 ? newFilters : prev;
+    });
+  };
+
+  const getAllResults = () => {
+    const allResults: Array<{ type: 'book' | 'list' | 'chapter', data: Book | List | Chapter }> = [];
+    
+    if (activeFilters.includes('books')) {
+      searchResults.books.forEach(book => allResults.push({ type: 'book', data: book }));
+    }
+    if (activeFilters.includes('lists')) {
+      searchResults.lists.forEach(list => allResults.push({ type: 'list', data: list }));
+    }
+    if (activeFilters.includes('chapters')) {
+      searchResults.chapters.forEach(chapter => allResults.push({ type: 'chapter', data: chapter }));
+    }
+    
+    return allResults;
+  };
+
+  useEffect(() => {
+    // Relancer la recherche quand les filtres changent
+    if (searchText.trim()) {
+      debouncedFetchResults(searchText);
+    }
+  }, [activeFilters]);
 
   useEffect(() => {
     return () => {
@@ -122,19 +171,93 @@ export default function SearchScreen() {
     };
   }, []);
 
+  const allResults = getAllResults();
+  const hasResults = allResults.length > 0;
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["right", "left"]}>
       <HeaderDiscover searchMode="search" onSearchTextChange={handleSearchTextChange} searchText={searchText} />
+      
+      {/* Filtres */}
+      <View style={styles.filtersContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersScrollContainer}>
+          <Pressable
+            style={[
+              styles.filterButton,
+              { backgroundColor: activeFilters.includes('books') ? colors.primary : colors.card },
+              { borderColor: activeFilters.includes('books') ? colors.primary : colors.border }
+            ]}
+            onPress={() => toggleFilter('books')}
+          >
+            <Text style={[
+              styles.filterText,
+              typography.caption,
+              { color: activeFilters.includes('books') ? "white" : colors.text }
+            ]}>
+              Livres
+            </Text>
+          </Pressable>
+          
+          <Pressable
+            style={[
+              styles.filterButton,
+              { backgroundColor: activeFilters.includes('lists') ? colors.primary : colors.card },
+              { borderColor: activeFilters.includes('lists') ? colors.primary : colors.border }
+            ]}
+            onPress={() => toggleFilter('lists')}
+          >
+            <Text style={[
+              styles.filterText,
+              typography.caption,
+              { color: activeFilters.includes('lists') ? "white" : colors.text }
+            ]}>
+              Listes
+            </Text>
+          </Pressable>
+        </ScrollView>
+      </View>
 
-      {isLoading && searchResults.length === 0 && !error ? (
+      {isLoading && !hasResults && !error ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <LegendList
-          data={searchResults}
-          renderItem={({ item }) => <BookListElement book={item} showAuthor showRating showTrackingButton onPress={() => router.push(`/book/${item.id}`)} />}
-          keyExtractor={(item) => item.id.toString()}
+          data={allResults}
+          renderItem={({ item }) => {
+            if (item.type === 'book') {
+              return (
+                <BookListElement 
+                  book={item.data as Book} 
+                  showAuthor 
+                  showRating 
+                  showTrackingButton 
+                  onPress={() => router.push(`/book/${item.data.id}`)} 
+                />
+              );
+                         } else if (item.type === 'list') {
+               return (
+                 <CollectionListElement 
+                   list={item.data as List} 
+                   onPress={() => router.push(`/list-full?id=${item.data.id}`)} 
+                   showDescription={true}
+                 />
+               );
+            } else {
+              // Pour les chapitres, on peut créer un composant simple ou les ignorer pour l'instant
+              return (
+                <View style={styles.chapterItem}>
+                  <Text style={[typography.body, { color: colors.text }]} numberOfLines={2}>
+                    {(item.data as Chapter).title}
+                  </Text>
+                  <Text style={[typography.caption, { color: colors.secondaryText }]}>
+                    Chapitre {(item.data as Chapter).chapter}
+                  </Text>
+                </View>
+              );
+            }
+          }}
+          keyExtractor={(item) => `${item.type}-${item.data.id}`}
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
@@ -186,5 +309,25 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     textAlign: 'center',
+  },
+  filtersContainer: {
+    paddingVertical: 12,
+  },
+  filtersScrollContainer: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  filterText: {
+    fontWeight: '500',
+  },
+  chapterItem: {
+    padding: 16,
+    borderRadius: 8,
   },
 });

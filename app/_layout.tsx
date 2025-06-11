@@ -140,9 +140,6 @@ function RootLayoutContent() {
           name='list-edit' 
           options={{
             presentation: 'modal',
-            ...(Platform.OS === 'ios' && {
-              presentation: 'formSheet',
-            }),
             gestureEnabled: true,
             headerShown: false,
           }}
@@ -151,9 +148,6 @@ function RootLayoutContent() {
           name='list-order' 
           options={{
             presentation: 'modal',
-            ...(Platform.OS === 'ios' && {
-              presentation: 'formSheet',
-            }),
             gestureEnabled: true,
             headerShown: false,
           }}
