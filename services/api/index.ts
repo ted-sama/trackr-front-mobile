@@ -4,7 +4,7 @@ import { Book, ChapterResponse, Chapter, Source, BookResponse, SourceResponse, C
 import { refreshToken, clearAuthTokens } from './auth';
 
 export const api: AxiosInstance = axios.create({
-  baseURL: 'https://0gkclppoo967.share.zrok.io/api/v1',
+  baseURL: 'https://97paffp8zdj0.share.zrok.io/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -240,5 +240,10 @@ export const updateBookTracking = async (params: updateBookTrackingParams): Prom
 
 export const checkIfBookIsTracked = async (bookId: string): Promise<BookTracking> => {
   const response = await api.get(`/me/books/contains/${bookId}`);
+  return response.data;
+};
+
+export const getRecap = async (bookId: string, chapter: number): Promise<string> => {
+  const response = await api.get(`/books/${bookId}/recap/${chapter}`);
   return response.data;
 };

@@ -330,6 +330,7 @@ export default function BookScreen() {
     });
   };
 
+  // TODO MAYBE: Implement chatbot
   const handleChatPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push({
@@ -621,8 +622,14 @@ export default function BookScreen() {
               currentChapter={bookTracking.current_chapter}
               onManagePress={() => handlePresentChapterModalPress()}
               onStatusPress={() => handlePresentModalPress("status_editor")}
-              onChatPress={handleChatPress}
-            />
+              onRecapPress={() => router.push({
+                pathname: '/book/recap',
+                params: {
+                  bookId: book?.id.toString(),
+                  bookTitle: book?.title
+                }
+              })}
+            />  
           </Animated.View>
         </>
       )}

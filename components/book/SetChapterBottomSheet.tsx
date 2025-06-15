@@ -2,7 +2,6 @@
 import React, { forwardRef, useCallback, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useBottomSheet } from '@/contexts/BottomSheetContext';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useTypography } from '@/hooks/useTypography';
@@ -37,7 +36,14 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
 
     const handleInputChange = (text: string) => {
         const numeric = text.replace(/[^0-9]/g, '');
-        setChapter(numeric);
+        const numericValue = Number(numeric);
+        
+        // Si book.chapters existe, limiter au maximum disponible
+        if (book.chapters !== null && book.chapters !== undefined && numericValue > book.chapters) {
+            setChapter(book.chapters.toString());
+        } else {
+            setChapter(numeric);
+        }
     };
 
     const handleSave = async () => {
@@ -66,7 +72,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
             index={index}
             onDismiss={handleDismiss}
             backgroundStyle={{
-                backgroundColor: colors.card,
+                backgroundColor: colors.background,
                 borderRadius: 30,
             }}
             handleComponent={null}
@@ -76,7 +82,16 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
             <BottomSheetView style={styles.bottomSheetContent}>
                 <Text style={[typography.categoryTitle, styles.title, { color: colors.text }]}>Dernier chapitre lu</Text>
                 <View style={[styles.inputContainer, { backgroundColor: colors.actionButton }]}>
-                    <Pressable onPress={() => setChapter((Number(chapter) - 1).toString())}>
+                    <Pressable 
+                        onPress={() => {
+                            const newValue = Number(chapter) - 1;
+                            if (newValue >= 0) {
+                                setChapter(newValue.toString());
+                            }
+                        }}
+                        disabled={Number(chapter) <= 0}
+                        style={{ opacity: Number(chapter) <= 0 ? 0.5 : 1 }}
+                    >
                         <Minus size={24} color={colors.text} />
                     </Pressable>
                     <BottomSheetTextInput
@@ -87,7 +102,17 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
                         value={chapter}
                         onChangeText={handleInputChange}
                     />
-                    <Pressable onPress={() => setChapter((Number(chapter) + 1).toString())}>
+                    <Pressable 
+                        onPress={() => {
+                            const newValue = Number(chapter) + 1;
+                            const maxChapters = book.chapters !== null && book.chapters !== undefined ? book.chapters : Number.MAX_SAFE_INTEGER;
+                            if (newValue <= maxChapters) {
+                                setChapter(newValue.toString());
+                            }
+                        }}
+                        disabled={book.chapters !== null && book.chapters !== undefined && Number(chapter) >= book.chapters}
+                        style={{ opacity: book.chapters !== null && book.chapters !== undefined && Number(chapter) >= book.chapters ? 0.5 : 1 }}
+                    >
                         <Plus size={24} color={colors.text} />
                     </Pressable>
                 </View>

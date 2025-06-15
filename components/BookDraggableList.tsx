@@ -44,17 +44,12 @@ export const BookDraggableList: React.FC<BookDraggableListProps> = ({
       )}
       
       <View style={[styles.bookInfo, !showDragHandle && styles.bookInfoNoHandle]}>
-        <Text style={[typography.body, { color: colors.text, fontWeight: '600' }]} numberOfLines={2}>
+        <Text style={[typography.h3, { color: colors.text }]} numberOfLines={2}>
           {item.title}
         </Text>
         <Text style={[typography.caption, { color: colors.secondaryText }]} numberOfLines={1}>
           {item.author}
         </Text>
-        {item.tracking_status && (
-          <Text style={[typography.caption, { color: colors.accent }]}>
-            Chapitre {item.tracking_status.current_chapter || 0}
-          </Text>
-        )}
       </View>
       
       {showPosition && (

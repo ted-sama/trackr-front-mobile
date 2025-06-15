@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  Pressable,
+  Animated as RNAnimated,
 } from "react-native";
 import { Image } from "expo-image";
 import { LegendList, LegendListRef } from "@legendapp/list";
@@ -74,13 +76,11 @@ export default function ListFull() {
   const isLoading = useListStore((state) => state.isLoading);
   const isOwner = useListStore((state) => state.isOwner);
   const deleteListFromStore = useListStore((state) => state.deleteList);
-  const [isBlurVisible, setIsBlurVisible] = useState(false);
-  const blurOpacity = useSharedValue(0);
 
-  // Animated opacity for blur
-  const animatedBlurStyle = useAnimatedStyle(() => ({
-    opacity: blurOpacity.value,
-  }));
+  // Animation refs for buttons
+  const scaleAnimOrder = useRef(new RNAnimated.Value(1)).current;
+  const scaleAnimEdit = useRef(new RNAnimated.Value(1)).current;
+  const scaleAnimDelete = useRef(new RNAnimated.Value(1)).current;
 
   // Charger la liste initialement et quand on revient sur l'écran
   useFocusEffect(
@@ -149,14 +149,50 @@ export default function ListFull() {
     );
   };
 
+  // Animation handlers for buttons
+  const handlePressInOrder = () => {
+    RNAnimated.spring(scaleAnimOrder, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOutOrder = () => {
+    RNAnimated.spring(scaleAnimOrder, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressInEdit = () => {
+    RNAnimated.spring(scaleAnimEdit, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOutEdit = () => {
+    RNAnimated.spring(scaleAnimEdit, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressInDelete = () => {
+    RNAnimated.spring(scaleAnimDelete, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOutDelete = () => {
+    RNAnimated.spring(scaleAnimDelete, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
   const switchLayout = () => {
-    setIsBlurVisible(true);
-    blurOpacity.value = 1;
-    setTimeout(() => {
-      blurOpacity.value = withTiming(0, { duration: 600 }, (finished) => {
-        if (finished) runOnJS(setIsBlurVisible)(false);
-      });
-    }, 50);
     setCurrentLayout(currentLayout === "grid" ? "list" : "grid");
   };
 
@@ -253,23 +289,23 @@ export default function ListFull() {
               </View>
               {isOwner(list.id) && (
                 <View style={{ marginTop: 16 }}>
-                  <View style={{ flexDirection: "row", gap: 16 }}>
-                    <TouchableOpacity
-                      onPress={() =>
-                        router.push({
-                          pathname: "/list-order",
-                          params: {
-                            listId: list.id.toString(),
-                          },
-                        })
-                      }
-                    >
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          gap: 4,
-                        }}
+                  <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
+                    <RNAnimated.View style={{ transform: [{ scale: scaleAnimOrder }] }}>
+                      <Pressable
+                        style={[
+                          styles.actionButton,
+                          { backgroundColor: colors.card, borderColor: colors.border }
+                        ]}
+                        onPress={() =>
+                          router.push({
+                            pathname: "/list-order",
+                            params: {
+                              listId: list.id.toString(),
+                            },
+                          })
+                        }
+                        onPressIn={handlePressInOrder}
+                        onPressOut={handlePressOutOrder}
                       >
                         <Ionicons
                           name="swap-vertical"
@@ -278,30 +314,32 @@ export default function ListFull() {
                         />
                         <Text
                           style={[
-                            typography.body,
+                            styles.actionButtonText,
+                            typography.caption,
                             { color: colors.secondaryText },
                           ]}
                         >
                           Ordonner
                         </Text>
-                      </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() =>
-                        router.push({
-                          pathname: "/list-edit",
-                          params: {
-                            listId: list.id.toString(),
-                          },
-                        })
-                      }
-                    >
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          gap: 4,
-                        }}
+                      </Pressable>
+                    </RNAnimated.View>
+                    
+                    <RNAnimated.View style={{ transform: [{ scale: scaleAnimEdit }] }}>
+                      <Pressable
+                        style={[
+                          styles.actionButton,
+                          { backgroundColor: colors.card, borderColor: colors.border }
+                        ]}
+                        onPress={() =>
+                          router.push({
+                            pathname: "/list-edit",
+                            params: {
+                              listId: list.id.toString(),
+                            },
+                          })
+                        }
+                        onPressIn={handlePressInEdit}
+                        onPressOut={handlePressOutEdit}
                       >
                         <Ionicons
                           name="pencil"
@@ -310,21 +348,25 @@ export default function ListFull() {
                         />
                         <Text
                           style={[
-                            typography.body,
+                            styles.actionButtonText,
+                            typography.caption,
                             { color: colors.secondaryText },
                           ]}
                         >
                           Modifier
                         </Text>
-                      </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleDeleteList}>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          gap: 4,
-                        }}
+                      </Pressable>
+                    </RNAnimated.View>
+
+                    <RNAnimated.View style={{ transform: [{ scale: scaleAnimDelete }] }}>
+                      <Pressable
+                        style={[
+                          styles.actionButton,
+                          { backgroundColor: colors.card, borderColor: colors.error }
+                        ]}
+                        onPress={handleDeleteList}
+                        onPressIn={handlePressInDelete}
+                        onPressOut={handlePressOutDelete}
                       >
                         <Ionicons
                           name="trash-outline"
@@ -333,14 +375,15 @@ export default function ListFull() {
                         />
                         <Text
                           style={[
-                            typography.body,
+                            styles.actionButtonText,
+                            typography.caption,
                             { color: colors.error },
                           ]}
                         >
                           Supprimer
                         </Text>
-                      </View>
-                    </TouchableOpacity>
+                      </Pressable>
+                    </RNAnimated.View>
                   </View>
                 </View>
               )}
@@ -434,18 +477,6 @@ export default function ListFull() {
           accessibilityRole="list"
         />
       )}
-      {isBlurVisible && (
-        <Animated.View
-          style={[StyleSheet.absoluteFill, animatedBlurStyle, { zIndex: 10 }]}
-          pointerEvents="none"
-        >
-          <BlurView
-            intensity={40}
-            tint={currentTheme === "dark" ? "dark" : "light"}
-            style={StyleSheet.absoluteFill}
-          />
-        </Animated.View>
-      )}
     </View>
   );
 }
@@ -460,5 +491,25 @@ const styles = StyleSheet.create({
   },
   badgeContainer: {
     marginBottom: 32,
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  actionButtonText: {
+    fontWeight: '500',
   },
 });

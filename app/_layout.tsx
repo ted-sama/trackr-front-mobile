@@ -126,9 +126,14 @@ function RootLayoutContent() {
           name='book/summary' 
           options={{
             presentation: 'modal',
-            ...(Platform.OS === 'ios' && {
-              presentation: 'formSheet',
-            }),
+            gestureEnabled: true,
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen 
+          name='book/recap' 
+          options={{
+            presentation: 'modal',
             gestureEnabled: true,
             headerShown: false,
           }}

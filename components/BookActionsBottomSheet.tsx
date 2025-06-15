@@ -362,11 +362,10 @@ const BookActionsBottomSheet = forwardRef<
         index={index}
         onDismiss={handleDismiss}
         backgroundStyle={{
-          backgroundColor: colors.card,
+          backgroundColor: colors.background,
           borderRadius: 30,
         }}
         handleComponent={null}
-        handleIndicatorStyle={{ backgroundColor: colors.icon }}
         backdropComponent={renderBackdrop}
         keyboardBlurBehavior="restore"
       >
@@ -516,7 +515,7 @@ const BookActionsBottomSheet = forwardRef<
               {/* Liste des listes */}
               <View style={{ height: 380 }}>
                 <LinearGradient
-                  colors={[hexToRgba(colors.card, 1), hexToRgba(colors.card, 0)]}
+                  colors={[hexToRgba(colors.background, 1), hexToRgba(colors.background, 0)]}
                   style={styles.fadeTop}
                   pointerEvents="none"
                 />
@@ -535,7 +534,7 @@ const BookActionsBottomSheet = forwardRef<
                   contentContainerStyle={{ flexGrow: 1, paddingTop: 12 }}
                 />
                 <LinearGradient
-                  colors={[hexToRgba(colors.card, 0), hexToRgba(colors.card, 1)]}
+                  colors={[hexToRgba(colors.background, 0), hexToRgba(colors.background, 1)]}
                   style={styles.fadeBottom}
                   pointerEvents="none"
                 />

@@ -20,7 +20,6 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BlurView } from "expo-blur";
 import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import { useCategoryStore } from "@/stores/categoryStore";
@@ -57,13 +56,6 @@ export default function CategoryFull() {
 
   const category = useCategoryStore((state: CategoryState) => state.categoriesById[id as string] || null);
   const fetchCategory = useCategoryStore((state: CategoryState) => state.fetchCategory);
-  const [isBlurVisible, setIsBlurVisible] = useState(false);
-  const blurOpacity = useSharedValue(0);
-
-  // Animated opacity for blur
-  const animatedBlurStyle = useAnimatedStyle(() => ({
-    opacity: blurOpacity.value,
-  }));
 
   useEffect(() => {
     if (id) fetchCategory(id as string);
@@ -138,13 +130,6 @@ export default function CategoryFull() {
   };
 
   const switchLayout = () => {
-    setIsBlurVisible(true);
-    blurOpacity.value = 1;
-    setTimeout(() => {
-      blurOpacity.value = withTiming(0, { duration: 600 }, (finished) => {
-        if (finished) runOnJS(setIsBlurVisible)(false);
-      });
-    }, 50);
     setCurrentLayout(currentLayout === "grid" ? "list" : "grid");
   };
 
@@ -251,18 +236,6 @@ export default function CategoryFull() {
           showsVerticalScrollIndicator={true}
           accessibilityRole="list"
         />
-      )}
-      {isBlurVisible && (
-        <Animated.View
-          style={[StyleSheet.absoluteFill, animatedBlurStyle, { zIndex: 10 }]}
-          pointerEvents="none"
-        >
-          <BlurView
-            intensity={40}
-            tint={currentTheme === "dark" ? "dark" : "light"}
-            style={StyleSheet.absoluteFill}
-          />
-        </Animated.View>
       )}
     </View>
   );

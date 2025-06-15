@@ -2,17 +2,25 @@ import React from "react";
 import { View, Text, Pressable, StyleSheet, useWindowDimensions, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withRepeat, 
+  withTiming, 
+  interpolate,
+  Easing 
+} from 'react-native-reanimated';
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { ReadingStatus } from "@/types";
-import { Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square, BookMarked, ClockFading } from "lucide-react-native";
 
 interface TrackingTabBarProps {
   status: string;
   currentChapter?: number;
   onManagePress: () => void;
   onStatusPress: () => void;
-  onChatPress?: () => void;
+  onRecapPress?: () => void;
 }
 
 export function TrackingTabBar({
@@ -20,12 +28,39 @@ export function TrackingTabBar({
   currentChapter,
   onManagePress,
   onStatusPress,
-  onChatPress,
+  onRecapPress,
 }: TrackingTabBarProps) {
   const { width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const typography = useTypography();
+  
+  // Animation for AI button glow effect
+  const glowAnimation = useSharedValue(0);
+  
+  React.useEffect(() => {
+    glowAnimation.value = withRepeat(
+      withTiming(1, {
+        duration: 4000,
+        easing: Easing.inOut(Easing.sin),
+      }),
+      -1,
+      true
+    );
+  }, []);
+
+  const animatedGlowStyle = useAnimatedStyle(() => {
+    const shadowOpacity = interpolate(glowAnimation.value, [0, 1], [0, 0.5]);
+    const shadowRadius = interpolate(glowAnimation.value, [0, 1], [4, 8]);
+    const scale = interpolate(glowAnimation.value, [0, 1], [1, 1.005]);
+    
+    return {
+      shadowOpacity,
+      shadowRadius,
+      transform: [{ scale }],
+    };
+  });
+
   const trackingStatusValues: Record<ReadingStatus, { text: string, icon: React.ReactNode }> = {
     'plan_to_read': { text: 'À lire', icon: <Clock3 size={20} strokeWidth={2.75} color={colors.planToRead} /> },
     'reading': { text: 'En cours', icon: <BookOpenIcon size={20} strokeWidth={2.75} color={colors.reading} /> },
@@ -35,28 +70,6 @@ export function TrackingTabBar({
   };
 
   return (
-    <>
-      {/* Chatbot floating button */}
-      <Pressable
-        style={[
-          styles.chatbotButton,
-          {
-            right: (screenWidth - screenWidth * 0.94) / 2,
-            bottom: insets.bottom + 16 + 64 + 16,
-            shadowColor: Platform.OS === "android" ? "rgba(0,0,0,0.589)" : "rgba(0,0,0,0.1)",
-          },
-        ]}
-        onPress={onChatPress}
-        accessibilityRole="button"
-        accessibilityLabel="Chatbot button"
-      >
-        <LinearGradient
-          colors={[colors.primary, "#8A2BE2"]}
-          style={styles.chatbotGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        />
-      </Pressable>
       <View
         style={[
           styles.container,
@@ -66,14 +79,14 @@ export function TrackingTabBar({
             borderRadius: 50,
             borderWidth: 1,
             borderColor: colors.border,
-            backgroundColor: colors.card,
+            backgroundColor: colors.background,
             position: "absolute",
             left: (screenWidth - screenWidth * 0.94) / 2,
             right: (screenWidth - screenWidth * 0.94) / 2,
             bottom: insets.bottom + 16,
             shadowColor: Platform.OS === "android" ? "rgba(0,0,0,0.589)" : "rgba(0,0,0,0.1)",
             shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.15,
+            shadowOpacity: 0.25,
             shadowRadius: 12,
             elevation: 12,
             overflow: "hidden",
@@ -97,24 +110,52 @@ export function TrackingTabBar({
               )}
             </View>
           </Pressable>
-          <Pressable
-            style={({ pressed }) => [styles.manageButton, { backgroundColor: colors.primary, opacity: pressed ? 0.8 : 1 }]}
-            onPress={onManagePress}
-            accessibilityRole="button"
-            accessibilityLabel="Bookmark"
-          >
-            <LinearGradient
-              colors={[colors.primary, "#8A2BE2"]}
-              style={styles.gradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+          <View style={styles.manageButtonContainer}>
+            {onRecapPress && (
+              <Animated.View
+              style={[
+                styles.aiButtonWrapper,
+                animatedGlowStyle,
+                {
+                  shadowColor: colors.primary,
+                }
+              ]}
             >
-              <Text style={[typography.trackingTabBarButton, { color: "#fff" }]}>Marque-pages</Text>
-            </LinearGradient>
-          </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.manageButton, 
+                  styles.aiButton,
+                  { 
+                    backgroundColor: colors.actionButton, 
+                    opacity: pressed ? 0.8 : 1 
+                  }
+                ]}
+                onPress={onRecapPress}
+                accessibilityRole="button"
+                accessibilityLabel="Recap"
+              >
+                <ClockFading size={20} strokeWidth={2.5} color={colors.text} />
+              </Pressable>
+            </Animated.View>
+            )}
+            <Pressable
+              style={({ pressed }) => [styles.manageButton, { backgroundColor: colors.primary, opacity: pressed ? 0.8 : 1 }]}
+              onPress={onManagePress}
+              accessibilityRole="button"
+              accessibilityLabel="Bookmark"
+            >
+              <LinearGradient
+                colors={[colors.primary, "#8A2BE2"]}
+                style={styles.gradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <BookMarked size={20} strokeWidth={2.5} color="#fff" />
+              </LinearGradient>
+            </Pressable>
+          </View>
         </View>
       </View>
-    </>
   );
 }
 
@@ -136,10 +177,16 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
     gap: 4,
   },
+  manageButtonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 8,
+  },
   manageButton: {
     borderRadius: 100,
     overflow: "hidden",
-    minWidth: 100,
+    width: 50,
     height: 50,
     justifyContent: "center",
     alignItems: "center",
@@ -149,6 +196,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 2,
+  },
+  aiButtonWrapper: {
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  aiButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
   },
   gradient: {
     paddingVertical: 10,

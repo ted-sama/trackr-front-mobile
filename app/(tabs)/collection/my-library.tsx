@@ -13,7 +13,6 @@ import { useRouter } from 'expo-router';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import SwitchLayoutButton from '@/components/SwitchLayoutButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BlurView } from 'expo-blur';
 import Toast from 'react-native-toast-message';
 import { useUIStore } from '@/stores/uiStore';
 
@@ -46,14 +45,6 @@ export default function MyLibrary() {
   const { getTrackedBooks, addTrackedBook, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
   const books = getTrackedBooks();
 
-  const [isBlurVisible, setIsBlurVisible] = useState(false);
-  const blurOpacity = useSharedValue(0);
-
-  // Animation d'opacité pour le flou
-  const animatedBlurStyle = useAnimatedStyle(() => ({
-    opacity: blurOpacity.value,
-  }));
-
   // Load saved layout preference
   useEffect(() => {
     AsyncStorage.getItem(LAYOUT_STORAGE_KEY).then((layout) => {
@@ -67,13 +58,6 @@ export default function MyLibrary() {
   }, [currentLayout]);
 
   const switchLayout = () => {
-    setIsBlurVisible(true);
-    blurOpacity.value = 1;
-    setTimeout(() => {
-      blurOpacity.value = withTiming(0, { duration: 600 }, (finished) => {
-        if (finished) runOnJS(setIsBlurVisible)(false);
-      });
-    }, 50);
     const newLayout = currentLayout === 'grid' ? 'list' : 'grid';
     setLayout(newLayout);
   };
@@ -128,12 +112,6 @@ export default function MyLibrary() {
         showsVerticalScrollIndicator={true}
         accessibilityRole="list"
       />
-      {isBlurVisible && (
-        <Animated.View style={[StyleSheet.absoluteFill, animatedBlurStyle, { zIndex: 10 }]}
-        pointerEvents="none">
-          <BlurView intensity={40} tint={currentTheme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
-        </Animated.View>
-      )}
     </View>
   );
 }

@@ -70,12 +70,11 @@ export default function Summary() {
       )}
       
       {/* Header avec bouton fermer */}
-      <Animated.View 
-        entering={FadeInUp.duration(300)}
+      <View 
         style={[styles.header, { borderBottomColor: 'transparent' }]}
       >
         <View style={styles.headerLeft}>
-          <Text style={[typography.h2, { color: colors.text }]}>
+          <Text style={[typography.categoryTitle, { color: colors.text }]}>
             Résumé
           </Text>
         </View>
@@ -91,7 +90,7 @@ export default function Summary() {
         >
           <X size={20} color={colors.text} />
         </Pressable>
-      </Animated.View>
+      </View>
 
       <View 
         style={styles.content}
