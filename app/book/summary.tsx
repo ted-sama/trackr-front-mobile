@@ -10,7 +10,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { useBookDetailStore } from '@/stores/bookDetailStore';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
-import { ReadingStatus } from '@/types';
+import { ReadingStatus } from '@/types/reading-status';
 import Badge from '@/components/ui/Badge';
 import { X, RotateCcw, BookOpen, TrendingUp, Calendar, Clock3, BookCheck, Pause, Square, Star } from 'lucide-react-native';
 import Animated, { 
@@ -49,7 +49,7 @@ export default function Summary() {
       <StatusBar style='light' />
       
       {/* Background Image with Masked Fade Effect */}
-      {bookDetails?.cover_image && (
+      {bookDetails?.coverImage && (
         <View style={styles.backgroundContainer}>
           <MaskedView
             style={styles.maskedView}
@@ -62,7 +62,7 @@ export default function Summary() {
             }
           >
             <Image 
-              source={{ uri: bookDetails.cover_image }} 
+              source={{ uri: bookDetails.coverImage }} 
               style={styles.backgroundImage}
             />
           </MaskedView>
@@ -125,7 +125,7 @@ export default function Summary() {
               </View>
               <Text style={[typography.h3, { color: colors.text }]}>Chapitres lus</Text>
               <Text style={[typography.h1, { color: colors.primary }]} numberOfLines={1} ellipsizeMode='tail'>
-                {bookTracking?.current_chapter || '0'}
+                {bookTracking?.currentChapter || '0'}
               </Text>
             </View>
 
@@ -136,8 +136,8 @@ export default function Summary() {
               </View>
               <Text style={[typography.h3, { color: colors.text }]}>Progression</Text>
               <Text style={[typography.h1, { color: colors.accent }]} numberOfLines={1} ellipsizeMode='tail'>
-                {bookDetails?.chapters && bookTracking?.current_chapter 
-                  ? ((bookTracking.current_chapter / bookDetails.chapters) * 100).toFixed(1) + '%'
+                {bookDetails?.chapters && bookTracking?.currentChapter 
+                  ? ((bookTracking.currentChapter / bookDetails.chapters) * 100).toFixed(1) + '%'
                   : '—'
                 }
               </Text>
@@ -149,12 +149,12 @@ export default function Summary() {
                 <Calendar size={20} color={colors.reading} />
               </View>
               <Text style={[typography.h3, { color: colors.text }]}>Jours actifs</Text>
-              {bookTracking?.start_date ? (
-                bookTracking.finish_date ? (
+              {bookTracking?.startDate ? (
+                bookTracking.finishDate ? (
                   <Text style={[typography.h1, { color: colors.reading }]}>
                   {(() => {
-                    const start = new Date(bookTracking.start_date);
-                    const finish = new Date(bookTracking.finish_date);
+                    const start = new Date(bookTracking.startDate);
+                    const finish = new Date(bookTracking.finishDate);
                     const diffTime = Math.abs(finish.getTime() - start.getTime());
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     return `${diffDays} jour${diffDays > 1 ? 's' : ''}`;
@@ -163,7 +163,7 @@ export default function Summary() {
                 ) : (
                   <Text style={[typography.h1, { color: colors.reading }]}>
                     {(() => {
-                      const start = new Date(bookTracking.start_date);
+                      const start = new Date(bookTracking.startDate);
                       const now = new Date();
                       const diffTime = Math.abs(now.getTime() - start.getTime());
                       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -192,16 +192,16 @@ export default function Summary() {
 
         <Animated.View style={{ flexDirection: 'column', gap: 4 }} entering={FadeInDown.delay(300).duration(300)}>
           <Text style={[typography.caption, { color: colors.secondaryText }]}>
-            Ajouté le {new Date(bookTracking?.created_at || '').toLocaleDateString()}
+            Ajouté le {new Date(bookTracking?.createdAt || '').toLocaleDateString()}
           </Text>
-          {bookTracking?.start_date && (
+          {bookTracking?.startDate && (
             <Text style={[typography.caption, { color: colors.secondaryText }]}>
-              Débuté le {new Date(bookTracking?.start_date || '').toLocaleDateString()}
+              Débuté le {new Date(bookTracking?.startDate || '').toLocaleDateString()}
             </Text>
           )}
-          {bookTracking?.finish_date && (
+          {bookTracking?.finishDate && (
             <Text style={[typography.caption, { color: colors.secondaryText }]}>
-              Terminé le {new Date(bookTracking?.finish_date || '').toLocaleDateString()}
+              Terminé le {new Date(bookTracking?.finishDate || '').toLocaleDateString()}
             </Text>
           )}
         </Animated.View>

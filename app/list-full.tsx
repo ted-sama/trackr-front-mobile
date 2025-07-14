@@ -26,7 +26,8 @@ import { StatusBar } from "expo-status-bar";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import BookListElement from "@/components/BookListElement";
 import BookCard from "@/components/BookCard";
-import { Book, List, BookTracking } from "@/types";
+import { Book } from "@/types/book";
+import { List } from "@/types/list";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
@@ -230,7 +231,7 @@ export default function ListFull() {
                   zIndex: -99,
                 }}
               >
-                {list.backdrop_image ? (
+                {list.backdropImage ? (
                   <MaskedView
                     style={{ flex: 1 }}
                     maskElement={
@@ -241,7 +242,7 @@ export default function ListFull() {
                     }
                   >
                     <Image
-                      source={{ uri: list.backdrop_image }}
+                      source={{ uri: list.backdropImage }}
                       style={{ width: "100%", height: "100%" }}
                       contentFit="cover"
                     />

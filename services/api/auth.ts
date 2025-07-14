@@ -6,33 +6,6 @@ import { RegisterResponse, LoginResponse, RefreshTokenResponse } from '@/types/a
 const REFRESH_TOKEN_KEY = 'user_refresh_token';
 const TOKEN_KEY = 'user_auth_token';
 
-interface RegisterParams {
-    username: string;
-    email: string;
-    password: string;
-}
-
-interface LoginParams {
-    email: string;
-    password: string;
-}
-
-export const register = async ({ username, email, password }: RegisterParams): Promise<RegisterResponse> => {
-  const response = await api.post('/auth/register', { username, email, password });
-  return response.data;
-};
-
-export const login = async ({ email, password }: LoginParams): Promise<LoginResponse> => {
-  const response = await api.post('/auth/login', { email, password });
-  
-  // Store tokens and update API headers
-  if (response.data.access_token) {
-    await setAuthTokens(response.data.access_token, response.data.refresh_token);
-  }
-  
-  return response.data;
-};
-
 // Utility function to set auth tokens and update API headers
 export const setAuthTokens = async (accessToken: string, refreshToken?: string) => {
   await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
@@ -65,7 +38,7 @@ export const refreshToken = async (): Promise<RefreshTokenResponse> => {
   
   try {
     // Use axios directly instead of api instance to avoid interceptor interference
-    const response = await axios.post('https://0gkclppoo967.share.zrok.io/api/v1/auth/refresh', 
+    const response = await axios.post('http://127.0.0.1:3333/api/v1/auth/refresh', 
       { refreshToken: storedRefreshToken },
       {
         headers: {
@@ -74,10 +47,10 @@ export const refreshToken = async (): Promise<RefreshTokenResponse> => {
       }
     );
     
-    const { access_token, refresh_token } = response.data;
+    const { accessToken, refreshToken: newRefreshToken } = response.data;
     
-    if (access_token) {
-      await setAuthTokens(access_token, refresh_token);
+    if (accessToken) {
+      await setAuthTokens(accessToken, newRefreshToken);
     }
     
     return response.data;

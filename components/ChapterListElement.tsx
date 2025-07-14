@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, Linking } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
-import { Chapter } from '@/types';
+import { Chapter } from '@/types/chapter';
 import { CalendarDaysIcon } from 'lucide-react-native';
 export default function ChapterListElement({ chapter }: { chapter: Chapter }) {
     const { colors } = useTheme();
@@ -25,7 +25,7 @@ export default function ChapterListElement({ chapter }: { chapter: Chapter }) {
     };
 
     const handlePress = () => {
-        Linking.openURL(chapter.external_url);
+        Linking.openURL(chapter.externalUrl);
     };
 
     return (
@@ -35,7 +35,7 @@ export default function ChapterListElement({ chapter }: { chapter: Chapter }) {
                 <Text style={[typography.body, { color: colors.text }]}>{chapter.title}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                     <CalendarDaysIcon size={16} color={colors.secondaryText} />
-                    <Text style={[typography.body, { color: colors.secondaryText }]}>Sorti le {new Date(chapter.published_at).toLocaleDateString()}</Text>
+                    <Text style={[typography.body, { color: colors.secondaryText }]}>Sorti le {new Date(chapter.publishedAt).toLocaleDateString()}</Text>
                 </View>
             </Animated.View>
         </Pressable>

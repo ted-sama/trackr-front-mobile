@@ -1,7 +1,8 @@
-import { getBooks, getCategory } from "@/services/api";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { Book, Category, BookTracking } from "@/types";
+import { Book } from "@/types/book";
+import { Category } from "@/types/category";
+import { BookTracking } from "@/types/reading-status";
 import {
   Text,
   StyleSheet,
@@ -226,13 +227,11 @@ export default function BookScreen() {
   const [isButtonRendered, setIsButtonRendered] = useState(false);
 
   useEffect(() => {
-    if (id) fetchBook(id as string);
-    const fetchRecommendations = async () => {
-      const recommendations = await getCategory("1");
-      setDummyRecommendations(recommendations);
-    };
-    fetchRecommendations();
-  }, [id]);
+    if (id) {
+        fetchBook(id as string);
+    }
+}, [id, fetchBook]);
+
 
   if (error) {
     return (
@@ -256,16 +255,16 @@ export default function BookScreen() {
     );
   };
   const dates = () => {
-    if (book?.release_year && book?.end_year) {
-      return `${book?.release_year} - ${book?.end_year}`;
+    if (book?.releaseYear && book?.endYear) {
+      return `${book?.releaseYear} - ${book?.endYear}`;
     } else if (
-      book?.release_year &&
-      !book?.end_year &&
+      book?.releaseYear &&
+      !book?.endYear &&
       book?.status === "ongoing"
     ) {
-      return `${book?.release_year} - en cours`;
+      return `${book?.releaseYear} - en cours`;
     }
-    return book?.release_year;
+    return book?.releaseYear;
   };
 
   const onTrackingToggle = async () => {
@@ -375,7 +374,7 @@ export default function BookScreen() {
               <SkeletonLoader width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
             ) : (
               <Image
-                source={{ uri: book?.cover_image }}
+                source={{ uri: book?.coverImage }}
                 style={styles.imageContent}
               />
             )}
@@ -419,7 +418,7 @@ export default function BookScreen() {
                   style={[typography.caption, { color: colors.secondaryText }]}
                   numberOfLines={1}
                 >
-                  {typeMap[book?.type as keyof typeof typeMap]}
+                  {book?.type ? typeMap[book.type as keyof typeof typeMap] : ''}
                 </Text>
                 {separator()}
                 <Text
@@ -453,7 +452,7 @@ export default function BookScreen() {
           {book?.genres && book?.tags && (
             <View style={styles.badgeContainer}>
               <BadgeSlider
-                data={[...(book?.genres || []), ...(book?.tags || [])]}
+                data={[...(book.genres || []), ...(book.tags || [])]}
               />
             </View>
           )}
@@ -490,9 +489,9 @@ export default function BookScreen() {
               <Text
                 style={[typography.caption, { color: colors.secondaryText }]}
               >
-                {book?.rating_count}{" "}
-                {book?.rating_count
-                  ? book?.rating_count > 1
+                {book?.ratingCount}{" "}
+                {book?.ratingCount
+                  ? book?.ratingCount > 1
                     ? "notes"
                     : "note"
                   : "note"}
@@ -619,7 +618,7 @@ export default function BookScreen() {
           >
             <TrackingTabBar
               status={bookTracking.status}
-              currentChapter={bookTracking.current_chapter}
+              currentChapter={bookTracking.currentChapter}
               onManagePress={() => handlePresentChapterModalPress()}
               onStatusPress={() => handlePresentModalPress("status_editor")}
               onRecapPress={() => router.push({

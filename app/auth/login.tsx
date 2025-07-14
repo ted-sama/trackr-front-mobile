@@ -4,8 +4,6 @@ import Button from '@/components/ui/Button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTypography } from '@/hooks/useTypography';
-import { login as loginApi } from '@/services/api/auth';
-import { LoginResponse } from '@/types/auth';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 
@@ -18,25 +16,7 @@ export default function Login() {
     const { login, isLoading, isAuthenticated } = useAuth();
 
     const handleLogin = async () => {
-        const response: LoginResponse = await loginApi({ email, password });
-        console.log(response);
-        if (response.access_token && response.refresh_token) {
-            try {
-                await login(response.access_token, response.refresh_token);
-                router.push('/');
-            } catch (error) {
-                console.error('Error logging in:', error);
-                Toast.show({
-                    type: "error",
-                    text1: 'Error logging in',
-                });
-            }
-        } else {
-            Toast.show({
-                type: "error",
-                text1: response.message,
-            });
-        }
+        login(email, password);
     };
 
     if (isLoading) {

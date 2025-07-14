@@ -8,7 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import BookListElement from '@/components/BookListElement';
 import BookCard from '@/components/BookCard';
-import { Book, BookTracking } from '@/types';
+import { Book } from '@/types/book';
 import { useRouter } from 'expo-router';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import SwitchLayoutButton from '@/components/SwitchLayoutButton';

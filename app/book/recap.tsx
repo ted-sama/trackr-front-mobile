@@ -7,7 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { useBookDetailStore } from '@/stores/bookDetailStore';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
-import { ReadingStatus } from '@/types';
+import { ReadingStatus } from '@/types/reading-status';
 import { X, BookOpen, Clock3, BookCheck, Pause, Square } from 'lucide-react-native';
 import Animated, { 
     FadeInDown, 
@@ -16,14 +16,14 @@ import Animated, {
     useAnimatedStyle, 
     withTiming 
   } from 'react-native-reanimated';
-import { getRecap } from '@/services/api';
+// import { getRecap } from '@/services/api';
 
 export default function Recap() {
   const router = useRouter();
   const { bookId, bookTitle } = useLocalSearchParams();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
-  const { bookById } = useBookDetailStore();
+  const { bookById, getRecap } = useBookDetailStore();
   const { getTrackedBookStatus } = useTrackedBooksStore();
   const [recap, setRecap] = useState<string>('');
   const bookTracking = getTrackedBookStatus(Number(bookId));
@@ -43,12 +43,13 @@ export default function Recap() {
 
   useEffect(() => {
     const fetchRecap = async () => {
-      const recap = await getRecap(bookId as string, bookTracking?.current_chapter as number);
-      console.log(recap);
-      setRecap(recap);
+      if (bookTracking?.currentChapter) {
+        const recapText = await getRecap(bookId as string, bookTracking.currentChapter);
+        if(recapText) setRecap(recapText);
+      }
     };
     fetchRecap();
-  }, [bookId, bookTracking]);
+  }, [bookId, bookTracking, getRecap]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
@@ -88,7 +89,7 @@ export default function Recap() {
           {/* Current chapter */}
           {bookTracking && (
             <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: 12 }]} numberOfLines={1} ellipsizeMode='tail'>
-              Chapitre {bookTracking.current_chapter}
+              Chapitre {bookTracking.currentChapter}
             </Text>
           )}
         </Animated.View>

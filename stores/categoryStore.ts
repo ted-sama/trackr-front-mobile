@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { getCategories, getCategory } from '@/services/api';
-import { Category } from '@/types';
+import { api } from '@/services/api';
+import { Category } from '@/types/category';
+import { PaginatedResponse } from '@/types/api';
 
 export interface CategoryState {
   categoriesById: Record<string, Category>;
@@ -20,8 +21,8 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
   fetchCategories: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await getCategories();
-      const categories = response.items;
+      const response = await api.get<PaginatedResponse<Category>>('/categories');
+      const categories = response.data.data;
       set({
         categoriesById: categories.reduce<Record<string, Category>>((acc, cat) => {
           acc[cat.id] = cat;
@@ -39,7 +40,8 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
   fetchCategory: async (id: string) => {
     set({ isLoading: true, error: null });
     try {
-      const cat = await getCategory(id);
+      const response = await api.get<Category>(`/categories/${id}`);
+      const cat = response.data;
       set(state => ({
         categoriesById: { ...state.categoriesById, [id]: cat },
       }));

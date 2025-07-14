@@ -1,12 +1,12 @@
 export interface User {
-    id: number;
+    id: string;
     username: string;
     email: string;
-    avatar: string;
-    role: string;
-    preferences: {
+    avatar?: string;
+    role?: string;
+    preferences?: {
         [key: string]: any;
     };
-    created_at: Date;
-    updated_at: Date;
+    createdAt: Date;
+    updatedAt: Date;
 };

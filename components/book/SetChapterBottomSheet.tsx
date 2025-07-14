@@ -5,7 +5,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useTypography } from '@/hooks/useTypography';
-import { Book } from '@/types';
+import { Book } from '@/types/book';
 import { Plus, Minus } from 'lucide-react-native';
 import Button from '@/components/ui/Button';
 
@@ -25,11 +25,11 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
     const { colors } = useTheme();
     const typography = useTypography();
     const isTracking = bookTracking !== null;
-    const [chapter, setChapter] = useState(bookTracking?.current_chapter?.toString() ?? '0');
+    const [chapter, setChapter] = useState(bookTracking?.currentChapter?.toString() ?? '0');
 
     const handleDismiss = () => {
         if (onDismiss) {
-            setChapter(bookTracking?.current_chapter?.toString() ?? '0');
+            setChapter(bookTracking?.currentChapter?.toString() ?? '0');
             onDismiss();
         }
     };
@@ -48,7 +48,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
 
     const handleSave = async () => {
         if (isTracking) {
-            await updateTrackedBook(book.id, { current_chapter: Number(chapter) });
+            await updateTrackedBook(book.id, { currentChapter: Number(chapter) });
             setChapter(chapter);
             if (ref && typeof ref === 'object' && 'current' in ref) {
                 ref.current?.dismiss();

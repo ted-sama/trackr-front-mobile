@@ -40,7 +40,7 @@ export default function UserListsScreen() {
   const isLoading = useListStore(state => state.isLoading);
   const error = useListStore(state => state.error);
   
-  const lists = listsIds.map(id => listsById[id]).filter(list => list.is_public);
+  const lists = listsIds.map(id => listsById[id]).filter(list => list.isPublic);
   
   useEffect(() => {
     const loadInitialData = async () => {

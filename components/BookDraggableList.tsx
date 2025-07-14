@@ -5,7 +5,7 @@ import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flat
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
-import { Book } from '@/types';
+import { Book } from '@/types/book';
 
 interface BookDraggableListProps {
   books: Book[];
@@ -40,7 +40,7 @@ export const BookDraggableList: React.FC<BookDraggableListProps> = ({
       delayLongPress={150}
     >
       {showDragHandle && (
-        <Image source={item.cover_image} style={styles.coverImage} />
+        <Image source={item.coverImage} style={styles.coverImage} />
       )}
       
       <View style={[styles.bookInfo, !showDragHandle && styles.bookInfoNoHandle]}>

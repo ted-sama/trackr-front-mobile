@@ -76,7 +76,7 @@ export default function ListEdit() {
       setName(list.name || "");
       setDescription(list.description || "");
       setTags(list.tags || []);
-      setIsPublic(list.is_public || false);
+      setIsPublic(list.isPublic || false);
       setRanked(list.ranked || false);
     }
   }, [list]);
@@ -89,7 +89,7 @@ export default function ListEdit() {
       const tagsChanged =
         JSON.stringify(tags.sort()) !==
         JSON.stringify((list.tags || []).sort());
-      const isPublicChanged = isPublic !== (list.is_public || false);
+      const isPublicChanged = isPublic !== (list.isPublic || false);
       const rankedChanged = ranked !== (list.ranked || false);
       setHasChanges(nameChanged || descriptionChanged || tagsChanged || isPublicChanged || rankedChanged || !!selectedImage);
     }
@@ -163,7 +163,7 @@ export default function ListEdit() {
         name: name.trim(),
         description: description.trim() || null,
         tags: tags.length > 0 ? tags : null,
-        is_public: isPublic,
+        isPublic: isPublic,
         ranked: ranked,
       });
 
@@ -189,7 +189,7 @@ export default function ListEdit() {
       setName(list.name || "");
       setDescription(list.description || "");
       setTags(list.tags || []);
-      setIsPublic(list.is_public || false);
+      setIsPublic(list.isPublic || false);
       setRanked(list.ranked || false);
     }
   };
@@ -255,7 +255,7 @@ export default function ListEdit() {
           {/* Backdrop Image */}
           <TouchableOpacity onPress={handlePickImage} activeOpacity={0.8}>
               <ImageBackground
-                source={{ uri: selectedImage?.uri || list.backdrop_image || undefined }}
+                source={{ uri: selectedImage?.uri || list.backdropImage || undefined }}
                 style={[styles.backdrop, { backgroundColor: colors.card }]}
                 imageStyle={{ borderRadius: 16 }}
               >

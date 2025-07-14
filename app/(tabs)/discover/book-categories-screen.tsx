@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { StyleSheet, ScrollView, ActivityIndicator, Text, View, RefreshControl } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
-import { Book } from "@/types/index";
+import { Book } from "@/types/book";
 import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { useCategoryStore, CategoryState } from '@/stores/categoryStore';

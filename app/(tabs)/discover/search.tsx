@@ -5,10 +5,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import HeaderDiscover from '@/components/discover/HeaderDiscover';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Book, List, Chapter } from '@/types';
+import { Book } from '@/types/book';
+import { List } from '@/types/list';
+import { Chapter } from '@/types/chapter';
 import BookListElement from '@/components/BookListElement';
 import CollectionListElement from '@/components/CollectionListElement';
-import { search } from '@/services/api';
+// import { search } from '@/services/api';
 import { LegendList } from '@legendapp/list';
 import { useTypography } from '@/hooks/useTypography';
 import MaskedView from '@react-native-masked-view/masked-view';
@@ -32,64 +34,64 @@ export default function SearchScreen() {
   const scaleAnimLists = useRef(new Animated.Value(1)).current;
 
   const fetchResults = useCallback(async (text: string, newOffset = 0, append = false) => {
-    const trimmedText = text.trim();
-    if (!trimmedText) {
-      setSearchResults({ books: [], lists: [], chapters: [] });
-      setIsLoading(false);
-      setIsFetchingMore(false);
-      setHasMore(true);
-      setOffset(0);
-      setError(null);
-      return;
-    }
+    // const trimmedText = text.trim();
+    // if (!trimmedText) {
+    //   setSearchResults({ books: [], lists: [], chapters: [] });
+    //   setIsLoading(false);
+    //   setIsFetchingMore(false);
+    //   setHasMore(true);
+    //   setOffset(0);
+    //   setError(null);
+    //   return;
+    // }
 
-    setError(null);
-    if (append) {
-      setIsFetchingMore(true);
-    } else {
-      setSearchResults({ books: [], lists: [], chapters: [] });
-      setOffset(0);
-      setHasMore(true);
-      setIsLoading(true);
-    }
+    // setError(null);
+    // if (append) {
+    //   setIsFetchingMore(true);
+    // } else {
+    //   setSearchResults({ books: [], lists: [], chapters: [] });
+    //   setOffset(0);
+    //   setHasMore(true);
+    //   setIsLoading(true);
+    // }
 
-    try {
-      const results = await search({ query: trimmedText, offset: newOffset, limit, types: activeFilters });
+    // try {
+    //   const results = await search({ query: trimmedText, offset: newOffset, limit, types: activeFilters });
       
-      if (append) {
-        setSearchResults(prevSearchResults => {
-          const existingBookIds = new Set(prevSearchResults.books.map(book => book.id));
-          const existingListIds = new Set(prevSearchResults.lists.map(list => list.id));
-          const existingChapterIds = new Set(prevSearchResults.chapters.map(chapter => chapter.id));
+    //   if (append) {
+    //     setSearchResults(prevSearchResults => {
+    //       const existingBookIds = new Set(prevSearchResults.books.map(book => book.id));
+    //       const existingListIds = new Set(prevSearchResults.lists.map(list => list.id));
+    //       const existingChapterIds = new Set(prevSearchResults.chapters.map(chapter => chapter.id));
           
-          const uniqueNewBooks = results.books.filter(book => !existingBookIds.has(book.id));
-          const uniqueNewLists = results.lists.filter(list => !existingListIds.has(list.id));
-          const uniqueNewChapters = results.chapters.filter(chapter => !existingChapterIds.has(chapter.id));
+    //       const uniqueNewBooks = results.books.filter(book => !existingBookIds.has(book.id));
+    //       const uniqueNewLists = results.lists.filter(list => !existingListIds.has(list.id));
+    //       const uniqueNewChapters = results.chapters.filter(chapter => !existingChapterIds.has(chapter.id));
           
-          return {
-            books: [...prevSearchResults.books, ...uniqueNewBooks],
-            lists: [...prevSearchResults.lists, ...uniqueNewLists],
-            chapters: [...prevSearchResults.chapters, ...uniqueNewChapters]
-          };
-        });
-      } else {
-        setSearchResults(results);
-      }
+    //       return {
+    //         books: [...prevSearchResults.books, ...uniqueNewBooks],
+    //         lists: [...prevSearchResults.lists, ...uniqueNewLists],
+    //         chapters: [...prevSearchResults.chapters, ...uniqueNewChapters]
+    //       };
+    //     });
+    //   } else {
+    //     setSearchResults(results);
+    //   }
       
-      const totalResults = results.books.length + results.lists.length + results.chapters.length;
-      setOffset(newOffset + totalResults);
-      setHasMore(totalResults === limit);
+    //   const totalResults = results.books.length + results.lists.length + results.chapters.length;
+    //   setOffset(newOffset + totalResults);
+    //   setHasMore(totalResults === limit);
 
-    } catch (e: any) {
-      setError(e.message || 'Une erreur est survenue lors de la recherche.');
-      setHasMore(false);
-    } finally {
-      if (append) {
-        setIsFetchingMore(false);
-      } else {
-        setIsLoading(false);
-      }
-    }
+    // } catch (e: any) {
+    //   setError(e.message || 'Une erreur est survenue lors de la recherche.');
+    //   setHasMore(false);
+    // } finally {
+    //   if (append) {
+    //     setIsFetchingMore(false);
+    //   } else {
+    //     setIsLoading(false);
+    //   }
+    // }
   }, [limit, activeFilters]);
 
   const debouncedFetchResults = useCallback((text: string) => {

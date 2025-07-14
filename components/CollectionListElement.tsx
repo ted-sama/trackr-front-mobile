@@ -3,7 +3,7 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { List } from "@/types";
+import { List } from "@/types/list";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -116,7 +116,7 @@ export default function CollectionListElement({
       >
         <View style={styles.coverStackContainer}>
           {[0, 1, 2].map((_, index) => {
-            const book = list.first_book_covers?.[index];
+            const book = list.firstBookCovers?.[index];
             const leftOffset = index * stackOffset;
             return book ? (
               <Image
@@ -152,7 +152,7 @@ export default function CollectionListElement({
           </Text>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={[typography.caption, { color: colors.secondaryText }]}>
-              {list.total_books} {list.total_books > 1 ? "éléments" : "élément"}
+              {list.totalBooks} {list.totalBooks > 1 ? "éléments" : "élément"}
             </Text>
             {size === "compact" && (
               <>
@@ -160,7 +160,7 @@ export default function CollectionListElement({
                 <Text
                   style={[typography.caption, { color: colors.secondaryText }]}
                 >
-                  {list.is_public ? "Public" : "Privé"}
+                  {list.isPublic ? "Public" : "Privé"}
                 </Text>
               </>
             )}
@@ -176,7 +176,7 @@ export default function CollectionListElement({
               <Text
                 style={[typography.caption, { color: colors.secondaryText }]}
               >
-                {list.is_public ? "Public" : "Privé"}
+                {list.isPublic ? "Public" : "Privé"}
               </Text>
             </View>
           )}

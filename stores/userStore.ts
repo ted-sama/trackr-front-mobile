@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { getMe, updateUserProfile } from '@/services/api';
-import { User } from '@/types';
+import { api } from '@/services/api';
+import { User } from '@/types/user';
 
 export interface UserState {
   currentUser: User | null;
@@ -22,9 +22,9 @@ export const useUserStore = create<UserState>((set, get) => ({
   fetchCurrentUser: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await getMe();
+      const response = await api.get<{ user: User }>('/me');
       set({
-        currentUser: response.user,
+        currentUser: response.data.user,
         isAuthenticated: true,
       });
     } catch (e: any) {
@@ -41,7 +41,8 @@ export const useUserStore = create<UserState>((set, get) => ({
   updateUser: async (userData: Partial<User>) => {
     set({ isLoading: true, error: null });
     try {
-      const updatedUser = await updateUserProfile(userData);
+      const response = await api.patch<{ user: User }>('/me', userData);
+      const updatedUser = response.data.user;
       set({
         currentUser: updatedUser,
       });

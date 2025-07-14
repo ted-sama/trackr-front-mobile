@@ -7,14 +7,14 @@ export interface RegisterResponse {
 
 export interface LoginResponse {
     message: string;
-    access_token?: string;
-    refresh_token?: string;
+    accessToken?: string;
+    refreshToken?: string;
     user?: User;
 }
 
 export interface RefreshTokenResponse {
     message: string;
-    access_token?: string;
+    accessToken?: string;
 }
 
 

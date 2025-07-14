@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { ReadingStatus } from "@/types";
+import { ReadingStatus } from "@/types/reading-status";
 import { Clock3, BookOpenIcon, BookCheck, Pause, Square, BookMarked, ClockFading } from "lucide-react-native";
 
 interface TrackingTabBarProps {

@@ -33,7 +33,9 @@ import Animated, {
   ExitAnimationsValues,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
-import { Book, ReadingStatus, List } from "@/types";
+import { Book } from "@/types/book";
+import { ReadingStatus } from "@/types/reading-status";
+import { List } from "@/types/list";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -375,7 +377,7 @@ const BookActionsBottomSheet = forwardRef<
               <View>
                 <View style={styles.bottomSheetHeader}>
                   <Image
-                    source={{ uri: book.cover_image }}
+                    source={{ uri: book.coverImage }}
                     style={{
                       width: 60,
                       height: 60 * 1.5,

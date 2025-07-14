@@ -1,5 +1,8 @@
 import { create } from 'zustand';
-import { Book, BookTracking } from '@/types';
+import { Book } from '@/types/book';
+import { BookTracking } from '@/types/reading-status';
+import { api } from '@/services/api';
+import { PaginatedResponse } from '@/types/api';
 
 interface TrackedBooksState {
   trackedBooks: Record<number, Book>;
@@ -25,14 +28,13 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   addTrackedBook: async (book) => {
     set({ isLoading: true, error: null });
     try {
-      const { addBookToTracking, getBook } = await import('@/services/api');
-      const tracking = await addBookToTracking(String(book.id));
-      // On récupère le book complet pour avoir toutes les infos à jour
-      const freshBook = await getBook({ id: String(book.id) });
+      const response = await api.post(`/me/books`, { id: book.id });
+      const tracking: BookTracking = response.data.bookTracking;
+      const freshBook = response.data.book;
       set((state) => ({
         trackedBooks: {
           ...state.trackedBooks,
-          [book.id]: { ...freshBook, tracking: true, tracking_status: tracking },
+          [book.id]: { ...freshBook, tracking: true, trackingStatus: tracking },
         },
       }));
     } catch (e: any) {
@@ -45,8 +47,7 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   removeTrackedBook: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const { removeBookFromTracking } = await import('@/services/api');
-      await removeBookFromTracking(String(id));
+      await api.delete(`/me/books`, { data: { id } });
       set((state) => {
         const { [id]: _, ...rest } = state.trackedBooks;
         return { trackedBooks: rest };
@@ -61,14 +62,13 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   updateTrackedBook: async (id, tracking) => {
     set({ isLoading: true, error: null });
     try {
-      const { updateBookTracking, getBook } = await import('@/services/api');
-      const updatedTracking = await updateBookTracking({ bookId: String(id), ...tracking });
-      // On récupère le book complet pour avoir toutes les infos à jour
-      const freshBook = await getBook({ id: String(id) });
+      const response = await api.patch(`/me/books/${id}`, tracking);
+      const updatedTracking: BookTracking = response.data.bookTracking;
+      const freshBook = response.data.book;
       set((state) => ({
         trackedBooks: {
           ...state.trackedBooks,
-          [id]: { ...freshBook, tracking: true, tracking_status: updatedTracking },
+          [id]: { ...freshBook, tracking: true, trackingStatus: updatedTracking },
         },
       }));
     } catch (e: any) {
@@ -82,20 +82,17 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
 
   getTrackedBooks: () => Object.values(get().trackedBooks),
 
-  getTrackedBookStatus: (id) => get().trackedBooks[id]?.tracking_status || null,
+  getTrackedBookStatus: (id) => get().trackedBooks[id]?.trackingStatus || null,
 
   clearTrackedBooks: () => set({ trackedBooks: {} }),
 
   fetchMyLibraryBooks: async () => {
     set({ isLoading: true, error: null });
     try {
-      const { getMyLibraryBooks, getBook } = await import('@/services/api');
-      const response = await getMyLibraryBooks({ offset: 0, limit: 1000 });
+      const response = await api.get<PaginatedResponse<Book>>('/me/books?offset=0&limit=1000');
       const books: Record<number, Book> = {};
-      for (const book of response.items) {
-        // On récupère le book complet pour avoir toutes les infos à jour
-        const freshBook = await getBook({ id: String(book.id) });
-        books[book.id] = { ...freshBook, tracking: true, tracking_status: book.tracking_status };
+      for (const book of response.data.data) {
+        books[book.id] = { ...book, tracking: true, trackingStatus: book.trackingStatus };
       }
       set({ trackedBooks: books });
     } catch (e: any) {
@@ -107,9 +104,8 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
 
   checkBookTrackedServer: async (id) => {
     try {
-      const { checkIfBookIsTracked } = await import('@/services/api');
-      const tracking = await checkIfBookIsTracked(String(id));
-      return tracking || null;
+      const response = await api.get<BookTracking>(`/me/books/contains/${id}`);
+      return response.data || null;
     } catch {
       return null;
     }
@@ -118,12 +114,12 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   refreshBookTracking: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const { getBook } = await import('@/services/api');
-      const freshBook = await getBook({ id: String(id) });
+      const response = await api.get<Book>(`/books/${id}`);
+      const freshBook = response.data;
       set((state) => ({
         trackedBooks: {
           ...state.trackedBooks,
-          [id]: { ...freshBook, tracking: true, tracking_status: freshBook.tracking_status },
+          [id]: { ...freshBook, tracking: true, trackingStatus: freshBook.trackingStatus },
         },
       }));
     } catch (e: any) {

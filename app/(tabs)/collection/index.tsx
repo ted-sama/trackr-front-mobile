@@ -8,7 +8,7 @@ import { useRouter } from "expo-router";
 import HeaderCollection from "@/components/collection/HeaderCollection";
 import { LegendList } from "@legendapp/list";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
-import { Book } from "@/types";
+import { Book } from "@/types/book";
 import { useTypography } from "@/hooks/useTypography";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useListStore } from '@/stores/listStore';
@@ -40,7 +40,7 @@ const AnimatedCover: React.FC<AnimatedCoverProps> = ({ book, index, colors }) =>
   return (
     <AnimatedExpoImage
       key={book.id}
-      source={book.cover_image ? { uri: book.cover_image } : { uri: "" }}
+      source={book.coverImage ? { uri: book.coverImage } : { uri: "" }}
       style={[
         styles.coverImage,
         { left: index * 25, zIndex: index, borderColor: colors.border },
@@ -81,7 +81,7 @@ const MyLibraryHeader: React.FC<MyLibraryHeaderProps> = React.memo(
       prevProps.mosaicBooks.length === nextProps.mosaicBooks.length &&
       prevProps.mosaicBooks.every((book, index) => 
         book.id === nextProps.mosaicBooks[index].id && 
-        book.cover_image === nextProps.mosaicBooks[index].cover_image
+        book.coverImage === nextProps.mosaicBooks[index].coverImage
       ) &&
       prevProps.colors === nextProps.colors &&
       prevProps.typography === nextProps.typography &&

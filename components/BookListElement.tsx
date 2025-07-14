@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import * as Haptics from "expo-haptics";
-import { Book, ReadingStatus } from "@/types";
+import { Book } from "@/types/book";
+import { ReadingStatus } from "@/types/reading-status";
 import { useTheme } from "@/contexts/ThemeContext";
 import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
@@ -65,7 +66,7 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
           style={styles.container}
         >
           <View style={styles.detailsGroup}>
-            <Image source={book.cover_image} style={styles.image} />
+            <Image source={book.coverImage} style={styles.image} />
           <View style={styles.infoContainer}>
             {rank && (
               <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: 4 }]}>
@@ -90,18 +91,18 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
               </Text>
             </View>
             )}
-            {book.tracking_status && showTrackingStatus && (
+            {book.trackingStatus && showTrackingStatus && (
               <View style={styles.badgeContainer}>
                 <Badge
-                  text={trackingStatusValues[book.tracking_status.status].text}
+                  text={trackingStatusValues[book.trackingStatus.status as ReadingStatus].text}
                   color={colors.badgeText}
                   backgroundColor={colors.badgeBackground}
-                  icon={trackingStatusValues[book.tracking_status.status].icon}
+                  icon={trackingStatusValues[book.trackingStatus.status as ReadingStatus].icon}
                   borderColor={colors.badgeBorder}
                 />
-                {book.tracking_status.current_chapter && (
+                {book.trackingStatus.currentChapter && (
                   <Badge
-                    text={`Ch. ${book.tracking_status.current_chapter.toString()}`}
+                    text={`Ch. ${book.trackingStatus.currentChapter.toString()}`}
                     color={colors.badgeText}
                     backgroundColor={colors.badgeBackground}
                     borderColor={colors.badgeBorder}

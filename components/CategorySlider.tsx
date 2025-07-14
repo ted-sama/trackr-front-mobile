@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
 import { View, Text, TouchableWithoutFeedback, StyleSheet, Dimensions, Pressable } from 'react-native';
 import { LegendList } from '@legendapp/list';
-import { Category, Book } from '../types';
+import { Category } from '@/types/category';
+import { Book } from '@/types/book';
 import BookCard from './BookCard';
 import { useTheme } from '../contexts/ThemeContext';
 import { router } from 'expo-router';

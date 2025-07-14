@@ -7,7 +7,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useListStore } from "@/stores/listStore";
 import BookDraggableList from "@/components/BookDraggableList";
-import { Book } from "@/types";
+import { Book } from "@/types/book";
 import { Ionicons } from "@expo/vector-icons";
 import { Check } from "lucide-react-native";
 
