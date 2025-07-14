@@ -20,6 +20,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { DropdownProvider } from '@/contexts/DropdownContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
+import { useUserStore } from '@/stores/userStore';
 import BookActionsBottomSheet from '@/components/BookActionsBottomSheet';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 
@@ -63,6 +64,7 @@ function RootLayoutContent() {
   const { colors } = useTheme();
   const { isAuthenticated } = useAuth();
   const fetchMyLibraryBooks = useTrackedBooksStore(state => state.fetchMyLibraryBooks);
+  const fetchCurrentUser = useUserStore(state => state.fetchCurrentUser);
   const isLibraryLoading = useTrackedBooksStore(state => state.isLoading);
   const libraryError = useTrackedBooksStore(state => state.error);
   const { 
@@ -94,8 +96,9 @@ function RootLayoutContent() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchMyLibraryBooks();
+      fetchCurrentUser();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, fetchMyLibraryBooks, fetchCurrentUser]);
 
   // Present or dismiss global bottom sheet when visibility changes
   useEffect(() => {

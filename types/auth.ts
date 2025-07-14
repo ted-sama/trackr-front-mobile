@@ -6,15 +6,12 @@ export interface RegisterResponse {
 }
 
 export interface LoginResponse {
-    message: string;
-    accessToken?: string;
-    refreshToken?: string;
-    user?: User;
-}
-
-export interface RefreshTokenResponse {
-    message: string;
-    accessToken?: string;
+    type: 'bearer';
+    token: string;
+    name: string | null;
+    abilities: string[];
+    lastUsedAt: string | null;
+    expiresAt: string | null;
 }
 
 

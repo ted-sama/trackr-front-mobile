@@ -50,24 +50,43 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsLoading(true);
         try {
             const response = await api.post<LoginResponse>('/auth/login', { email, password });
-            if (response.data.accessToken && response.data.refreshToken) {
-                const { accessToken, refreshToken } = response.data;
-                await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
-                await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
-                api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-                setToken(accessToken);
+            if (response.data.token) {
+                const { token } = response.data;
+                await SecureStore.setItemAsync(TOKEN_KEY, token);
+                await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                await useUserStore.getState().fetchCurrentUser();
+                setToken(token);
                 router.push('/');
             } else {
                 Toast.show({
                     type: "error",
-                    text1: response.data.message,
+                    text1: "Erreur de connexion",
+                    text2: 'Réponse invalide du serveur.',
                 });
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error logging in:', error);
+            let errorMessage = 'Une erreur de réseau est survenue.';
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                console.error('Error data:', error.response.data);
+                console.error('Error status:', error.response.status);
+                errorMessage = error.response.data?.message || `Erreur ${error.response.status}`;
+            } else if (error.request) {
+                // The request was made but no response was received
+                console.error('Error request:', error.request);
+                errorMessage = 'Le serveur ne répond pas. Veuillez vérifier votre connexion.';
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                console.error('Error message:', error.message);
+                errorMessage = error.message;
+            }
             Toast.show({
                 type: "error",
-                text1: 'Error logging in',
+                text1: 'Erreur de connexion',
+                text2: errorMessage,
             });
         } finally {
             setIsLoading(false);

@@ -1,9 +1,8 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { refreshToken, clearAuthTokens } from './auth';
 
 export const api: AxiosInstance = axios.create({
-  baseURL: 'https://caf831e700c4.ngrok-free.app',
+  baseURL: 'https://c6b060aa2934.ngrok-free.app',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -37,6 +36,7 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
   failedQueue = [];
 };
 
+/*
 api.interceptors.response.use(
   response => response,
   async (error: AxiosError) => {
@@ -98,3 +98,4 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+*/
