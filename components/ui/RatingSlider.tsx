@@ -12,7 +12,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 
 interface RatingSliderProps {
-  value: number;
+  initialValue?: number;
   onValueChange: (value: number) => void;
   size?: number;
   showValue?: boolean;
@@ -20,7 +20,7 @@ interface RatingSliderProps {
 }
 
 const RatingSlider: React.FC<RatingSliderProps> = ({
-  value = 0,
+  initialValue = 0,
   onValueChange,
   size = 52,
   showValue = true,
@@ -28,12 +28,13 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
 }) => {
   const { colors } = useTheme();
   const typography = useTypography();
-  const [currentRating, setCurrentRating] = useState(value);
+  const [currentRating, setCurrentRating] = useState<number>(0);
   const scaleValue = useSharedValue(1);
 
   useEffect(() => {
-    setCurrentRating(value);
-  }, [value]);
+    const validRating = typeof initialValue === 'number' && !isNaN(initialValue) ? initialValue : 0;
+    setCurrentRating(validRating);
+  }, [initialValue]);
 
   const updateRating = (newRating: number) => {
     const clampedRating = Math.max(0.5, Math.min(5, newRating));
@@ -51,9 +52,10 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
     const starValue = starIndex + 1;
     
     // If clicking on the same star that's currently selected, toggle half star
-    if (currentRating === starValue) {
+    const rating = currentRating || 0;
+    if (rating === starValue) {
       updateRating(starValue - 0.5);
-    } else if (currentRating === starValue - 0.5) {
+    } else if (rating === starValue - 0.5) {
       updateRating(starValue);
     } else {
       updateRating(starValue);
@@ -66,21 +68,22 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
 
   const renderStar = (index: number) => {
     const starValue = index + 1;
+    const rating = currentRating || 0;
 
     // Determine star fill based on current rating
     const getStarFill = () => {
-      if (currentRating >= starValue) return colors.primary;
-      if (currentRating >= starValue - 0.5) return colors.primary;
+      if (rating >= starValue) return colors.primary;
+      if (rating >= starValue - 0.5) return colors.primary;
       return 'transparent';
     };
 
     const getStarOpacity = () => {
-      if (currentRating >= starValue) return 1;
-      if (currentRating >= starValue - 0.5) return 0.6;
+      if (rating >= starValue) return 1;
+      if (rating >= starValue - 0.5) return 0.6;
       return 0.3;
     };
 
-    const shouldShowHalf = currentRating >= starValue - 0.5 && currentRating < starValue;
+    const shouldShowHalf = rating >= starValue - 0.5 && rating < starValue;
 
     return (
       <TouchableOpacity
@@ -129,7 +132,7 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
     <View style={[styles.container, style]}>
       {showValue && (
         <Text style={[typography.h2, { color: colors.text, textAlign: 'center', marginBottom: 24 }]}>
-          {currentRating.toFixed(1)}/5.0
+          {(currentRating || 0).toFixed(1)}/5.0
         </Text>
       )}
       
@@ -150,15 +153,15 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
             style={[
               styles.quickRatingButton,
               { 
-                backgroundColor: currentRating === rating ? colors.primary : colors.actionButton,
+                backgroundColor: (currentRating || 0) === rating ? colors.primary : colors.actionButton,
               }
             ]}
           >
             <Text style={[
               typography.caption,
               { 
-                color: currentRating === rating ? colors.background : colors.text,
-                fontWeight: currentRating === rating ? 'bold' : 'normal'
+                color: (currentRating || 0) === rating ? colors.background : colors.text,
+                fontWeight: (currentRating || 0) === rating ? 'bold' : 'normal'
               }
             ]}>
               {rating.toFixed(1)}

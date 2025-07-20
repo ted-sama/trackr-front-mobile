@@ -1,10 +1,5 @@
 /* eslint-disable react/display-name */
-import React, {
-  forwardRef,
-  useCallback,
-  useState,
-  useEffect,
-} from "react";
+import React, { forwardRef, useCallback, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -65,8 +60,13 @@ export interface BookActionsBottomSheetProps {
   index?: number;
   onDismiss?: () => void;
   backdropDismiss?: boolean;
-  view?: "actions" | "status_editor" | "rating_editor" | "list_editor" | "list_creator";
-  currentListId?: number;
+  view?:
+    | "actions"
+    | "status_editor"
+    | "rating_editor"
+    | "list_editor"
+    | "list_creator";
+  currentListId?: string;
   isFromListPage?: boolean;
 }
 
@@ -147,8 +147,8 @@ const BookActionsBottomSheet = forwardRef<
     const isTracking = isBookTracked(book.id);
     const [currentView, setCurrentView] = useState(view);
     const [newListName, setNewListName] = useState("");
-    const [selectedListIds, setSelectedListIds] = useState<number[]>([]);
-    const [initialListIds, setInitialListIds] = useState<number[]>([]);
+    const [selectedListIds, setSelectedListIds] = useState<string[]>([]);
+    const [initialListIds, setInitialListIds] = useState<string[]>([]);
     const [tempStatus, setTempStatus] = useState<ReadingStatus>();
     const [tempRating, setTempRating] = useState<number>(0);
 
@@ -177,7 +177,10 @@ const BookActionsBottomSheet = forwardRef<
             setSelectedListIds(bookListIds);
             setInitialListIds(bookListIds);
           } catch (error) {
-            console.error('Erreur lors du chargement des listes du livre:', error);
+            console.error(
+              "Erreur lors du chargement des listes du livre:",
+              error
+            );
           }
         };
         loadBookLists();
@@ -188,7 +191,8 @@ const BookActionsBottomSheet = forwardRef<
     useEffect(() => {
       const trackedStatus = getTrackedBookStatus(book.id);
       setTempStatus(trackedStatus?.status || "plan_to_read");
-      setTempRating(trackedStatus?.rating || 0);
+      const rating = trackedStatus?.rating;
+      setTempRating(typeof rating === 'number' ? rating : 0);
     }, [book.id, getTrackedBookStatus]);
 
     const handleDismiss = () => {
@@ -310,8 +314,20 @@ const BookActionsBottomSheet = forwardRef<
     }, [view]);
 
     const updateStatus = async (status: ReadingStatus) => {
-      setTempStatus(status);
-      await updateTrackedBook(book.id, { status });
+      try {
+        setTempStatus(status);
+        await updateTrackedBook(book.id, { status });
+        // Optional: Add a small delay to ensure UI updates properly
+        setTimeout(() => {
+          // @ts-expect-error bottom sheet ref
+          ref.current?.dismiss();
+        }, 100);
+      } catch (error) {
+        console.error("Error updating book status:", error);
+        // Revert temp status on error
+        const currentStatus = getTrackedBookStatus(book.id);
+        setTempStatus(currentStatus?.status || "plan_to_read");
+      }
     };
 
     const handleAddBookToTracking = async () => {
@@ -320,9 +336,11 @@ const BookActionsBottomSheet = forwardRef<
 
     const handleRemoveBookFromTracking = async () => {
       await removeTrackedBook(book.id);
+      // @ts-expect-error bottom sheet ref
+      ref.current?.dismiss();
     };
 
-    function toggleListSelection(listId: number) {
+    function toggleListSelection(listId: string) {
       setSelectedListIds((prev) =>
         prev.includes(listId)
           ? prev.filter((id) => id !== listId)
@@ -343,18 +361,14 @@ const BookActionsBottomSheet = forwardRef<
     );
 
     const handleSaveRating = async () => {
-      try {
-        // If book is not tracked, add it first
-        if (!isTracking) {
-          await addTrackedBook(book);
-        }
-        
-        // Update the book with the new rating
-        await updateTrackedBook(book.id, { rating: tempRating });
-        handleDismiss();
-      } catch (error) {
-        console.error('Erreur lors de la sauvegarde de la note:', error);
+      // If book is not tracked, add it first
+      if (!isTracking) {
+        await addTrackedBook(book);
       }
+
+      // Update the book with the new rating
+      await updateTrackedBook(book.id, { rating: tempRating });
+      handleDismiss();
     };
 
     return (
@@ -402,7 +416,11 @@ const BookActionsBottomSheet = forwardRef<
                       {book.author}
                     </Text>
                     <View style={[styles.ratingContainer, { marginTop: 4 }]}>
-                      <Ionicons name="star" size={14} color={colors.secondaryText} />
+                      <Ionicons
+                        name="star"
+                        size={14}
+                        color={colors.secondaryText}
+                      />
                       <Text
                         style={[
                           typography.caption,
@@ -517,7 +535,10 @@ const BookActionsBottomSheet = forwardRef<
               {/* Liste des listes */}
               <View style={{ height: 380 }}>
                 <LinearGradient
-                  colors={[hexToRgba(colors.background, 1), hexToRgba(colors.background, 0)]}
+                  colors={[
+                    hexToRgba(colors.background, 1),
+                    hexToRgba(colors.background, 0),
+                  ]}
                   style={styles.fadeTop}
                   pointerEvents="none"
                 />
@@ -536,7 +557,10 @@ const BookActionsBottomSheet = forwardRef<
                   contentContainerStyle={{ flexGrow: 1, paddingTop: 12 }}
                 />
                 <LinearGradient
-                  colors={[hexToRgba(colors.background, 0), hexToRgba(colors.background, 1)]}
+                  colors={[
+                    hexToRgba(colors.background, 0),
+                    hexToRgba(colors.background, 1),
+                  ]}
                   style={styles.fadeBottom}
                   pointerEvents="none"
                 />
@@ -545,23 +569,32 @@ const BookActionsBottomSheet = forwardRef<
                 title="Sauvegarder"
                 onPress={async () => {
                   // Determine which lists to add to and which to remove from
-                  const listsToAdd = selectedListIds.filter(id => !initialListIds.includes(id));
-                  const listsToRemove = initialListIds.filter(id => !selectedListIds.includes(id));
-                  
+                  const listsToAdd = selectedListIds.filter(
+                    (id) => !initialListIds.includes(id)
+                  );
+                  const listsToRemove = initialListIds.filter(
+                    (id) => !selectedListIds.includes(id)
+                  );
+
                   try {
                     // Add book to new lists
                     await Promise.all(
                       listsToAdd.map((listId) => addBookToList(listId, book.id))
                     );
-                    
+
                     // Remove book from unchecked lists
                     await Promise.all(
-                      listsToRemove.map((listId) => removeBookFromList(listId, book.id))
+                      listsToRemove.map((listId) =>
+                        removeBookFromList(listId, book.id)
+                      )
                     );
-                    
+
                     handleDismiss();
                   } catch (error) {
-                    console.error('Erreur lors de la sauvegarde des listes:', error);
+                    console.error(
+                      "Erreur lors de la sauvegarde des listes:",
+                      error
+                    );
                   }
                 }}
                 style={{ marginTop: 36 }}
@@ -591,21 +624,26 @@ const BookActionsBottomSheet = forwardRef<
                 </Text>
               </View>
               <View style={{ marginBottom: 36 }}>
-                <View style={{
-                  backgroundColor: colors.background,
-                  borderRadius: 16,
-                  paddingHorizontal: 12,
-                  paddingVertical: 10,
-                  borderColor: colors.border,
-                  borderWidth: 1,
-                }}>
+                <View
+                  style={{
+                    backgroundColor: colors.background,
+                    borderRadius: 16,
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                    borderColor: colors.border,
+                    borderWidth: 1,
+                  }}
+                >
                   <BottomSheetTextInput
                     placeholder="Nom de la liste"
                     value={newListName}
                     onChangeText={setNewListName}
                     placeholderTextColor={colors.secondaryText}
                     clearButtonMode="always"
-                    style={[{ color: colors.text, fontSize: 16, paddingVertical: 8 }, typography.body]}
+                    style={[
+                      { color: colors.text, fontSize: 16, paddingVertical: 8 },
+                      typography.body,
+                    ]}
                   />
                 </View>
               </View>
@@ -640,7 +678,7 @@ const BookActionsBottomSheet = forwardRef<
               </View>
               <View style={styles.ratingAction}>
                 <RatingSlider
-                  value={tempRating}
+                  initialValue={tempRating}
                   onValueChange={setTempRating}
                   showValue={true}
                 />

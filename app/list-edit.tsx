@@ -38,7 +38,7 @@ import { Camera } from "lucide-react-native";
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export default function ListEdit() {
-  const { listId } = useLocalSearchParams();
+  const { listId } = useLocalSearchParams<{ listId: string }>();
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -51,7 +51,7 @@ export default function ListEdit() {
   const updateList = useListStore((state) => state.updateList);
   const fetchList = useListStore((state) => state.fetchList);
   const isLoading = useListStore((state) => state.isLoading);
-  const updateListImage = useListStore((state) => state.updateListImage);
+  const updateBackdropImage = useListStore((state) => state.updateBackdropImage);
 
   // Form state
   const [name, setName] = useState("");
@@ -156,10 +156,11 @@ export default function ListEdit() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       if(selectedImage) {
-        await updateListImage(Number(listId), selectedImage);
+        await updateBackdropImage(listId, selectedImage);
+        console.log("Backdrop image updated");
       }
 
-      await updateList(Number(listId), {
+      await updateList(listId, {
         name: name.trim(),
         description: description.trim() || null,
         tags: tags.length > 0 ? tags : null,

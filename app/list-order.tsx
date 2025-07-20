@@ -12,7 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Check } from "lucide-react-native";
 
 export default function ListOrder() {
-  const { listId } = useLocalSearchParams();
+  const { listId } = useLocalSearchParams<{ listId: string }>();
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -20,14 +20,12 @@ export default function ListOrder() {
 
   const list = useListStore(
     (state) =>
-      state.listsById[listId as string] ||
-      state.myListsById[listId as string] ||
+      state.listsById[listId] ||
+      state.myListsById[listId] ||
       null
   );
   const fetchList = useListStore((state) => state.fetchList);
-  const reorderBooksInListBulk = useListStore(
-    (state) => state.reorderBooksInListBulk
-  );
+  const reorderBooksInList = useListStore((state) => state.reorderBooksInList);
   const isLoading = useListStore((state) => state.isLoading);
   const error = useListStore((state) => state.error);
 
@@ -39,7 +37,7 @@ export default function ListOrder() {
   useFocusEffect(
     useCallback(() => {
       if (listId) {
-        fetchList(listId as string);
+        fetchList(listId);
       }
     }, [listId, fetchList])
   );
@@ -47,8 +45,8 @@ export default function ListOrder() {
   // Mettre à jour les livres locaux quand la liste change
   React.useEffect(() => {
     if (list?.books) {
-      setLocalBooks([...list.books]);
-      setOriginalBooks([...list.books]);
+      setLocalBooks([...list.books.items]);
+      setOriginalBooks([...list.books.items]);
       setHasChanges(false); // Reset changes when list reloads
     }
   }, [list?.books]);
@@ -102,21 +100,18 @@ export default function ListOrder() {
 
     try {
       // Créer la liste des nouvelles positions
-      const bookOrders = localBooks.map((book, index) => ({
-        bookId: book.id,
-        position: index + 1, // 1-indexed
-      }));
+      const bookOrders = localBooks.map((book) => book.id);
 
       console.log("Saving all changes at once:", {
-        listId: parseInt(listId as string),
+        listId: listId,
         bookOrders,
       });
 
-      await reorderBooksInListBulk(parseInt(listId as string), bookOrders);
-      console.log("Bulk reorder successful");
+      await reorderBooksInList(listId, bookOrders);
+      console.log("Reorder successful");
 
       setHasChanges(false);
-      setOriginalBooks([...localBooks]); // Update original to reflect saved state
+      setOriginalBooks([...localBooks]);
 
       Alert.alert(
         "Sauvegarde réussie",
@@ -229,8 +224,8 @@ export default function ListOrder() {
             </Text>
             <Text style={{ color: colors.secondaryText }}>·</Text>
             <Text style={[typography.h3, { color: colors.text }]}>
-              {list.books?.length || 0} livre
-              {list.books?.length === 1 ? "" : "s"}
+              {list.books?.items?.length || 0} livre
+              {list.books?.items?.length === 1 ? "" : "s"}
             </Text>
           </View>
           <Text style={[typography.bodyCaption, { color: colors.secondaryText }]}>

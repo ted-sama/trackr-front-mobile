@@ -116,12 +116,12 @@ export default function CollectionListElement({
       >
         <View style={styles.coverStackContainer}>
           {[0, 1, 2].map((_, index) => {
-            const book = list.firstBookCovers?.[index];
+            const book = list.books.items[index];
             const leftOffset = index * stackOffset;
             return book ? (
               <Image
-                key={book}
-                source={{ uri: book }}
+                key={book.id}
+                source={{ uri: book.coverImage ?? "" }}
                 style={[
                   styles.coverStackImage,
                   {
@@ -152,7 +152,7 @@ export default function CollectionListElement({
           </Text>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={[typography.caption, { color: colors.secondaryText }]}>
-              {list.totalBooks} {list.totalBooks > 1 ? "éléments" : "élément"}
+              {list.books.total} {list.books.total > 1 ? "éléments" : "élément"}
             </Text>
             {size === "compact" && (
               <>

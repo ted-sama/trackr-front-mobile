@@ -44,6 +44,7 @@ export default function MyLibrary() {
 
   const { getTrackedBooks, addTrackedBook, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
   const books = getTrackedBooks();
+  console.log(books);
 
   // Load saved layout preference
   useEffect(() => {
@@ -75,7 +76,7 @@ export default function MyLibrary() {
         ref={scrollRef}
         data={books}
         key={currentLayout}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={{ marginTop: insets.top, paddingHorizontal: 16, paddingBottom: 64, flexGrow: 1 }}
         numColumns={currentLayout === 'grid' ? 3 : 1}
         onScroll={scrollHandler}

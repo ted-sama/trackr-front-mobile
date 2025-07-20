@@ -43,7 +43,7 @@ export default function BookCategoriesScreen({}: BookCategoriesScreenProps) {
 
     if (isCurrentlyTracking) {
       try {
-        await removeTrackedBookFromStore(parseInt(bookId, 10));
+        await removeTrackedBookFromStore(bookId);
         Toast.show({
           text1: 'Livre retiré de votre bibliothèque',
           type: 'info',

@@ -23,7 +23,7 @@ interface BookListElementProps {
   showAuthor?: boolean;
   showRating?: boolean;
   rank?: number;
-  currentListId?: number;
+  currentListId?: string;
   isFromListPage?: boolean;
 }
 
@@ -31,8 +31,9 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
   const { colors } = useTheme();
   const typography = useTypography();
   const { isBottomSheetVisible, openBookActions } = useBottomSheet();
-  const { isBookTracked } = useTrackedBooksStore();
+  const { isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
   const isTracking = isBookTracked(book.id);
+  const trackingStatus = getTrackedBookStatus(book.id);
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -91,18 +92,18 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
               </Text>
             </View>
             )}
-            {book.trackingStatus && showTrackingStatus && (
+            {trackingStatus && showTrackingStatus && (
               <View style={styles.badgeContainer}>
                 <Badge
-                  text={trackingStatusValues[book.trackingStatus.status as ReadingStatus].text}
+                  text={trackingStatusValues[trackingStatus.status as ReadingStatus].text}
                   color={colors.badgeText}
                   backgroundColor={colors.badgeBackground}
-                  icon={trackingStatusValues[book.trackingStatus.status as ReadingStatus].icon}
+                  icon={trackingStatusValues[trackingStatus.status as ReadingStatus].icon}
                   borderColor={colors.badgeBorder}
                 />
-                {book.trackingStatus.currentChapter && (
+                {trackingStatus.currentChapter && (
                   <Badge
-                    text={`Ch. ${book.trackingStatus.currentChapter.toString()}`}
+                    text={`Ch. ${trackingStatus.currentChapter.toString()}`}
                     color={colors.badgeText}
                     backgroundColor={colors.badgeBackground}
                     borderColor={colors.badgeBorder}

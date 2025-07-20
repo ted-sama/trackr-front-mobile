@@ -39,7 +39,7 @@ interface BookCardProps {
   showTrackingStatus?: boolean;
   showTrackingButton?: boolean;
   rank?: number;
-  currentListId?: number;
+  currentListId?: string;
   isFromListPage?: boolean;
 }
 
@@ -50,8 +50,9 @@ const COMPACT_CARD_WIDTH = width * 0.29;
 const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAuthor = true, showRating = true, showTrackingStatus = false, showTrackingButton = true, rank, currentListId, isFromListPage }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const { isBookTracked } = useTrackedBooksStore();
+  const { isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
   const isTracking = isBookTracked(book.id);
+  const trackingStatus = getTrackedBookStatus(book.id);
   const { colors } = useTheme();
   const { isBottomSheetVisible, openBookActions } = useBottomSheet();
   const typography = useTypography();
@@ -193,10 +194,10 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
               </View>
             )}
             {/* Chapter badge on cover */}
-            {book.trackingStatus && book.trackingStatus.currentChapter && (
+            {trackingStatus && trackingStatus.currentChapter && (
               <View style={styles.chapterBadgeContainer}>
                 <Badge
-                  text={`Ch. ${book.trackingStatus.currentChapter.toString()}`}
+                  text={`Ch. ${trackingStatus.currentChapter.toString()}`}
                   color={colors.badgeText}
                   backgroundColor={colors.badgeBackground}
                   borderColor={colors.badgeBorder}
@@ -266,13 +267,13 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
                 </Text>
               </View>
             )}
-            {book.trackingStatus && showTrackingStatus && (
+            {trackingStatus && showTrackingStatus && (
               <View style={styles.badgeContainer}>
                 <Badge
-                  text={trackingStatusValues[book.trackingStatus.status as ReadingStatus].text}
+                  text={trackingStatusValues[trackingStatus.status as ReadingStatus].text}
                   color={colors.badgeText}
                   backgroundColor={colors.badgeBackground}
-                  icon={trackingStatusValues[book.trackingStatus.status as ReadingStatus].icon}
+                  icon={trackingStatusValues[trackingStatus.status as ReadingStatus].icon}
                   borderColor={colors.badgeBorder}
                 />
               </View>

@@ -1,23 +1,24 @@
 import { create } from 'zustand';
-import { Book } from '@/types/book';
-import { BookTracking } from '@/types/reading-status';
+import { Book, TrackedBookWithMeta } from '@/types/book';
+import { BookTracking, ReadingStatus } from '@/types/reading-status';
 import { api } from '@/services/api';
 import { PaginatedResponse } from '@/types/api';
+import { TrackedBook } from '@/types/tracked-book';
 
 interface TrackedBooksState {
-  trackedBooks: Record<number, Book>;
+  trackedBooks: Record<string, TrackedBookWithMeta>;
   isLoading: boolean;
   error: string | null;
   addTrackedBook: (book: Book) => Promise<void>;
-  removeTrackedBook: (id: number) => Promise<void>;
-  updateTrackedBook: (id: number, tracking: Partial<BookTracking>) => Promise<void>;
-  isBookTracked: (id: number) => boolean;
-  getTrackedBooks: () => Book[];
-  getTrackedBookStatus: (id: number) => BookTracking | null;
+  removeTrackedBook: (id: string) => Promise<void>;
+  updateTrackedBook: (id: string, tracking: Partial<BookTracking>) => Promise<void>;
+  isBookTracked: (id: string) => boolean;
+  getTrackedBooks: () => TrackedBookWithMeta[];
+  getTrackedBookStatus: (id: string) => BookTracking | null;
   clearTrackedBooks: () => void;
   fetchMyLibraryBooks: () => Promise<void>;
-  checkBookTrackedServer: (id: number) => Promise<BookTracking | null>;
-  refreshBookTracking: (id: number) => Promise<void>;
+  checkBookTrackedServer: (id: string) => Promise<BookTracking | null>;
+  refreshBookTracking: (id: string) => Promise<void>;
 }
 
 export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
@@ -26,19 +27,34 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   error: null,
 
   addTrackedBook: async (book) => {
+    const { refreshBookTracking } = get();
+    // Optimistically add the book to the UI
+    const optimisticTracking: BookTracking = {
+      status: 'plan_to_read',
+      createdAt: new Date(),
+    };
+    set((state) => ({
+      trackedBooks: {
+        ...state.trackedBooks,
+        [book.id]: {
+          ...book,
+          tracking: true,
+          trackingStatus: optimisticTracking,
+        },
+      },
+    }));
+
     set({ isLoading: true, error: null });
     try {
-      const response = await api.post(`/me/books`, { id: book.id });
-      const tracking: BookTracking = response.data.bookTracking;
-      const freshBook = response.data.book;
-      set((state) => ({
-        trackedBooks: {
-          ...state.trackedBooks,
-          [book.id]: { ...freshBook, tracking: true, trackingStatus: tracking },
-        },
-      }));
+      await api.post(`/me/books/${book.id}`);
+      // Refresh the book data from the server to get the full tracking object
+      await refreshBookTracking(book.id);
     } catch (e: any) {
-      set({ error: e.message || 'Erreur lors de l’ajout du suivi' });
+      // Revert optimistic update on failure
+      set((state) => {
+        const { [book.id]: _, ...rest } = state.trackedBooks;
+        return { trackedBooks: rest, error: e.message || "Erreur lors de l'ajout du suivi" };
+      });
     } finally {
       set({ isLoading: false });
     }
@@ -47,7 +63,7 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   removeTrackedBook: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      await api.delete(`/me/books`, { data: { id } });
+      await api.delete(`/me/books/${id}`);
       set((state) => {
         const { [id]: _, ...rest } = state.trackedBooks;
         return { trackedBooks: rest };
@@ -62,13 +78,40 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   updateTrackedBook: async (id, tracking) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.patch(`/me/books/${id}`, tracking);
-      const updatedTracking: BookTracking = response.data.bookTracking;
-      const freshBook = response.data.book;
+      const response = await api.patch<TrackedBook>(`/me/books/${id}`, tracking);
+      const trackedBook = response.data;
+      
+      if (!trackedBook || !trackedBook.book) {
+        throw new Error('Invalid response from server');
+      }
+
+      const freshBook = trackedBook.book;
+      const updatedTracking: BookTracking = {
+        status: trackedBook.status as ReadingStatus,
+        currentChapter: trackedBook.currentChapter ?? undefined,
+        currentVolume: trackedBook.currentVolume ?? undefined,
+        rating: trackedBook.rating ?? undefined,
+        startDate: trackedBook.startDate ? new Date(trackedBook.startDate) : undefined,
+        finishDate: trackedBook.finishDate ? new Date(trackedBook.finishDate) : undefined,
+        notes: trackedBook.notes ?? undefined,
+        lastReadAt: trackedBook.lastReadAt ? new Date(trackedBook.lastReadAt) : undefined,
+        createdAt: trackedBook.createdAt ? new Date(trackedBook.createdAt) : undefined,
+        updatedAt: trackedBook.updatedAt ? new Date(trackedBook.updatedAt) : undefined,
+      };
+      
+      // Ensure the book ID is consistent
+      if (freshBook.id !== id) {
+        console.warn(`Book ID mismatch: expected ${id}, received ${freshBook.id}`);
+      }
+
       set((state) => ({
         trackedBooks: {
           ...state.trackedBooks,
-          [id]: { ...freshBook, tracking: true, trackingStatus: updatedTracking },
+          [id]: { 
+            ...freshBook, 
+            tracking: true, 
+            trackingStatus: updatedTracking,
+          },
         },
       }));
     } catch (e: any) {
@@ -80,7 +123,11 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
 
   isBookTracked: (id) => Boolean(get().trackedBooks[id]?.tracking),
 
-  getTrackedBooks: () => Object.values(get().trackedBooks),
+  getTrackedBooks: () => {
+    const books = Object.values(get().trackedBooks);
+    // Filter out any books that don't have a valid ID to prevent rendering issues
+    return books.filter(book => book && book.id && typeof book.id === 'string');
+  },
 
   getTrackedBookStatus: (id) => get().trackedBooks[id]?.trackingStatus || null,
 
@@ -89,10 +136,23 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   fetchMyLibraryBooks: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.get<PaginatedResponse<Book>>('/me/books?offset=0&limit=1000');
-      const books: Record<number, Book> = {};
-      for (const book of response.data.data) {
-        books[book.id] = { ...book, tracking: true, trackingStatus: book.trackingStatus };
+      const response = await api.get<PaginatedResponse<TrackedBook>>('/me/books?offset=0&limit=1000');
+      const books: Record<string, TrackedBookWithMeta> = {};
+      for (const trackedBook of response.data.data) {
+        const bookData = trackedBook.book;
+        const trackingStatus: BookTracking = {
+          status: trackedBook.status as ReadingStatus,
+          currentChapter: trackedBook.currentChapter ?? undefined,
+          currentVolume: trackedBook.currentVolume ?? undefined,
+          rating: trackedBook.rating ?? undefined,
+          startDate: trackedBook.startDate ? new Date(trackedBook.startDate) : undefined,
+          finishDate: trackedBook.finishDate ? new Date(trackedBook.finishDate) : undefined,
+          notes: trackedBook.notes ?? undefined,
+          lastReadAt: trackedBook.lastReadAt ? new Date(trackedBook.lastReadAt) : undefined,
+          createdAt: trackedBook.createdAt ? new Date(trackedBook.createdAt) : undefined,
+          updatedAt: trackedBook.updatedAt ? new Date(trackedBook.updatedAt) : undefined,
+        };
+        books[bookData.id] = { ...bookData, tracking: true, trackingStatus: trackingStatus };
       }
       set({ trackedBooks: books });
     } catch (e: any) {
@@ -119,7 +179,7 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
       set((state) => ({
         trackedBooks: {
           ...state.trackedBooks,
-          [id]: { ...freshBook, tracking: true, trackingStatus: freshBook.trackingStatus },
+          [id]: { ...freshBook, tracking: true, trackingStatus: state.trackedBooks[id]?.trackingStatus },
         },
       }));
     } catch (e: any) {

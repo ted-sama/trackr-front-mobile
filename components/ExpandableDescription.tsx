@@ -36,6 +36,8 @@ export default function ExpandableDescription({
   const [isExpanded, setIsExpanded] = useState(false);
   const descriptionMaxHeight = useSharedValue(initialCollapsedHeight);
 
+  const expandable = text.length > 200
+
   const animatedDescriptionStyle = useAnimatedStyle(() => {
     return {
       maxHeight: descriptionMaxHeight.value,
@@ -60,7 +62,7 @@ export default function ExpandableDescription({
         <Text style={[typography.body, { color: colors.text }, textStyle]}>
           {text}
         </Text>
-        {!isExpanded && (
+        {!isExpanded && expandable && (
           <LinearGradient
             colors={[
               `${colors.background}00`, // Transparent
@@ -73,7 +75,8 @@ export default function ExpandableDescription({
           />
         )}
       </Animated.View>
-      <Pressable onPress={toggleDescription} style={styles.toggleButton}>
+      {expandable && (
+        <Pressable onPress={toggleDescription} style={styles.toggleButton}>
         <Text
           style={[
             typography.body,
@@ -85,6 +88,7 @@ export default function ExpandableDescription({
           {isExpanded ? collapseText : readMoreText}
         </Text>
       </Pressable>
+      )}
     </View>
   );
 }

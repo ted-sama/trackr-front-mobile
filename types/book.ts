@@ -1,11 +1,10 @@
 import { BookTracking } from "./reading-status";
-import { Category } from "./category";
 
 /**
  * Interface représentant un manga
  */
 export interface Book {
-  id: number;
+  id: string; // Changed from number to string to match API
   title: string;
   author?: string;
   rating?: number;
@@ -20,9 +19,19 @@ export interface Book {
   genres?: string[];
   tags?: string[];
   status: string;
-  tracking?: boolean;
-  trackingStatus?: BookTracking | null;
   createdAt?: Date;
   updatedAt?: Date;
   itemNumber?: number;
+  alternativeTitles?: string[];
+  dataSource?: string;
+  externalId?: string;
+  nsfw?: boolean;
+}
+
+/**
+ * Interface for books with tracking metadata used in stores
+ */
+export interface TrackedBookWithMeta extends Book {
+  tracking: boolean;
+  trackingStatus?: BookTracking;
 } 

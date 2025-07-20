@@ -75,7 +75,7 @@ export default function ListFull() {
   );
   const fetchList = useListStore((state) => state.fetchList);
   const isLoading = useListStore((state) => state.isLoading);
-  const isOwner = useListStore((state) => state.isOwner);
+  const isEditable = useListStore((state) => state.isOwner);
   const deleteListFromStore = useListStore((state) => state.deleteList);
 
   // Animation refs for buttons
@@ -209,7 +209,7 @@ export default function ListFull() {
       {list && (
         <AnimatedList
           ref={scrollRef}
-          data={list.books || []}
+          data={list.books.items || []}
           key={currentLayout}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{
@@ -288,7 +288,7 @@ export default function ListFull() {
                   </Text>
                 </View>
               </View>
-              {isOwner(list.id) && (
+              {isEditable(list.id) && (
                 <View style={{ marginTop: 16 }}>
                   <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
                     <RNAnimated.View style={{ transform: [{ scale: scaleAnimOrder }] }}>
@@ -434,7 +434,7 @@ export default function ListFull() {
                   showTrackingStatus={true}
                   showTrackingButton={false}
                   showRating={false}
-                  rank={list.ranked && list.books ? list.books.findIndex(b => b.id === item.id) + 1 : undefined}
+                  rank={list.ranked && list.books.items ? list.books.items.findIndex(b => b.id === item.id) + 1 : undefined}
                   currentListId={list.id}
                   isFromListPage={true}
                 />
@@ -443,7 +443,7 @@ export default function ListFull() {
               <BookListElement
                 book={item}
                 onPress={() => router.push(`/book/${item.id}`)}
-                rank={list.ranked && list.books ? list.books.findIndex(b => b.id === item.id) + 1 : undefined}
+                rank={list.ranked && list.books.items ? list.books.items.findIndex(b => b.id === item.id) + 1 : undefined}
                 showAuthor={true}
                 showTrackingStatus={true}
                 showTrackingButton={false}
@@ -458,7 +458,7 @@ export default function ListFull() {
               : () => <View style={{ height: 12 }} />
           }
           ListEmptyComponent={
-            list.books?.length === 0 ? (
+            list.books.items.length === 0 ? (
               <Text
                 style={{
                   color: colors.secondaryText,

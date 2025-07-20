@@ -139,7 +139,7 @@ export default function Collection() {
           data={lists}
           ListHeaderComponent={renderListHeader}
           renderItem={({ item }) => <CollectionListElement list={item} onPress={() => {router.push({pathname: "/list-full", params: {id: item.id.toString()}})}} />}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id}
           ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
           contentContainerStyle={styles.listContainer}
         />

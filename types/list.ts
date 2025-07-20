@@ -2,7 +2,7 @@ import { Book } from "./book";
 import { User } from "./user";
 
 export interface List {
-  id: number;
+  id: string;
   name: string;
   description?: string | null;
   backdropImage?: string | null;
@@ -10,9 +10,10 @@ export interface List {
   owner: User;
   isPublic: boolean;
   ranked: boolean;
-  firstBookCovers?: string[];
-  totalBooks: number;
-  books?: Book[];
+  books: {
+    total: number;
+    items: Book[];
+  };
   createdAt: Date;
   updatedAt: Date;
 } 

@@ -7,24 +7,23 @@ import { PaginatedResponse } from '@/types/api';
 
 export interface ListState {
   listsById: Record<string, List>;
-  listsIds: number[];
+  listsIds: string[];
   myListsById: Record<string, List>;
-  myListsIds: number[];
+  myListsIds: string[];
   isLoading: boolean;
   error: string | null;
   createList: (name: string) => Promise<List | undefined>;
-  updateList: (listId: number, updatedList: Partial<List>) => Promise<void>;
-  addBookToList: (listId: number, bookId: number) => Promise<void>;
-  removeBookFromList: (listId: number, bookId: number) => Promise<void>;
-  reorderBookInList: (listId: number, bookId: number, newPosition: number) => Promise<void>;
-  reorderBooksInListBulk: (listId: number, bookOrders: { bookId: number; position: number }[]) => Promise<void>;
-  getListsContainingBook: (bookId: number) => Promise<number[]>;
+  updateList: (listId: string, updatedList: Partial<List>) => Promise<void>;
+  addBookToList: (listId: string, bookId: string) => Promise<void>;
+  removeBookFromList: (listId: string, bookId: string) => Promise<void>;
+  reorderBooksInList: (listId: string, positions: string[]) => Promise<void>;
+  getListsContainingBook: (bookId: string) => Promise<string[]>;
   fetchLists: () => Promise<void>;
   fetchMyLists: () => Promise<void>;
   fetchList: (id: string) => Promise<void>;
-  isOwner: (listId: number) => boolean;
-  deleteList: (listId: number) => Promise<void>;
-  updateListImage: (listId: number, image: ImagePickerAsset) => Promise<void>;
+  isOwner: (listId: string) => boolean;
+  deleteList: (listId: string) => Promise<void>;
+  updateBackdropImage: (listId: string, image: ImagePickerAsset) => Promise<void>;
 }
 
 export const useListStore = create<ListState>((set, get) => ({
@@ -38,9 +37,9 @@ export const useListStore = create<ListState>((set, get) => ({
   createList: async (name: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.post<{ list: List }>('/lists', { name });
-      const newList = response.data.list;
-      set({ myListsById: { ...get().myListsById, [newList.id]: newList }, myListsIds: [...get().myListsIds, newList.id] });
+      const response = await api.post<List>('/lists', { name });
+      const newList = response.data;
+      set({ myListsById: { ...get().myListsById, [String(newList.id)]: newList }, myListsIds: [...get().myListsIds, String(newList.id)] });
       return newList;
     } catch (e: any) {
       set({ error: e.message || 'Erreur de création de la liste' });
@@ -50,35 +49,20 @@ export const useListStore = create<ListState>((set, get) => ({
     }
   },
 
-  updateList: async (listId: number, updatedList: Partial<List>) => {
+  updateList: async (listId: string, updatedList: Partial<List>) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.patch<{ list: List }>(`/lists/${listId}`, updatedList);
-      const freshList = response.data.list;
+      const response = await api.patch<List>(`/lists/${listId}`, updatedList);
+      const freshList = response.data;
       set(state => {
-        const existingMyList = state.myListsById[listId];
-        const existingPublicList = state.listsById[listId];
-        
-        const mergedMyList = existingMyList ? {
-          ...freshList,
-          totalBooks: existingMyList.totalBooks || 0,
-          firstBookCovers: existingMyList.firstBookCovers || [],
-        } : freshList;
-        
-        const mergedPublicList = existingPublicList ? {
-          ...freshList,
-          totalBooks: existingPublicList.totalBooks || 0,
-          firstBookCovers: existingPublicList.firstBookCovers || [],
-        } : freshList;
-        
         return {
           myListsById: {
             ...state.myListsById,
-            [listId]: mergedMyList,
+            [listId]: freshList,
           },
           listsById: state.listsById[listId] ? {
             ...state.listsById,
-            [listId]: mergedPublicList,
+            [listId]: freshList,
           } : state.listsById,
         };
       });
@@ -89,10 +73,10 @@ export const useListStore = create<ListState>((set, get) => ({
     }
   },
 
-  addBookToList: async (listId: number, bookId: number) => {
+  addBookToList: async (listId: string, bookId: string) => {
     set({ isLoading: true, error: null });
     try {
-      await api.post(`/lists/${listId}/books`, { id: bookId });
+      await api.post(`/lists/${listId}/books`, { bookId: bookId });
       const response = await api.get<Book>(`/books/${bookId}`);
       const book = response.data;
       
@@ -101,26 +85,26 @@ export const useListStore = create<ListState>((set, get) => ({
           ...state.myListsById,
           [listId]: {
             ...state.myListsById[listId],
-            totalBooks: state.myListsById[listId].totalBooks + 1,
-            firstBookCovers: (() => {
-              const covers = state.myListsById[listId].firstBookCovers
-                ? [...state.myListsById[listId].firstBookCovers]
-                : [];
-              if (covers.length < 3 && book.coverImage) {
-                covers.push(book.coverImage);
-              }
-              return covers;
-            })(),
+            books: {
+              ...state.myListsById[listId].books,
+              total: state.myListsById[listId].books.total + 1,
+              items: [...state.myListsById[listId].books.items, book],
+            },
           }
         },
         listsById: state.listsById[listId] ? {
           ...state.listsById,
           [listId]: {
             ...state.listsById[listId],
-            books: state.listsById[listId].books 
-              ? [...state.listsById[listId].books, book]
-              : [book],
-            totalBooks: (state.listsById[listId].totalBooks || 0) + 1,
+            books: state.listsById[listId].books?.items
+              ? {
+                  total: state.listsById[listId].books.total + 1,
+                  items: [...state.listsById[listId].books.items, book]
+                }
+              : {
+                  total: 1,
+                  items: [book]
+                },
           }
         } : state.listsById,
       }));
@@ -131,10 +115,10 @@ export const useListStore = create<ListState>((set, get) => ({
     }
   },
 
-  removeBookFromList: async (listId: number, bookId: number) => {
+  removeBookFromList: async (listId: string, bookId: string) => {
     set({ isLoading: true, error: null });
     try {
-      await api.delete(`/lists/${listId}/books`, { data: { id: bookId } });
+      await api.delete(`/lists/${listId}/books`, { data: { bookId: bookId } });
       
       const response = await api.get<Book>(`/books/${bookId}`);
       const book = response.data;
@@ -144,21 +128,26 @@ export const useListStore = create<ListState>((set, get) => ({
           ...state.myListsById,
           [listId]: {
             ...state.myListsById[listId],
-            totalBooks: Math.max(0, state.myListsById[listId].totalBooks - 1),
-            firstBookCovers: (() => {
-              const covers = state.myListsById[listId].firstBookCovers || [];
-              return covers.filter(cover => cover !== book.coverImage);
-            })(),
+            books: {
+              ...state.myListsById[listId].books,
+              total: Math.max(0, state.myListsById[listId].books.total - 1),
+              items: state.myListsById[listId].books.items.filter(b => b.id !== bookId)
+            },
           }
         },
         listsById: state.listsById[listId] ? {
           ...state.listsById,
           [listId]: {
             ...state.listsById[listId],
-            books: state.listsById[listId].books 
-              ? state.listsById[listId].books.filter(b => b.id !== bookId)
-              : [],
-            totalBooks: Math.max(0, (state.listsById[listId].totalBooks || 0) - 1),
+            books: state.listsById[listId].books?.items
+              ? {
+                  total: Math.max(0, state.listsById[listId].books.total - 1),
+                  items: state.listsById[listId].books.items.filter(b => b.id !== bookId)
+                }
+              : {
+                  total: 0,
+                  items: []
+                },
           }
         } : state.listsById,
       }));
@@ -169,14 +158,23 @@ export const useListStore = create<ListState>((set, get) => ({
     }
   },
 
-  reorderBookInList: async (listId: number, bookId: number, newPosition: number) => {
+  reorderBooksInList: async (listId: string, positions: string[]) => {
     set({ isLoading: true, error: null });
     try {
-      await api.patch(`/lists/${listId}/reorder`, {
-        bookId,
-        newPosition,
-      });
-      await get().fetchList(String(listId));
+      await api.put(`/lists/${listId}/books/reorder`, {bookIds: positions});
+      await get().fetchList(listId);
+      // TODO: update local books by fetching the list again
+      const list = await api.get<List>(`/lists/${listId}`);
+      set(state => ({
+        myListsById: {
+          ...state.myListsById,
+          [listId]: list.data,
+        },
+        listsById: {
+          ...state.listsById,
+          [listId]: list.data,
+        },
+      }));
     } catch (e: any) {
       set({ error: e.message || 'Erreur de réordonnancement du livre dans la liste' });
     } finally {
@@ -184,30 +182,16 @@ export const useListStore = create<ListState>((set, get) => ({
     }
   },
 
-  reorderBooksInListBulk: async (listId: number, bookOrders: { bookId: number; position: number }[]) => {
-    set({ isLoading: true, error: null });
-    try {
-      await api.patch(`/lists/${listId}/reorder-bulk`, {
-        bookOrders,
-      });
-      await get().fetchList(String(listId));
-    } catch (e: any) {
-      set({ error: e.message || 'Erreur de réordonnancement des livres dans la liste' });
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  getListsContainingBook: async (bookId: number) => {
+  getListsContainingBook: async (bookId: string) => {
     const { myListsIds } = get();
-    const listsContainingBook: number[] = [];
+    const listsContainingBook: string[] = [];
     
     await Promise.all(
       myListsIds.map(async (listId) => {
         try {
           const response = await api.get<List>(`/lists/${listId}`);
           const list = response.data;
-          if (list.books && list.books.some(book => book.id === bookId)) {
+          if (list.books?.items && list.books.items.some(book => book.id === bookId)) {
             listsContainingBook.push(listId);
           }
         } catch (error) {
@@ -226,7 +210,7 @@ export const useListStore = create<ListState>((set, get) => ({
       set({ listsById: response.data.data.reduce<Record<string, List>>((acc: Record<string, List>, list: List) => {
         acc[list.id] = list;
         return acc;
-      }, {}), listsIds: response.data.data.map((l: List) => l.id) });
+      }, {}), listsIds: response.data.data.map((l: List) => String(l.id)) });
     } catch (e: any) {
       set({ error: e.message || 'Erreur de chargement des listes' });
     } finally {
@@ -243,7 +227,7 @@ export const useListStore = create<ListState>((set, get) => ({
         acc[list.id] = list;
         return acc;
       }, {});
-      set({ myListsById: byId, myListsIds: lists.map(l => l.id) });
+      set({ myListsById: byId, myListsIds: lists.map(l => String(l.id)) });
     } catch (e: any) {
       set({ error: e.message || 'Erreur de chargement des listes' });
     } finally {
@@ -260,8 +244,10 @@ export const useListStore = create<ListState>((set, get) => ({
         const existingList = state.listsById[id];
         const mergedList = existingList ? {
           ...list,
-          firstBookCovers: existingList.firstBookCovers || list.firstBookCovers,
-          totalBooks: existingList.totalBooks || list.totalBooks,
+          books: existingList.books || {
+            total: 0,
+            items: [],
+          },
         } : list;
         
         return {
@@ -275,7 +261,7 @@ export const useListStore = create<ListState>((set, get) => ({
     }
   },
 
-  deleteList: async (listId: number) => {
+  deleteList: async (listId: string) => {
     set({ isLoading: true, error: null });
     try {
       await api.delete(`/lists/${listId}`);
@@ -306,7 +292,7 @@ export const useListStore = create<ListState>((set, get) => ({
     }
   },
 
-  updateListImage: async (listId: number, image: ImagePickerAsset) => {
+  updateBackdropImage: async (listId: string, image: ImagePickerAsset) => {
     set({ isLoading: true, error: null });
     try {
         const formData = new FormData();
@@ -319,13 +305,14 @@ export const useListStore = create<ListState>((set, get) => ({
             name: fileName,
             type: mimeType,
         }
-        formData.append('image', imagePayload);
+        formData.append('backdrop', imagePayload);
 
-        await api.put(`/lists/${listId}/images`, formData, {
+       const response = await api.put(`/lists/${listId}/backdrop`, formData, {
             headers: {
             'Content-Type': 'multipart/form-data',
             },
         });
+        console.log("Backdrop image updated", response);
       await get().fetchList(String(listId));
     } catch (e: any) {
       set({ error: e.message || "Erreur de mise à jour de l'image de la liste" });
@@ -335,7 +322,7 @@ export const useListStore = create<ListState>((set, get) => ({
     }
   },
 
-  isOwner: (listId: number) => {
+  isOwner: (listId: string) => {
     const { myListsIds } = get();
     return myListsIds.includes(listId);
   },
