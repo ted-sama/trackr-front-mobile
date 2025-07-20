@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withTiming,
+  runOnJS,
 } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Star } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
+import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 
 interface RatingSliderProps {
-  initialValue?: number;
+  bookId: string;
   onValueChange: (value: number) => void;
   size?: number;
   showValue?: boolean;
@@ -20,7 +23,7 @@ interface RatingSliderProps {
 }
 
 const RatingSlider: React.FC<RatingSliderProps> = ({
-  initialValue = 0,
+  bookId,
   onValueChange,
   size = 52,
   showValue = true,
@@ -30,37 +33,65 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
   const typography = useTypography();
   const [currentRating, setCurrentRating] = useState<number>(0);
   const scaleValue = useSharedValue(1);
-
+  const startValue = useSharedValue(0);
+  const isActive = useSharedValue(false);
+  const { getTrackedBookStatus } = useTrackedBooksStore();
+  
   useEffect(() => {
-    const validRating = typeof initialValue === 'number' && !isNaN(initialValue) ? initialValue : 0;
-    setCurrentRating(validRating);
-  }, [initialValue]);
+    const book = getTrackedBookStatus(bookId);
+    // Get raw rating (could be number or string) and default to 0
+    const rawRating = book?.rating ?? 0;
+    // Convert to number if it's a string
+    const numericRating = typeof rawRating === 'string' ? parseFloat(rawRating) : rawRating;
+    setCurrentRating(numericRating);
+  }, [bookId]);
 
   const updateRating = (newRating: number) => {
-    const clampedRating = Math.max(0.5, Math.min(5, newRating));
+    const clampedRating = Math.max(0, Math.min(5, newRating));
     setCurrentRating(clampedRating);
     onValueChange(clampedRating);
     Haptics.selectionAsync();
-    
-    // Animation feedback
-    scaleValue.value = withSpring(1.1, { duration: 100 }, () => {
-      scaleValue.value = withSpring(1);
-    });
   };
 
-  const handleStarPress = (starIndex: number) => {
-    const starValue = starIndex + 1;
+  const calculateRatingFromPosition = (x: number, containerWidth: number) => {
+    'worklet';
+    const starsWidth = containerWidth;
+    const starWidth = starsWidth / 5;
+    const position = Math.max(0, Math.min(x, starsWidth));
+    const rating = (position / starWidth);
     
-    // If clicking on the same star that's currently selected, toggle half star
-    const rating = currentRating || 0;
-    if (rating === starValue) {
-      updateRating(starValue - 0.5);
-    } else if (rating === starValue - 0.5) {
-      updateRating(starValue);
-    } else {
-      updateRating(starValue);
-    }
+    // Snap to increments of 0.5
+    return Math.round(rating * 2) / 2;
   };
+
+  const panGesture = Gesture.Pan()
+    .onBegin(() => {
+      isActive.value = true;
+      startValue.value = currentRating;
+      scaleValue.value = withSpring(1.05);
+    })
+    .onUpdate((event) => {
+      const containerWidth = 5 * (size + 8); // 5 stars with 8px margin each
+      const rating = calculateRatingFromPosition(event.x, containerWidth);
+      runOnJS(updateRating)(rating);
+    })
+    .onEnd(() => {
+      isActive.value = false;
+      scaleValue.value = withSpring(1);
+    });
+
+  const tapGesture = Gesture.Tap()
+    .onStart((event) => {
+      const containerWidth = 5 * (size + 8);
+      const rating = calculateRatingFromPosition(event.x, containerWidth);
+      runOnJS(updateRating)(rating);
+      
+      scaleValue.value = withSpring(1.1, { duration: 100 }, () => {
+        scaleValue.value = withSpring(1);
+      });
+    });
+
+  const composedGesture = Gesture.Simultaneous(panGesture, tapGesture);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scaleValue.value }],
@@ -86,89 +117,78 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
     const shouldShowHalf = rating >= starValue - 0.5 && rating < starValue;
 
     return (
-      <TouchableOpacity
+      <View
         key={index}
-        onPress={() => handleStarPress(index)}
-        activeOpacity={0.7}
         style={{ marginHorizontal: 4 }}
       >
-        <Animated.View style={animatedStyle}>
-          <View style={{ position: 'relative' }}>
-            <Star
-              size={size}
-              color={colors.primary}
-              fill={getStarFill()}
-              strokeWidth={1.5}
-              opacity={getStarOpacity()}
-            />
-            {shouldShowHalf && (
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: size / 2,
-                  overflow: 'hidden',
-                }}
-              >
-                <Star
-                  size={size}
-                  color={colors.primary}
-                  fill={colors.primary}
-                  strokeWidth={1.5}
-                />
-              </View>
-            )}
-          </View>
-        </Animated.View>
-      </TouchableOpacity>
+        <View style={{ position: 'relative' }}>
+          <Star
+            size={size}
+            color={colors.primary}
+            fill={getStarFill()}
+            strokeWidth={1.5}
+            opacity={getStarOpacity()}
+          />
+          {shouldShowHalf && (
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: size / 2,
+                overflow: 'hidden',
+              }}
+            >
+              <Star
+                size={size}
+                color={colors.primary}
+                fill={colors.primary}
+                strokeWidth={1.5}
+              />
+            </View>
+          )}
+        </View>
+      </View>
     );
   };
-
-  // Quick rating buttons for common ratings
-  const quickRatings = [0.5, 1, 2, 3, 4, 5];
 
   return (
     <View style={[styles.container, style]}>
       {showValue && (
         <Text style={[typography.h2, { color: colors.text, textAlign: 'center', marginBottom: 24 }]}>
-          {(currentRating || 0).toFixed(1)}/5.0
+          {currentRating === 0 ? 'Pas encore noté' : `${(currentRating || 0).toFixed(1)}/5.0`}
         </Text>
       )}
       
-      <View style={styles.starsContainer}>
-        {[0, 1, 2, 3, 4].map(renderStar)}
-      </View>
+      <GestureDetector gesture={composedGesture}>
+        <Animated.View style={[styles.starsContainer, animatedStyle]}>
+          {[0, 1, 2, 3, 4].map(renderStar)}
+        </Animated.View>
+      </GestureDetector>
 
       <Text style={[typography.caption, { color: colors.secondaryText, textAlign: 'center', marginTop: 16 }]}>
-        Touchez une étoile pour noter
+        Glissez ou touchez pour noter
       </Text>
 
-      {/* Quick rating buttons */}
-      <View style={styles.quickRatingContainer}>
-        {quickRatings.map((rating) => (
-          <TouchableOpacity
-            key={rating}
-            onPress={() => updateRating(rating)}
+        <View style={styles.resetContainer}>
+          <Text
             style={[
-              styles.quickRatingButton,
-              { 
-                backgroundColor: (currentRating || 0) === rating ? colors.primary : colors.actionButton,
-              }
-            ]}
-          >
-            <Text style={[
               typography.caption,
               { 
-                color: (currentRating || 0) === rating ? colors.background : colors.text,
-                fontWeight: (currentRating || 0) === rating ? 'bold' : 'normal'
+                color: currentRating === 0 ? colors.secondaryText : colors.primary,
+                textAlign: 'center',
+                marginTop: 12,
+                textDecorationLine: currentRating === 0 ? 'none' : 'underline',
+                opacity: currentRating === 0 ? 0.5 : 1,
               }
-            ]}>
-              {rating.toFixed(1)}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+            ]}
+            onPress={currentRating === 0 ? undefined : () => updateRating(0)}
+            accessibilityState={{ disabled: currentRating === 0 }}
+            disabled={currentRating === 0}
+          >
+            Supprimer la note
+          </Text>
+        </View>
     </View>
   );
 };
@@ -183,18 +203,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
+    paddingVertical: 10,
   },
-  quickRatingContainer: {
-    flexDirection: 'row',
-    marginTop: 20,
-    gap: 8,
-  },
-  quickRatingButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    minWidth: 40,
-    alignItems: 'center',
+  resetContainer: {
+    marginTop: 8,
   },
 });
 

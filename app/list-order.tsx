@@ -79,7 +79,6 @@ export default function ListOrder() {
 
   const handleDragEnd = useCallback(
     (data: Book[]) => {
-      console.log("Drag end - updating local state only");
       setLocalBooks(data);
 
       // Vérifier s'il y a vraiment des changements
@@ -102,13 +101,7 @@ export default function ListOrder() {
       // Créer la liste des nouvelles positions
       const bookOrders = localBooks.map((book) => book.id);
 
-      console.log("Saving all changes at once:", {
-        listId: listId,
-        bookOrders,
-      });
-
       await reorderBooksInList(listId, bookOrders);
-      console.log("Reorder successful");
 
       setHasChanges(false);
       setOriginalBooks([...localBooks]);

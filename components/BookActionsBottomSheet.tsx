@@ -192,7 +192,8 @@ const BookActionsBottomSheet = forwardRef<
       const trackedStatus = getTrackedBookStatus(book.id);
       setTempStatus(trackedStatus?.status || "plan_to_read");
       const rating = trackedStatus?.rating;
-      setTempRating(typeof rating === 'number' ? rating : 0);
+      // Toujours synchroniser avec la note réelle de la base de données
+      setTempRating(typeof rating === "number" ? rating : 0);
     }, [book.id, getTrackedBookStatus]);
 
     const handleDismiss = () => {
@@ -678,7 +679,8 @@ const BookActionsBottomSheet = forwardRef<
               </View>
               <View style={styles.ratingAction}>
                 <RatingSlider
-                  initialValue={tempRating}
+                  key={`rating-${book.id}`}
+                  bookId={book.id}
                   onValueChange={setTempRating}
                   showValue={true}
                 />

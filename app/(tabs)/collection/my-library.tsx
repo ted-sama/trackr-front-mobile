@@ -37,14 +37,13 @@ export default function MyLibrary() {
   const scrollRef = useRef<FlatList<Book> | null>(null);
   const currentLayout = useUIStore(state => state.myLibraryLayout);
   const setLayout = useUIStore(state => state.setMyLibraryLayout);
-  // scrollRef.current?.scrollToOffset({ offset: 0, animated: true });
+
   const handleBack = () => {
     router.back();
   }
 
   const { getTrackedBooks, addTrackedBook, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
   const books = getTrackedBooks();
-  console.log(books);
 
   // Load saved layout preference
   useEffect(() => {

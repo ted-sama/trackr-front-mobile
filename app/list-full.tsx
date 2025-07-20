@@ -431,7 +431,7 @@ export default function ListFull() {
                   onPress={() => router.push(`/book/${item.id}`)}
                   size="compact"
                   showAuthor={true}
-                  showTrackingStatus={true}
+                  showTrackingStatus={false}
                   showTrackingButton={false}
                   showRating={false}
                   rank={list.ranked && list.books.items ? list.books.items.findIndex(b => b.id === item.id) + 1 : undefined}
@@ -445,7 +445,7 @@ export default function ListFull() {
                 onPress={() => router.push(`/book/${item.id}`)}
                 rank={list.ranked && list.books.items ? list.books.items.findIndex(b => b.id === item.id) + 1 : undefined}
                 showAuthor={true}
-                showTrackingStatus={true}
+                showTrackingStatus={false}
                 showTrackingButton={false}
                 currentListId={list.id}
                 isFromListPage={true}

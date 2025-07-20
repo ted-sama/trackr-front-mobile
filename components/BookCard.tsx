@@ -125,13 +125,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
   });
 
   const handlePress = () => {
-    if (onPress) {
-      onPress(book);
-    } else {
-      // Default behavior if no onPress is provided
-      // Example: Navigate to a detail screen or log
-      console.log(`Livre sélectionné: ${book.title}`);
-    }
+    onPress?.(book);
   };
 
   return (

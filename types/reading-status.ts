@@ -8,13 +8,13 @@ export type ReadingStatus = 'plan_to_read' | 'reading' | 'completed' | 'on_hold'
  */
 export interface BookTracking {
   status: ReadingStatus;
-  currentChapter?: number;
-  currentVolume?: number;
-  rating?: number;
-  startDate?: Date;
-  finishDate?: Date;
-  notes?: string;
-  lastReadAt?: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
+  currentChapter?: number | null;
+  currentVolume?: number | null;
+  rating?: number | null;
+  startDate?: Date | null;
+  finishDate?: Date | null;
+  notes?: string | null;
+  lastReadAt?: Date | null;
+  createdAt?: Date | null;
+  updatedAt?: Date | null;
 } 

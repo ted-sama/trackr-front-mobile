@@ -17,7 +17,7 @@ import { Clock3, BookOpenIcon, BookCheck, Pause, Square, BookMarked, ClockFading
 
 interface TrackingTabBarProps {
   status: string;
-  currentChapter?: number;
+  currentChapter?: number | null;
   onManagePress: () => void;
   onStatusPress: () => void;
   onRecapPress?: () => void;

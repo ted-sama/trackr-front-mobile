@@ -521,7 +521,7 @@ export default function BookScreen() {
                     reviewsAnimatedStyle,
                   ]}
                 >
-                  {bookTracking?.rating ? (
+                  {bookTracking?.rating && bookTracking?.rating > 0 ? (
                     <View>
                       <Text
                         style={[

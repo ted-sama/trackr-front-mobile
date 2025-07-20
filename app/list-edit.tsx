@@ -157,7 +157,6 @@ export default function ListEdit() {
 
       if(selectedImage) {
         await updateBackdropImage(listId, selectedImage);
-        console.log("Backdrop image updated");
       }
 
       await updateList(listId, {

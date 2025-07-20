@@ -88,15 +88,15 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
       const freshBook = trackedBook.book;
       const updatedTracking: BookTracking = {
         status: trackedBook.status as ReadingStatus,
-        currentChapter: trackedBook.currentChapter ?? undefined,
-        currentVolume: trackedBook.currentVolume ?? undefined,
-        rating: trackedBook.rating ?? undefined,
-        startDate: trackedBook.startDate ? new Date(trackedBook.startDate) : undefined,
-        finishDate: trackedBook.finishDate ? new Date(trackedBook.finishDate) : undefined,
-        notes: trackedBook.notes ?? undefined,
-        lastReadAt: trackedBook.lastReadAt ? new Date(trackedBook.lastReadAt) : undefined,
-        createdAt: trackedBook.createdAt ? new Date(trackedBook.createdAt) : undefined,
-        updatedAt: trackedBook.updatedAt ? new Date(trackedBook.updatedAt) : undefined,
+        currentChapter: trackedBook.currentChapter,
+        currentVolume: trackedBook.currentVolume,
+        rating: trackedBook.rating,
+        startDate: trackedBook.startDate ? new Date(trackedBook.startDate) : null,
+        finishDate: trackedBook.finishDate ? new Date(trackedBook.finishDate) : null,
+        notes: trackedBook.notes,
+        lastReadAt: trackedBook.lastReadAt ? new Date(trackedBook.lastReadAt) : null,
+        createdAt: trackedBook.createdAt ? new Date(trackedBook.createdAt) : null,
+        updatedAt: trackedBook.updatedAt ? new Date(trackedBook.updatedAt) : null,
       };
       
       // Ensure the book ID is consistent
@@ -142,15 +142,15 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
         const bookData = trackedBook.book;
         const trackingStatus: BookTracking = {
           status: trackedBook.status as ReadingStatus,
-          currentChapter: trackedBook.currentChapter ?? undefined,
-          currentVolume: trackedBook.currentVolume ?? undefined,
-          rating: trackedBook.rating ?? undefined,
-          startDate: trackedBook.startDate ? new Date(trackedBook.startDate) : undefined,
-          finishDate: trackedBook.finishDate ? new Date(trackedBook.finishDate) : undefined,
-          notes: trackedBook.notes ?? undefined,
-          lastReadAt: trackedBook.lastReadAt ? new Date(trackedBook.lastReadAt) : undefined,
-          createdAt: trackedBook.createdAt ? new Date(trackedBook.createdAt) : undefined,
-          updatedAt: trackedBook.updatedAt ? new Date(trackedBook.updatedAt) : undefined,
+          currentChapter: trackedBook.currentChapter,
+          currentVolume: trackedBook.currentVolume,
+          rating: trackedBook.rating,
+          startDate: trackedBook.startDate ? new Date(trackedBook.startDate) : null,
+          finishDate: trackedBook.finishDate ? new Date(trackedBook.finishDate) : null,
+          notes: trackedBook.notes,
+          lastReadAt: trackedBook.lastReadAt ? new Date(trackedBook.lastReadAt) : null,
+          createdAt: trackedBook.createdAt ? new Date(trackedBook.createdAt) : null,
+          updatedAt: trackedBook.updatedAt ? new Date(trackedBook.updatedAt) : null,
         };
         books[bookData.id] = { ...bookData, tracking: true, trackingStatus: trackingStatus };
       }
