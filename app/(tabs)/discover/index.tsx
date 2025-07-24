@@ -33,6 +33,7 @@ export default function Discover() {
             backgroundColor: colors.background,
             borderColor: colors.tabBarBorder,
             borderBottomWidth: 1,
+            height: 50,
           },
           tabBarLabelStyle: {
             ...typography.caption,

@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext'; // Ajustement du chemin
-import { Library } from 'lucide-react-native';
+import { Library, Settings } from 'lucide-react-native';
 
 export default function TabLayout() {
   const { colors, currentTheme } = useTheme();
@@ -59,6 +59,15 @@ export default function TabLayout() {
           title: 'Collection',
           tabBarIcon: ({ color, size }) => (
             <Library size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Paramètres',
+          tabBarIcon: ({ color, size }) => (
+            <Settings size={size} color={color} />
           ),
         }}
       />

@@ -16,7 +16,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 interface BookListElementProps {
   book: Book;
-  onPress: () => void;
+  onPress?: () => void;
   onTrackingToggle?: (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => void;
   showTrackingButton?: boolean;
   showTrackingStatus?: boolean;
@@ -25,9 +25,10 @@ interface BookListElementProps {
   rank?: number;
   currentListId?: string;
   isFromListPage?: boolean;
+  compact?: boolean;
 }
 
-const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, showRating = false, showTrackingButton = false, showTrackingStatus = false, rank, currentListId, isFromListPage }: BookListElementProps) => {
+const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, showRating = false, showTrackingButton = false, showTrackingStatus = false, rank, currentListId, isFromListPage, compact = false }: BookListElementProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
   const { isBottomSheetVisible, openBookActions } = useBottomSheet();
@@ -61,26 +62,26 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
     <>
       <Animated.View style={[animatedStyle]}> 
         <Pressable
-          onPress={onPress}
+          onPress={onPress ?? (() => {})}
           onPressIn={() => { scale.value = withTiming(0.97, { duration: 220 }); }}
           onPressOut={() => { scale.value = withTiming(1, { duration: 220 }); }}
           style={styles.container}
         >
           <View style={styles.detailsGroup}>
-            <Image source={book.coverImage} style={styles.image} />
-          <View style={styles.infoContainer}>
+            <Image source={book.coverImage} style={[styles.image, compact && styles.imageCompact]} />
+          <View style={[styles.infoContainer, compact && styles.infoContainerCompact]}>
             {rank && (
-              <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: 4 }]}>
+              <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: compact ? 2 : 4 }]}>
                 {rank}
               </Text>
             )}
-            <Text style={[styles.title, typography.h3, { color: colors.text }]} numberOfLines={2} ellipsizeMode="tail">{book.title}</Text>
+            <Text style={[styles.title, typography.h3, { color: colors.text, marginBottom: compact ? 2 : 4 }]} numberOfLines={2} ellipsizeMode="tail">{book.title}</Text>
             {book.author && showAuthor && (
-              <Text style={[styles.author, typography.caption, { color: colors.secondaryText }]} numberOfLines={1} ellipsizeMode="tail">{book.author}</Text>
+              <Text style={[styles.author, typography.caption, { color: colors.secondaryText, marginBottom: compact ? 1 : 2 }]} numberOfLines={1} ellipsizeMode="tail">{book.author}</Text>
             )}
             {showRating && (
               <View style={styles.ratingContainer}>
-              <Ionicons name="star" size={12} color={colors.secondaryText} />
+              <Ionicons name="star" size={compact ? 10 : 12} color={colors.secondaryText} />
               <Text
                 style={[
                   styles.ratingText,
@@ -92,8 +93,8 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
               </Text>
             </View>
             )}
-            {trackingStatus && showTrackingStatus && (
-              <View style={styles.badgeContainer}>
+            {trackingStatus && showTrackingStatus && !compact && (
+              <View style={[styles.badgeContainer, compact && styles.badgeContainerCompact]}>
                 <Badge
                   text={trackingStatusValues[trackingStatus.status as ReadingStatus].text}
                   color={colors.badgeText}
@@ -113,9 +114,17 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
             )}
           </View>
         </View>
-        <View style={styles.actionsContainer}>
+        <View style={[styles.actionsContainer, compact && styles.actionsContainerCompact]}>
           {showTrackingButton && (
             <TrackingIconButton isTracking={isTracking} onPress={handleTrackingToggle} />
+          )}
+          {compact && showTrackingStatus && trackingStatus && trackingStatus.currentChapter && (
+            <Badge
+              text={`Ch. ${trackingStatus.currentChapter.toString()}`}
+              color={colors.badgeText}
+              backgroundColor={colors.badgeBackground}
+              borderColor={colors.badgeBorder}
+            />
           )}
           <Pressable onPress={handlePresentModalPress}>
             <Ellipsis size={22} color={colors.icon} strokeWidth={2} />
@@ -145,9 +154,16 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 4,
   },
+  imageCompact: {
+    width: 40,
+    height: 60,
+  },
   infoContainer: {
     marginHorizontal: 16,
     flexShrink: 1,
+  },
+  infoContainerCompact: {
+    marginHorizontal: 8,
   },
   title: {
     marginBottom: 4,
@@ -159,6 +175,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+  },
+  badgeContainerCompact: {
+    gap: 2,
   },
   ratingContainer: {
     flexDirection: "row",
@@ -172,5 +191,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+  },
+  actionsContainerCompact: {
+    gap: 5,
   },
 });

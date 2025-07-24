@@ -22,9 +22,9 @@ export const useUserStore = create<UserState>((set, get) => ({
   fetchCurrentUser: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.get<{ user: User }>('/me');
+      const response = await api.get<User>('/me');
       set({
-        currentUser: response.data.user,
+        currentUser: response.data,
         isAuthenticated: true,
       });
     } catch (e: any) {
@@ -41,8 +41,8 @@ export const useUserStore = create<UserState>((set, get) => ({
   updateUser: async (userData: Partial<User>) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.patch<{ user: User }>('/me', userData);
-      const updatedUser = response.data.user;
+      const response = await api.patch<User>('/me', userData);
+      const updatedUser = response.data;
       set({
         currentUser: updatedUser,
       });

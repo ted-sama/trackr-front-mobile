@@ -1,16 +1,19 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, StatusBar, NativeSyntheticEvent, TextInputSubmitEditingEventData, TouchableOpacity, Text, Dimensions } from "react-native";
+import { View, StyleSheet, StatusBar, NativeSyntheticEvent, TextInputSubmitEditingEventData, TouchableOpacity, Text, Dimensions, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS } from 'react-native-reanimated';
 import { useTheme } from "@/contexts/ThemeContext";
 import SearchBar from "@/components/discover/SearchBar";
 import { useRouter } from "expo-router";
 import { useTypography } from "@/hooks/useTypography";
+import { useSearchStore } from "@/stores/searchStore";
 interface HeaderDiscoverProps {
   searchMode: 'navigate' | 'search';
   searchText?: string;
   onSearchTextChange?: (text: string) => void;
   onSubmitSearch?: () => void;
+  activeFilter?: 'books' | 'lists';
+  onFilterChange?: (filter: 'books' | 'lists') => void;
 }
 
 const screenWidth = Dimensions.get('window').width;
@@ -23,12 +26,14 @@ export default function HeaderDiscover({
   searchText = '',
   onSearchTextChange = () => {},
   onSubmitSearch = () => {},
+  activeFilter = 'books',
+  onFilterChange = () => {},
 }: HeaderDiscoverProps) {
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const router = useRouter();
-
+  const { clearSearch } = useSearchStore();
   const initialWidth = screenWidth - paddingHorizontal * 2;
   const searchBarWidth = useSharedValue(initialWidth);
   const cancelButtonOpacity = useSharedValue(0);
@@ -57,6 +62,7 @@ export default function HeaderDiscover({
   };
 
   const performBackNavigation = () => {
+    clearSearch();
     router.back();
   };
 
@@ -95,6 +101,7 @@ export default function HeaderDiscover({
   });
 
   return (
+    <>
     <View
       style={[
         styles.header,
@@ -102,8 +109,6 @@ export default function HeaderDiscover({
           paddingTop: insets.top,
           height: 72 + insets.top,
           backgroundColor: colors.background,
-          borderBottomColor: colors.border,
-          borderBottomWidth: isEditable ? 1 : 0,
         },
       ]}
     >
@@ -128,6 +133,42 @@ export default function HeaderDiscover({
         </Animated.View>
       )}
     </View>
+    {searchMode === 'search' && (
+      <View style={[styles.filtersContainer, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+        <Pressable
+          style={[
+            styles.filterButton,
+            activeFilter === 'books' && { backgroundColor: colors.primary }
+          ]}
+          onPress={() => onFilterChange('books')}
+        >
+          <Text style={[
+            typography.caption,
+            styles.filterText,
+            { color: activeFilter === 'books' ? 'white' : colors.text }
+          ]}>
+            Livres
+          </Text>
+        </Pressable>
+        
+        <Pressable
+          style={[
+            styles.filterButton,
+            activeFilter === 'lists' && { backgroundColor: colors.primary }
+          ]}
+          onPress={() => onFilterChange('lists')}
+        >
+          <Text style={[
+            typography.caption,
+            styles.filterText,
+            { color: activeFilter === 'lists' ? 'white' : colors.text }
+          ]}>
+            Listes
+          </Text>
+        </Pressable>
+      </View>
+    )}
+    </>
   );
 }
 
@@ -145,5 +186,21 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     paddingHorizontal: 5,
+  },
+  filtersContainer: {
+    height: 50,
+    borderBottomWidth: 1,
+    paddingHorizontal: paddingHorizontal,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  filterButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  filterText: {
+    fontWeight: '500',
   },
 });
