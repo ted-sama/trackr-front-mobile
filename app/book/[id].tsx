@@ -53,6 +53,8 @@ import ExpandableDescription from "@/components/ExpandableDescription";
 import BadgeSlider from "@/components/BadgeSlider";
 import { useBookDetailStore, BookDetailState } from "@/stores/bookDetailStore";
 import RatingStars from "@/components/ui/RatingStars";
+import { useLocalization } from "@/hooks/useLocalization";
+import { getLocalizedDescription } from "@/utils/description";
 // Constants for animation
 const HEADER_THRESHOLD = 320; // Threshold for header animation
 
@@ -80,6 +82,7 @@ export default function BookScreen() {
   const insets = useSafeAreaInsets();
   const [dummyRecommendations, setDummyRecommendations] =
     useState<Category | null>(null);
+  const { isFrench } = useLocalization();
 
   // Get the full BookTracking object
   const getTrackedBookStatus = useTrackedBooksStore(
@@ -457,9 +460,9 @@ export default function BookScreen() {
             </View>
           )}
           {/* Description */}
-          {book?.description && (
+          {book && getLocalizedDescription(book, isFrench) && (
             <View>
-              <ExpandableDescription text={book.description} />
+              <ExpandableDescription text={getLocalizedDescription(book, isFrench)!} />
             </View>
           )}
           {/* Ratings / Socials */}

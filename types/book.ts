@@ -16,6 +16,7 @@ export interface Book {
   coverImage?: string;
   type?: string;
   description?: string;
+  descriptionFr?: string;
   genres?: string[];
   tags?: string[];
   status: string;
