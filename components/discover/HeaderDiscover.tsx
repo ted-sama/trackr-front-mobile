@@ -4,16 +4,22 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS } from 'react-native-reanimated';
 import { useTheme } from "@/contexts/ThemeContext";
 import SearchBar from "@/components/discover/SearchBar";
+import PillTabBar from "@/components/discover/PillTabBar";
 import { useRouter } from "expo-router";
 import { useTypography } from "@/hooks/useTypography";
 import { useSearchStore } from "@/stores/searchStore";
+type TabType = 'books' | 'lists';
+
 interface HeaderDiscoverProps {
   searchMode: 'navigate' | 'search';
   searchText?: string;
   onSearchTextChange?: (text: string) => void;
   onSubmitSearch?: () => void;
-  activeFilter?: 'books' | 'lists';
-  onFilterChange?: (filter: 'books' | 'lists') => void;
+  activeFilter?: TabType;
+  onFilterChange?: (filter: TabType) => void;
+  // Navigation tabs props
+  activeTab?: TabType;
+  onTabChange?: (tab: TabType) => void;
 }
 
 const screenWidth = Dimensions.get('window').width;
@@ -28,6 +34,8 @@ export default function HeaderDiscover({
   onSubmitSearch = () => {},
   activeFilter = 'books',
   onFilterChange = () => {},
+  activeTab = 'books',
+  onTabChange = () => {},
 }: HeaderDiscoverProps) {
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
@@ -100,6 +108,11 @@ export default function HeaderDiscover({
     };
   });
 
+  const navigationTabs = [
+    { label: 'Livres', value: 'books' as TabType },
+    { label: 'Listes', value: 'lists' as TabType },
+  ];
+
   return (
     <>
     <View
@@ -107,8 +120,10 @@ export default function HeaderDiscover({
         styles.header,
         {
           paddingTop: insets.top,
-          height: 72 + insets.top,
+          height: 130 + insets.top,
           backgroundColor: colors.background,
+          borderBottomColor: colors.border,
+          borderBottomWidth: 1,
         },
       ]}
     >
@@ -116,68 +131,86 @@ export default function HeaderDiscover({
         barStyle={currentTheme === "dark" ? "light-content" : "dark-content"}
         backgroundColor={colors.background}
       />
-      <SearchBar
-        placeholder="Commencez votre recherche"
-        isEditable={isEditable}
-        value={searchText}
-        onChangeText={isEditable ? onSearchTextChange : () => {}}
-        onSubmitEditing={isEditable ? handleSubmitEditing : undefined}
-        onPressNavigate={!isEditable ? handleNavigateToSearch : undefined}
-        containerStyle={animatedSearchBarContainerStyle}
-      />
-      {isEditable && (
-        <Animated.View style={[styles.cancelButtonContainer, animatedCancelButtonStyle]}>
-          <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
-            <Text style={[typography.h3, { color: colors.primary }]}>Annuler</Text>
-          </TouchableOpacity>
-        </Animated.View>
+      
+      <View style={styles.searchBarContainer}>
+        <SearchBar
+          placeholder="Commencez votre recherche"
+          isEditable={isEditable}
+          value={searchText}
+          onChangeText={isEditable ? onSearchTextChange : () => {}}
+          onSubmitEditing={isEditable ? handleSubmitEditing : undefined}
+          onPressNavigate={!isEditable ? handleNavigateToSearch : undefined}
+          containerStyle={animatedSearchBarContainerStyle}
+        />
+        {isEditable && (
+          <Animated.View style={[styles.cancelButtonContainer, animatedCancelButtonStyle]}>
+            <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
+              <Text style={[typography.h3, { color: colors.primary }]}>Annuler</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+      </View>
+
+      {/* Navigation tabs in navigate mode - inside header */}
+      {searchMode === 'navigate' && (
+        <View style={styles.navigationContainerInHeader}>
+          <PillTabBar
+            tabs={navigationTabs}
+            selected={activeTab}
+            onTabChange={onTabChange}
+          />
+        </View>
+      )}
+
+      {/* Filter buttons in search mode - inside header */}
+      {searchMode === 'search' && (
+        <View style={styles.filterContainerInHeader}>
+          <Pressable
+            style={[
+              styles.filterButton,
+              activeFilter === 'books' && { backgroundColor: colors.primary }
+            ]}
+            onPress={() => onFilterChange('books')}
+          >
+            <Text style={[
+              typography.caption,
+              styles.filterText,
+              { color: activeFilter === 'books' ? 'white' : colors.text }
+            ]}>
+              Livres
+            </Text>
+          </Pressable>
+          
+          <Pressable
+            style={[
+              styles.filterButton,
+              activeFilter === 'lists' && { backgroundColor: colors.primary }
+            ]}
+            onPress={() => onFilterChange('lists')}
+          >
+            <Text style={[
+              typography.caption,
+              styles.filterText,
+              { color: activeFilter === 'lists' ? 'white' : colors.text }
+            ]}>
+              Listes
+            </Text>
+          </Pressable>
+        </View>
       )}
     </View>
-    {searchMode === 'search' && (
-      <View style={[styles.filtersContainer, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
-        <Pressable
-          style={[
-            styles.filterButton,
-            activeFilter === 'books' && { backgroundColor: colors.primary }
-          ]}
-          onPress={() => onFilterChange('books')}
-        >
-          <Text style={[
-            typography.caption,
-            styles.filterText,
-            { color: activeFilter === 'books' ? 'white' : colors.text }
-          ]}>
-            Livres
-          </Text>
-        </Pressable>
-        
-        <Pressable
-          style={[
-            styles.filterButton,
-            activeFilter === 'lists' && { backgroundColor: colors.primary }
-          ]}
-          onPress={() => onFilterChange('lists')}
-        >
-          <Text style={[
-            typography.caption,
-            styles.filterText,
-            { color: activeFilter === 'lists' ? 'white' : colors.text }
-          ]}>
-            Listes
-          </Text>
-        </Pressable>
-      </View>
-    )}
     </>
   );
 }
 
 const styles = StyleSheet.create({
   header: {
-    flexDirection: "row",
-    alignItems: "center",
     paddingHorizontal: paddingHorizontal,
     paddingBottom: 10,
+  },
+  searchBarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   cancelButtonContainer: {
     marginLeft: searchBarMarginRight,
@@ -186,6 +219,15 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     paddingHorizontal: 5,
+  },
+  navigationContainerInHeader: {
+    marginTop: 8,
+  },
+  filterContainerInHeader: {
+    marginTop: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   filtersContainer: {
     height: 50,
