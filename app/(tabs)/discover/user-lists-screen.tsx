@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   listContainer: {
-    paddingTop: 16,
+    paddingTop: 20,
     paddingBottom: 128,
     paddingHorizontal: 16,
   },

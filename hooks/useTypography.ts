@@ -46,7 +46,7 @@ export function useTypography(): Typography {
     body: {
       fontFamily: 'Manrope_500Medium',
       fontSize: 14,
-      lineHeight: 19,
+      lineHeight: 21,
       letterSpacing: -0.3,
     },
     bodyCaption: {

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, StatusBar, NativeSyntheticEvent, TextInputSubmitEditingEventData, TouchableOpacity, Text, Dimensions, Pressable } from "react-native";
+import { View, StyleSheet, StatusBar, NativeSyntheticEvent, TextInputSubmitEditingEventData, TouchableOpacity, Text, Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS } from 'react-native-reanimated';
 import { useTheme } from "@/contexts/ThemeContext";
@@ -41,7 +41,7 @@ export default function HeaderDiscover({
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const router = useRouter();
-  const { clearSearch } = useSearchStore();
+  const { clearSearch, setInitialFilterFromTab } = useSearchStore();
   const initialWidth = screenWidth - paddingHorizontal * 2;
   const searchBarWidth = useSharedValue(initialWidth);
   const cancelButtonOpacity = useSharedValue(0);
@@ -66,6 +66,8 @@ export default function HeaderDiscover({
   }, [isEditable, initialWidth]);
 
   const handleNavigateToSearch = () => {
+    // Set the search filter to match the current active tab
+    setInitialFilterFromTab(activeTab);
     router.navigate('/discover/search');
   };
 
@@ -162,40 +164,14 @@ export default function HeaderDiscover({
         </View>
       )}
 
-      {/* Filter buttons in search mode - inside header */}
+      {/* Filter tabs in search mode - same as navigation tabs */}
       {searchMode === 'search' && (
-        <View style={styles.filterContainerInHeader}>
-          <Pressable
-            style={[
-              styles.filterButton,
-              activeFilter === 'books' && { backgroundColor: colors.primary }
-            ]}
-            onPress={() => onFilterChange('books')}
-          >
-            <Text style={[
-              typography.caption,
-              styles.filterText,
-              { color: activeFilter === 'books' ? 'white' : colors.text }
-            ]}>
-              Livres
-            </Text>
-          </Pressable>
-          
-          <Pressable
-            style={[
-              styles.filterButton,
-              activeFilter === 'lists' && { backgroundColor: colors.primary }
-            ]}
-            onPress={() => onFilterChange('lists')}
-          >
-            <Text style={[
-              typography.caption,
-              styles.filterText,
-              { color: activeFilter === 'lists' ? 'white' : colors.text }
-            ]}>
-              Listes
-            </Text>
-          </Pressable>
+        <View style={styles.navigationContainerInHeader}>
+          <PillTabBar
+            tabs={navigationTabs}
+            selected={activeFilter}
+            onTabChange={onFilterChange}
+          />
         </View>
       )}
     </View>
@@ -222,27 +198,5 @@ const styles = StyleSheet.create({
   },
   navigationContainerInHeader: {
     marginTop: 8,
-  },
-  filterContainerInHeader: {
-    marginTop: 25,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  filtersContainer: {
-    height: 50,
-    borderBottomWidth: 1,
-    paddingHorizontal: paddingHorizontal,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  filterButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  filterText: {
-    fontWeight: '500',
   },
 });

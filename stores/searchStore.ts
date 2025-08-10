@@ -26,6 +26,7 @@ interface SearchState {
   loadMoreResults: () => Promise<void>;
   clearSearch: () => void;
   clearError: () => void;
+  setInitialFilterFromTab: (tabType: SearchFilter) => void;
   
   // Getters
   getCurrentResults: () => (Book | List)[];
@@ -166,5 +167,9 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   getCurrentResults: () => {
     const { activeFilter, bookResults, listResults } = get();
     return activeFilter === 'books' ? bookResults : listResults;
+  },
+
+  setInitialFilterFromTab: (tabType: SearchFilter) => {
+    set({ activeFilter: tabType });
   }
 }));

@@ -50,7 +50,6 @@ import * as Haptics from "expo-haptics";
 import { TrackingTabBar } from "@/components/book/TrackingTabBar";
 import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
 import ExpandableDescription from "@/components/ExpandableDescription";
-import BadgeSlider from "@/components/BadgeSlider";
 import { useBookDetailStore, BookDetailState } from "@/stores/bookDetailStore";
 import RatingStars from "@/components/ui/RatingStars";
 import { useLocalization } from "@/hooks/useLocalization";
@@ -451,17 +450,23 @@ export default function BookScreen() {
               />
             </View>
           </View>
-          {/* Badge */}
+          {/* Tags */}
           {book?.genres && book?.tags && (
-            <View style={styles.badgeContainer}>
-              <BadgeSlider
-                data={[...(book.genres || []), ...(book.tags || [])]}
-              />
+            <View style={styles.tagsContainer}>
+              {[...(book.genres || []), ...(book.tags || [])].map((tag) => (
+                <Badge
+                  key={tag}
+                  text={tag}
+                  color={colors.badgeText}
+                  backgroundColor={colors.badgeBackground}
+                  borderColor={colors.badgeBorder}
+                />
+              ))}
             </View>
           )}
           {/* Description */}
           {book && getLocalizedDescription(book, isFrench) && (
-            <View>
+            <View style={styles.descriptionContainer}>
               <ExpandableDescription text={getLocalizedDescription(book, isFrench)!} />
             </View>
           )}
@@ -689,7 +694,7 @@ const styles = StyleSheet.create({
   },
   title: {
     marginRight: 32,
-    marginBottom: 4,
+    marginBottom: 12,
   },
   titleTextContainer: {
     flexDirection: "row",
@@ -711,11 +716,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  badgeContainer: {
+  tagsContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    flexWrap: "wrap",
     marginTop: 8,
     gap: 4,
+  },
+  descriptionContainer: {
+    marginTop: 18,
   },
   // Styles for the animated button
   buttonContainer: {
