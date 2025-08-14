@@ -54,11 +54,15 @@ import { useBookDetailStore, BookDetailState } from "@/stores/bookDetailStore";
 import RatingStars from "@/components/ui/RatingStars";
 import { useLocalization } from "@/hooks/useLocalization";
 import { getLocalizedDescription } from "@/utils/description";
+import Transition from 'react-native-screen-transitions'
+
 // Constants for animation
 const HEADER_THRESHOLD = 320; // Threshold for header animation
 
 // Rename ScrollView to AnimatedScrollView for Animated API usage
-const AnimatedScrollView = Animated.createAnimatedComponent(DefaultScrollView);
+// const AnimatedScrollView = Animated.createAnimatedComponent(DefaultScrollView);
+
+const AnimatedScrollView = Transition.ScrollView;
 
 export default function BookScreen() {
   const { id } = useLocalSearchParams();

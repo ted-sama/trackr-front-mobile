@@ -5,7 +5,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import ThemeProvider, { useTheme } from '../contexts/ThemeContext';
 import { BottomSheetProvider , useBottomSheet } from '../contexts/BottomSheetContext';
 import Toast, { BaseToast, ToastConfig } from 'react-native-toast-message';
-import { Stack } from 'expo-router';
+import { Stack } from '../layouts/stack';
 import {
   useFonts,
   Manrope_200ExtraLight,
@@ -124,7 +124,11 @@ function RootLayoutContent() {
       >
         <Stack.Screen name='auth/login' />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name='book/[id]' />
+        <Stack.Screen name='book/[id]' options={{
+          gestureEnabled: true,
+          gestureDirection: ['vertical'],
+          enableTransitions: true,
+        }}/>
         <Stack.Screen 
           name='book/summary' 
           options={{
@@ -133,15 +137,6 @@ function RootLayoutContent() {
             headerShown: false,
           }}
         />
-        <Stack.Screen 
-          name='book/recap' 
-          options={{
-            presentation: 'modal',
-            gestureEnabled: true,
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen name='book/chat' />
         <Stack.Screen name='category-full' />
         <Stack.Screen name='list-full' />
         <Stack.Screen 
