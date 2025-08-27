@@ -42,7 +42,7 @@ const CategorySlider = ({ category, isBottomSheetVisible = false, header = true,
       <LegendList
         data={books.slice(0, 8)}
         keyExtractor={(item, index) => `${item.id}-${index}`}
-        renderItem={({ item }) => <BookCard book={item} onPress={() => router.push({pathname: "/book/[id]", params: {id: item.id}})} onTrackingToggle={onTrackingToggle} />}
+        renderItem={({ item }) => <BookCard book={item} onPress={() => router.push({ pathname: '/book/[id]', params: { id: item.id.toString(), sharedBoundId: `bookCover-${item.id}` } })} onTrackingToggle={onTrackingToggle} />}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.sliderContent}

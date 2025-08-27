@@ -29,7 +29,7 @@ export default function Summary() {
   const { bookById } = useBookDetailStore();
   const { getTrackedBookStatus } = useTrackedBooksStore();
 
-  const bookTracking = getTrackedBookStatus(Number(bookId));
+  const bookTracking = getTrackedBookStatus(bookId as string);
   const bookDetails = bookById[Number(bookId)];
 
   const trackingStatusValues: Record<ReadingStatus, { text: string, icon: React.ReactNode }> = {

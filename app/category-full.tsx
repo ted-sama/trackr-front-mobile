@@ -99,7 +99,7 @@ export default function CategoryFull() {
 
     if (isCurrentlyTracking) {
       try {
-        await removeTrackedBookFromStore(parseInt(bookId, 10));
+        await removeTrackedBookFromStore(bookId);
         Toast.show({
           text1: "Livre retiré de votre bibliothèque",
           type: "info",
@@ -135,7 +135,7 @@ export default function CategoryFull() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={{ flex: 1, backgroundColor: colors.background, borderCurve: 'continuous', borderRadius: 55, overflow: 'hidden' }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedHeader
         title={category?.title || "Catégorie"}

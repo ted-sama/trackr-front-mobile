@@ -26,7 +26,7 @@ export default function Recap() {
   const { bookById, getRecap } = useBookDetailStore();
   const { getTrackedBookStatus } = useTrackedBooksStore();
   const [recap, setRecap] = useState<string>('');
-  const bookTracking = getTrackedBookStatus(Number(bookId));
+  const bookTracking = getTrackedBookStatus(bookId as string);
   const bookDetails = bookById[Number(bookId)];
 
   const trackingStatusValues: Record<ReadingStatus, { text: string, icon: React.ReactNode }> = {

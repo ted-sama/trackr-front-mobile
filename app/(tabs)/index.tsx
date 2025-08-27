@@ -39,7 +39,7 @@ export default function Index() {
           <Text style={[typography.categoryTitle, { color: colors.text, marginBottom: 16 }]}>Dernières lectures</Text>
           <FlatList
             data={lastRead}
-            renderItem={({ item }) => <BookListElement book={item} compact showTrackingStatus onPress={() => {router.push(`/book/${item.id}`)}} />}
+            renderItem={({ item }) => <BookListElement book={item} compact showTrackingStatus onPress={() => {router.push({ pathname: '/book/[id]', params: { id: item.id.toString(), sharedBoundId: `bookCover-${item.id}` } })}} />}
             ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
             scrollEnabled={false}
           />

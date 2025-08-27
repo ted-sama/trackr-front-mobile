@@ -28,6 +28,7 @@ import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import Badge from "./ui/Badge";
+import Transition from "react-native-screen-transitions";
 
 interface BookCardProps {
   book: Book;
@@ -144,7 +145,8 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
         onPress={handlePress}
         onLongPress={handlePresentModalPress}
       >
-        <Animated.View
+        <Transition.View
+          sharedBoundTag={`bookCover-${book.id}`}
           style={[
             styles.mangaCard,
             animatedCardStyle,
@@ -153,7 +155,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
             },
           ]}
         >
-          <View
+          <View 
             style={[
               styles.imageContainer,
               { backgroundColor: colors.card },
@@ -273,7 +275,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
               </View>
             )}
           </View>
-        </Animated.View>
+        </Transition.View>
       </Pressable>
     </>
   );

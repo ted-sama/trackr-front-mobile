@@ -91,7 +91,7 @@ export default function SearchScreen() {
           showAuthor 
           showRating 
           showTrackingButton 
-          onPress={() => router.push(`/book/${item.id}`)} 
+          onPress={() => router.push({ pathname: '/book/[id]', params: { id: (item as Book).id.toString(), sharedBoundId: `bookCover-${(item as Book).id}` } })} 
         />
       );
     } else {

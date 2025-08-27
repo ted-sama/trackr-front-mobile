@@ -95,10 +95,10 @@ export default function MyLibrary() {
         renderItem={({ item }) =>
           currentLayout === 'grid' ? (
             <View style={{ width: '33%' }}>
-              <BookCard book={item} onPress={() => { router.push(`/book/${item.id}`); }} size="compact" showAuthor={false} showTrackingStatus={true} showTrackingButton={false} showRating={false} />
+              <BookCard book={item} onPress={() => { router.push({ pathname: '/book/[id]', params: { id: item.id.toString(), sharedBoundId: `bookCover-${item.id}` } }); }} size="compact" showAuthor={false} showTrackingStatus={true} showTrackingButton={false} showRating={false} />
             </View>
           ) : (
-            <BookListElement book={item} onPress={() => { router.push(`/book/${item.id}`); }} showAuthor={false} showTrackingStatus={true} showTrackingButton={false} showRating={false} />
+            <BookListElement book={item} onPress={() => { router.push({ pathname: '/book/[id]', params: { id: item.id.toString(), sharedBoundId: `bookCover-${item.id}` } }); }} showAuthor={false} showTrackingStatus={true} showTrackingButton={false} showRating={false} />
           )
         }
         ItemSeparatorComponent={currentLayout === 'grid' ? () => <View style={{ height: 26 }} /> : () => <View style={{ height: 12 }} />}

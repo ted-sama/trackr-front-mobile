@@ -13,6 +13,7 @@ import Badge from "./ui/Badge";
 import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Ellipsis } from "lucide-react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Transition from "react-native-screen-transitions";
 
 interface BookListElementProps {
   book: Book;
@@ -68,7 +69,9 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
           style={styles.container}
         >
           <View style={styles.detailsGroup}>
-            <Image source={book.coverImage} style={[styles.image, compact && styles.imageCompact]} />
+            <Transition.View sharedBoundTag={`bookCover-${book.id}`} style={[styles.image, compact && styles.imageCompact]}>
+              <Image source={book.coverImage} style={[styles.image, compact && styles.imageCompact]} />
+            </Transition.View>
           <View style={[styles.infoContainer, compact && styles.infoContainerCompact]}>
             {rank && (
               <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: compact ? 2 : 4 }]}>

@@ -23,6 +23,7 @@ import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { useUserStore } from '@/stores/userStore';
 import BookActionsBottomSheet from '@/components/BookActionsBottomSheet';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+import Transition from 'react-native-screen-transitions';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -125,9 +126,11 @@ function RootLayoutContent() {
         <Stack.Screen name='auth/login' />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name='book/[id]' options={{
+          ...Transition.presets.DraggableCard(),
+          gestureDirection: ['vertical', 'horizontal'],
+          gestureResponseDistance: 80,
           gestureEnabled: true,
-          gestureDirection: ['vertical'],
-          enableTransitions: true,
+          contentStyle: { backgroundColor: 'transparent' },
         }}/>
         <Stack.Screen 
           name='book/summary' 

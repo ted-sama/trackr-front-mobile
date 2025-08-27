@@ -27,7 +27,6 @@ import Animated, {
   withTiming,
   Easing,
   withSpring,
-  useAnimatedScrollHandler,
   interpolate,
   Extrapolate,
   FadeIn,
@@ -65,7 +64,7 @@ const HEADER_THRESHOLD = 320; // Threshold for header animation
 const AnimatedScrollView = Transition.ScrollView;
 
 export default function BookScreen() {
-  const { id } = useLocalSearchParams();
+  const { id, sharedBoundId } = useLocalSearchParams<{ id: string, sharedBoundId: string }>();
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const [bottomSheetView, setBottomSheetView] = useState<
@@ -189,12 +188,11 @@ export default function BookScreen() {
     };
   });
 
-  // Scroll handler to update scrollY
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
-    },
-  });
+  // Provide a worklet onScroll for Transition.ScrollView to call inside its own handler
+  const transitionOnScroll = (event: any) => {
+    "worklet";
+    scrollY.value = event.contentOffset.y;
+  };
 
   const typeMap = {
     manga: "Manga",
@@ -236,7 +234,7 @@ export default function BookScreen() {
     if (id) {
         fetchBook(id as string);
     }
-}, [id, fetchBook]);
+  }, [id, fetchBook]);
 
 
   if (error) {
@@ -349,7 +347,7 @@ export default function BookScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.container, { backgroundColor: colors.background, borderCurve: 'continuous', borderRadius: 55, overflow: 'hidden' }]}
       edges={["right", "left"]}
     >
       {/* Bottom Sheet Modal */}
@@ -371,11 +369,11 @@ export default function BookScreen() {
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedScrollView
         contentContainerStyle={{ paddingHorizontal: 16 }}
-        onScroll={scrollHandler}
+        onScroll={transitionOnScroll}
         scrollEventThrottle={16}
       >
         <View style={styles.shadowContainer}>
-          <View style={styles.imageContainer}>
+          <Transition.View sharedBoundTag={sharedBoundId} style={styles.imageContainer}>
             {isLoading ? (
               <SkeletonLoader width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
             ) : (
@@ -384,7 +382,7 @@ export default function BookScreen() {
                 style={styles.imageContent}
               />
             )}
-          </View>
+          </Transition.View>
         </View>
         <View style={styles.detailsContainer}>
           {/* Title, author, type, dates and tracking button */}
@@ -599,29 +597,6 @@ export default function BookScreen() {
               { bottom: 0, height: insets.bottom + 16 + 40 },
             ]}
           >
-            <MaskedView
-              style={StyleSheet.absoluteFillObject}
-              maskElement={
-                <LinearGradient
-                  start={{ x: 0, y: 1 }}
-                  end={{ x: 0, y: 0 }}
-                  colors={["#fff", "transparent"]}
-                  style={StyleSheet.absoluteFillObject}
-                />
-              }
-            >
-              <BlurView
-                intensity={100}
-                tint={currentTheme === "dark" ? "dark" : "light"}
-                style={StyleSheet.absoluteFillObject}
-              />
-              <View
-                style={[
-                  StyleSheet.absoluteFillObject,
-                  { backgroundColor: "rgba(0,0,0,0.6)" },
-                ]}
-              />
-            </MaskedView>
           </View>
 
           <Animated.View
