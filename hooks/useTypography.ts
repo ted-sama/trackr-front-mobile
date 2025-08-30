@@ -28,7 +28,7 @@ export function useTypography(): Typography {
     },
     h1: {
       fontFamily: 'Manrope_700Bold',
-      fontSize: 24,
+      fontSize: 20,
       lineHeight: 30,
       letterSpacing: -0.3,
     },

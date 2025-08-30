@@ -47,7 +47,7 @@ export function HeaderCollection({
           paddingTop: insets.top,
           height: 72 + insets.top,
           backgroundColor: colors.background,
-          borderBottomColor: colors.tabBarBorder,
+          borderBottomColor: colors.border,
         },
       ]}
     >

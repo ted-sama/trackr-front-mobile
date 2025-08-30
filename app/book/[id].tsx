@@ -43,7 +43,7 @@ import Badge from "@/components/ui/Badge";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
-import { Ellipsis, Minus, Plus, ChartPie } from "lucide-react-native";
+import { Ellipsis, Minus, Plus, ChartPie, Sparkles } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 import * as Haptics from "expo-haptics";
@@ -70,12 +70,18 @@ export default function BookScreen() {
   const book = useBookDetailStore(
     (state: BookDetailState) => state.bookById[id as string] || null
   );
+  const booksBySameAuthor = useBookDetailStore(
+    (state: BookDetailState) => state.booksBySameAuthor[id as string] || null
+  );
   const isLoading = useBookDetailStore(
     (state: BookDetailState) => state.isLoading
   );
   const error = useBookDetailStore((state: BookDetailState) => state.error);
   const fetchBook = useBookDetailStore(
     (state: BookDetailState) => state.fetchBook
+  );
+  const fetchBooksBySameAuthor = useBookDetailStore(
+    (state: BookDetailState) => state.fetchBooksBySameAuthor
   );
   const typography = useTypography();
   const insets = useSafeAreaInsets();
@@ -231,6 +237,7 @@ export default function BookScreen() {
   useEffect(() => {
     if (id) {
         fetchBook(id as string);
+        fetchBooksBySameAuthor(id as string);
     }
 }, [id, fetchBook]);
 
@@ -308,6 +315,38 @@ export default function BookScreen() {
           text1: "Erreur",
           text2: `Impossible d'ajouter le livre.`,
         });
+      }
+    }
+  };
+  
+  const onTrackingToggleInSuggestions = async (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => {
+    if (!bookObject) {
+      console.warn("Book object is missing in onTrackingToggleInSuggestions");
+      Toast.show({ type: 'error', text1: 'Erreur de suivi', text2: 'Données du livre manquantes.' });
+      return;
+    }
+
+    if (isCurrentlyTracking) {
+      try {
+        await removeTrackedBookFromStore(bookId);
+        Toast.show({
+          text1: 'Livre retiré de votre bibliothèque',
+          type: 'info',
+        });
+      } catch (err) {
+        console.warn(`Failed to remove book ${bookId} from tracking:`, err);
+        Toast.show({ type: 'error', text1: 'Erreur', text2: 'Impossible de retirer le livre.'});
+      }
+    } else {
+      try {
+        await addTrackedBookToStore(bookObject);
+        Toast.show({
+          text1: 'Livre ajouté à votre bibliothèque',
+          type: 'info',
+        });
+      } catch (err) {
+        console.warn(`Failed to add book ${bookId} to tracking:`, err);
+        Toast.show({ type: 'error', text1: 'Erreur', text2: `Impossible d'ajouter le livre.` });
       }
     }
   };
@@ -467,6 +506,14 @@ export default function BookScreen() {
           {/* Description */}
           {book && getLocalizedDescription(book, isFrench) && (
             <View style={styles.descriptionContainer}>
+              {isFrench && (
+                <View style={{ flex: 1, marginBottom: 6, flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <Sparkles size={16} fill={colors.secondaryText} color={colors.secondaryText} />
+                  <Text style={[typography.caption, { color: colors.secondaryText }]}>
+                    Traduit par IA
+                  </Text> 
+                </View>
+              )}
               <ExpandableDescription text={getLocalizedDescription(book, isFrench)!} />
             </View>
           )}
@@ -568,16 +615,34 @@ export default function BookScreen() {
               { borderColor: colors.border },
             ]}
           >
-            <Text style={[typography.categoryTitle, { color: colors.text }]}>
-              Les utilisateurs suivent aussi
-            </Text>
-            {dummyRecommendations && (
-              <View style={{ marginHorizontal: -16 }}>
-                <CategorySlider
-                  category={dummyRecommendations}
-                  isBottomSheetVisible={false}
-                  header={false}
-                />
+            {booksBySameAuthor && booksBySameAuthor.books.length > 0 && (
+            <View>
+              <Text style={[typography.categoryTitle, { color: colors.text }]}>
+                Livres par le même auteur
+              </Text>
+                <View style={{ marginHorizontal: -16 }}>
+                  <CategorySlider
+                    category={booksBySameAuthor}
+                    isBottomSheetVisible={false}
+                    header={false}
+                    onTrackingToggle={onTrackingToggleInSuggestions}
+                  />
+                </View>
+              </View>
+            )}
+            {dummyRecommendations && dummyRecommendations.books.length > 0 && (
+            <View>
+              <Text style={[typography.categoryTitle, { color: colors.text }]}>
+                Les utilisateurs suivent aussi
+              </Text>
+                <View style={{ marginHorizontal: -16 }}>
+                  <CategorySlider
+                    category={dummyRecommendations}
+                    isBottomSheetVisible={false}
+                    header={false}
+                    onTrackingToggle={onTrackingToggleInSuggestions}
+                  />
+                </View>
               </View>
             )}
           </View>
@@ -629,13 +694,6 @@ export default function BookScreen() {
               currentChapter={bookTracking.currentChapter}
               onManagePress={() => handlePresentChapterModalPress()}
               onStatusPress={() => handlePresentModalPress("status_editor")}
-              onRecapPress={() => router.push({
-                pathname: '/book/recap',
-                params: {
-                  bookId: book?.id.toString(),
-                  bookTitle: book?.title
-                }
-              })}
             />  
           </Animated.View>
         </>
@@ -723,7 +781,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   descriptionContainer: {
-    marginTop: 18,
+    marginTop: 24,
   },
   // Styles for the animated button
   buttonContainer: {

@@ -2,25 +2,16 @@ import React from "react";
 import { View, Text, Pressable, StyleSheet, useWindowDimensions, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withRepeat, 
-  withTiming, 
-  interpolate,
-  Easing 
-} from 'react-native-reanimated';
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { ReadingStatus } from "@/types/reading-status";
-import { Clock3, BookOpenIcon, BookCheck, Pause, Square, BookMarked, ClockFading } from "lucide-react-native";
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square, BookMarked } from "lucide-react-native";
 
 interface TrackingTabBarProps {
   status: string;
   currentChapter?: number | null;
   onManagePress: () => void;
   onStatusPress: () => void;
-  onRecapPress?: () => void;
 }
 
 export function TrackingTabBar({
@@ -28,38 +19,11 @@ export function TrackingTabBar({
   currentChapter,
   onManagePress,
   onStatusPress,
-  onRecapPress,
 }: TrackingTabBarProps) {
   const { width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const typography = useTypography();
-  
-  // Animation for AI button glow effect
-  const glowAnimation = useSharedValue(0);
-  
-  React.useEffect(() => {
-    glowAnimation.value = withRepeat(
-      withTiming(1, {
-        duration: 4000,
-        easing: Easing.inOut(Easing.sin),
-      }),
-      -1,
-      true
-    );
-  }, []);
-
-  const animatedGlowStyle = useAnimatedStyle(() => {
-    const shadowOpacity = interpolate(glowAnimation.value, [0, 1], [0, 0.5]);
-    const shadowRadius = interpolate(glowAnimation.value, [0, 1], [4, 8]);
-    const scale = interpolate(glowAnimation.value, [0, 1], [1, 1.005]);
-    
-    return {
-      shadowOpacity,
-      shadowRadius,
-      transform: [{ scale }],
-    };
-  });
 
   const trackingStatusValues: Record<ReadingStatus, { text: string, icon: React.ReactNode }> = {
     'plan_to_read': { text: 'À lire', icon: <Clock3 size={20} strokeWidth={2.75} color={colors.planToRead} /> },
@@ -76,6 +40,7 @@ export function TrackingTabBar({
           {
             width: screenWidth * 0.94,
             height: 64,
+            borderCurve: "continuous",
             borderRadius: 50,
             borderWidth: 1,
             borderColor: colors.border,
@@ -111,33 +76,6 @@ export function TrackingTabBar({
             </View>
           </Pressable>
           <View style={styles.manageButtonContainer}>
-            {onRecapPress && (
-              <Animated.View
-              style={[
-                styles.aiButtonWrapper,
-                animatedGlowStyle,
-                {
-                  shadowColor: colors.primary,
-                }
-              ]}
-            >
-              <Pressable
-                style={({ pressed }) => [
-                  styles.manageButton, 
-                  styles.aiButton,
-                  { 
-                    backgroundColor: colors.actionButton, 
-                    opacity: pressed ? 0.8 : 1 
-                  }
-                ]}
-                onPress={onRecapPress}
-                accessibilityRole="button"
-                accessibilityLabel="Recap"
-              >
-                <ClockFading size={20} strokeWidth={2.5} color={colors.text} />
-              </Pressable>
-            </Animated.View>
-            )}
             <Pressable
               style={({ pressed }) => [styles.manageButton, { backgroundColor: colors.primary, opacity: pressed ? 0.8 : 1 }]}
               onPress={onManagePress}

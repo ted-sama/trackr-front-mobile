@@ -95,7 +95,6 @@ export default function ExpandableDescription({
 
 const styles = StyleSheet.create({
   descriptionContainer: {
-    marginTop: 16,
     position: "relative",
   },
   fadeOverlay: {

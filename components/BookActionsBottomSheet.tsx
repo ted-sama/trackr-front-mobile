@@ -204,6 +204,8 @@ const BookActionsBottomSheet = forwardRef<
       if (onDismiss) {
         onDismiss();
       }
+      // @ts-expect-error bottom sheet ref
+      ref?.current?.dismiss();
     };
 
     const handleCreateList = async () => {
@@ -380,6 +382,7 @@ const BookActionsBottomSheet = forwardRef<
         onDismiss={handleDismiss}
         backgroundStyle={{
           backgroundColor: colors.background,
+          borderCurve: "continuous",
           borderRadius: 30,
         }}
         handleComponent={null}

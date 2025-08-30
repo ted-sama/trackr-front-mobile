@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import HeaderDiscover from '@/components/discover/HeaderDiscover';
@@ -22,8 +22,7 @@ export default function SearchScreen() {
     activeFilter,
     isLoading, 
     isLoadingMore, 
-    error, 
-    totalResults,
+    error,
     setSearchQuery, 
     setActiveFilter,
     search, 
@@ -115,31 +114,13 @@ export default function SearchScreen() {
         activeFilter={activeFilter}
         onFilterChange={handleFilterChange}
       />
-      
-      {/* Statistiques de recherche */}
-      {hasResults && (
-        <View style={styles.statsContainer}>
-          <Text style={[typography.caption, { color: colors.secondaryText }]}>
-            {totalResults} résultat{totalResults > 1 ? 's' : ''} trouvé{totalResults > 1 ? 's' : ''}
-          </Text>
-        </View>
-      )}
 
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       {isLoading && !hasResults && !error ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
-        <MaskedView
-          style={styles.maskedView}
-          maskElement={
-            <LinearGradient
-              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,1)']}
-              locations={[0, 0.02, 0.08]}
-              style={styles.maskGradient}
-            />
-          }
-        >
           <LegendList
             data={currentResults}
             renderItem={renderItem}
@@ -147,7 +128,7 @@ export default function SearchScreen() {
             contentContainerStyle={styles.listContainer}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
-                <Text style={[styles.emptyText, { color: colors.text }]}>
+                <Text style={[typography.body, { color: colors.text }]}>
                   {error ? error : (searchQuery.trim() ? "Aucun résultat trouvé" : "Commencez votre recherche en tapant ci-dessus.")}
                 </Text>
               </View>
@@ -161,8 +142,8 @@ export default function SearchScreen() {
               </View>
             ) : null}
           />
-        </MaskedView>
-      )}
+        )}
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 }

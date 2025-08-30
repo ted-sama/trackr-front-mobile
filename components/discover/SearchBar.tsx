@@ -94,8 +94,6 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: '100%',
-    fontSize: 14,
-    fontWeight: '400',
     paddingVertical: Platform.OS === 'android' ? 8 : 0,
   },
   clearButton: {

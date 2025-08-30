@@ -73,6 +73,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
             onDismiss={handleDismiss}
             backgroundStyle={{
                 backgroundColor: colors.background,
+                borderCurve: "continuous",
                 borderRadius: 30,
             }}
             handleComponent={null}

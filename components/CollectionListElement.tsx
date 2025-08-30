@@ -176,7 +176,7 @@ export default function CollectionListElement({
               <Text
                 style={[typography.caption, { color: colors.secondaryText }]}
               >
-                {list.isPublic ? "Public" : "Privé"}
+                {list.isPublic ? "Publique" : "Privée"}
               </Text>
             </View>
           )}

@@ -244,6 +244,10 @@ export default function ListOrder() {
             onDragEnd={handleDragEnd}
             showDragHandle={true}
             showPosition={true}
+            contentContainerStyle={{
+              overflow: "visible",
+              marginHorizontal: 16,
+            }}
           />
         </View>
       </View>
@@ -257,6 +261,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    overflow: "visible",
     padding: 16,
     paddingTop: 24,
   },
@@ -283,6 +288,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   listContainer: {
+    marginHorizontal: -16,
     flex: 1,
   },
   header: {

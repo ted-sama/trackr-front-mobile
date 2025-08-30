@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
+import * as Haptics from "expo-haptics";
 import {
   View,
   Text,
@@ -40,6 +41,9 @@ import BadgeSlider from "@/components/BadgeSlider";
 import { useListStore } from "@/stores/listStore";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { Ionicons } from "@expo/vector-icons";
+import { Ellipsis } from "lucide-react-native";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import ListActionsBottomSheet from "@/components/ListActionsBottomSheet";
 
 // AsyncStorage key for layout preference
 const LAYOUT_STORAGE_KEY = "@MyApp:layoutPreference";
@@ -60,6 +64,7 @@ export default function ListFull() {
   });
   const [titleY, setTitleY] = useState<number>(0);
   const scrollRef = useRef<FlatList<Book> | null>(null);
+  const listActionsBottomSheetRef = useRef<BottomSheetModal>(null);
   const [currentLayout, setCurrentLayout] = useState<"grid" | "list">(
     DEFAULT_LAYOUT as "grid" | "list"
   );
@@ -197,6 +202,11 @@ export default function ListFull() {
     setCurrentLayout(currentLayout === "grid" ? "list" : "grid");
   };
 
+  const handlePresentModalPress = useCallback((view: "actions") => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    listActionsBottomSheetRef.current?.present();
+  }, []);
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
@@ -297,14 +307,15 @@ export default function ListFull() {
                           styles.actionButton,
                           { backgroundColor: colors.card, borderColor: colors.border }
                         ]}
-                        onPress={() =>
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           router.push({
                             pathname: "/list-order",
                             params: {
                               listId: list.id.toString(),
                             },
                           })
-                        }
+                        }}
                         onPressIn={handlePressInOrder}
                         onPressOut={handlePressOutOrder}
                       >
@@ -331,14 +342,15 @@ export default function ListFull() {
                           styles.actionButton,
                           { backgroundColor: colors.card, borderColor: colors.border }
                         ]}
-                        onPress={() =>
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           router.push({
                             pathname: "/list-edit",
                             params: {
                               listId: list.id.toString(),
                             },
                           })
-                        }
+                        }}
                         onPressIn={handlePressInEdit}
                         onPressOut={handlePressOutEdit}
                       >
@@ -365,7 +377,10 @@ export default function ListFull() {
                           styles.actionButton,
                           { backgroundColor: colors.card, borderColor: colors.error }
                         ]}
-                        onPress={handleDeleteList}
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          handleDeleteList();
+                        }}
                         onPressIn={handlePressInDelete}
                         onPressOut={handlePressOutDelete}
                       >
@@ -403,10 +418,15 @@ export default function ListFull() {
                 >
                   {list.name}
                 </Text>
-                <SwitchLayoutButton
-                  onPress={switchLayout}
-                  currentView={currentLayout}
-                />
+                <View style={styles.actionsContainer}>
+                  <Pressable onPress={() => handlePresentModalPress("actions")}>
+                    <Ellipsis size={32} color={colors.icon} strokeWidth={2} />
+                  </Pressable>
+                  <SwitchLayoutButton
+                    onPress={switchLayout}
+                    currentView={currentLayout}
+                  />
+                </View>
               </View>
               {list.description && (
                 <View style={{ marginBottom: 32 }}>
@@ -478,6 +498,14 @@ export default function ListFull() {
           accessibilityRole="list"
         />
       )}
+      {list && (
+        <ListActionsBottomSheet
+          ref={listActionsBottomSheetRef}
+          list={list}
+          index={0}
+          backdropDismiss
+        />
+      )}
     </View>
   );
 }
@@ -501,16 +529,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
   },
   actionButtonText: {
     fontWeight: '500',
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
 });
