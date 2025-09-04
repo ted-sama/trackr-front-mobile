@@ -4,6 +4,7 @@ export interface User {
     email: string;
     avatar?: string;
     role?: string;
+    plan?: "free" | "plus";
     preferences?: {
         [key: string]: any;
     };

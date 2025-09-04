@@ -262,7 +262,7 @@ export default function ListFull() {
                     style={{
                       width: "100%",
                       height: "100%",
-                      backgroundColor: colors.accent,
+                      backgroundColor: list.backdropColor || colors.accent,
                     }}
                   />
                 )}

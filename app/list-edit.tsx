@@ -24,16 +24,17 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import { useListStore } from "@/stores/listStore";
+import { useUserStore } from "@/stores/userStore";
 import Button from "@/components/ui/Button";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import Badge from "@/components/ui/Badge";
-import { X, Plus, Check, Globe, Lock, Trophy, Users } from "lucide-react-native";
+import { X, Plus, Check, Globe, Lock, Trophy, Users, Palette, Camera } from "lucide-react-native";
 import Toast from "react-native-toast-message";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
-import { Camera } from "lucide-react-native";
+
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
@@ -52,6 +53,21 @@ export default function ListEdit() {
   const fetchList = useListStore((state) => state.fetchList);
   const isLoading = useListStore((state) => state.isLoading);
   const updateBackdropImage = useListStore((state) => state.updateBackdropImage);
+  const currentUser = useUserStore((state) => state.currentUser);
+  const isPlus = currentUser?.plan === "plus";
+
+  const presetColors = [
+    "#7C3AED", // violet
+    "#3B82F6", // blue
+    "#10B981", // green
+    "#EF4444", // red
+    "#F59E0B", // amber
+    "#8B5CF6", // purple
+    "#EC4899", // pink
+    "#06B6D4", // cyan
+    "#0EA5E9", // sky
+    "#F97316", // orange
+  ];
 
   // Form state
   const [name, setName] = useState("");
@@ -62,6 +78,8 @@ export default function ListEdit() {
   const [ranked, setRanked] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [selectedImage, setSelectedImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [backdropMode, setBackdropMode] = useState<"color" | "image">("color");
+  const [backdropColor, setBackdropColor] = useState<string | null>(null);
 
   // Load list data
   useEffect(() => {
@@ -78,6 +96,8 @@ export default function ListEdit() {
       setTags(list.tags || []);
       setIsPublic(list.isPublic || false);
       setRanked(list.ranked || false);
+      setBackdropColor(list.backdropColor || null);
+      setBackdropMode(list.backdropImage ? "image" : "color");
     }
   }, [list]);
 
@@ -91,9 +111,13 @@ export default function ListEdit() {
         JSON.stringify((list.tags || []).sort());
       const isPublicChanged = isPublic !== (list.isPublic || false);
       const rankedChanged = ranked !== (list.ranked || false);
-      setHasChanges(nameChanged || descriptionChanged || tagsChanged || isPublicChanged || rankedChanged || !!selectedImage);
+      const backdropColorChanged = (backdropColor || null) !== (list.backdropColor || null);
+      const modeChanged = (backdropMode === "image") !== !!list.backdropImage;
+      setHasChanges(
+        nameChanged || descriptionChanged || tagsChanged || isPublicChanged || rankedChanged || backdropColorChanged || modeChanged || !!selectedImage
+      );
     }
-  }, [name, description, tags, isPublic, ranked, list, selectedImage]);
+  }, [name, description, tags, isPublic, ranked, list, selectedImage, backdropColor, backdropMode]);
 
   const handleBack = () => {
     if (hasChanges) {
@@ -115,16 +139,25 @@ export default function ListEdit() {
   };
 
   const handlePickImage = async () => {
+    if (!isPlus) {
+      Toast.show({
+        type: "info",
+        text1: "Réservé au plan Plus",
+        text2: "L'illustration de bannière est disponible avec le plan Plus.",
+      });
+      return;
+    }
     Haptics.selectionAsync();
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [3, 2], // Ratio ajusté pour correspondre à la bannière (275px height, ~412px width)
+      aspect: [3, 2],
       quality: 0.8,
     });
 
     if (!result.canceled) {
       setSelectedImage(result.assets[0]);
+      setBackdropMode("image");
     }
   };
 
@@ -155,17 +188,33 @@ export default function ListEdit() {
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-      if(selectedImage) {
-        await updateBackdropImage(listId, selectedImage);
+      // Backdrop handling
+      if (backdropMode === "image") {
+        if (!isPlus) {
+          Toast.show({
+            type: "info",
+            text1: "Réservé au plan Plus",
+            text2: "L'illustration de bannière est disponible avec le plan Plus.",
+          });
+        } else if (selectedImage) {
+          await updateBackdropImage(listId, selectedImage);
+        }
       }
 
-      await updateList(listId, {
+      const payload: any = {
         name: name.trim(),
         description: description.trim() || null,
         tags: tags.length > 0 ? tags : null,
         isPublic: isPublic,
         ranked: ranked,
-      });
+      };
+
+      if (backdropMode === "color") {
+        payload.backdropImage = null;
+        payload.backdropColor = backdropColor || null;
+      }
+
+      await updateList(listId, payload);
 
       Toast.show({
         type: "success",
@@ -191,6 +240,9 @@ export default function ListEdit() {
       setTags(list.tags || []);
       setIsPublic(list.isPublic || false);
       setRanked(list.ranked || false);
+      setBackdropColor(list.backdropColor || null);
+      setBackdropMode(list.backdropImage ? "image" : "color");
+      setSelectedImage(null);
     }
   };
 
@@ -252,26 +304,106 @@ export default function ListEdit() {
           contentContainerStyle={[styles.scrollContent, { paddingBottom: 120}]}
           showsVerticalScrollIndicator={false}
         >
-          {/* Backdrop Image */}
-          <TouchableOpacity onPress={handlePickImage} activeOpacity={0.8}>
+          {/* Backdrop Mode Toggle */}
+          <View style={styles.modeToggleRow}>
+            <TouchableOpacity
+              style={[
+                styles.modeToggleButton,
+                { backgroundColor: colors.card, borderColor: colors.border },
+                backdropMode === "color" && { borderColor: colors.primary },
+              ]}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setBackdropMode("color");
+              }}
+              activeOpacity={0.7}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Palette size={18} color={colors.text} />
+                <Text style={[typography.body, styles.modeToggleText, { color: colors.text }]}>Couleur</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.modeToggleButton,
+                { backgroundColor: colors.card, borderColor: colors.border, opacity: isPlus ? 1 : 0.6 },
+                backdropMode === "image" && { borderColor: isPlus ? colors.primary : colors.border },
+              ]}
+              onPress={() => {
+                if (!isPlus) {
+                  Toast.show({
+                    type: "info",
+                    text1: "Réservé au plan Plus",
+                    text2: "L'illustration de bannière est disponible avec le plan Plus.",
+                  });
+                  return;
+                }
+                Haptics.selectionAsync();
+                setBackdropMode("image");
+              }}
+              activeOpacity={0.7}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Camera size={18} color={colors.text} />
+                <Text style={[typography.body, styles.modeToggleText, { color: colors.text }]}>Illustration</Text>
+                {!isPlus && <Lock size={16} color={colors.secondaryText} />}
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* Backdrop Preview */}
+          {backdropMode === "image" ? (
+            <TouchableOpacity onPress={handlePickImage} activeOpacity={0.8}>
               <ImageBackground
                 source={{ uri: selectedImage?.uri || list.backdropImage || undefined }}
                 style={[styles.backdrop, { backgroundColor: colors.card }]}
                 imageStyle={{ borderRadius: 16 }}
               >
                 <LinearGradient
-                  colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.5)']}
+                  colors={["rgba(0,0,0,0.5)", "rgba(0,0,0,0.1)", "rgba(0,0,0,0.5)"]}
                   style={styles.backdropOverlay}
                 >
                   <View style={styles.cameraIconContainer}>
                     <Camera size={24} color="white" />
-                    <Text style={[typography.body, styles.cameraText]}>
-                      Changer la bannière
-                    </Text>
+                    <Text style={[typography.body, styles.cameraText]}>Changer la bannière</Text>
                   </View>
                 </LinearGradient>
               </ImageBackground>
             </TouchableOpacity>
+          ) : (
+            <View style={[styles.backdrop, { backgroundColor: backdropColor || list.backdropColor || "#7C3AED" }] }>
+              <LinearGradient
+                colors={["rgba(0,0,0,0.5)", "rgba(0,0,0,0.1)", "rgba(0,0,0,0.5)"]}
+                style={styles.backdropOverlay}
+              >
+                <View style={styles.cameraIconContainer}>
+                  <Palette size={24} color="white" />
+                  <Text style={[typography.body, styles.cameraText]}>Choisir une couleur</Text>
+                </View>
+              </LinearGradient>
+            </View>
+          )}
+
+          {/* Color Swatches */}
+          {backdropMode === "color" && (
+            <View style={styles.swatchesContainer}>
+              {presetColors.map((c) => (
+                <TouchableOpacity
+                  key={c}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setBackdropColor(c);
+                  }}
+                  activeOpacity={0.8}
+                  style={[
+                    styles.swatch,
+                    { backgroundColor: c, borderColor: (backdropColor || list.backdropColor || "#7C3AED") === c ? colors.primary : "transparent" },
+                  ]}
+                />
+              ))}
+            </View>
+          )}
 
             {/* Name Field */}
             <View style={styles.fieldContainer}>
@@ -647,5 +779,34 @@ const styles = StyleSheet.create({
     color: 'white',
     marginLeft: 8,
     fontWeight: '600',
+  },
+  modeToggleRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 12,
+  },
+  modeToggleButton: {
+    flex: 1,
+    height: 44,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    justifyContent: "center",
+  },
+  modeToggleText: {
+    fontWeight: "600",
+  },
+  swatchesContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: -8,
+    marginBottom: 16,
+  },
+  swatch: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
   },
 });

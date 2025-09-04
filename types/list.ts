@@ -6,6 +6,7 @@ export interface List {
   name: string;
   description?: string | null;
   backdropImage?: string | null;
+  backdropColor?: string | null;
   tags?: string[] | null;
   owner: User;
   isPublic: boolean;
