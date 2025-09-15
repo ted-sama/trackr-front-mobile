@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet, FlatList, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -8,13 +8,15 @@ import { router } from "expo-router";
 import { useUserStore } from "@/stores/userStore";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import BookListElement from "@/components/BookListElement";
+import CategorySlider from "@/components/CategorySlider";
+import { useCategoryStore } from "@/stores/categoryStore";
 
 export default function Index() {
   const { currentUser } = useUserStore();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const { getTrackedBooks } = useTrackedBooksStore();
-
+  const { homeSections, fetchMostTracked, fetchTopRated } = useCategoryStore();
   const lastRead = getTrackedBooks().filter(book => book.trackingStatus?.currentChapter && book.trackingStatus?.lastReadAt !== null).sort((a, b) => {
     if (a.trackingStatus?.lastReadAt && b.trackingStatus?.lastReadAt) {
       return new Date(b.trackingStatus.lastReadAt).getTime() - new Date(a.trackingStatus.lastReadAt).getTime();
@@ -22,11 +24,19 @@ export default function Index() {
     return 0;
   }).slice(0, 3);
 
+  useEffect(() => {
+    fetchMostTracked();
+    fetchTopRated();
+  }, []);
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+      <ScrollView
+        style={{ flex: 1 }}
+      >
       <View style={styles.content}>
         <Text
           style={[styles.welcomeText, typography.h1, { color: colors.text }]}
@@ -44,7 +54,18 @@ export default function Index() {
             scrollEnabled={false}
           />
         </View>
-      </View>
+        <View style={{ marginHorizontal: -16 }}>
+          {homeSections['most-tracked'] && (
+            <CategorySlider category={homeSections['most-tracked']} />
+          )}
+        </View>
+        <View style={{ marginHorizontal: -16 }}>
+          {homeSections['top-rated'] && (
+              <CategorySlider category={homeSections['top-rated']} />
+          )}
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -62,5 +83,6 @@ const styles = StyleSheet.create({
   },
   lastReadContainer: {
     flexDirection: "column",
+    marginBottom: 20,
   }
 });

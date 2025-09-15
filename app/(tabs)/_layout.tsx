@@ -1,15 +1,20 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext'; // Ajustement du chemin
 import { Library, Settings } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
   const { colors, currentTheme } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
+      safeAreaInsets={{
+        bottom: Platform.OS === "android" ? 10 : insets.bottom
+      }}
       screenOptions={{
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: currentTheme === 'dark' ? '#888' : '#999',

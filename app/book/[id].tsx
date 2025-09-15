@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { getPalette } from "@somesoap/react-native-image-palette";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Book } from "@/types/book";
 import { Category } from "@/types/category";
@@ -64,6 +65,7 @@ export default function BookScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
+  const [dominantColor, setDominantColor] = useState<string | null>(null);
   const [bottomSheetView, setBottomSheetView] = useState<
     "actions" | "status_editor" | "rating_editor"
   >("actions");
@@ -129,6 +131,15 @@ export default function BookScreen() {
     return {
       opacity: listsOpacity.value,
       transform: [{ scale: listsScale.value }],
+    };
+  });
+
+  // Gradient opacity animation
+  const gradientOpacity = useSharedValue(0);
+  
+  const gradientAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: gradientOpacity.value,
     };
   });
 
@@ -240,6 +251,30 @@ export default function BookScreen() {
         fetchBooksBySameAuthor(id as string);
     }
 }, [id, fetchBook]);
+
+
+  useEffect(() => {
+    if (book?.coverImage) {
+      getPalette(book.coverImage).then(palette => setDominantColor(palette.vibrant));
+    }
+  }, [book?.coverImage]);
+
+  useEffect(() => {
+    console.log("dominantColor", dominantColor);
+  }, [dominantColor])
+
+  // Compute gradient color and height
+  const gradientTopColor = (() => {
+    return dominantColor;
+  })();
+  const gradientHeight = 120 + IMAGE_HEIGHT * 0.5;
+
+  // Animate gradient opacity when gradient color is available
+  useEffect(() => {
+    if (gradientTopColor) {
+      gradientOpacity.value = withTiming(0.45, { duration: 100 });
+    }
+  }, [gradientTopColor]);
 
 
   if (error) {
@@ -409,6 +444,18 @@ export default function BookScreen() {
         onScroll={scrollHandler}
         scrollEventThrottle={16}
       >
+        {gradientTopColor && (
+        <Animated.View
+          style={[styles.topGradient, { height: gradientHeight }, gradientAnimatedStyle]}
+        >
+          <LinearGradient
+            colors={[gradientTopColor, colors.background]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+        </Animated.View>
+      )}
         <View style={styles.shadowContainer}>
           <View style={styles.imageContainer}>
             {isLoading ? (
@@ -702,6 +749,7 @@ export default function BookScreen() {
       {/* Custom animated header */}
       <AnimatedHeader
         title={book?.title ?? ""}
+        backgroundColor={dominantColor ?? colors.background}
         scrollY={scrollY}
         collapseThreshold={HEADER_THRESHOLD}
         onBack={() => router.back()}
@@ -905,5 +953,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     overflow: "hidden",
+  },
+  topGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
   },
 });

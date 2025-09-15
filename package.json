@@ -25,6 +25,7 @@
     "@react-navigation/material-top-tabs": "^7.2.13",
     "@react-navigation/native": "^7.0.14",
     "@shopify/react-native-skia": "v2.0.0-next.4",
+    "@somesoap/react-native-image-palette": "^1.2.2",
     "axios": "^1.8.4",
     "expo": "53.0.20",
     "expo-blur": "~14.1.4",

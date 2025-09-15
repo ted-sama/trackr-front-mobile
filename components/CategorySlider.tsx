@@ -1,8 +1,6 @@
 import React, { useRef } from 'react';
-import { View, Text, TouchableWithoutFeedback, StyleSheet, Dimensions, Pressable } from 'react-native';
-import { LegendList } from '@legendapp/list';
+import { View, Text, StyleSheet, Dimensions, Pressable, FlatList } from 'react-native';
 import { Category } from '@/types/category';
-import { Book } from '@/types/book';
 import BookCard from './BookCard';
 import { useTheme } from '../contexts/ThemeContext';
 import { router } from 'expo-router';
@@ -39,7 +37,7 @@ const CategorySlider = ({ category, isBottomSheetVisible = false, header = true,
           <ChevronRight size={20} strokeWidth={2.5} color={colors.secondaryText} />
         </Pressable>
       )}
-      <LegendList
+      <FlatList
         data={books.slice(0, 8)}
         keyExtractor={(item, index) => `${item.id}-${index}`}
         renderItem={({ item }) => <BookCard book={item} onPress={() => router.push({pathname: "/book/[id]", params: {id: item.id}})} onTrackingToggle={onTrackingToggle} />}
@@ -50,7 +48,6 @@ const CategorySlider = ({ category, isBottomSheetVisible = false, header = true,
         ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
         decelerationRate="fast"
         scrollEnabled={!isBottomSheetVisible}
-        recycleItems
       />
     </View>
   );
@@ -68,8 +65,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   categoryTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
     maxWidth: '95%',
   },
   sliderContent: {

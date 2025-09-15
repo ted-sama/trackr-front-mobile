@@ -347,8 +347,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   mangaTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
     marginBottom: 2,
   },
   mangaAuthor: {
