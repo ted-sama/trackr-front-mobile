@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions, Pressable, FlatList } from 'react-native';
 import { Category } from '@/types/category';
 import BookCard from './BookCard';
@@ -11,36 +11,40 @@ interface CategorySliderProps {
   category: Category;
   isBottomSheetVisible?: boolean;
   header?: boolean;
-  onTrackingToggle?: (bookId: string, isTracking: boolean) => void;
+  seeMore?: boolean;
+  ranked?: boolean;
 }
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.33;
-const ITEM_MARGIN_RIGHT = 12;
-const CONTAINER_PADDING_LEFT = 16;
-const ITEM_WIDTH = CARD_WIDTH + ITEM_MARGIN_RIGHT;
 
-const CategorySlider = ({ category, isBottomSheetVisible = false, header = true, onTrackingToggle }: CategorySliderProps) => {
+const CategorySlider = ({ category, isBottomSheetVisible = false, header = true, seeMore = true, ranked = false }: CategorySliderProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
   
   // Ensure books is always an array
-  const books = Array.isArray(category?.books) ? category.books : [];
+  const books = useMemo(() => (Array.isArray(category?.books) ? category.books : []), [category?.books]);
 
   return (
     <View style={styles.categoryContainer}>
       {header && (
-        <Pressable style={styles.categoryHeader} onPress={() => router.push({pathname: "/category-full", params: {id: category.id}})}>
+        <Pressable style={styles.categoryHeader} onPress={() => seeMore ? router.push({pathname: "/category-full", params: {id: category.id}}) : null}>
           <Text style={[styles.categoryTitle, typography.categoryTitle, { color: colors.text }]} numberOfLines={1}>
             {category.title}
           </Text>
-          <ChevronRight size={20} strokeWidth={2.5} color={colors.secondaryText} />
+          {seeMore ? <ChevronRight size={20} strokeWidth={2.5} color={colors.secondaryText} /> : null}
         </Pressable>
       )}
       <FlatList
-        data={books.slice(0, 8)}
+        data={books.slice(0, seeMore ? undefined : 8)}
         keyExtractor={(item, index) => `${item.id}-${index}`}
-        renderItem={({ item }) => <BookCard book={item} onPress={() => router.push({pathname: "/book/[id]", params: {id: item.id}})} onTrackingToggle={onTrackingToggle} />}
+        renderItem={({ item, index }) => (
+          <BookCard
+            book={item}
+            onPress={() => router.push({ pathname: "/book/[id]", params: { id: item.id } })}
+            rank={ranked ? index + 1 : undefined}
+          />
+        )}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.sliderContent}

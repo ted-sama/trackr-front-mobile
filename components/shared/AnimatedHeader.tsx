@@ -9,7 +9,7 @@ import { useTypography } from '@/hooks/useTypography';
 
 interface AnimatedHeaderProps {
   title: string;
-  backgroundColor: string;
+  backgroundColor?: string;
   scrollY: SharedValue<number>;
   collapseThreshold?: number;
   onBack: () => void;
@@ -18,7 +18,7 @@ interface AnimatedHeaderProps {
 
 const DEFAULT_THRESHOLD = 320;
 
-export function AnimatedHeader({ title, backgroundColor, scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, rightButton }: AnimatedHeaderProps) {
+export function AnimatedHeader({ title, backgroundColor , scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, rightButton }: AnimatedHeaderProps) {
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -60,7 +60,7 @@ export function AnimatedHeader({ title, backgroundColor, scrollY, collapseThresh
           StyleSheet.absoluteFillObject,
           styles.background,
           headerContainerStyle,
-          { borderBottomColor: colors.border, borderBottomWidth: 1, backgroundColor: `${backgroundColor}73` },
+          { borderBottomColor: colors.border, borderBottomWidth: 1, backgroundColor: backgroundColor ? `${backgroundColor}73` : undefined },
         ]}
       >
         <BlurView

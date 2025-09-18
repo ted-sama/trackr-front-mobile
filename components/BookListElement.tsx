@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
@@ -13,11 +13,11 @@ import Badge from "./ui/Badge";
 import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Ellipsis } from "lucide-react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Toast from "react-native-toast-message";
 
 interface BookListElementProps {
   book: Book;
   onPress?: () => void;
-  onTrackingToggle?: (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => void;
   showTrackingButton?: boolean;
   showTrackingStatus?: boolean;
   showAuthor?: boolean;
@@ -28,7 +28,7 @@ interface BookListElementProps {
   compact?: boolean;
 }
 
-const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, showRating = false, showTrackingButton = false, showTrackingStatus = false, rank, currentListId, isFromListPage, compact = false }: BookListElementProps) => {
+const BookListElement = ({ book, onPress, showAuthor = true, showRating = false, showTrackingButton = false, showTrackingStatus = false, rank, currentListId, isFromListPage, compact = false }: BookListElementProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
   const { isBottomSheetVisible, openBookActions } = useBottomSheet();
@@ -48,8 +48,18 @@ const BookListElement = ({ book, onPress, onTrackingToggle, showAuthor = true, s
     'dropped': { text: 'Abandonné', icon: <Square size={12} strokeWidth={2.75} color={colors.dropped} />},
   }
 
-  const handleTrackingToggle = () => {
-    onTrackingToggle?.(book.id.toString(), isTracking, book);
+  const handleTrackingToggle = async () => {
+    try {
+      if (isTracking) {
+        await useTrackedBooksStore.getState().removeTrackedBook(book.id);
+        Toast.show({ text1: 'Livre retiré de votre bibliothèque', type: 'info' });
+      } else {
+        await useTrackedBooksStore.getState().addTrackedBook(book);
+        Toast.show({ text1: 'Livre ajouté à votre bibliothèque', type: 'info' });
+      }
+    } catch (err) {
+      Toast.show({ type: 'error', text1: 'Erreur', text2: isTracking ? 'Impossible de retirer le livre.' : `Impossible d\'ajouter le livre.` });
+    }
   };
 
   // Présenter le bottom sheet via context

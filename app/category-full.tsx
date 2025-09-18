@@ -82,53 +82,7 @@ export default function CategoryFull() {
     router.back();
   };
 
-  const onTrackingToggleInCategory = async (
-    bookId: string,
-    isCurrentlyTracking: boolean,
-    bookObject?: Book
-  ) => {
-    if (!bookObject) {
-      console.warn("Book object is missing in onTrackingToggleInDiscover");
-      Toast.show({
-        type: "error",
-        text1: "Erreur de suivi",
-        text2: "Données du livre manquantes.",
-      });
-      return;
-    }
-
-    if (isCurrentlyTracking) {
-      try {
-        await removeTrackedBookFromStore(parseInt(bookId, 10));
-        Toast.show({
-          text1: "Livre retiré de votre bibliothèque",
-          type: "info",
-        });
-      } catch (err) {
-        console.warn(`Failed to remove book ${bookId} from tracking:`, err);
-        Toast.show({
-          type: "error",
-          text1: "Erreur",
-          text2: "Impossible de retirer le livre.",
-        });
-      }
-    } else {
-      try {
-        await addTrackedBookToStore(bookObject);
-        Toast.show({
-          text1: "Livre ajouté à votre bibliothèque",
-          type: "info",
-        });
-      } catch (err) {
-        console.warn(`Failed to add book ${bookId} to tracking:`, err);
-        Toast.show({
-          type: "error",
-          text1: "Erreur",
-          text2: `Impossible d'ajouter le livre.`,
-        });
-      }
-    }
-  };
+  // Tracking toggle now handled inside BookCard/BookListElement
 
   const switchLayout = () => {
     setCurrentLayout(currentLayout === "grid" ? "list" : "grid");
@@ -196,7 +150,6 @@ export default function CategoryFull() {
                     router.push(`/book/${item.id}`);
                   }}
                   size="compact"
-                  onTrackingToggle={onTrackingToggleInCategory}
                 />
               </View>
             ) : (
@@ -208,7 +161,6 @@ export default function CategoryFull() {
                 showRating
                 showAuthor
                 showTrackingButton
-                onTrackingToggle={onTrackingToggleInCategory}
               />
             )
           }

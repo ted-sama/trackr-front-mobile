@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
@@ -10,8 +10,10 @@ import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import BookListElement from "@/components/BookListElement";
 import CategorySlider from "@/components/CategorySlider";
 import { useCategoryStore } from "@/stores/categoryStore";
+import { BlurView } from "expo-blur";
 
 export default function Index() {
+  const insets = useSafeAreaInsets();
   const { currentUser } = useUserStore();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -31,9 +33,11 @@ export default function Index() {
 
   return (
     <SafeAreaView
+      edges={["right", "left"]}
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+      <BlurView intensity={5} tint={currentTheme === "dark" ? "dark" : "light"} style={[styles.bluredStatusBar, { height: insets.top }]} />
       <ScrollView
         style={{ flex: 1 }}
       >
@@ -56,12 +60,12 @@ export default function Index() {
         </View>
         <View style={{ marginHorizontal: -16 }}>
           {homeSections['most-tracked'] && (
-            <CategorySlider category={homeSections['most-tracked']} />
+            <CategorySlider category={homeSections['most-tracked']} seeMore={false} ranked />
           )}
         </View>
         <View style={{ marginHorizontal: -16 }}>
           {homeSections['top-rated'] && (
-              <CategorySlider category={homeSections['top-rated']} />
+              <CategorySlider category={homeSections['top-rated']} seeMore={false} />
           )}
           </View>
         </View>
@@ -75,7 +79,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingTop: 16,
+    paddingTop: 72,
     paddingHorizontal: 16,
   },
   welcomeText: {
@@ -84,5 +88,13 @@ const styles = StyleSheet.create({
   lastReadContainer: {
     flexDirection: "column",
     marginBottom: 20,
+  },
+  bluredStatusBar: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    width: "100%",
+    zIndex: 1000,
   }
 });

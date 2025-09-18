@@ -672,7 +672,6 @@ export default function BookScreen() {
                     category={booksBySameAuthor}
                     isBottomSheetVisible={false}
                     header={false}
-                    onTrackingToggle={onTrackingToggleInSuggestions}
                   />
                 </View>
               </View>
@@ -687,7 +686,6 @@ export default function BookScreen() {
                     category={dummyRecommendations}
                     isBottomSheetVisible={false}
                     header={false}
-                    onTrackingToggle={onTrackingToggleInSuggestions}
                   />
                 </View>
               </View>

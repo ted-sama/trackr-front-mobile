@@ -79,7 +79,7 @@ export default function ListEdit() {
   const [hasChanges, setHasChanges] = useState(false);
   const [selectedImage, setSelectedImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [backdropMode, setBackdropMode] = useState<"color" | "image">("color");
-  const [backdropColor, setBackdropColor] = useState<string | null>(null);
+  const [backdropColor, setBackdropColor] = useState<string>("#7C3AED");
 
   // Load list data
   useEffect(() => {
@@ -96,8 +96,8 @@ export default function ListEdit() {
       setTags(list.tags || []);
       setIsPublic(list.isPublic || false);
       setRanked(list.ranked || false);
-      setBackdropColor(list.backdropColor || null);
-      setBackdropMode(list.backdropImage ? "image" : "color");
+      setBackdropMode(list.backdropMode || "color");
+      setBackdropColor(list.backdropColor || "#7C3AED");
     }
   }, [list]);
 
@@ -204,15 +204,15 @@ export default function ListEdit() {
       const payload: any = {
         name: name.trim(),
         description: description.trim() || null,
+        backdropMode: backdropMode,
+        backdropColor: backdropColor,
+        backdropImage: backdropMode === "image" ? selectedImage?.uri : null,
         tags: tags.length > 0 ? tags : null,
         isPublic: isPublic,
         ranked: ranked,
       };
 
-      if (backdropMode === "color") {
-        payload.backdropImage = null;
-        payload.backdropColor = backdropColor || null;
-      }
+      console.log(payload)
 
       await updateList(listId, payload);
 
@@ -240,7 +240,7 @@ export default function ListEdit() {
       setTags(list.tags || []);
       setIsPublic(list.isPublic || false);
       setRanked(list.ranked || false);
-      setBackdropColor(list.backdropColor || null);
+      setBackdropColor(list.backdropColor || "#7C3AED");
       setBackdropMode(list.backdropImage ? "image" : "color");
       setSelectedImage(null);
     }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
-import { CirclePlus, ListPlus, CircleStop , Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
 import Animated, {
   useAnimatedStyle,
   interpolate,
@@ -32,7 +32,6 @@ import Badge from "./ui/Badge";
 interface BookCardProps {
   book: Book;
   onPress?: (book: Book) => void;
-  onTrackingToggle?: (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => void;
   size?: 'default' | 'compact';
   showAuthor?: boolean;
   showRating?: boolean;
@@ -47,7 +46,7 @@ const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.33;
 const COMPACT_CARD_WIDTH = width * 0.29;
 
-const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAuthor = true, showRating = true, showTrackingStatus = false, showTrackingButton = true, rank, currentListId, isFromListPage }: BookCardProps) => {
+const BookCard = ({ book, onPress, size = 'default', showAuthor = true, showRating = true, showTrackingStatus = false, showTrackingButton = true, rank, currentListId, isFromListPage }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const { isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
@@ -68,33 +67,7 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
   // Shared value for scale animation
   const scale = useSharedValue(1);
 
-  // Options for the bottom sheet tracking actions
-  const bottomSheetTrackingOptions = [
-    {
-      id: "reading",
-      title: "Mettre en cours de lecture",
-      icon: CirclePlus,
-      action: () => {
-        onTrackingToggle?.(book.id.toString(), false, book);
-      }
-    },
-    {
-      id: "add-to-list",
-      title: "Ajouter à une liste",
-      icon: ListPlus,
-      action: () => {
-        onTrackingToggle?.(book.id.toString(), false, book);
-      }
-    },
-    {
-      id: "stopped",
-      title: "Mettre en arrêt",
-      icon: CircleStop,
-      action: () => {
-        onTrackingToggle?.(book.id.toString(), true, book);
-      }
-    },
-  ];
+  // No local bottom sheet options here; actions are managed by BottomSheetContext
 
   const handleImageLoad = () => {
     setIsLoading(false);
@@ -106,8 +79,18 @@ const BookCard = ({ book, onPress, onTrackingToggle, size = 'default', showAutho
   };
 
   // Function to handle quick add/remove tracking
-  const handleTrackingToggle = () => {
-    onTrackingToggle?.(book.id.toString(), isTracking, book);
+  const handleTrackingToggle = async () => {
+    try {
+      if (isTracking) {
+        await useTrackedBooksStore.getState().removeTrackedBook(book.id);
+        Toast.show({ text1: 'Livre retiré de votre bibliothèque', type: 'info' });
+      } else {
+        await useTrackedBooksStore.getState().addTrackedBook(book);
+        Toast.show({ text1: 'Livre ajouté à votre bibliothèque', type: 'info' });
+      }
+    } catch (err) {
+      Toast.show({ type: 'error', text1: 'Erreur', text2: isTracking ? 'Impossible de retirer le livre.' : `Impossible d\'ajouter le livre.` });
+    }
   };
 
   // Présenter le bottom sheet via context

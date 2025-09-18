@@ -241,7 +241,7 @@ export default function ListFull() {
                   zIndex: -99,
                 }}
               >
-                {list.backdropImage ? (
+                {list.backdropMode === "image" && list.backdropImage ? (
                   <MaskedView
                     style={{ flex: 1 }}
                     maskElement={
@@ -296,6 +296,11 @@ export default function ListFull() {
                   >
                     {list.owner.username}
                   </Text>
+                  {list.owner.plan === "plus" && (
+                    <Text style={[typography.plusBadge, styles.plusBadge, { backgroundColor: colors.accent }]}>
+                      PLUS
+                    </Text>
+                  )}
                 </View>
               </View>
               {isEditable(list.id) && (
@@ -537,5 +542,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+  },
+  plusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    color: "white",
   },
 });
