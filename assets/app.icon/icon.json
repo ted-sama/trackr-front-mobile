@@ -9,13 +9,13 @@
           "fill" : {
             "linear-gradient" : [
               "display-p3:0.94869,1.00000,0.98742,1.00000",
-              "display-p3:1.00000,0.86412,0.99117,1.00000"
+              "extended-gray:1.00000,1.00000"
             ]
           },
           "hidden" : false,
           "image-name" : "TrackrLogo.png",
           "name" : "TrackrLogo",
-          "opacity" : 0.75,
+          "opacity" : 0.94,
           "position" : {
             "scale" : 1.03,
             "translation-in-points" : [
