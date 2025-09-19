@@ -233,6 +233,17 @@ export default function BookScreen() {
     setChapterBottomSheetRef.current?.present();
   }, []);
 
+  const incrementCurrentChapter = () => {
+    if (bookTracking && book) {
+      updateTrackedBook(book.id, { currentChapter: bookTracking.currentChapter ? bookTracking.currentChapter + 1 : 1 });
+      Toast.show({
+        text1: "Nouveau chapitre marqué comme lu",
+        type: "info",
+        bottomOffset: 120,
+      });
+    }
+  };
+
   const IMAGE_WIDTH = 202.5;
   const IMAGE_HEIGHT = 303.75;
 
@@ -240,6 +251,7 @@ export default function BookScreen() {
     addTrackedBook: addTrackedBookToStore,
     removeTrackedBook: removeTrackedBookFromStore,
     isBookTracked,
+    updateTrackedBook,
   } = useTrackedBooksStore();
 
   // State to control button rendering for animation
@@ -339,6 +351,7 @@ export default function BookScreen() {
         Toast.show({
           text1: "Livre ajouté à votre bibliothèque",
           type: "info",
+          bottomOffset: 120,
         });
       } catch (error) {
         console.warn(
@@ -737,7 +750,9 @@ export default function BookScreen() {
             <TrackingTabBar
               status={bookTracking.status}
               currentChapter={bookTracking.currentChapter}
-              onManagePress={() => handlePresentChapterModalPress()}
+              onBookmarkPress={() => handlePresentChapterModalPress()}
+              onMarkLastChapterAsReadPress={() => incrementCurrentChapter()}
+              markLastChapterAsReadDisabled={bookTracking.currentChapter !== null && bookTracking.currentChapter === book?.chapters}
               onStatusPress={() => handlePresentModalPress("status_editor")}
             />  
           </Animated.View>

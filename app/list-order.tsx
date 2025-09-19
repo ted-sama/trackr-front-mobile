@@ -10,6 +10,7 @@ import BookDraggableList from "@/components/BookDraggableList";
 import { Book } from "@/types/book";
 import { Ionicons } from "@expo/vector-icons";
 import { Check } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function ListOrder() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
@@ -247,7 +248,13 @@ export default function ListOrder() {
             contentContainerStyle={{
               overflow: "visible",
               marginHorizontal: 16,
+              paddingTop: 16, // Add padding to see content behind gradient
             }}
+          />
+          <LinearGradient
+            colors={[`${colors.background}`, `${colors.background}00`]}
+            style={styles.fade}
+            pointerEvents="none"
           />
         </View>
       </View>
@@ -264,6 +271,7 @@ const styles = StyleSheet.create({
     overflow: "visible",
     padding: 16,
     paddingTop: 24,
+    paddingBottom: 0,
   },
   centerContainer: {
     flex: 1,
@@ -291,6 +299,13 @@ const styles = StyleSheet.create({
     marginHorizontal: -16,
     flex: 1,
   },
+  fade: {
+    position: "absolute",
+    top: -1, // Correction pour le positionnement
+    left: 0,
+    right: 0,
+    height: 48, // Augmentation pour un effet plus doux
+  },
   header: {
     position: "absolute",
     top: 0,
@@ -317,19 +332,5 @@ const styles = StyleSheet.create({
     marginTop: 8,
     flexDirection: "row",
     alignItems: "center",
-  },
-  changeBadge: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  changeBadgeText: {
-    fontSize: 12,
-    fontWeight: "bold",
-  },
+  }
 });

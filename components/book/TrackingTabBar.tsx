@@ -5,19 +5,23 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { ReadingStatus } from "@/types/reading-status";
-import { Clock3, BookOpenIcon, BookCheck, Pause, Square, BookMarked } from "lucide-react-native";
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square, BookMarked, Eye } from "lucide-react-native";
 
 interface TrackingTabBarProps {
   status: string;
   currentChapter?: number | null;
-  onManagePress: () => void;
+  markLastChapterAsReadDisabled: boolean;
   onStatusPress: () => void;
+  onMarkLastChapterAsReadPress: () => void;
+  onBookmarkPress: () => void;
 }
 
 export function TrackingTabBar({
   status,
   currentChapter,
-  onManagePress,
+  markLastChapterAsReadDisabled,
+  onMarkLastChapterAsReadPress,
+  onBookmarkPress,
   onStatusPress,
 }: TrackingTabBarProps) {
   const { width: screenWidth } = useWindowDimensions();
@@ -76,9 +80,19 @@ export function TrackingTabBar({
             </View>
           </Pressable>
           <View style={styles.manageButtonContainer}>
+            {!markLastChapterAsReadDisabled && (
+              <Pressable
+                style={({ pressed }) => [styles.manageButton, { backgroundColor: colors.actionButton, opacity: pressed ? 0.8 : 1 }]}
+                onPress={onMarkLastChapterAsReadPress}
+                accessibilityRole="button"
+                accessibilityLabel="Mark last chapter as read"
+              >
+                <Eye size={20} strokeWidth={2.5} color={colors.icon} />
+              </Pressable>
+            )}
             <Pressable
               style={({ pressed }) => [styles.manageButton, { backgroundColor: colors.primary, opacity: pressed ? 0.8 : 1 }]}
-              onPress={onManagePress}
+              onPress={onBookmarkPress}
               accessibilityRole="button"
               accessibilityLabel="Bookmark"
             >

@@ -10,7 +10,7 @@ import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import BookListElement from "@/components/BookListElement";
 import CategorySlider from "@/components/CategorySlider";
 import { useCategoryStore } from "@/stores/categoryStore";
-import { BlurView } from "expo-blur";
+import Avatar from "@/components/ui/Avatar";
 
 export default function Index() {
   const insets = useSafeAreaInsets();
@@ -37,18 +37,21 @@ export default function Index() {
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-      <BlurView intensity={5} tint={currentTheme === "dark" ? "dark" : "light"} style={[styles.bluredStatusBar, { height: insets.top }]} />
-      <ScrollView
-        style={{ flex: 1 }}
-      >
-      <View style={styles.content}>
+      {/* <BlurView intensity={5} tint={currentTheme === "dark" ? "dark" : "light"} style={[styles.bluredStatusBar, { height: insets.top }]} /> */}
+      <View style={[styles.header, { paddingTop: insets.top, paddingHorizontal: 16 }]}>
         <Text
-          style={[styles.welcomeText, typography.h1, { color: colors.text }]}
+          style={[typography.h1, { color: colors.text }]}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
           Bonjour, {currentUser?.username}
         </Text>
+        <Avatar image={currentUser?.avatar || ""} size={32} />
+      </View>
+      <ScrollView
+        style={{ flex: 1 }}
+      >
+      <View style={styles.content}>
         <View style={styles.lastReadContainer}>
           <Text style={[typography.categoryTitle, { color: colors.text, marginBottom: 16 }]}>Dernières lectures</Text>
           <FlatList
@@ -75,15 +78,18 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingBottom: 16,
+  },
   container: {
     flex: 1,
   },
   content: {
-    paddingTop: 72,
+    paddingTop: 42,
     paddingHorizontal: 16,
-  },
-  welcomeText: {
-    marginBottom: 30,
   },
   lastReadContainer: {
     flexDirection: "column",

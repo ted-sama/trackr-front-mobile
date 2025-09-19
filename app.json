@@ -9,9 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "icon": "./assets/app.icon",
       "supportsTablet": true,
       "bundleIdentifier": "com.ted.trackr.app",
       "infoPlist": {
+        "CFBundleDisplayName": "Trackr",
         "ITSAppUsesNonExemptEncryption": false
       }
     },

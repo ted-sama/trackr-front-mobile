@@ -270,7 +270,7 @@ export default function ListEdit() {
   }
 
   return (
-    <SafeAreaView
+    <View
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <StatusBar style="light" />
@@ -635,7 +635,7 @@ export default function ListEdit() {
             </View>
         </ScrollView>
         </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -756,7 +756,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backdrop: {
-    height: 275,
+    height: 225,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 16,

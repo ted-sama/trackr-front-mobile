@@ -99,7 +99,7 @@ export default function Collection() {
   const [searchText, setSearchText] = useState("");
   const { getTrackedBooks } = useTrackedBooksStore();
   const myLibrary = getTrackedBooks();
-  const mosaicBooks = useMemo(() => myLibrary.slice(0, 12), [myLibrary]);
+  const mosaicBooks = useMemo(() => myLibrary.slice(0, 10), [myLibrary]);
   const fetchMyLists = useListStore(state => state.fetchMyLists);
   const myListsIds = useListStore(state => state.myListsIds);
   const myListsById = useListStore(state => state.myListsById);

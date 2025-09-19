@@ -44,6 +44,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Ellipsis } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import ListActionsBottomSheet from "@/components/ListActionsBottomSheet";
+import Avatar from "@/components/ui/Avatar";
 
 // AsyncStorage key for layout preference
 const LAYOUT_STORAGE_KEY = "@MyApp:layoutPreference";
@@ -278,14 +279,7 @@ export default function ListFull() {
                 <View
                   style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
                 >
-                  <View
-                    style={{
-                      width: 28,
-                      height: 28,
-                      backgroundColor: colors.accent,
-                      borderRadius: 16,
-                    }}
-                  />
+                  <Avatar image={list.owner.avatar || ""} size={28} />
                   <Text
                     style={[
                       typography.username,
