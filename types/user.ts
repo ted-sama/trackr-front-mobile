@@ -3,6 +3,9 @@ export interface User {
     username: string;
     email: string;
     avatar?: string;
+    backdropMode: "color" | "image";
+    backdropColor: string;
+    backdropImage?: string;
     role?: string;
     plan?: "free" | "plus";
     preferences?: {

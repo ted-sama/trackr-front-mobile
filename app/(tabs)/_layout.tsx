@@ -3,7 +3,7 @@ import { Platform, View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext'; // Ajustement du chemin
-import { Library, Settings } from 'lucide-react-native';
+import { CircleUserRound, Library, Settings } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
@@ -64,6 +64,15 @@ export default function TabLayout() {
           title: 'Collection',
           tabBarIcon: ({ color, size }) => (
             <Library size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profil',
+          tabBarIcon: ({ color, size }) => (
+            <CircleUserRound size={size} color={color} />
           ),
         }}
       />

@@ -36,7 +36,7 @@ function morphIn(values: EntryAnimationsValues) {
   };
   const animations = {
     opacity: withTiming(1, { duration: 300 }),
-    transform: [{ scale: withSpring(1, { damping: 12, stiffness: 100 }) }],
+    transform: [{ scale: withSpring(1, { damping: 500, stiffness: 900 }) }],
     borderRadius: withTiming(0, { duration: 300 }),
   };
   return { initialValues, animations };

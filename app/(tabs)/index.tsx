@@ -39,6 +39,7 @@ export default function Index() {
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       {/* <BlurView intensity={5} tint={currentTheme === "dark" ? "dark" : "light"} style={[styles.bluredStatusBar, { height: insets.top }]} /> */}
       <View style={[styles.header, { paddingTop: insets.top, paddingHorizontal: 16 }]}>
+        <Avatar image={currentUser?.avatar || ""} size={32} />
         <Text
           style={[typography.h1, { color: colors.text }]}
           numberOfLines={1}
@@ -46,7 +47,6 @@ export default function Index() {
         >
           Bonjour, {currentUser?.username}
         </Text>
-        <Avatar image={currentUser?.avatar || ""} size={32} />
       </View>
       <ScrollView
         style={{ flex: 1 }}
@@ -80,7 +80,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: 16,
     alignItems: "center",
     paddingBottom: 16,
   },
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingTop: 42,
+    paddingTop: 12,
     paddingHorizontal: 16,
   },
   lastReadContainer: {

@@ -45,6 +45,7 @@ import { Ellipsis } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import ListActionsBottomSheet from "@/components/ListActionsBottomSheet";
 import Avatar from "@/components/ui/Avatar";
+import PlusBadge from "@/components/ui/PlusBadge";
 
 // AsyncStorage key for layout preference
 const LAYOUT_STORAGE_KEY = "@MyApp:layoutPreference";
@@ -291,9 +292,7 @@ export default function ListFull() {
                     {list.owner.username}
                   </Text>
                   {list.owner.plan === "plus" && (
-                    <Text style={[typography.plusBadge, styles.plusBadge, { backgroundColor: colors.accent }]}>
-                      PLUS
-                    </Text>
+                    <PlusBadge />
                   )}
                 </View>
               </View>
