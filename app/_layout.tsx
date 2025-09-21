@@ -148,15 +148,7 @@ function RootLayoutContent() {
       >
         <Stack.Screen name="auth/login" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="book/[id]" />
-        <Stack.Screen
-          name="book/summary"
-          options={{
-            presentation: "modal",
-            gestureEnabled: true,
-            headerShown: false,
-          }}
-        />
+        <Stack.Screen name="(zShared)" />
         <Stack.Screen
           name="book/recap"
           options={{

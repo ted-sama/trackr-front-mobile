@@ -101,7 +101,7 @@ export default function Collection() {
   const myLibrary = getTrackedBooks();
   const mosaicBooks = useMemo(() => myLibrary.slice(0, 10), [myLibrary]);
   const { data: myLists } = useMyLists();
-  const lists = myLists || [];
+  const lists = (myLists?.pages.flatMap((p: any) => p.data) ?? []) as any[];
   
   const handleSearchTextChange = useCallback((text: string) => {
     setSearchText(text);

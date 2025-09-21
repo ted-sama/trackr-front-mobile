@@ -121,11 +121,11 @@ const BookActionsBottomSheet = forwardRef<
       removeTrackedBook,
       addTrackedBook,
     } = useTrackedBooksStore();
-    const { data: myLists } = useMyLists();
+    const { data: myListsData } = useMyLists();
     const { mutateAsync: addBookToList } = useAddBookToList();
     const { mutateAsync: removeBookFromList } = useRemoveBookFromList();
 
-    const lists = myLists || [];
+    const lists = (myListsData?.pages.flatMap((p: any) => p.data) ?? []) as any[];
     const isTracking = isBookTracked(book.id);
     const [currentView, setCurrentView] = useState(view);
     const [newListName, setNewListName] = useState("");
@@ -149,13 +149,13 @@ const BookActionsBottomSheet = forwardRef<
     useEffect(() => {
       if (currentView === VIEW_LIST_EDITOR) {
         // Without a direct endpoint in hooks, infer selected lists from lists containing the book if available in list data
-        const inLists = (myLists || [])
-          .filter(l => l.books?.items?.some(b => b.id === book.id))
-          .map(l => l.id);
+        const inLists = lists
+          .filter((l: any) => l.books?.items?.some((b: any) => b.id === book.id))
+          .map((l: any) => l.id);
         setSelectedListIds(inLists);
         setInitialListIds(inLists);
       }
-    }, [currentView, book.id, myLists]);
+    }, [currentView, book.id, lists]);
 
     // Synchronise tempStatus et tempRating avec trackedStatus à chaque changement
     useEffect(() => {

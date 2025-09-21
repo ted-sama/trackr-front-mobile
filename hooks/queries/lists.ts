@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { api } from '@/services/api';
 import { List } from '@/types/list';
@@ -10,9 +10,11 @@ async function fetchLists(): Promise<List[]> {
   return data.data;
 }
 
-async function fetchMyLists(): Promise<List[]> {
-  const { data } = await api.get<PaginatedResponse<List>>('/me/lists');
-  return data.data;
+async function fetchMyLists(page: number): Promise<PaginatedResponse<List>> {
+  const { data } = await api.get<PaginatedResponse<List>>('/me/lists', {
+    params: { page, limit: 20 },
+  });
+  return data;
 }
 
 async function fetchList(id: string): Promise<List> {
@@ -61,7 +63,15 @@ export function useLists() {
 }
 
 export function useMyLists() {
-  return useQuery({ queryKey: queryKeys.myLists, queryFn: fetchMyLists });
+  return useInfiniteQuery({
+    queryKey: queryKeys.myLists,
+    queryFn: ({ pageParam }) => fetchMyLists(pageParam ?? 1),
+    getNextPageParam: (lastPage) => {
+      const { currentPage, lastPage: last } = lastPage.meta;
+      return currentPage < last ? currentPage + 1 : undefined;
+    },
+    initialPageParam: 1,
+  });
 }
 
 export function useList(id: string | undefined) {
@@ -110,9 +120,7 @@ export function useCreateList() {
     mutationFn: (name: string) => createList(name),
     onSuccess: (newList) => {
       qc.invalidateQueries({ queryKey: queryKeys.myLists });
-      qc.setQueryData<List[]>(queryKeys.myLists, (prev) =>
-        prev ? [...prev, newList] : [newList]
-      );
+      qc.invalidateQueries({ queryKey: queryKeys.lists });
     },
   });
 }

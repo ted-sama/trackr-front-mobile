@@ -32,7 +32,8 @@ import Badge from "./ui/Badge";
 interface BookCardProps {
   book: Book;
   onPress?: (book: Book) => void;
-  size?: 'default' | 'compact';
+  size?: 'default' | 'compact' | 'compact-small';
+  showTitle?: boolean;
   showAuthor?: boolean;
   showRating?: boolean;
   showTrackingStatus?: boolean;
@@ -45,8 +46,9 @@ interface BookCardProps {
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.33;
 const COMPACT_CARD_WIDTH = width * 0.29;
+const COMPACT_SMALL_CARD_WIDTH = width * 0.25;
 
-const BookCard = ({ book, onPress, size = 'default', showAuthor = true, showRating = true, showTrackingStatus = false, showTrackingButton = true, rank, currentListId, isFromListPage }: BookCardProps) => {
+const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showTrackingStatus = false, showTrackingButton = true, rank, currentListId, isFromListPage }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const { isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
@@ -134,6 +136,9 @@ const BookCard = ({ book, onPress, size = 'default', showAuthor = true, showRati
             size === 'compact' && {
               width: COMPACT_CARD_WIDTH,
             },
+            size === 'compact-small' && {
+              width: COMPACT_SMALL_CARD_WIDTH,
+            },
           ]}
         >
           <View
@@ -142,6 +147,9 @@ const BookCard = ({ book, onPress, size = 'default', showAuthor = true, showRati
               { backgroundColor: colors.card },
               size === 'compact' && {
                 height: COMPACT_CARD_WIDTH * 1.5,
+              },
+              size === 'compact-small' && {
+                height: COMPACT_SMALL_CARD_WIDTH * 1.5,
               },
             ]}
           >
@@ -155,6 +163,10 @@ const BookCard = ({ book, onPress, size = 'default', showAuthor = true, showRati
               style={[
                 styles.mangaCover,
                 size === 'compact' && {
+                  width: '100%',
+                  height: '100%',
+                },
+                size === 'compact-small' && {
                   width: '100%',
                   height: '100%',
                 },
@@ -206,17 +218,20 @@ const BookCard = ({ book, onPress, size = 'default', showAuthor = true, showRati
                 {rank}
               </Text>
             )}
+            {showTitle && (
             <Text
               style={[
                 styles.mangaTitle,
                 typography.h3,
                 { color: colors.text },
                 size === 'compact' && { fontSize: 13, marginBottom: 2 },
+                size === 'compact-small' && { fontSize: 12, marginBottom: 2 },
               ]}
               numberOfLines={1}
             >
-              {book.title}
-            </Text>
+                {book.title}
+              </Text>
+            )}
             {showAuthor && (
                 <Text
                 style={[
@@ -224,6 +239,7 @@ const BookCard = ({ book, onPress, size = 'default', showAuthor = true, showRati
                   typography.caption,
                   { color: colors.secondaryText },
                   size === 'compact' && { fontSize: 12, marginBottom: 2 },
+                  size === 'compact-small' && { fontSize: 11, marginBottom: 2 },
                 ]}
                 numberOfLines={1}
               >
@@ -238,6 +254,7 @@ const BookCard = ({ book, onPress, size = 'default', showAuthor = true, showRati
                     styles.ratingText,
                     typography.caption,
                     { color: colors.secondaryText },
+                    size === 'compact-small' && { fontSize: 11 },
                   ]}
                 >
                   {book.rating || "N/A"}

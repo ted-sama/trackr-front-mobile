@@ -12,7 +12,7 @@ interface AnimatedHeaderProps {
   backgroundColor?: string;
   scrollY: SharedValue<number>;
   collapseThreshold?: number;
-  onBack: () => void;
+  onBack?: () => void;
   rightButton?: React.ReactNode;
 }
 
@@ -36,7 +36,7 @@ export function AnimatedHeader({ title, backgroundColor , scrollY, collapseThres
   const headerTitleStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       scrollY.value,
-      [collapseThreshold, collapseThreshold + 40],
+      [collapseThreshold - 60, collapseThreshold + 10],
       [0, 1],
       Extrapolate.CLAMP
     );
@@ -77,7 +77,8 @@ export function AnimatedHeader({ title, backgroundColor , scrollY, collapseThres
         />
       </Animated.View>
       <View style={[styles.content, { paddingTop: insets.top }]}> 
-        <Pressable onPress={onBack} style={styles.backButton}>
+        {onBack && (
+          <Pressable onPress={onBack} style={styles.backButton}>
           <Animated.View
             style={[
               StyleSheet.absoluteFillObject,
@@ -87,7 +88,8 @@ export function AnimatedHeader({ title, backgroundColor , scrollY, collapseThres
             ]}
           />
           <Ionicons name="arrow-back" size={22} color={colors.icon} />
-        </Pressable>
+          </Pressable>
+        )}
         <Animated.Text
           style={[typography.h3, styles.title, { color: colors.text }, headerTitleStyle]}
           numberOfLines={1}
@@ -152,7 +154,6 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    textAlign: 'center',
     marginHorizontal: 8,
   },
   rightContainer: {

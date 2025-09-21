@@ -8,10 +8,11 @@
         {
           "fill" : {
             "linear-gradient" : [
-              "display-p3:0.94869,1.00000,0.98742,1.00000",
-              "extended-gray:1.00000,1.00000"
+              "display-p3:0.84078,0.76832,1.00000,1.00000",
+              "display-p3:0.52465,0.24306,1.00000,1.00000"
             ]
           },
+          "glass" : true,
           "hidden" : false,
           "image-name" : "TrackrLogo.png",
           "name" : "TrackrLogo",
