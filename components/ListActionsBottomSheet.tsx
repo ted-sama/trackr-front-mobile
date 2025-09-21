@@ -82,7 +82,7 @@ const ListActionsBottomSheet = forwardRef<BottomSheetModal, ListActionsBottomShe
         const owner = list.owner?.username || "";
         const message = `Découvre la liste "${list.name}" (${list.books?.total ?? 0} éléments) par ${owner}`;
         await Share.share({ message });
-      } catch (e) {
+    } catch {
         // no-op
       } finally {
         // @ts-expect-error bottom sheet ref

@@ -5,7 +5,7 @@ import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { Book } from "@/types/book";
 import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
-import { useCategoryStore, CategoryState } from '@/stores/categoryStore';
+import { useCategories } from '@/hooks/queries/categories';
 import CategorySlider from "@/components/CategorySlider";
 
 interface BookCategoriesScreenProps {}
@@ -16,33 +16,24 @@ export default function BookCategoriesScreen({}: BookCategoriesScreenProps) {
   const [refreshing, setRefreshing] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
-  const fetchCategories = useCategoryStore((state: CategoryState) => state.fetchCategories);
-  const categoryIds = useCategoryStore((state: CategoryState) => state.allIds);
-  const categoriesById = useCategoryStore((state: CategoryState) => state.categoriesById);
-  const categories = categoryIds.map(id => categoriesById[id]);
-  const isLoading = useCategoryStore((state: CategoryState) => state.isLoading);
-  const error = useCategoryStore((state: CategoryState) => state.error);
+  const { data: categories, isLoading, error, refetch, isFetching } = useCategories();
 
   const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await fetchCategories();
+      await refetch();
     } finally {
       setRefreshing(false);
     }
-  }, [fetchCategories]);
+  }, [refetch]);
 
   // Tracking toggle now handled inside BookCard/BookListElement
 
   useEffect(() => {
-    const loadInitialData = async () => {
-      await fetchCategories();
-      setHasLoadedOnce(true);
-    };
-    loadInitialData();
-  }, [fetchCategories]);
+    if (categories) setHasLoadedOnce(true);
+  }, [categories]);
 
   if (isLoading && !hasLoadedOnce && !refreshing) {
     return (
@@ -75,7 +66,7 @@ export default function BookCategoriesScreen({}: BookCategoriesScreenProps) {
         />
       }
     >
-      {categories.map((category) => (
+      {(categories || []).map((category) => (
           <CategorySlider
           key={category.id}
           category={category}

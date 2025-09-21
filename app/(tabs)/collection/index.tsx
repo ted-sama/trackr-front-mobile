@@ -11,7 +11,7 @@ import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { Book } from "@/types/book";
 import { useTypography } from "@/hooks/useTypography";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useListStore } from '@/stores/listStore';
+import { useMyLists } from '@/hooks/queries/lists';
 
 const AnimatedExpoImage = Animated.createAnimatedComponent(ExpoImage);
 
@@ -100,14 +100,8 @@ export default function Collection() {
   const { getTrackedBooks } = useTrackedBooksStore();
   const myLibrary = getTrackedBooks();
   const mosaicBooks = useMemo(() => myLibrary.slice(0, 10), [myLibrary]);
-  const fetchMyLists = useListStore(state => state.fetchMyLists);
-  const myListsIds = useListStore(state => state.myListsIds);
-  const myListsById = useListStore(state => state.myListsById);
-  const lists = myListsIds.map(id => myListsById[id]);
-  
-  useEffect(() => {
-    fetchMyLists();
-  }, [fetchMyLists]);
+  const { data: myLists } = useMyLists();
+  const lists = myLists || [];
   
   const handleSearchTextChange = useCallback((text: string) => {
     setSearchText(text);

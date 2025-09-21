@@ -7,7 +7,6 @@ import SearchBar from "@/components/discover/SearchBar";
 import PillTabBar from "@/components/discover/PillTabBar";
 import { useRouter } from "expo-router";
 import { useTypography } from "@/hooks/useTypography";
-import { useSearchStore } from "@/stores/searchStore";
 type TabType = 'books' | 'lists';
 
 interface HeaderDiscoverProps {
@@ -41,7 +40,7 @@ export default function HeaderDiscover({
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const router = useRouter();
-  const { clearSearch, setInitialFilterFromTab } = useSearchStore();
+  // State is managed in screens; remove store coupling
   const initialWidth = screenWidth - paddingHorizontal * 2;
   const searchBarWidth = useSharedValue(initialWidth);
   const cancelButtonOpacity = useSharedValue(0);
@@ -66,13 +65,10 @@ export default function HeaderDiscover({
   }, [isEditable, initialWidth]);
 
   const handleNavigateToSearch = () => {
-    // Set the search filter to match the current active tab
-    setInitialFilterFromTab(activeTab);
     router.navigate('/discover/search');
   };
 
   const performBackNavigation = () => {
-    clearSearch();
     router.back();
   };
 

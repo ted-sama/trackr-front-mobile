@@ -9,7 +9,7 @@ import { useUserStore } from "@/stores/userStore";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import BookListElement from "@/components/BookListElement";
 import CategorySlider from "@/components/CategorySlider";
-import { useCategoryStore } from "@/stores/categoryStore";
+import { useMostTrackedCategory, useTopRatedCategory } from "@/hooks/queries/categories";
 import Avatar from "@/components/ui/Avatar";
 
 export default function Index() {
@@ -18,7 +18,8 @@ export default function Index() {
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const { getTrackedBooks } = useTrackedBooksStore();
-  const { homeSections, fetchMostTracked, fetchTopRated } = useCategoryStore();
+  const { data: mostTracked } = useMostTrackedCategory();
+  const { data: topRated } = useTopRatedCategory();
   const lastRead = getTrackedBooks().filter(book => book.trackingStatus?.currentChapter && book.trackingStatus?.lastReadAt !== null).sort((a, b) => {
     if (a.trackingStatus?.lastReadAt && b.trackingStatus?.lastReadAt) {
       return new Date(b.trackingStatus.lastReadAt).getTime() - new Date(a.trackingStatus.lastReadAt).getTime();
@@ -27,8 +28,7 @@ export default function Index() {
   }).slice(0, 3);
 
   useEffect(() => {
-    fetchMostTracked();
-    fetchTopRated();
+    // Data fetched via React Query hooks
   }, []);
 
   return (
@@ -62,13 +62,13 @@ export default function Index() {
           />
         </View>
         <View style={{ marginHorizontal: -16 }}>
-          {homeSections['most-tracked'] && (
-            <CategorySlider category={homeSections['most-tracked']} seeMore={false} ranked />
+          {mostTracked && (
+            <CategorySlider category={mostTracked} seeMore={false} ranked />
           )}
         </View>
         <View style={{ marginHorizontal: -16 }}>
-          {homeSections['top-rated'] && (
-              <CategorySlider category={homeSections['top-rated']} seeMore={false} />
+          {topRated && (
+              <CategorySlider category={topRated} seeMore={false} />
           )}
           </View>
         </View>

@@ -23,7 +23,8 @@ import Animated, {
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
-import { useListStore } from "@/stores/listStore";
+import { useList } from "@/hooks/queries/lists";
+import { useUpdateList, useUpdateBackdropImage } from "@/hooks/queries/lists";
 import { useUserStore } from "@/stores/userStore";
 import Button from "@/components/ui/Button";
 import SecondaryButton from "@/components/ui/SecondaryButton";
@@ -44,15 +45,11 @@ export default function ListEdit() {
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
 
-  // Store
-  const list = useListStore(
-    (state) =>
-      state.listsById[listId as string] || state.myListsById[listId as string]
-  );
-  const updateList = useListStore((state) => state.updateList);
-  const fetchList = useListStore((state) => state.fetchList);
-  const isLoading = useListStore((state) => state.isLoading);
-  const updateBackdropImage = useListStore((state) => state.updateBackdropImage);
+  // Data
+  const { data: list } = useList(listId as string);
+  const { mutateAsync: updateList } = useUpdateList();
+  const { mutateAsync: updateBackdropImage } = useUpdateBackdropImage();
+  const isLoading = false;
   const currentUser = useUserStore((state) => state.currentUser);
   const isPlus = currentUser?.plan === "plus";
 
@@ -81,12 +78,7 @@ export default function ListEdit() {
   const [backdropMode, setBackdropMode] = useState<"color" | "image">("color");
   const [backdropColor, setBackdropColor] = useState<string>("#7C3AED");
 
-  // Load list data
-  useEffect(() => {
-    if (listId && !list) {
-      fetchList(listId as string);
-    }
-  }, [listId, list, fetchList]);
+  // Query hook loads data
 
   // Initialize form with list data
   useEffect(() => {

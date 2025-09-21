@@ -10,26 +10,16 @@ import { LegendList } from '@legendapp/list';
 import { useTypography } from '@/hooks/useTypography';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSearchStore } from '@/stores/searchStore';
+import { useSearch } from '@/hooks/queries/search';
 import { Book } from '@/types/book';
 import { List } from '@/types/list';
 
 export default function SearchScreen() {
   const { colors } = useTheme();
   const typography = useTypography();
-  const { 
-    searchQuery, 
-    activeFilter,
-    isLoading, 
-    isLoadingMore, 
-    error,
-    setSearchQuery, 
-    setActiveFilter,
-    search, 
-    loadMoreResults, 
-    clearSearch,
-    getCurrentResults
-  } = useSearchStore();
+  const [searchQuery, setQuery] = React.useState('');
+  const [activeFilter, setActiveFilter] = React.useState<'books' | 'lists'>('books');
+  const { data, isFetching, hasNextPage, fetchNextPage, isFetchingNextPage, error } = useSearch(activeFilter, searchQuery);
 
   const debounceTimeoutRef = useRef<number | null>(null);
 
@@ -39,17 +29,17 @@ export default function SearchScreen() {
     }
 
     debounceTimeoutRef.current = setTimeout(() => {
-      search(text, 1);
+      setQuery(text);
     }, 500);
-  }, [search]);
+  }, []);
 
   const handleSearchTextChange = (text: string) => {
-    setSearchQuery(text);
+    setQuery(text);
     if (!text.trim()) {
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
-      clearSearch();
+      setQuery('');
     } else {
       debouncedSearch(text);
     }
@@ -58,15 +48,11 @@ export default function SearchScreen() {
   const handleFilterChange = (filter: 'books' | 'lists') => {
     setActiveFilter(filter);
     
-    // Si on a déjà une recherche, on la relance avec le nouveau filtre
-    if (searchQuery.trim()) {
-      search(searchQuery, 1);
-    }
+    // changing filter keeps current query; hook will refetch
   };
 
   const handleEndReached = () => {
-    console.log('handleEndReached called');
-    loadMoreResults();
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
   };
 
   useEffect(() => {
@@ -77,8 +63,8 @@ export default function SearchScreen() {
     };
   }, []);
 
-  const currentResults = getCurrentResults();
-  const hasResults = currentResults.length > 0;
+  const flatResults = (data?.pages || []).flatMap(p => p.data);
+  const hasResults = flatResults.length > 0;
 
   const renderItem = ({ item }: { item: Book | List }) => {
     // Type guard pour distinguer Book de List
@@ -116,27 +102,27 @@ export default function SearchScreen() {
       />
 
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      {isLoading && !hasResults && !error ? (
+      {isFetching && !hasResults && !error ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
           <LegendList
-            data={currentResults}
+            data={flatResults}
             renderItem={renderItem}
             keyExtractor={(item, index) => `${item.id}-${index}`}
             contentContainerStyle={styles.listContainer}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <Text style={[typography.body, { color: colors.text }]}>
-                  {error ? error : (searchQuery.trim() ? "Aucun résultat trouvé" : "Commencez votre recherche en tapant ci-dessus.")}
+                  {error ? String(error) : (searchQuery.trim() ? "Aucun résultat trouvé" : "Commencez votre recherche en tapant ci-dessus.")}
                 </Text>
               </View>
             }
             ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
             onEndReached={handleEndReached}
             onEndReachedThreshold={0.2}
-            ListFooterComponent={isLoadingMore ? (
+            ListFooterComponent={isFetchingNextPage ? (
               <View style={styles.footerContainer}>
                 <ActivityIndicator size="small" color={colors.primary} />
               </View>

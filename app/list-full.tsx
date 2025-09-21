@@ -1,44 +1,29 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import * as Haptics from "expo-haptics";
-import {
-  View,
-  Text,
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-  Alert,
-  Pressable,
-  Animated as RNAnimated,
-} from "react-native";
+import { View, Text, StyleSheet, FlatList, Alert, Pressable, Animated as RNAnimated } from "react-native";
 import { Image } from "expo-image";
-import { LegendList, LegendListRef } from "@legendapp/list";
+// import { LegendList, LegendListRef } from "@legendapp/list";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import Animated, {
-  useSharedValue,
-  useAnimatedScrollHandler,
-  withTiming,
-  useAnimatedStyle,
-  runOnJS,
-} from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { useSharedValue, useAnimatedScrollHandler } from "react-native-reanimated";
+// import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import BookListElement from "@/components/BookListElement";
 import BookCard from "@/components/BookCard";
 import { Book } from "@/types/book";
-import { List } from "@/types/list";
+// import { List } from "@/types/list";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
-import { useTrackedBooksStore } from "@/stores/trackedBookStore";
+// import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BlurView } from "expo-blur";
+// import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import BadgeSlider from "@/components/BadgeSlider";
-import { useListStore } from "@/stores/listStore";
+import { useList, useDeleteList } from "@/hooks/queries/lists";
+import { useUserStore } from "@/stores/userStore";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { Ionicons } from "@expo/vector-icons";
 import { Ellipsis } from "lucide-react-native";
@@ -59,7 +44,7 @@ export default function ListFull() {
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
-  const insets = useSafeAreaInsets();
+  // const insets = useSafeAreaInsets();
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollY.value = event.contentOffset.y;
@@ -71,19 +56,12 @@ export default function ListFull() {
     DEFAULT_LAYOUT as "grid" | "list"
   );
 
-  const {
-    addTrackedBook: addTrackedBookToStore,
-    removeTrackedBook: removeTrackedBookFromStore,
-  } = useTrackedBooksStore();
+  // const { addTrackedBook, removeTrackedBook } = useTrackedBooksStore();
 
-  const list = useListStore(
-    (state) =>
-      state.listsById[id as string] || state.myListsById[id as string] || null
-  );
-  const fetchList = useListStore((state) => state.fetchList);
-  const isLoading = useListStore((state) => state.isLoading);
-  const isEditable = useListStore((state) => state.isOwner);
-  const deleteListFromStore = useListStore((state) => state.deleteList);
+  const { data: list } = useList(id as string);
+  const { mutateAsync: deleteListFromStore } = useDeleteList();
+  const { currentUser } = useUserStore();
+  const isEditable = (listId: string) => Boolean(list && currentUser && list.owner?.id === currentUser.id);
 
   // Animation refs for buttons
   const scaleAnimOrder = useRef(new RNAnimated.Value(1)).current;
@@ -93,10 +71,8 @@ export default function ListFull() {
   // Charger la liste initialement et quand on revient sur l'écran
   useFocusEffect(
     useCallback(() => {
-      if (id) {
-        fetchList(id as string);
-      }
-    }, [id, fetchList])
+      // Query hook handles caching and refetch on focus via focusManager
+    }, [])
   );
 
   // Load layout preference

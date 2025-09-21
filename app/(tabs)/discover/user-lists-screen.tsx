@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { LegendList } from "@legendapp/list";
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from "@/hooks/useTypography";
-import { useListStore } from '@/stores/listStore';
+import { useLists } from '@/hooks/queries/lists';
 import CollectionListElement from "@/components/CollectionListElement";
 
 interface UserListsHeaderProps {
@@ -34,30 +34,21 @@ export default function UserListsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   
-  const fetchLists = useListStore(state => state.fetchLists);
-  const listsIds = useListStore(state => state.listsIds);
-  const listsById = useListStore(state => state.listsById);
-  const isLoading = useListStore(state => state.isLoading);
-  const error = useListStore(state => state.error);
-  
-  const lists = listsIds.map(id => listsById[id]).filter(list => list.isPublic);
+  const { data: listsData, isLoading, error, refetch } = useLists();
+  const lists = (listsData || []).filter(list => list.isPublic);
   
   useEffect(() => {
-    const loadInitialData = async () => {
-      await fetchLists();
-      setHasLoadedOnce(true);
-    };
-    loadInitialData();
-  }, [fetchLists]);
+    if (listsData) setHasLoadedOnce(true);
+  }, [listsData]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await fetchLists();
+      await refetch();
     } finally {
       setRefreshing(false);
     }
-  }, [fetchLists]);
+  }, [refetch]);
 
   const renderListHeader = useCallback(() => (
     <UserListsHeader
@@ -74,7 +65,7 @@ export default function UserListsScreen() {
             Erreur de chargement
           </Text>
           <Text style={[typography.body, { color: colors.secondaryText, textAlign: 'center', marginTop: 8 }]}>
-            {error}
+            {error.message}
           </Text>
         </View>
       </SafeAreaView>

@@ -23,8 +23,7 @@ import SwitchLayoutButton from "@/components/SwitchLayoutButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";
-import { useCategoryStore } from "@/stores/categoryStore";
-import type { CategoryState } from "@/stores/categoryStore";
+import { useCategory } from "@/hooks/queries/categories";
 
 // AsyncStorage key for layout preference
 const LAYOUT_STORAGE_KEY = "@MyApp:layoutPreference";
@@ -55,11 +54,10 @@ export default function CategoryFull() {
     removeTrackedBook: removeTrackedBookFromStore,
   } = useTrackedBooksStore();
 
-  const category = useCategoryStore((state: CategoryState) => state.categoriesById[id as string] || null);
-  const fetchCategory = useCategoryStore((state: CategoryState) => state.fetchCategory);
+  const { data: category } = useCategory(id as string);
 
   useEffect(() => {
-    if (id) fetchCategory(id as string);
+    // Fetched via query hook
   }, [id]);
 
   // Load layout preference

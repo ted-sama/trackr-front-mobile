@@ -8,7 +8,7 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
-import { useBookDetailStore } from '@/stores/bookDetailStore';
+import { useBook } from '@/hooks/queries/books';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { ReadingStatus } from '@/types/reading-status';
 import Badge from '@/components/ui/Badge';
@@ -26,11 +26,10 @@ export default function Summary() {
   const { bookId, bookTitle } = useLocalSearchParams();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
-  const { bookById } = useBookDetailStore();
+  const { data: bookDetails } = useBook(bookId as string);
   const { getTrackedBookStatus } = useTrackedBooksStore();
 
-  const bookTracking = getTrackedBookStatus(Number(bookId));
-  const bookDetails = bookById[Number(bookId)];
+  const bookTracking = getTrackedBookStatus(String(bookId));
 
   const trackingStatusValues: Record<ReadingStatus, { text: string, icon: React.ReactNode }> = {
     'plan_to_read': { text: 'À lire', icon: <Clock3 size={12} strokeWidth={2.75} color={colors.planToRead} /> },

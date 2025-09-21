@@ -51,7 +51,7 @@ import * as Haptics from "expo-haptics";
 import { TrackingTabBar } from "@/components/book/TrackingTabBar";
 import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
 import ExpandableDescription from "@/components/ExpandableDescription";
-import { useBookDetailStore, BookDetailState } from "@/stores/bookDetailStore";
+import { useBook, useBooksBySameAuthorCategory } from "@/hooks/queries/books";
 import RatingStars from "@/components/ui/RatingStars";
 import { useLocalization } from "@/hooks/useLocalization";
 import { getLocalizedDescription } from "@/utils/description";
@@ -69,22 +69,8 @@ export default function BookScreen() {
   const [bottomSheetView, setBottomSheetView] = useState<
     "actions" | "status_editor" | "rating_editor"
   >("actions");
-  const book = useBookDetailStore(
-    (state: BookDetailState) => state.bookById[id as string] || null
-  );
-  const booksBySameAuthor = useBookDetailStore(
-    (state: BookDetailState) => state.booksBySameAuthor[id as string] || null
-  );
-  const isLoading = useBookDetailStore(
-    (state: BookDetailState) => state.isLoading
-  );
-  const error = useBookDetailStore((state: BookDetailState) => state.error);
-  const fetchBook = useBookDetailStore(
-    (state: BookDetailState) => state.fetchBook
-  );
-  const fetchBooksBySameAuthor = useBookDetailStore(
-    (state: BookDetailState) => state.fetchBooksBySameAuthor
-  );
+  const { data: book, isLoading, error } = useBook(id as string);
+  const { data: booksBySameAuthor } = useBooksBySameAuthorCategory(id as string);
   const typography = useTypography();
   const insets = useSafeAreaInsets();
   const [dummyRecommendations, setDummyRecommendations] =
@@ -258,11 +244,8 @@ export default function BookScreen() {
   const [isButtonRendered, setIsButtonRendered] = useState(false);
 
   useEffect(() => {
-    if (id) {
-        fetchBook(id as string);
-        fetchBooksBySameAuthor(id as string);
-    }
-}, [id, fetchBook]);
+    // No imperative fetch; hooks above handle fetching based on id
+  }, [id]);
 
 
   useEffect(() => {

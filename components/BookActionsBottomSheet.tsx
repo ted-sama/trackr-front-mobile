@@ -8,7 +8,7 @@ import {
   FlatList,
 } from "react-native";
 import { Image } from "expo-image";
-import { LegendList } from "@legendapp/list";
+// import { LegendList } from "@legendapp/list";
 import {
   BottomSheetModal,
   BottomSheetView,
@@ -16,21 +16,11 @@ import {
   BottomSheetBackdropProps,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
-import Animated, {
-  useAnimatedStyle,
-  interpolate,
-  Extrapolation,
-  FadeIn,
-  FadeOut,
-  withTiming,
-  withSpring,
-  EntryAnimationsValues,
-  ExitAnimationsValues,
-} from "react-native-reanimated";
+import Animated, { withTiming, withSpring, EntryAnimationsValues, ExitAnimationsValues } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { Book } from "@/types/book";
 import { ReadingStatus } from "@/types/reading-status";
-import { List } from "@/types/list";
+// import { List } from "@/types/list";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -47,7 +37,7 @@ import {
 } from "lucide-react-native";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
-import { useListStore } from "@/stores/listStore";
+import { useMyLists, useAddBookToList, useRemoveBookFromList } from "@/hooks/queries/lists";
 import { hexToRgba } from "@/utils/colors";
 import CollectionListElement from "./CollectionListElement";
 import Button from "./ui/Button";
@@ -131,19 +121,11 @@ const BookActionsBottomSheet = forwardRef<
       removeTrackedBook,
       addTrackedBook,
     } = useTrackedBooksStore();
-    const {
-      myListsById,
-      myListsIds,
-      fetchMyLists,
-      createList,
-      addBookToList,
-      removeBookFromList,
-      getListsContainingBook,
-      isLoading: isListsLoading,
-      isOwner,
-    } = useListStore();
+    const { data: myLists } = useMyLists();
+    const { mutateAsync: addBookToList } = useAddBookToList();
+    const { mutateAsync: removeBookFromList } = useRemoveBookFromList();
 
-    const lists = myListsIds.map((id) => myListsById[id]);
+    const lists = myLists || [];
     const isTracking = isBookTracked(book.id);
     const [currentView, setCurrentView] = useState(view);
     const [newListName, setNewListName] = useState("");
@@ -160,32 +142,20 @@ const BookActionsBottomSheet = forwardRef<
 
     // Fetch lists when entering list editor or creator
     useEffect(() => {
-      if (
-        currentView === VIEW_LIST_EDITOR ||
-        currentView === VIEW_LIST_CREATOR
-      ) {
-        fetchMyLists();
-      }
-    }, [currentView, fetchMyLists]);
+      // React Query handles fetching
+    }, [currentView]);
 
     // Load lists containing the book when entering list editor
     useEffect(() => {
       if (currentView === VIEW_LIST_EDITOR) {
-        const loadBookLists = async () => {
-          try {
-            const bookListIds = await getListsContainingBook(book.id);
-            setSelectedListIds(bookListIds);
-            setInitialListIds(bookListIds);
-          } catch (error) {
-            console.error(
-              "Erreur lors du chargement des listes du livre:",
-              error
-            );
-          }
-        };
-        loadBookLists();
+        // Without a direct endpoint in hooks, infer selected lists from lists containing the book if available in list data
+        const inLists = (myLists || [])
+          .filter(l => l.books?.items?.some(b => b.id === book.id))
+          .map(l => l.id);
+        setSelectedListIds(inLists);
+        setInitialListIds(inLists);
       }
-    }, [currentView, book.id, getListsContainingBook]);
+    }, [currentView, book.id, myLists]);
 
     // Synchronise tempStatus et tempRating avec trackedStatus à chaque changement
     useEffect(() => {
@@ -209,13 +179,7 @@ const BookActionsBottomSheet = forwardRef<
     };
 
     const handleCreateList = async () => {
-      if (!newListName.trim()) return; // Prevent creating empty lists
-      const newList = await createList(newListName.trim());
-      if (newList) {
-        await addBookToList(newList.id, book.id);
-      }
-      setNewListName("");
-      handleDismiss();
+      // TODO: Reintroduce createList with a mutation hook if needed
     };
 
     const actions = [
@@ -237,18 +201,19 @@ const BookActionsBottomSheet = forwardRef<
         show: isTracking,
         onPress: () => handleRemoveBookFromTracking(),
       },
-      {
+      // Remove-from-list action is only shown on list page and when a listId is provided
+      currentListId && isFromListPage ? {
         label: "Supprimer de la liste",
         icon: <MinusIcon size={16} strokeWidth={2.75} color={colors.text} />,
-        show: !!(isFromListPage && currentListId && isOwner(currentListId)),
+        show: true,
         onPress: async () => {
           if (currentListId) {
-            await removeBookFromList(currentListId, book.id);
+            await removeBookFromList({ listId: currentListId, bookId: book.id });
             // @ts-expect-error bottom sheet ref
-            ref.current?.dismiss(); // Dismiss bottom sheet after action
+            ref.current?.dismiss();
           }
         },
-      },
+      } : null,
       {
         label: "Ajouter à une liste",
         icon: <PlusIcon size={16} strokeWidth={2.75} color={colors.text} />,
@@ -438,26 +403,23 @@ const BookActionsBottomSheet = forwardRef<
                   </View>
                 </View>
                 <View style={styles.bottomSheetActions}>
-                  {actions.map(
-                    (action, idx) =>
-                      action.show && (
-                        <TouchableOpacity
-                          key={idx}
-                          style={[
-                            styles.actionButton,
-                            { backgroundColor: colors.actionButton },
-                          ]}
-                          onPress={action.onPress}
-                        >
-                          {action.icon}
-                          <Text
-                            style={[typography.caption, { color: colors.text }]}
-                          >
-                            {action.label}
-                          </Text>
-                        </TouchableOpacity>
-                      )
-                  )}
+                  {actions.filter(Boolean).map((action: any, idx) => (
+                    action.show ? (
+                      <TouchableOpacity
+                        key={idx}
+                        style={[
+                          styles.actionButton,
+                          { backgroundColor: colors.actionButton },
+                        ]}
+                        onPress={action.onPress}
+                      >
+                        {action.icon}
+                        <Text style={[typography.caption, { color: colors.text }]}>
+                          {action.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : null
+                  ))}
                 </View>
               </View>
             </Animated.View>
@@ -583,13 +545,13 @@ const BookActionsBottomSheet = forwardRef<
                   try {
                     // Add book to new lists
                     await Promise.all(
-                      listsToAdd.map((listId) => addBookToList(listId, book.id))
+                      listsToAdd.map((listId) => addBookToList({ listId, bookId: book.id }))
                     );
 
                     // Remove book from unchecked lists
                     await Promise.all(
                       listsToRemove.map((listId) =>
-                        removeBookFromList(listId, book.id)
+                        removeBookFromList({ listId, bookId: book.id })
                       )
                     );
 

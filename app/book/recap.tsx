@@ -5,7 +5,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
-import { useBookDetailStore } from '@/stores/bookDetailStore';
+import { useBook, useBookRecap } from '@/hooks/queries/books';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { ReadingStatus } from '@/types/reading-status';
 import { X, BookOpen, Clock3, BookCheck, Pause, Square } from 'lucide-react-native';
@@ -23,11 +23,10 @@ export default function Recap() {
   const { bookId, bookTitle } = useLocalSearchParams();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
-  const { bookById, getRecap } = useBookDetailStore();
   const { getTrackedBookStatus } = useTrackedBooksStore();
-  const [recap, setRecap] = useState<string>('');
-  const bookTracking = getTrackedBookStatus(Number(bookId));
-  const bookDetails = bookById[Number(bookId)];
+  const bookTracking = getTrackedBookStatus(String(bookId));
+  const { data: bookDetails } = useBook(bookId as string);
+  const { data: recap } = useBookRecap(bookId as string, bookTracking?.currentChapter || undefined);
 
   const trackingStatusValues: Record<ReadingStatus, { text: string, icon: React.ReactNode }> = {
     'plan_to_read': { text: 'À lire', icon: <Clock3 size={12} strokeWidth={2.75} color={colors.planToRead} /> },
@@ -42,14 +41,8 @@ export default function Recap() {
   };
 
   useEffect(() => {
-    const fetchRecap = async () => {
-      if (bookTracking?.currentChapter) {
-        const recapText = await getRecap(bookId as string, bookTracking.currentChapter);
-        if(recapText) setRecap(recapText);
-      }
-    };
-    fetchRecap();
-  }, [bookId, bookTracking, getRecap]);
+    // Fetched via query hook
+  }, [bookId, bookTracking?.currentChapter]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>

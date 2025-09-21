@@ -5,7 +5,8 @@ import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { useListStore } from "@/stores/listStore";
+import { useList } from "@/hooks/queries/lists";
+import { useReorderBooksInList } from "@/hooks/queries/lists";
 import BookDraggableList from "@/components/BookDraggableList";
 import { Book } from "@/types/book";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,16 +20,10 @@ export default function ListOrder() {
   const typography = useTypography();
   const insets = useSafeAreaInsets();
 
-  const list = useListStore(
-    (state) =>
-      state.listsById[listId] ||
-      state.myListsById[listId] ||
-      null
-  );
-  const fetchList = useListStore((state) => state.fetchList);
-  const reorderBooksInList = useListStore((state) => state.reorderBooksInList);
-  const isLoading = useListStore((state) => state.isLoading);
-  const error = useListStore((state) => state.error);
+  const { data: list } = useList(listId as string);
+  const { mutateAsync: reorderBooksInList } = useReorderBooksInList();
+  const isLoading = false;
+  const error = null;
 
   const [hasChanges, setHasChanges] = useState(false);
   const [localBooks, setLocalBooks] = useState<Book[]>([]);
@@ -37,10 +32,8 @@ export default function ListOrder() {
   // Charger la liste initialement et quand on revient sur l'écran
   useFocusEffect(
     useCallback(() => {
-      if (listId) {
-        fetchList(listId);
-      }
-    }, [listId, fetchList])
+      // Query hook handles caching and refetch
+    }, [])
   );
 
   // Mettre à jour les livres locaux quand la liste change
@@ -102,7 +95,7 @@ export default function ListOrder() {
       // Créer la liste des nouvelles positions
       const bookOrders = localBooks.map((book) => book.id);
 
-      await reorderBooksInList(listId, bookOrders);
+      await reorderBooksInList({ listId: listId as string, positions: bookOrders });
 
       setHasChanges(false);
       setOriginalBooks([...localBooks]);

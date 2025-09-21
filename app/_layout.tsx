@@ -26,6 +26,8 @@ import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { useUserStore } from "@/stores/userStore";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -63,15 +65,17 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
-        <ThemeProvider>
-          <DropdownProvider>
-            <BottomSheetProvider>
-              <BottomSheetModalProvider>
-                <RootLayoutContent />
-              </BottomSheetModalProvider>
-            </BottomSheetProvider>
-          </DropdownProvider>
-        </ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <DropdownProvider>
+              <BottomSheetProvider>
+                <BottomSheetModalProvider>
+                  <RootLayoutContent />
+                </BottomSheetModalProvider>
+              </BottomSheetProvider>
+            </DropdownProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
       </AuthProvider>
     </GestureHandlerRootView>
   );
