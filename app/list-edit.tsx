@@ -6,28 +6,16 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  Platform,
-  KeyboardAvoidingView,
   ImageBackground,
   ScrollView,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import Animated, {
-  useSharedValue,
-  useAnimatedScrollHandler,
-  FadeInDown,
-  FadeInUp,
-} from "react-native-reanimated";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
-import { useList } from "@/hooks/queries/lists";
-import { useUpdateList, useUpdateBackdropImage } from "@/hooks/queries/lists";
+import { useList, useUpdateList, useUpdateBackdropImage } from "@/hooks/queries/lists";
 import { useUserStore } from "@/stores/userStore";
-import Button from "@/components/ui/Button";
-import SecondaryButton from "@/components/ui/SecondaryButton";
 import Badge from "@/components/ui/Badge";
 import { X, Plus, Check, Globe, Lock, Trophy, Users, Palette, Camera } from "lucide-react-native";
 import Toast from "react-native-toast-message";
@@ -37,7 +25,7 @@ import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 
 
-const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
+//
 
 export default function ListEdit() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
@@ -49,7 +37,7 @@ export default function ListEdit() {
   const { data: list } = useList(listId as string);
   const { mutateAsync: updateList } = useUpdateList();
   const { mutateAsync: updateBackdropImage } = useUpdateBackdropImage();
-  const isLoading = false;
+  const [isSaving, setIsSaving] = useState(false);
   const currentUser = useUserStore((state) => state.currentUser);
   const isPlus = currentUser?.plan === "plus";
 
@@ -178,7 +166,7 @@ export default function ListEdit() {
     }
 
     try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setIsSaving(true);
 
       // Backdrop handling
       if (backdropMode === "image") {
@@ -189,7 +177,7 @@ export default function ListEdit() {
             text2: "L'illustration de bannière est disponible avec le plan Plus.",
           });
         } else if (selectedImage) {
-          await updateBackdropImage(listId, selectedImage);
+          await updateBackdropImage({ listId: listId as string, image: selectedImage });
         }
       }
 
@@ -198,7 +186,8 @@ export default function ListEdit() {
         description: description.trim() || null,
         backdropMode: backdropMode,
         backdropColor: backdropColor,
-        backdropImage: backdropMode === "image" ? selectedImage?.uri : null,
+        // When switching to color mode, explicitly clear the image on backend
+        ...(backdropMode === "color" ? { backdropImage: null } : {}),
         tags: tags.length > 0 ? tags : null,
         isPublic: isPublic,
         ranked: ranked,
@@ -206,37 +195,29 @@ export default function ListEdit() {
 
       console.log(payload)
 
-      await updateList(listId, payload);
+      await updateList({ listId: listId as string, updated: payload });
 
       Toast.show({
         type: "success",
         text1: "Succès",
         text2: "Liste mise à jour avec succès",
       });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       router.back();
-    } catch (error) {
+  } catch {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Toast.show({
         type: "error",
         text1: "Erreur",
         text2: "Impossible de mettre à jour la liste",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleReset = () => {
-    if (list) {
-      setName(list.name || "");
-      setDescription(list.description || "");
-      setTags(list.tags || []);
-      setIsPublic(list.isPublic || false);
-      setRanked(list.ranked || false);
-      setBackdropColor(list.backdropColor || "#7C3AED");
-      setBackdropMode(list.backdropImage ? "image" : "color");
-      setSelectedImage(null);
-    }
-  };
+  //
 
   const togglePublic = () => {
     Haptics.selectionAsync();
@@ -285,7 +266,7 @@ export default function ListEdit() {
             styles.backButton,
             { backgroundColor: colors.primary, opacity: hasChanges ? 1 : 0.5 },
           ]}
-          disabled={!hasChanges || isLoading}
+          disabled={!hasChanges || isSaving}
         >
           <Check size={24} color={colors.buttonText} strokeWidth={2.5} />
         </TouchableOpacity>

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import * as Haptics from "expo-haptics";
-import { View, Text, StyleSheet, FlatList, Alert, Pressable, Animated as RNAnimated } from "react-native";
+import { View, Text, StyleSheet, FlatList, Alert, Pressable } from "react-native";
 import { Image } from "expo-image";
 // import { LegendList, LegendListRef } from "@legendapp/list";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -31,6 +31,7 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import ListActionsBottomSheet from "@/components/ListActionsBottomSheet";
 import Avatar from "@/components/ui/Avatar";
 import PlusBadge from "@/components/ui/PlusBadge";
+import PillButton from "@/components/ui/PillButton";
 
 // AsyncStorage key for layout preference
 const LAYOUT_STORAGE_KEY = "@MyApp:layoutPreference";
@@ -63,10 +64,7 @@ export default function ListFull() {
   const { currentUser } = useUserStore();
   const isEditable = (listId: string) => Boolean(list && currentUser && list.owner?.id === currentUser.id);
 
-  // Animation refs for buttons
-  const scaleAnimOrder = useRef(new RNAnimated.Value(1)).current;
-  const scaleAnimEdit = useRef(new RNAnimated.Value(1)).current;
-  const scaleAnimDelete = useRef(new RNAnimated.Value(1)).current;
+  // Animation refs for buttons (kept if used elsewhere)
 
   // Charger la liste initialement et quand on revient sur l'écran
   useFocusEffect(
@@ -133,48 +131,7 @@ export default function ListFull() {
     );
   };
 
-  // Animation handlers for buttons
-  const handlePressInOrder = () => {
-    RNAnimated.spring(scaleAnimOrder, {
-      toValue: 0.95,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePressOutOrder = () => {
-    RNAnimated.spring(scaleAnimOrder, {
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePressInEdit = () => {
-    RNAnimated.spring(scaleAnimEdit, {
-      toValue: 0.95,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePressOutEdit = () => {
-    RNAnimated.spring(scaleAnimEdit, {
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePressInDelete = () => {
-    RNAnimated.spring(scaleAnimDelete, {
-      toValue: 0.95,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePressOutDelete = () => {
-    RNAnimated.spring(scaleAnimDelete, {
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
-  };
+  // Local button animation handlers removed; handled inside PillButton
 
   const switchLayout = () => {
     setCurrentLayout(currentLayout === "grid" ? "list" : "grid");
@@ -275,105 +232,37 @@ export default function ListFull() {
               {isEditable(list.id) && (
                 <View style={{ marginTop: 16 }}>
                   <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
-                    <RNAnimated.View style={{ transform: [{ scale: scaleAnimOrder }] }}>
-                      <Pressable
-                        style={[
-                          styles.actionButton,
-                          { backgroundColor: colors.card, borderColor: colors.border }
-                        ]}
-                        onPress={() => {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          router.push({
-                            pathname: "/list-order",
-                            params: {
-                              listId: list.id.toString(),
-                            },
-                          })
-                        }}
-                        onPressIn={handlePressInOrder}
-                        onPressOut={handlePressOutOrder}
-                      >
-                        <Ionicons
-                          name="swap-vertical"
-                          size={16}
-                          color={colors.secondaryText}
-                        />
-                        <Text
-                          style={[
-                            styles.actionButtonText,
-                            typography.caption,
-                            { color: colors.secondaryText },
-                          ]}
-                        >
-                          Ordonner
-                        </Text>
-                      </Pressable>
-                    </RNAnimated.View>
-                    
-                    <RNAnimated.View style={{ transform: [{ scale: scaleAnimEdit }] }}>
-                      <Pressable
-                        style={[
-                          styles.actionButton,
-                          { backgroundColor: colors.card, borderColor: colors.border }
-                        ]}
-                        onPress={() => {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          router.push({
-                            pathname: "/list-edit",
-                            params: {
-                              listId: list.id.toString(),
-                            },
-                          })
-                        }}
-                        onPressIn={handlePressInEdit}
-                        onPressOut={handlePressOutEdit}
-                      >
-                        <Ionicons
-                          name="pencil"
-                          size={16}
-                          color={colors.secondaryText}
-                        />
-                        <Text
-                          style={[
-                            styles.actionButtonText,
-                            typography.caption,
-                            { color: colors.secondaryText },
-                          ]}
-                        >
-                          Modifier
-                        </Text>
-                      </Pressable>
-                    </RNAnimated.View>
-
-                    <RNAnimated.View style={{ transform: [{ scale: scaleAnimDelete }] }}>
-                      <Pressable
-                        style={[
-                          styles.actionButton,
-                          { backgroundColor: colors.card, borderColor: colors.error }
-                        ]}
-                        onPress={() => {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          handleDeleteList();
-                        }}
-                        onPressIn={handlePressInDelete}
-                        onPressOut={handlePressOutDelete}
-                      >
-                        <Ionicons
-                          name="trash-outline"
-                          size={16}
-                          color={colors.error}
-                        />
-                        <Text
-                          style={[
-                            styles.actionButtonText,
-                            typography.caption,
-                            { color: colors.error },
-                          ]}
-                        >
-                          Supprimer
-                        </Text>
-                      </Pressable>
-                    </RNAnimated.View>
+                    <PillButton
+                      title="Ordonner"
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        router.push({
+                          pathname: "/list-order",
+                          params: { listId: list.id.toString() },
+                        });
+                      }}
+                      icon={<Ionicons name="swap-vertical" size={16} color={colors.secondaryText} />}
+                    />
+                    <PillButton
+                      title="Modifier"
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        router.push({
+                          pathname: "/list-edit",
+                          params: { listId: list.id.toString() },
+                        });
+                      }}
+                      icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
+                    />
+                    <PillButton
+                      title="Supprimer"
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        handleDeleteList();
+                      }}
+                      style="destructive"
+                      icon={<Ionicons name="trash-outline" size={16} color={colors.error} />}
+                    />
                   </View>
                 </View>
               )}

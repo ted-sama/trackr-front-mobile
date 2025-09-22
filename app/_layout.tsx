@@ -161,6 +161,14 @@ function RootLayoutContent() {
         <Stack.Screen name="category-full" />
         <Stack.Screen name="list-full" />
         <Stack.Screen
+          name="profile-edit"
+          options={{
+            presentation: "modal",
+            gestureEnabled: true,
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
           name="list-edit"
           options={{
             presentation: "modal",

@@ -5,7 +5,6 @@ import {
   Text,
   FlatList,
   StyleSheet,
-  Pressable,
   TouchableOpacity,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
@@ -26,6 +25,8 @@ import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
+import PillButton from "@/components/ui/PillButton";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function Profile() {
   const { currentUser } = useUserStore();
@@ -41,9 +42,7 @@ export default function Profile() {
 
   const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
-  const handleBack = () => {
-    router.back();
-  };
+  // no-op
   return (
     <View style={{ flex: 1 }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
@@ -128,6 +127,15 @@ export default function Profile() {
               {currentUser?.plan === "plus" && <PlusBadge />}
             </View>
           </View>
+        </View>
+        <View style={{ paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
+          <PillButton
+            icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
+            title="Modifier le profil"
+            onPress={() => {
+              router.push('/profile-edit');
+            }}
+          />
         </View>
         <View style={{ paddingHorizontal: 16, marginTop: 24, gap: 24 }}>
           {topBooks && (
