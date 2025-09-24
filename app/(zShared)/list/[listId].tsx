@@ -32,16 +32,12 @@ import ListActionsBottomSheet from "@/components/ListActionsBottomSheet";
 import Avatar from "@/components/ui/Avatar";
 import PlusBadge from "@/components/ui/PlusBadge";
 import PillButton from "@/components/ui/PillButton";
-
-// AsyncStorage key for layout preference
-const LAYOUT_STORAGE_KEY = "@MyApp:layoutPreference";
-// Default layout preference
-const DEFAULT_LAYOUT = "list";
+import { useUIStore } from "@/stores/uiStore";
 
 const AnimatedList = Animated.createAnimatedComponent(FlatList<Book>);
 
 export default function ListFull() {
-  const { id } = useLocalSearchParams();
+  const { listId } = useLocalSearchParams<{ listId: string }>();
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -53,13 +49,10 @@ export default function ListFull() {
   const [titleY, setTitleY] = useState<number>(0);
   const scrollRef = useRef<FlatList<Book> | null>(null);
   const listActionsBottomSheetRef = useRef<BottomSheetModal>(null);
-  const [currentLayout, setCurrentLayout] = useState<"grid" | "list">(
-    DEFAULT_LAYOUT as "grid" | "list"
-  );
+  const currentLayout = useUIStore(state => state.listLayout);
+  const setLayout = useUIStore(state => state.setListLayout);
 
-  // const { addTrackedBook, removeTrackedBook } = useTrackedBooksStore();
-
-  const { data: list } = useList(id as string);
+  const { data: list, refetch } = useList(listId);
   const { mutateAsync: deleteListFromStore } = useDeleteList();
   const { currentUser } = useUserStore();
   const isEditable = (listId: string) => Boolean(list && currentUser && list.owner?.id === currentUser.id);
@@ -69,25 +62,12 @@ export default function ListFull() {
   // Charger la liste initialement et quand on revient sur l'écran
   useFocusEffect(
     useCallback(() => {
-      // Query hook handles caching and refetch on focus via focusManager
-    }, [])
+      if (listId) {
+        refetch();
+      }
+      return () => {};
+    }, [listId, refetch])
   );
-
-  // Load layout preference
-  useEffect(() => {
-    const loadLayoutPreference = async () => {
-      const storedLayout = (await AsyncStorage.getItem(LAYOUT_STORAGE_KEY)) as
-        | "grid"
-        | "list";
-      if (storedLayout) setCurrentLayout(storedLayout);
-    };
-    loadLayoutPreference();
-  }, []);
-
-  // Save layout preference
-  useEffect(() => {
-    AsyncStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout);
-  }, [currentLayout]);
 
   const handleBack = () => {
     router.back();
@@ -111,16 +91,14 @@ export default function ListFull() {
             try {
               await deleteListFromStore(list.id);
               Toast.show({
-                type: "success",
+                type: "info",
                 text1: "Liste supprimée",
-                text2: `La liste "${list.name}" a été supprimée avec succès.`,
               });
               router.back();
             } catch (error) {
               Toast.show({
-                type: "error",
-                text1: "Erreur",
-                text2: "Impossible de supprimer la liste.",
+                type: "info",
+                text1: "Une erreur est survenue",
               });
               console.error("Failed to delete list:", error);
             }
@@ -134,7 +112,7 @@ export default function ListFull() {
   // Local button animation handlers removed; handled inside PillButton
 
   const switchLayout = () => {
-    setCurrentLayout(currentLayout === "grid" ? "list" : "grid");
+    setLayout(currentLayout === "grid" ? "list" : "grid");
   };
 
   const handlePresentModalPress = useCallback((view: "actions") => {
@@ -210,24 +188,26 @@ export default function ListFull() {
                   alignItems: "center",
                 }}
               >
-                <View
-                  style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-                >
-                  <Avatar image={list.owner.avatar || ""} size={28} />
-                  <Text
-                    style={[
-                      typography.username,
-                      { color: colors.secondaryText },
-                    ]}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
+                <Pressable onPress={() => router.push(`/profile/${list.owner.username}`)}>
+                  <View
+                    style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
                   >
-                    {list.owner.username}
-                  </Text>
-                  {list.owner.plan === "plus" && (
-                    <PlusBadge />
-                  )}
-                </View>
+                    <Avatar image={list.owner.avatar || ""} size={28} />
+                    <Text
+                      style={[
+                        typography.username,
+                        { color: colors.secondaryText },
+                      ]}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {list.owner.displayName}
+                    </Text>
+                    {list.owner.plan === "plus" && (
+                      <PlusBadge />
+                    )}
+                  </View>
+                </Pressable>
               </View>
               {isEditable(list.id) && (
                 <View style={{ marginTop: 16 }}>
@@ -343,11 +323,13 @@ export default function ListFull() {
           ListEmptyComponent={
             list.books.items.length === 0 ? (
               <Text
-                style={{
-                  color: colors.secondaryText,
+                style={
+                  [
+                    typography.body,
+                  {color: colors.secondaryText,
                   textAlign: "center",
-                  marginTop: 32,
-                }}
+                  marginTop: 32,}
+                ]}
               >
                 Aucun livre trouvé dans cette liste.
               </Text>

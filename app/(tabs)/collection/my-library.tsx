@@ -45,18 +45,6 @@ export default function MyLibrary() {
   const { getTrackedBooks, addTrackedBook, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
   const books = getTrackedBooks();
 
-  // Load saved layout preference
-  useEffect(() => {
-    AsyncStorage.getItem(LAYOUT_STORAGE_KEY).then((layout) => {
-      if (layout === 'grid' || layout === 'list') setLayout(layout);
-    });
-  }, [setLayout]);
-
-  // Persist layout changes
-  useEffect(() => {
-    AsyncStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout);
-  }, [currentLayout]);
-
   const switchLayout = () => {
     const newLayout = currentLayout === 'grid' ? 'list' : 'grid';
     setLayout(newLayout);

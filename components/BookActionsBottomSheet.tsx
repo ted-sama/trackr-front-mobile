@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { forwardRef, useCallback, useState, useEffect } from "react";
+import React, { forwardRef, useCallback, useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -37,8 +37,9 @@ import {
 } from "lucide-react-native";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
-import { useMyLists, useAddBookToList, useRemoveBookFromList } from "@/hooks/queries/lists";
+import { useMyLists, useAddBookToList, useRemoveBookFromList, useCreateList } from "@/hooks/queries/lists";
 import { hexToRgba } from "@/utils/colors";
+import Toast from "react-native-toast-message";
 import CollectionListElement from "./CollectionListElement";
 import Button from "./ui/Button";
 import SecondaryButton from "./ui/SecondaryButton";
@@ -95,6 +96,18 @@ function morphOut(values: ExitAnimationsValues) {
   return { initialValues, animations };
 }
 
+function haveSameIds(previous: string[], next: string[]) {
+  if (previous.length !== next.length) {
+    return false;
+  }
+  for (let index = 0; index < previous.length; index += 1) {
+    if (previous[index] !== next[index]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 const BookActionsBottomSheet = forwardRef<
   BottomSheetModal,
   BookActionsBottomSheetProps
@@ -124,8 +137,11 @@ const BookActionsBottomSheet = forwardRef<
     const { data: myListsData } = useMyLists();
     const { mutateAsync: addBookToList } = useAddBookToList();
     const { mutateAsync: removeBookFromList } = useRemoveBookFromList();
-
-    const lists = (myListsData?.pages.flatMap((p: any) => p.data) ?? []) as any[];
+    const { mutateAsync: createList } = useCreateList();
+    const lists = useMemo(
+      () => (myListsData?.pages.flatMap((page: any) => page.data) ?? []) as any[],
+      [myListsData]
+    );
     const isTracking = isBookTracked(book.id);
     const [currentView, setCurrentView] = useState(view);
     const [newListName, setNewListName] = useState("");
@@ -134,26 +150,39 @@ const BookActionsBottomSheet = forwardRef<
     const [tempStatus, setTempStatus] = useState<ReadingStatus>();
     const [tempRating, setTempRating] = useState<number>(0);
 
-    useEffect(() => {
-      if (view) {
-        setCurrentView(view);
-      }
+    const resetSheetState = useCallback(() => {
+      setCurrentView(view);
+      setNewListName("");
+      setSelectedListIds([]);
+      setInitialListIds([]);
     }, [view]);
 
-    // Fetch lists when entering list editor or creator
-    useEffect(() => {
-      // React Query handles fetching
-    }, [currentView]);
+    const closeSheet = useCallback(() => {
+      resetSheetState();
+      const sheetRef = typeof ref === "object" ? ref?.current : null;
+      if (sheetRef) {
+        // @ts-expect-error bottom sheet ref
+        sheetRef.dismiss();
+      }
+    }, [ref, resetSheetState]);
+
+    const handleSheetDismiss = useCallback(() => {
+      resetSheetState();
+      if (onDismiss) {
+        onDismiss();
+      }
+    }, [onDismiss, resetSheetState]);
 
     // Load lists containing the book when entering list editor
     useEffect(() => {
       if (currentView === VIEW_LIST_EDITOR) {
         // Without a direct endpoint in hooks, infer selected lists from lists containing the book if available in list data
         const inLists = lists
-          .filter((l: any) => l.books?.items?.some((b: any) => b.id === book.id))
-          .map((l: any) => l.id);
-        setSelectedListIds(inLists);
-        setInitialListIds(inLists);
+          .filter((list: any) => list.books?.items?.some((bookItem: any) => bookItem.id === book.id))
+          .map((list: any) => list.id);
+
+        setSelectedListIds((previous) => (haveSameIds(previous, inLists) ? previous : inLists));
+        setInitialListIds((previous) => (haveSameIds(previous, inLists) ? previous : inLists));
       }
     }, [currentView, book.id, lists]);
 
@@ -166,20 +195,15 @@ const BookActionsBottomSheet = forwardRef<
       setTempRating(typeof rating === "number" ? rating : 0);
     }, [book.id, getTrackedBookStatus]);
 
-    const handleDismiss = () => {
-      setCurrentView(view); // Reset to default view on dismiss
-      setNewListName(""); // Clear the input
-      setSelectedListIds([]); // Reset selected lists
-      setInitialListIds([]); // Reset initial lists
-      if (onDismiss) {
-        onDismiss();
-      }
-      // @ts-expect-error bottom sheet ref
-      ref?.current?.dismiss();
-    };
-
     const handleCreateList = async () => {
-      // TODO: Reintroduce createList with a mutation hook if needed
+      try {
+        const newList = await createList(newListName);
+        console.log("newList", newList);
+        setNewListName("");
+        setCurrentView(VIEW_LIST_EDITOR);
+      } catch (error) {
+        console.error("Error creating list:", error);
+      }
     };
 
     const actions = [
@@ -206,13 +230,7 @@ const BookActionsBottomSheet = forwardRef<
         label: "Supprimer de la liste",
         icon: <MinusIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: true,
-        onPress: async () => {
-          if (currentListId) {
-            await removeBookFromList({ listId: currentListId, bookId: book.id });
-            // @ts-expect-error bottom sheet ref
-            ref.current?.dismiss();
-          }
-        },
+        onPress: () => handleRemoveBookFromList(),
       } : null,
       {
         label: "Ajouter à une liste",
@@ -275,20 +293,13 @@ const BookActionsBottomSheet = forwardRef<
       },
     ];
 
-    useEffect(() => {
-      if (view) {
-        setCurrentView(view);
-      }
-    }, [view]);
-
     const updateStatus = async (status: ReadingStatus) => {
       try {
         setTempStatus(status);
         await updateTrackedBook(book.id, { status });
         // Optional: Add a small delay to ensure UI updates properly
         setTimeout(() => {
-          // @ts-expect-error bottom sheet ref
-          ref.current?.dismiss();
+          closeSheet();
         }, 100);
       } catch (error) {
         console.error("Error updating book status:", error);
@@ -304,8 +315,15 @@ const BookActionsBottomSheet = forwardRef<
 
     const handleRemoveBookFromTracking = async () => {
       await removeTrackedBook(book.id);
-      // @ts-expect-error bottom sheet ref
-      ref.current?.dismiss();
+      closeSheet();
+    };
+
+    const handleRemoveBookFromList = async () => {
+      if (currentListId) {
+        await removeBookFromList({ listId: currentListId, bookId: book.id });
+        closeSheet();
+        Toast.show({ type: 'info', text1: 'Livre retiré de la liste',  });
+      }
     };
 
     function toggleListSelection(listId: string) {
@@ -336,7 +354,7 @@ const BookActionsBottomSheet = forwardRef<
 
       // Update the book with the new rating
       await updateTrackedBook(book.id, { rating: tempRating });
-      handleDismiss();
+      closeSheet();
     };
 
     return (
@@ -344,7 +362,7 @@ const BookActionsBottomSheet = forwardRef<
         ref={ref}
         snapPoints={snapPoints}
         index={index}
-        onDismiss={handleDismiss}
+        onDismiss={handleSheetDismiss}
         backgroundStyle={{
           backgroundColor: colors.background,
           borderCurve: "continuous",
@@ -555,7 +573,7 @@ const BookActionsBottomSheet = forwardRef<
                       )
                     );
 
-                    handleDismiss();
+                    closeSheet();
                   } catch (error) {
                     console.error(
                       "Erreur lors de la sauvegarde des listes:",

@@ -57,6 +57,7 @@ export default function ProfileEdit() {
     []
   );
 
+  const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [backdropMode, setBackdropMode] = useState<"color" | "image">("color");
   const [backdropColor, setBackdropColor] = useState<string>("#7C3AED");
@@ -69,6 +70,7 @@ export default function ProfileEdit() {
 
   useEffect(() => {
     if (!currentUser) return;
+    setDisplayName(currentUser.displayName || "");
     setUsername(currentUser.username || "");
     setBackdropMode(currentUser.backdropMode || "color");
     setBackdropColor(currentUser.backdropColor || "#7C3AED");
@@ -76,15 +78,17 @@ export default function ProfileEdit() {
 
   useEffect(() => {
     if (!currentUser) return;
+    const displayNameChanged = displayName !== (currentUser.displayName || "");
     const usernameChanged = username !== (currentUser.username || "");
     const modeChanged = backdropMode !== (currentUser.backdropMode || "color");
     const colorChanged =
       (backdropColor || null) !== (currentUser.backdropColor || null);
     const pendingMedia = !!selectedBackdropImage || !!selectedAvatarImage;
     setHasChanges(
-      usernameChanged || modeChanged || colorChanged || pendingMedia
+      displayNameChanged || usernameChanged || modeChanged || colorChanged || pendingMedia
     );
   }, [
+    displayName,
     username,
     backdropMode,
     backdropColor,
@@ -167,6 +171,7 @@ export default function ProfileEdit() {
 
       // Update rest of fields
       await updateMe({
+        displayName: displayName.trim(),
         username: username.trim(),
         backdropMode,
         backdropColor:
@@ -404,6 +409,18 @@ export default function ProfileEdit() {
           </View>
         )}
 
+        {/* Display name */}
+        <TextField
+          label="Nom d'affichage"
+          value={displayName}
+          onChangeText={setDisplayName}
+          autoCapitalize="none"
+          autoCorrect={false}
+          maxLength={32}
+          returnKeyType="done"
+          placeholder="Entrez votre nom d'utilisateur"
+        />
+
         {/* Username */}
         <TextField
           label="Nom d'utilisateur"
@@ -415,20 +432,6 @@ export default function ProfileEdit() {
           returnKeyType="done"
           placeholder="Entrez votre nom d'utilisateur"
         />
-
-        {/* Selected avatar file hint */}
-        {selectedAvatarImage && (
-          <Text
-            style={[
-              typography.caption,
-              { color: colors.secondaryText, marginTop: -8 },
-            ]}
-            numberOfLines={1}
-          >
-            {selectedAvatarImage.fileName ||
-              selectedAvatarImage.uri.split("/").pop()}
-          </Text>
-        )}
       </ScrollView>
     </View>
   );
@@ -525,10 +528,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     alignSelf: "center",
     bottom: -36,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
   },
   avatarCameraBtn: {
     position: "absolute",

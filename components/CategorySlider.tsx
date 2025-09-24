@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     alignItems: 'center',
-    paddingHorizontal: 16,
+    marginHorizontal: 16,
     marginBottom: 12,
   },
   categoryTitle: {

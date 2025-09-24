@@ -6,6 +6,15 @@ import { useUserStore } from '@/stores/userStore';
 import { PaginatedResponse } from '@/types/api';
 import { List } from '@/types/list';
 import { User } from '@/types/user';
+import { queryKeys } from './keys';
+
+export function useUser(userId: string) {
+  return useQuery({
+    queryKey: queryKeys.user(userId),
+    queryFn: async () => (await api.get<User>(`/users/${userId}`)).data,
+    enabled: Boolean(userId),
+  });
+}
 
 export function useUserTop(userId?: string) {
   const { currentUser } = useUserStore();
@@ -26,7 +35,7 @@ export function useUserLists(userId?: string) {
   const endpoint = isMe ? '/me/lists' : `/users/${userId}/lists`;
 
   return useQuery({
-    queryKey: ['user', 'lists', isMe ? 'me' : userId],
+    queryKey: queryKeys.userLists(isMe ? undefined : userId),
     queryFn: async () => (await api.get<PaginatedResponse<List>>(endpoint)).data,
     enabled: isMe || Boolean(userId),
     staleTime: 60_000,
@@ -67,7 +76,8 @@ export function useUpdateMe() {
     onSuccess: (freshUser) => {
       useUserStore.getState().setUser(freshUser);
       qc.invalidateQueries({ queryKey: ['user', 'top', 'me'] });
-      qc.invalidateQueries({ queryKey: ['user', 'lists', 'me'] });
+      qc.invalidateQueries({ queryKey: queryKeys.userLists() });
+      qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
     },
   });
 }

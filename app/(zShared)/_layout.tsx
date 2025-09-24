@@ -4,6 +4,8 @@ export default function SharedLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="book/[id]" />
+      <Stack.Screen name="list/[listId]" />
+      <Stack.Screen name="profile/[userId]" />
     </Stack>
   );
 }

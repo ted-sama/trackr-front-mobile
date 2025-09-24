@@ -56,7 +56,7 @@ export function HeaderCollection({
         backgroundColor={colors.background}
       />
       {isSearchActive ? (
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <SearchBar
             placeholder="Rechercher dans la collection..."
             isEditable
@@ -71,7 +71,7 @@ export function HeaderCollection({
         </View>
       ) : (
         <View style={styles.titleRow}>
-          <Text style={[typography.headerTitle, { color: colors.text, flex: 1 }]} numberOfLines={1}>
+          <Text style={[typography.h1, { color: colors.text, flex: 1 }]} numberOfLines={1}>
             Collection
           </Text>
           <TouchableOpacity onPress={handleSearchIconPress} style={styles.searchIconButton}>
@@ -95,7 +95,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    height: 52,
   },
   searchIconButton: {
     marginLeft: 12,

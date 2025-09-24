@@ -170,7 +170,7 @@ export default function CollectionListElement({
               <Text
                 style={[typography.caption, { color: colors.secondaryText }]}
               >
-                Par {list.owner.username}
+                Par {list.owner.displayName}
               </Text>
               {separator()}
               <Text

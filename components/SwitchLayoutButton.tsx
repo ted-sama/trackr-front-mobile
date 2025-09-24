@@ -17,7 +17,7 @@ export default function SwitchLayoutButton({ onPress, currentView }: SwitchLayou
     <Pressable onPress={() => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       onPress();
-    }}>
+    }} style={{ width: 32, height: 32, justifyContent: 'center', alignItems: 'center' }}>
       {currentView === 'list' ? (
         <LucideLayoutGrid size={22} color={colors.icon} />
       ) : (

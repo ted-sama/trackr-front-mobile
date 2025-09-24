@@ -4,15 +4,16 @@ import { api } from '@/services/api';
 import { List } from '@/types/list';
 import { PaginatedResponse } from '@/types/api';
 import { queryKeys } from './keys';
+import { useUserStore } from '@/stores/userStore';
 
 async function fetchLists(): Promise<List[]> {
   const { data } = await api.get<PaginatedResponse<List>>('/lists');
   return data.data;
 }
 
-async function fetchMyLists(page: number): Promise<PaginatedResponse<List>> {
+async function fetchMyLists(page: number, q?: string): Promise<PaginatedResponse<List>> {
   const { data } = await api.get<PaginatedResponse<List>>('/me/lists', {
-    params: { page, limit: 20 },
+    params: { page, limit: 20, q },
   });
   return data;
 }
@@ -62,10 +63,10 @@ export function useLists() {
   return useQuery({ queryKey: queryKeys.lists, queryFn: fetchLists });
 }
 
-export function useMyLists() {
+export function useMyLists(q?: string) {
   return useInfiniteQuery({
-    queryKey: queryKeys.myLists,
-    queryFn: ({ pageParam }) => fetchMyLists(pageParam ?? 1),
+    queryKey: queryKeys.myLists(q),
+    queryFn: ({ pageParam }) => fetchMyLists(pageParam ?? 1, q),
     getNextPageParam: (lastPage) => {
       const { currentPage, lastPage: last } = lastPage.meta;
       return currentPage < last ? currentPage + 1 : undefined;
@@ -74,10 +75,14 @@ export function useMyLists() {
   });
 }
 
-export function useList(id: string | undefined) {
+export function useList(id?: string) {
   return useQuery({
-    queryKey: id ? queryKeys.list(id) : ['list', 'missing-id'],
-    queryFn: () => fetchList(id as string),
+    queryKey: id ? queryKeys.list(id) : queryKeys.list('missing-id'),
+    queryFn: () => {
+      const list = fetchList(id as string);
+      console.log("list", list);
+      return list;
+    },
     enabled: Boolean(id),
   });
 }
@@ -88,8 +93,13 @@ export function useUpdateList() {
     mutationFn: ({ listId, updated }: { listId: string; updated: Partial<List> }) => updateListRequest(listId, updated),
     onSuccess: (freshList) => {
       qc.setQueryData(queryKeys.list(freshList.id), freshList);
-      qc.invalidateQueries({ queryKey: queryKeys.myLists });
+      qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
       qc.invalidateQueries({ queryKey: queryKeys.lists });
+      qc.invalidateQueries({ queryKey: queryKeys.userLists() });
+      const ownerId = freshList.owner?.id;
+      if (ownerId) {
+        qc.invalidateQueries({ queryKey: queryKeys.userLists(ownerId) });
+      }
     },
   });
 }
@@ -110,6 +120,9 @@ export function useReorderBooksInList() {
     mutationFn: ({ listId, positions }: { listId: string; positions: string[] }) => reorderBooksRequest(listId, positions),
     onSuccess: (_res, vars) => {
       qc.invalidateQueries({ queryKey: queryKeys.list(vars.listId) });
+      qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
+      qc.invalidateQueries({ queryKey: queryKeys.lists });
+      qc.invalidateQueries({ queryKey: queryKeys.userLists() });
     },
   });
 }
@@ -119,8 +132,13 @@ export function useCreateList() {
   return useMutation({
     mutationFn: (name: string) => createList(name),
     onSuccess: (newList) => {
-      qc.invalidateQueries({ queryKey: queryKeys.myLists });
+      qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
       qc.invalidateQueries({ queryKey: queryKeys.lists });
+      qc.invalidateQueries({ queryKey: queryKeys.userLists() });
+      const ownerId = newList.owner?.id ?? useUserStore.getState().currentUser?.id;
+      if (ownerId) {
+        qc.invalidateQueries({ queryKey: queryKeys.userLists(ownerId) });
+      }
     },
   });
 }
@@ -130,7 +148,14 @@ export function useAddBookToList() {
   return useMutation({
     mutationFn: ({ listId, bookId }: { listId: string; bookId: string }) => addBookToList(listId, bookId),
     onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
       qc.invalidateQueries({ queryKey: queryKeys.list(vars.listId) });
+      qc.invalidateQueries({ queryKey: queryKeys.userLists() });
+      const cachedList = qc.getQueryData<List>(queryKeys.list(vars.listId));
+      const ownerId = cachedList?.owner?.id ?? useUserStore.getState().currentUser?.id;
+      if (ownerId) {
+        qc.invalidateQueries({ queryKey: queryKeys.userLists(ownerId) });
+      }
     },
   });
 }
@@ -140,7 +165,14 @@ export function useRemoveBookFromList() {
   return useMutation({
     mutationFn: ({ listId, bookId }: { listId: string; bookId: string }) => removeBookFromList(listId, bookId),
     onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
       qc.invalidateQueries({ queryKey: queryKeys.list(vars.listId) });
+      qc.invalidateQueries({ queryKey: queryKeys.userLists() });
+      const cachedList = qc.getQueryData<List>(queryKeys.list(vars.listId));
+      const ownerId = cachedList?.owner?.id ?? useUserStore.getState().currentUser?.id;
+      if (ownerId) {
+        qc.invalidateQueries({ queryKey: queryKeys.userLists(ownerId) });
+      }
     },
   });
 }
@@ -150,9 +182,15 @@ export function useDeleteList() {
   return useMutation({
     mutationFn: (listId: string) => deleteList(listId),
     onSuccess: (_data, listId) => {
+      const cachedList = qc.getQueryData<List>(queryKeys.list(listId));
+      const ownerId = cachedList?.owner?.id ?? useUserStore.getState().currentUser?.id;
       qc.invalidateQueries({ queryKey: queryKeys.lists });
-      qc.invalidateQueries({ queryKey: queryKeys.myLists });
+      qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
       qc.removeQueries({ queryKey: queryKeys.list(listId) });
+      qc.invalidateQueries({ queryKey: queryKeys.userLists() });
+      if (ownerId) {
+        qc.invalidateQueries({ queryKey: queryKeys.userLists(ownerId) });
+      }
     },
   });
 }

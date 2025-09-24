@@ -5,13 +5,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } from 'react-native-reanimated';
 import CollectionListElement from "@/components/CollectionListElement";
 import { useRouter } from "expo-router";
-import HeaderCollection from "@/components/collection/HeaderCollection";
-import { LegendList } from "@legendapp/list";
+import CollectionHeader from "@/components/collection/HeaderCollection";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { Book } from "@/types/book";
 import { useTypography } from "@/hooks/useTypography";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useMyLists } from '@/hooks/queries/lists';
+import { useStableTrimmedQuery } from '@/hooks/useDebouncedValue';
 
 const AnimatedExpoImage = Animated.createAnimatedComponent(ExpoImage);
 
@@ -63,7 +63,7 @@ interface MyLibraryHeaderProps {
 const MyLibraryHeader: React.FC<MyLibraryHeaderProps> = React.memo(
   ({ mosaicBooks, colors, typography, onPress, totalBooks }) => {
     return (
-      <Pressable onPress={onPress}>
+      <Pressable onPress={onPress} style={{ marginBottom: 16 }}>
         <View style={[styles.myLibraryHeaderMenu, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <View style={styles.stackContainer}>
             {mosaicBooks.map((book, index) => (
@@ -97,10 +97,11 @@ export default function Collection() {
   const typography = useTypography();
   const { colors } = useTheme();
   const [searchText, setSearchText] = useState("");
+  const debouncedQuery = useStableTrimmedQuery(searchText);
   const { getTrackedBooks } = useTrackedBooksStore();
   const myLibrary = getTrackedBooks();
   const mosaicBooks = useMemo(() => myLibrary.slice(0, 10), [myLibrary]);
-  const { data: myLists } = useMyLists();
+  const { data: myLists } = useMyLists(debouncedQuery);
   const lists = (myLists?.pages.flatMap((p: any) => p.data) ?? []) as any[];
   
   const handleSearchTextChange = useCallback((text: string) => {
@@ -123,7 +124,7 @@ export default function Collection() {
 
   return (
     <SafeAreaView edges={["right", "left", "bottom"]} style={{ flex: 1 }}>
-      <HeaderCollection
+      <CollectionHeader
         searchText={searchText}
         onSearchTextChange={handleSearchTextChange}
         onSubmitSearch={handleSubmitSearch}
@@ -132,7 +133,7 @@ export default function Collection() {
         <FlatList
           data={lists}
           ListHeaderComponent={renderListHeader}
-          renderItem={({ item }) => <CollectionListElement list={item} onPress={() => {router.push({pathname: "/list-full", params: {id: item.id.toString()}})}} />}
+          renderItem={({ item }) => <CollectionListElement list={item} onPress={() => {router.push(`/list/${item.id}`)}} />}
           keyExtractor={(item) => item.id}
           ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
           contentContainerStyle={styles.listContainer}
@@ -148,7 +149,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 16,
-    marginBottom: 16,
   },
   stackContainer: {
     width: 235,

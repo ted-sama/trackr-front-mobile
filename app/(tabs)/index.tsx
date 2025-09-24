@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, ScrollView } from "react-native";
+import { View, Text, StyleSheet, FlatList, ScrollView, Pressable } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -37,15 +37,16 @@ export default function Index() {
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-      {/* <BlurView intensity={5} tint={currentTheme === "dark" ? "dark" : "light"} style={[styles.bluredStatusBar, { height: insets.top }]} /> */}
-      <View style={[styles.header, { paddingTop: insets.top, paddingHorizontal: 16 }]}>
-        <Avatar image={currentUser?.avatar || ""} size={32} />
+      <View style={[styles.header, { paddingTop: 24 + insets.top, paddingHorizontal: 16 }]}>
+        <Pressable onPress={() => router.push("/profile")}>
+          <Avatar image={currentUser?.avatar || ""} size={32} />
+        </Pressable>
         <Text
           style={[typography.h1, { color: colors.text }]}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
-          Bonjour, {currentUser?.username}
+          Bonjour, {currentUser?.displayName}
         </Text>
       </View>
       <ScrollView
