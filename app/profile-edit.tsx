@@ -27,6 +27,7 @@ import {
   useUpdateUserBackdropImage,
 } from "@/hooks/queries/users";
 import { Image } from "expo-image";
+import PlusBadge from "@/components/ui/PlusBadge";
 
 export default function ProfileEdit() {
   const router = useRouter();
@@ -160,9 +161,7 @@ export default function ProfileEdit() {
         if (!isPlus) {
           Toast.show({
             type: "info",
-            text1: "Réservé au plan Plus",
-            text2:
-              "L'illustration de bannière est disponible avec le plan Plus.",
+            text1: "L'illustration de bannière est réservée au plan Plus",
           });
         } else {
           await uploadBackdrop(selectedBackdropImage);
@@ -301,9 +300,7 @@ export default function ProfileEdit() {
               if (!isPlus) {
                 Toast.show({
                   type: "info",
-                  text1: "Réservé au plan Plus",
-                  text2:
-                    "L'illustration de bannière est disponible avec le plan Plus.",
+                  text1: "L'illustration de bannière est réservée au plan Plus",
                 });
                 return;
               }
@@ -325,7 +322,7 @@ export default function ProfileEdit() {
               >
                 Illustration
               </Text>
-              {!isPlus && <Lock size={16} color={colors.secondaryText} />}
+              {!isPlus && <PlusBadge />}
             </View>
           </TouchableOpacity>
         </View>

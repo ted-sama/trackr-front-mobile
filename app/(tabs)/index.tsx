@@ -55,12 +55,16 @@ export default function Index() {
       <View style={styles.content}>
         <View style={styles.lastReadContainer}>
           <Text style={[typography.categoryTitle, { color: colors.text, marginBottom: 16 }]}>Dernières lectures</Text>
-          <FlatList
-            data={lastRead}
-            renderItem={({ item }) => <BookListElement book={item} compact showTrackingStatus onPress={() => {router.push(`/book/${item.id}`)}} />}
-            ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-            scrollEnabled={false}
-          />
+          {lastRead.length > 0 ? (
+            <FlatList
+              data={lastRead}
+              renderItem={({ item }) => <BookListElement book={item} compact showTrackingStatus onPress={() => {router.push(`/book/${item.id}`)}} />}
+              ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+              scrollEnabled={false}
+            />
+          ) : (
+            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>Commencez à lire pour voir vos dernières lectures</Text>
+          )}
         </View>
         <View style={{ marginHorizontal: -16 }}>
           {mostTracked && (

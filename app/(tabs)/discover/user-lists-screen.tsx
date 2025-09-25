@@ -83,10 +83,7 @@ export default function UserListsScreen() {
               list={item}
               showDescription
               onPress={() => {
-                router.push({
-                  pathname: "/list-full", 
-                  params: { id: item.id.toString() }
-                });
+                router.push(`/list/${item.id}`);
               }} 
             />
           )}

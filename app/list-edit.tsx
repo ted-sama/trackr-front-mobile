@@ -122,8 +122,7 @@ export default function ListEdit() {
     if (!isPlus) {
       Toast.show({
         type: "info",
-        text1: "Réservé au plan Plus",
-        text2: "L'illustration de bannière est disponible avec le plan Plus.",
+        text1: "L'illustration de bannière est réservée au plan Plus",
       });
       return;
     }
@@ -173,8 +172,7 @@ export default function ListEdit() {
         if (!isPlus) {
           Toast.show({
             type: "info",
-            text1: "Réservé au plan Plus",
-            text2: "L'illustration de bannière est disponible avec le plan Plus.",
+            text1: "L'illustration de bannière est réservée au plan Plus",
           });
         } else if (selectedImage) {
           await updateBackdropImage({ listId: listId as string, image: selectedImage });
@@ -307,8 +305,7 @@ export default function ListEdit() {
                 if (!isPlus) {
                   Toast.show({
                     type: "info",
-                    text1: "Réservé au plan Plus",
-                    text2: "L'illustration de bannière est disponible avec le plan Plus.",
+                    text1: "L'illustration de bannière est réservée au plan Plus",
                   });
                   return;
                 }
@@ -320,7 +317,7 @@ export default function ListEdit() {
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Camera size={18} color={colors.text} />
                 <Text style={[typography.body, styles.modeToggleText, { color: colors.text }]}>Illustration</Text>
-                {!isPlus && <Lock size={16} color={colors.secondaryText} />}
+                {!isPlus && <PlusBadge />}
               </View>
             </TouchableOpacity>
           </View>

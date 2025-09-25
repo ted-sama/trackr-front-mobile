@@ -84,7 +84,7 @@ export default function SearchScreen() {
       return (
         <CollectionListElement 
           list={item as List} 
-          onPress={() => router.push(`/list-full?id=${item.id}`)}
+          onPress={() => router.push(`/list/${item.id}`)}
           showDescription={true}
         />
       );
