@@ -5,13 +5,13 @@ import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { useList } from "@/hooks/queries/lists";
-import { useReorderBooksInList } from "@/hooks/queries/lists";
+import { useList , useReorderBooksInList } from "@/hooks/queries/lists";
 import BookDraggableList from "@/components/BookDraggableList";
 import { Book } from "@/types/book";
 import { Ionicons } from "@expo/vector-icons";
 import { Check } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import Toast from "react-native-toast-message";
 
 export default function ListOrder() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
@@ -100,16 +100,11 @@ export default function ListOrder() {
       setHasChanges(false);
       setOriginalBooks([...localBooks]);
 
-      Alert.alert(
-        "Sauvegarde réussie",
-        "L'ordre de la liste a été mis à jour.",
-        [
-          {
-            text: "OK",
-            onPress: () => router.back(),
-          },
-        ]
-      );
+      router.back();
+      Toast.show({
+        type: "info",
+        text1: "L'ordre de la liste a été mis à jour.",
+      });
     } catch (error: any) {
       console.error("Erreur lors de la sauvegarde:", error);
       console.error("Error details:", {

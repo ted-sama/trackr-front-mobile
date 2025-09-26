@@ -12,7 +12,12 @@ export default function ProfileLayout() {
         contentStyle: { backgroundColor: colors.background },
       }}
     >
-      <Stack.Screen name="[userId]" />
+      <Stack.Screen name="index" />
+      <Stack.Screen name="edit" options={{
+        presentation: "modal",
+        gestureEnabled: true,
+        headerShown: false,
+      }} />
       <Stack.Screen name="lists" />
     </Stack>
   );

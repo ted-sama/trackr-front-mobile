@@ -15,9 +15,9 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import Avatar from "@/components/ui/Avatar";
 import PlusBadge from "@/components/ui/PlusBadge";
-import { router } from "expo-router";
+import { router , useLocalSearchParams } from "expo-router";
 import BookCard from "@/components/BookCard";
-import { useUserLists, useUserTop } from "@/hooks/queries/users";
+import { useUser, useUserLists, useUserTop } from "@/hooks/queries/users";
 import CollectionListElement from "@/components/CollectionListElement";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import { useState } from "react";
@@ -28,10 +28,9 @@ import Animated, {
 import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-export default function Profile() {
-  const { currentUser } = useUserStore();
-  const { data: topBooks } = useUserTop();
-  const { data: userLists } = useUserLists();
+export default function UserProfileScreen() {
+  const { userId } = useLocalSearchParams<{ userId: string }>();
+  const { data: user } = useUser(userId);
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const scrollY = useSharedValue(0);
@@ -47,7 +46,7 @@ export default function Profile() {
     <View style={{ flex: 1 }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedHeader
-        title={currentUser?.username || "Profil"}
+        title={user?.username || "Profil"}
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
       />
@@ -63,8 +62,8 @@ export default function Profile() {
               zIndex: -99,
             }}
           >
-            {currentUser?.backdropMode === "image" &&
-            currentUser?.backdropImage ? (
+            {user?.backdropMode === "image" &&
+            user?.backdropImage ? (
               <MaskedView
                 style={{ flex: 1 }}
                 maskElement={
@@ -75,7 +74,7 @@ export default function Profile() {
                 }
               >
                 <Image
-                  source={{ uri: currentUser?.backdropImage }}
+                  source={{ uri: user?.backdropImage }}
                   style={{ width: "100%", height: "100%" }}
                   contentFit="cover"
                 />
@@ -85,7 +84,7 @@ export default function Profile() {
                 style={{
                   width: "100%",
                   height: "100%",
-                  backgroundColor: currentUser?.backdropColor || colors.accent,
+                  backgroundColor: user?.backdropColor || colors.accent,
                 }}
               />
             )}
@@ -99,7 +98,7 @@ export default function Profile() {
             }}
           >
             <Avatar
-              image={currentUser?.avatar || ""}
+              image={user?.avatar || ""}
               size={80}
               borderWidth={4}
               borderColor={colors.background}
@@ -122,9 +121,9 @@ export default function Profile() {
                 ]}
                 onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
               >
-                {currentUser?.displayName}
+                {user?.displayName}
               </Text>
-              {currentUser?.plan === "plus" && <PlusBadge />}
+              {user?.plan === "plus" && <PlusBadge />}
             </View>
           </View>
         </View>
@@ -133,11 +132,11 @@ export default function Profile() {
             icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
             title="Modifier le profil"
             onPress={() => {
-              router.push('/profile-edit');
+              router.push(`/profile/${userId}/edit`);
             }}
           />
         </View>
-        <View style={{ paddingHorizontal: 16, marginTop: 24, gap: 24 }}>
+        {/* <View style={{ paddingHorizontal: 16, marginTop: 24, gap: 24 }}>
           {topBooks && (
             <View>
               <Text
@@ -188,7 +187,7 @@ export default function Profile() {
                   <CollectionListElement
                     list={item}
                     onPress={() => {
-                      router.push(`/list/${item.id}`);
+                      router.push(`/list-full?id=${item.id}`);
                     }}
                   />
                 )}
@@ -210,7 +209,7 @@ export default function Profile() {
               </TouchableOpacity>
             </View>
           )}
-        </View>
+        </View> */}
       </AnimatedScrollView>
     </View>
   );

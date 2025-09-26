@@ -34,10 +34,13 @@ import {
   BookCheck,
   Pause,
   Square,
+  HeartIcon,
+  HeartMinusIcon,
 } from "lucide-react-native";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { useMyLists, useAddBookToList, useRemoveBookFromList, useCreateList } from "@/hooks/queries/lists";
+import { useAddBookToFavorites, useRemoveBookFromFavorites, useUserTop } from "@/hooks/queries/users";
 import { hexToRgba } from "@/utils/colors";
 import Toast from "react-native-toast-message";
 import CollectionListElement from "./CollectionListElement";
@@ -138,11 +141,18 @@ const BookActionsBottomSheet = forwardRef<
     const { mutateAsync: addBookToList } = useAddBookToList();
     const { mutateAsync: removeBookFromList } = useRemoveBookFromList();
     const { mutateAsync: createList } = useCreateList();
+    const { mutateAsync: addBookToFavorites } = useAddBookToFavorites();
+    const { mutateAsync: removeBookFromFavorites } = useRemoveBookFromFavorites();
+    const { data: favoriteBooks } = useUserTop();
     const lists = useMemo(
       () => (myListsData?.pages.flatMap((page: any) => page.data) ?? []) as any[],
       [myListsData]
     );
     const isTracking = isBookTracked(book.id);
+    const isFavorited = useMemo(
+      () => favoriteBooks?.some((favoriteBook) => favoriteBook.id === book.id) ?? false,
+      [favoriteBooks, book.id]
+    );
     const [currentView, setCurrentView] = useState(view);
     const [newListName, setNewListName] = useState("");
     const [selectedListIds, setSelectedListIds] = useState<string[]>([]);
@@ -218,6 +228,18 @@ const BookActionsBottomSheet = forwardRef<
         icon: <BookOpenIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: isTracking,
         onPress: () => setCurrentView(VIEW_STATUS_EDITOR),
+      },
+      {
+        label: "Ajouter aux favoris",
+        icon: <HeartIcon size={16} strokeWidth={2.75} color={colors.text} />,
+        show: !isFavorited,
+        onPress: () => handleAddBookToFavorites(),
+      },
+      {
+        label: "Retirer des favoris",
+        icon: <HeartMinusIcon size={16} strokeWidth={2.75} color={colors.text} />,
+        show: isFavorited,
+        onPress: () => handleRemoveBookFromFavorites(),
       },
       {
         label: "Supprimer de ma bibliothèque",
@@ -316,6 +338,18 @@ const BookActionsBottomSheet = forwardRef<
     const handleRemoveBookFromTracking = async () => {
       await removeTrackedBook(book.id);
       closeSheet();
+    };
+
+    const handleAddBookToFavorites = async () => {
+      await addBookToFavorites(book.id);
+      closeSheet();
+      Toast.show({ type: 'info', text1: 'Livre ajouté aux favoris',  });
+    };
+
+    const handleRemoveBookFromFavorites = async () => {
+      await removeBookFromFavorites(book.id);
+      closeSheet();
+      Toast.show({ type: 'info', text1: 'Livre retiré des favoris',  });
     };
 
     const handleRemoveBookFromList = async () => {

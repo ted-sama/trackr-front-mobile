@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
@@ -29,7 +29,8 @@ import {
 import { Image } from "expo-image";
 import PlusBadge from "@/components/ui/PlusBadge";
 
-export default function ProfileEdit() {
+export default function ProfileEditModal() {
+  const { userId } = useLocalSearchParams<{ userId: string }>();
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();

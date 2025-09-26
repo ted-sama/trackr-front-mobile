@@ -1,7 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { Stack } from "expo-router";
 
-export default function ProfileLayout() {
+export default function MeLayout() {
   const { colors } = useTheme();
   
   return (
@@ -13,6 +13,11 @@ export default function ProfileLayout() {
       }}
     >
       <Stack.Screen name="index" />
+      <Stack.Screen name="edit" options={{
+        presentation: "modal",
+        gestureEnabled: true,
+        headerShown: false,
+      }} />
       <Stack.Screen name="lists" />
     </Stack>
   );

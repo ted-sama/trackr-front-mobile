@@ -38,7 +38,7 @@ export default function Index() {
     >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <View style={[styles.header, { paddingTop: 24 + insets.top, paddingHorizontal: 16 }]}>
-        <Pressable onPress={() => router.push("/profile")}>
+        <Pressable onPress={() => router.push("/me")}>
           <Avatar image={currentUser?.avatar || ""} size={32} />
         </Pressable>
         <Text

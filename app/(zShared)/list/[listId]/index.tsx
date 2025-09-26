@@ -36,7 +36,7 @@ import { useUIStore } from "@/stores/uiStore";
 
 const AnimatedList = Animated.createAnimatedComponent(FlatList<Book>);
 
-export default function ListFull() {
+export default function ListFullScreen() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
@@ -216,10 +216,7 @@ export default function ListFull() {
                       title="Ordonner"
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        router.push({
-                          pathname: "/list-order",
-                          params: { listId: list.id.toString() },
-                        });
+                        router.push(`/list/${listId}/reorder`);
                       }}
                       icon={<Ionicons name="swap-vertical" size={16} color={colors.secondaryText} />}
                     />
@@ -227,10 +224,7 @@ export default function ListFull() {
                       title="Modifier"
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        router.push({
-                          pathname: "/list-edit",
-                          params: { listId: list.id.toString() },
-                        });
+                        router.push(`/list/${listId}/edit`);
                       }}
                       icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
                     />

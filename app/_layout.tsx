@@ -150,30 +150,6 @@ function RootLayoutContent() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(zShared)" />
         <Stack.Screen name="category-full" />
-        <Stack.Screen
-          name="profile-edit"
-          options={{
-            presentation: "modal",
-            gestureEnabled: true,
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="list-edit"
-          options={{
-            presentation: "modal",
-            gestureEnabled: true,
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="list-order"
-          options={{
-            presentation: "modal",
-            gestureEnabled: true,
-            headerShown: false,
-          }}
-        />
       </Stack>
       {/* Global Book Actions BottomSheet */}
       {selectedBook && (

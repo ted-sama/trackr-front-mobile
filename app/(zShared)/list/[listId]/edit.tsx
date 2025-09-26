@@ -23,9 +23,7 @@ import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
-
-
-//
+import PlusBadge from "@/components/ui/PlusBadge";
 
 export default function ListEdit() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
@@ -196,9 +194,8 @@ export default function ListEdit() {
       await updateList({ listId: listId as string, updated: payload });
 
       Toast.show({
-        type: "success",
-        text1: "Succès",
-        text2: "Liste mise à jour avec succès",
+        type: "info",
+        text1: "Liste mise à jour",
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 

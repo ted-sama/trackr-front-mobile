@@ -69,6 +69,14 @@ async function uploadBackdropRequest(image: ImagePickerAsset): Promise<void> {
   await api.put('/me/backdrop', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 }
 
+async function addBookToFavoritesRequest(bookId: string): Promise<void> {
+  await api.post(`/me/top/${bookId}`);
+}
+
+async function removeBookFromFavoritesRequest(bookId: string): Promise<void> {
+  await api.delete(`/me/top/${bookId}`);
+}
+
 export function useUpdateMe() {
   const qc = useQueryClient();
   return useMutation({
@@ -99,6 +107,26 @@ export function useUpdateUserBackdropImage() {
     mutationFn: (image: ImagePickerAsset) => uploadBackdropRequest(image),
     onSuccess: async () => {
       await useUserStore.getState().fetchCurrentUser();
+      qc.invalidateQueries({ queryKey: ['user', 'top', 'me'] });
+    },
+  });
+}
+
+export function useAddBookToFavorites() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (bookId: string) => addBookToFavoritesRequest(bookId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['user', 'top', 'me'] });
+    },
+  });
+}
+
+export function useRemoveBookFromFavorites() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (bookId: string) => removeBookFromFavoritesRequest(bookId),
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['user', 'top', 'me'] });
     },
   });
