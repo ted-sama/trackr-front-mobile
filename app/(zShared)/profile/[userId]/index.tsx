@@ -31,6 +31,10 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 export default function UserProfileScreen() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const { data: user } = useUser(userId);
+  const { data: topBooks } = useUserTop(userId);
+  const { data: userLists } = useUserLists(userId);
+  const { currentUser } = useUserStore();
+  const isMe = user?.id === currentUser?.id;
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const scrollY = useSharedValue(0);
@@ -41,7 +45,6 @@ export default function UserProfileScreen() {
 
   const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
-  // no-op
   return (
     <View style={{ flex: 1 }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
@@ -49,6 +52,7 @@ export default function UserProfileScreen() {
         title={user?.username || "Profil"}
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
+        onBack={() => router.back()}
       />
       <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} contentContainerStyle={{ paddingBottom: 64 }}>
         <View>
@@ -127,16 +131,25 @@ export default function UserProfileScreen() {
             </View>
           </View>
         </View>
-        <View style={{ paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
+        {isMe && (
+        <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
           <PillButton
             icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
             title="Modifier le profil"
             onPress={() => {
               router.push(`/profile/${userId}/edit`);
-            }}
-          />
-        </View>
-        {/* <View style={{ paddingHorizontal: 16, marginTop: 24, gap: 24 }}>
+              }}
+            />
+            <PillButton
+              icon={<Ionicons name="swap-vertical" size={16} color={colors.secondaryText} />}
+              title="Réordonner les favoris"
+              onPress={() => {
+                router.push(`/profile/${userId}/reorder`);
+              }}
+            />
+          </View>
+        )}
+        <View style={{ paddingHorizontal: 16, marginTop: 24, gap: 24 }}>
           {topBooks && (
             <View>
               <Text
@@ -182,12 +195,12 @@ export default function UserProfileScreen() {
                 Listes
               </Text>
               <FlatList
-                data={userLists.data.slice(0, 2)}
+                data={userLists.pages.flatMap(page => page.data).slice(0, 2)}
                 renderItem={({ item }) => (
                   <CollectionListElement
                     list={item}
                     onPress={() => {
-                      router.push(`/list-full?id=${item.id}`);
+                      router.push(`/list/${item.id}`);
                     }}
                   />
                 )}
@@ -200,7 +213,7 @@ export default function UserProfileScreen() {
                   { backgroundColor: colors.actionButton, marginTop: 16 },
                 ]}
                 onPress={() => {
-                  router.push("/profile/lists");
+                  router.push(`/profile/${userId}/lists`);
                 }}
               >
                 <Text style={[typography.caption, { color: colors.text }]}>
@@ -209,7 +222,7 @@ export default function UserProfileScreen() {
               </TouchableOpacity>
             </View>
           )}
-        </View> */}
+        </View>
       </AnimatedScrollView>
     </View>
   );

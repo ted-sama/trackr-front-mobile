@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator, Text, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
@@ -11,7 +11,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import CollectionListElement from '@/components/CollectionListElement';
-import { useMyLists } from '@/hooks/queries/lists';
+import { useUserLists, useUser } from '@/hooks/queries/users';
 import { List } from '@/types/list';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<List>);
@@ -20,14 +20,16 @@ export default function UserListsScreen() {
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const insets = useSafeAreaInsets();
-  const { 
-    data, 
-    isLoading, 
-    error, 
-    fetchNextPage, 
-    hasNextPage, 
-    isFetchingNextPage 
-  } = useMyLists();
+  const { userId } = useLocalSearchParams<{ userId: string }>();
+  const { data: user } = useUser(userId);
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useUserLists(userId);
   const [titleY, setTitleY] = useState<number>(0);
   const lists = useMemo(() => {
     return data?.pages.flatMap(page => page.data) ?? [];
@@ -68,9 +70,6 @@ export default function UserListsScreen() {
       <Text style={[typography.h3, { color: colors.secondaryText, textAlign: 'center' }]}>
         Aucune liste trouvée
       </Text>
-      <Text style={[typography.body, { color: colors.secondaryText, textAlign: 'center', marginTop: 8 }]}>
-        Créez votre première liste pour commencer à organiser vos livres
-      </Text>
     </View>
   );
 
@@ -106,7 +105,7 @@ export default function UserListsScreen() {
       <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />
       
       <AnimatedHeader
-        title="Listes"
+        title={`Listes de ${user?.displayName}`}
         scrollY={scrollY}
         onBack={handleBack}
         collapseThreshold={titleY > 0 ? titleY : undefined}
@@ -135,7 +134,7 @@ export default function UserListsScreen() {
                 accessibilityLabel="Lists"
                 numberOfLines={1}
               >
-                Listes
+                Listes de {user?.displayName}
               </Text>
             </View>
           }

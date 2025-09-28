@@ -60,7 +60,7 @@ export function AnimatedHeader({ title, backgroundColor , scrollY, collapseThres
           StyleSheet.absoluteFillObject,
           styles.background,
           headerContainerStyle,
-          { borderBottomColor: colors.border, borderBottomWidth: 1, backgroundColor: backgroundColor ? `${backgroundColor}73` : undefined },
+          { borderBottomColor: colors.tabBarBorder, borderBottomWidth: 1, backgroundColor: backgroundColor ? `${backgroundColor}73` : undefined },
         ]}
       >
         <BlurView

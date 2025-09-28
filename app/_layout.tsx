@@ -32,34 +32,6 @@ import { queryClient } from '@/lib/queryClient';
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
-// Config Toast
-const toastConfig: ToastConfig = {
-  info: (props) => (
-    <BaseToast
-      {...props}
-      style={{
-        borderLeftWidth: 0,
-        width: "90%",
-        height: 50,
-        backgroundColor: "#fff",
-      }}
-      contentContainerStyle={{ paddingHorizontal: 15 }}
-      text1Style={{
-        fontFamily: "Manrope_500Medium",
-        fontSize: 14,
-        lineHeight: 21,
-        letterSpacing: -0.3,
-      }}
-      text2Style={{
-        fontFamily: "Manrope_500Medium",
-        fontSize: 14,
-        lineHeight: 21,
-        letterSpacing: -0.3,
-      }}
-    />
-  ),
-};
-
 // Composant racine qui fournit les contextes globaux
 export default function RootLayout() {
   return (
@@ -110,6 +82,39 @@ function RootLayoutContent() {
     Manrope_700Bold,
     Manrope_800ExtraBold,
   });
+
+  // Config Toast
+const toastConfig: ToastConfig = {
+  info: (props) => (
+    <BaseToast
+      {...props}
+      style={{
+        borderLeftWidth: 0,
+        width: "90%",
+        height: 50,
+        borderRadius: 10,
+        borderColor: colors.border,
+        borderWidth: 1,
+        backgroundColor: colors.badgeBackground,
+      }}
+      contentContainerStyle={{ paddingHorizontal: 15 }}
+      text1Style={{
+        color: colors.text,
+        fontFamily: "Manrope_500Medium",
+        fontSize: 14,
+        lineHeight: 21,
+        letterSpacing: -0.3,
+      }}
+      text2Style={{
+        color: colors.text,
+        fontFamily: "Manrope_500Medium",
+        fontSize: 14,
+        lineHeight: 21,
+        letterSpacing: -0.3,
+      }}
+    />
+  ),
+};
 
   useEffect(() => {
     if (fontsLoaded) {
@@ -166,8 +171,8 @@ function RootLayoutContent() {
       <Toast
         autoHide={true}
         visibilityTime={2000}
-        position="bottom"
-        bottomOffset={100}
+        position="top"
+        topOffset={80}
         config={toastConfig}
       />
     </>

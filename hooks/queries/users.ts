@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { api } from '@/services/api';
 import { Book } from '@/types/book';
@@ -29,14 +29,35 @@ export function useUserTop(userId?: string) {
   });
 }
 
-export function useUserLists(userId?: string) {
+const PER_PAGE = 20;
+
+export function useUserLists(userId?: string, search?: string) {
   const { currentUser } = useUserStore();
   const isMe = !userId || userId === currentUser?.id;
   const endpoint = isMe ? '/me/lists' : `/users/${userId}/lists`;
 
-  return useQuery({
-    queryKey: queryKeys.userLists(isMe ? undefined : userId),
-    queryFn: async () => (await api.get<PaginatedResponse<List>>(endpoint)).data,
+  return useInfiniteQuery({
+    queryKey: [...queryKeys.userLists(isMe ? undefined : userId), search ?? ''],
+    queryFn: async ({ pageParam }) => {
+      const page = pageParam ?? 1;
+      const params: Record<string, string | number | undefined> = {
+        page,
+        limit: PER_PAGE,
+        q: search,
+      };
+      const { data } = await api.get<PaginatedResponse<List>>(endpoint, {
+        params,
+      });
+      return data;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPageData) => {
+      const {
+        currentPage,
+        lastPage,
+      } = lastPageData.meta;
+      return currentPage < lastPage ? currentPage + 1 : undefined;
+    },
     enabled: isMe || Boolean(userId),
     staleTime: 60_000,
   });
@@ -75,6 +96,10 @@ async function addBookToFavoritesRequest(bookId: string): Promise<void> {
 
 async function removeBookFromFavoritesRequest(bookId: string): Promise<void> {
   await api.delete(`/me/top/${bookId}`);
+}
+
+async function reorderTopRequest(bookIds: string[]): Promise<void> {
+  await api.put('/me/top/reorder', { bookIds });
 }
 
 export function useUpdateMe() {
@@ -126,6 +151,16 @@ export function useRemoveBookFromFavorites() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (bookId: string) => removeBookFromFavoritesRequest(bookId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['user', 'top', 'me'] });
+    },
+  });
+}
+
+export function useReorderUserTop() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (bookIds: string[]) => reorderTopRequest(bookIds),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['user', 'top', 'me'] });
     },

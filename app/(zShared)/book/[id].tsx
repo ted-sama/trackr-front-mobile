@@ -225,7 +225,6 @@ export default function BookScreen() {
       Toast.show({
         text1: "Nouveau chapitre marqué comme lu",
         type: "info",
-        bottomOffset: 120,
       });
     }
   };
@@ -334,7 +333,6 @@ export default function BookScreen() {
         Toast.show({
           text1: "Livre ajouté à votre bibliothèque",
           type: "info",
-          bottomOffset: 120,
         });
       } catch (error) {
         console.warn(

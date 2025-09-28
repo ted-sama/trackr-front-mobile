@@ -31,7 +31,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 export default function Profile() {
   const { currentUser } = useUserStore();
   const { data: topBooks } = useUserTop();
-  const { data: userLists } = useUserLists();
+  const { data: userListsPages } = useUserLists();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const scrollY = useSharedValue(0);
@@ -128,12 +128,20 @@ export default function Profile() {
             </View>
           </View>
         </View>
-        <View style={{ paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
+        <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
           <PillButton
             icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
             title="Modifier le profil"
             onPress={() => {
               router.push(`/me/edit`);
+            }}
+          />
+          <PillButton
+            icon={<Ionicons name="swap-vertical" size={16} color={colors.secondaryText} />}
+            title="Réordonner les favoris"
+            disabled={topBooks?.length === 0}
+            onPress={() => {
+              router.push(`/me/reorder`);
             }}
           />
         </View>
@@ -148,31 +156,35 @@ export default function Profile() {
               >
                 Favoris
               </Text>
-              <View style={{ marginHorizontal: -16 }}>
-                <FlatList
-                  data={topBooks}
-                  horizontal
-                  renderItem={({ item }) => (
-                    <BookCard
-                      book={item}
-                      size="compact-small"
-                      showRating={false}
-                      showAuthor={false}
-                      showTitle={false}
-                      onPress={() => {
-                        router.push(`/book/${item.id}`);
-                      }}
-                    />
-                  )}
-                  ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-                  scrollEnabled={true}
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.sliderContent}
-                />
-              </View>
+              {topBooks.length > 0 ? (
+                  <View style={{ marginHorizontal: -16 }}>
+                  <FlatList
+                    data={topBooks}
+                    horizontal
+                    renderItem={({ item }) => (
+                      <BookCard
+                        book={item}
+                        size="compact-small"
+                        showRating={false}
+                        showAuthor={false}
+                        showTitle={false}
+                        onPress={() => {
+                          router.push(`/book/${item.id}`);
+                        }}
+                      />
+                    )}
+                    ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+                    scrollEnabled={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.sliderContent}
+                  />
+                </View>
+              ) : (
+                <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>Aucun favori</Text>
+              )}
             </View>
           )}
-          {userLists && (
+          {userListsPages && userListsPages.pages?.length ? (
             <View>
               <Text
                 style={[
@@ -183,7 +195,7 @@ export default function Profile() {
                 Listes
               </Text>
               <FlatList
-                data={userLists.data.slice(0, 2)}
+                data={(userListsPages.pages.flatMap((page) => page.data) ?? []).slice(0, 2)}
                 renderItem={({ item }) => (
                   <CollectionListElement
                     list={item}
@@ -209,7 +221,7 @@ export default function Profile() {
                 </Text>
               </TouchableOpacity>
             </View>
-          )}
+          ) : null}
         </View>
       </AnimatedScrollView>
     </View>

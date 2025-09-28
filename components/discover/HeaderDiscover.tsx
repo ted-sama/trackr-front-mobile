@@ -120,7 +120,7 @@ export default function HeaderDiscover({
           paddingTop: insets.top,
           height: 130 + insets.top,
           backgroundColor: colors.background,
-          borderBottomColor: colors.border,
+          borderBottomColor: colors.tabBarBorder,
           borderBottomWidth: 1,
         },
       ]}

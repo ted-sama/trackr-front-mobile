@@ -13,6 +13,7 @@ import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import CollectionListElement from '@/components/CollectionListElement';
 import { useMyLists } from '@/hooks/queries/lists';
 import { List } from '@/types/list';
+import { useUserStore } from '@/stores/userStore';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<List>);
 
@@ -20,6 +21,7 @@ export default function UserListsScreen() {
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const insets = useSafeAreaInsets();
+  const { currentUser } = useUserStore();
   const { 
     data, 
     isLoading, 
@@ -68,9 +70,6 @@ export default function UserListsScreen() {
       <Text style={[typography.h3, { color: colors.secondaryText, textAlign: 'center' }]}>
         Aucune liste trouvée
       </Text>
-      <Text style={[typography.body, { color: colors.secondaryText, textAlign: 'center', marginTop: 8 }]}>
-        Créez votre première liste pour commencer à organiser vos livres
-      </Text>
     </View>
   );
 
@@ -106,7 +105,7 @@ export default function UserListsScreen() {
       <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />
       
       <AnimatedHeader
-        title="Listes"
+        title={`Listes de ${currentUser?.displayName}`}
         scrollY={scrollY}
         onBack={handleBack}
         collapseThreshold={titleY > 0 ? titleY : undefined}
@@ -135,7 +134,7 @@ export default function UserListsScreen() {
                 accessibilityLabel="Lists"
                 numberOfLines={1}
               >
-                Listes
+                Listes de {currentUser?.displayName}
               </Text>
             </View>
           }
