@@ -253,10 +253,6 @@ export default function BookScreen() {
     }
   }, [book?.coverImage]);
 
-  useEffect(() => {
-    console.log("dominantColor", dominantColor);
-  }, [dominantColor])
-
   // Compute gradient color and height
   const gradientTopColor = (() => {
     return dominantColor;

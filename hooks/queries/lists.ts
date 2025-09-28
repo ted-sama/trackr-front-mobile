@@ -80,7 +80,6 @@ export function useList(id?: string) {
     queryKey: id ? queryKeys.list(id) : queryKeys.list('missing-id'),
     queryFn: () => {
       const list = fetchList(id as string);
-      console.log("list", list);
       return list;
     },
     enabled: Boolean(id),

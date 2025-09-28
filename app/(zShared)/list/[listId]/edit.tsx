@@ -189,8 +189,6 @@ export default function ListEdit() {
         ranked: ranked,
       };
 
-      console.log(payload)
-
       await updateList({ listId: listId as string, updated: payload });
 
       Toast.show({

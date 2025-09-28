@@ -207,8 +207,7 @@ const BookActionsBottomSheet = forwardRef<
 
     const handleCreateList = async () => {
       try {
-        const newList = await createList(newListName);
-        console.log("newList", newList);
+        await createList(newListName);
         setNewListName("");
         setCurrentView(VIEW_LIST_EDITOR);
       } catch (error) {
