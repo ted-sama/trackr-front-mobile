@@ -68,7 +68,7 @@ export default function Index() {
         </View>
         <View style={{ marginHorizontal: -16 }}>
           {mostTracked && (
-            <CategorySlider category={mostTracked} seeMore={false} ranked />
+            <CategorySlider category={mostTracked} seeMore={false} />
           )}
         </View>
         <View style={{ marginHorizontal: -16 }}>
