@@ -12,6 +12,7 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      detachInactiveScreens={false}
       safeAreaInsets={{
         bottom: Platform.OS === "android" ? 10 : insets.bottom
       }}
