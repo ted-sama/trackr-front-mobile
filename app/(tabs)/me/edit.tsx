@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Pressable,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -25,6 +26,7 @@ import {
   useUpdateMe,
   useUpdateUserAvatarImage,
   useUpdateUserBackdropImage,
+  useDeleteUserAvatar,
 } from "@/hooks/queries/users";
 import { Image } from "expo-image";
 import PlusBadge from "@/components/ui/PlusBadge";
@@ -42,6 +44,7 @@ export default function ProfileEditModal() {
     useUpdateUserAvatarImage();
   const { mutateAsync: uploadBackdrop, isPending: isUploadingBackdrop } =
     useUpdateUserBackdropImage();
+  const { mutateAsync: deleteAvatar } = useDeleteUserAvatar();
 
   const presetColors = useMemo(
     () => [
@@ -67,6 +70,7 @@ export default function ProfileEditModal() {
     useState<ImagePicker.ImagePickerAsset | null>(null);
   const [selectedAvatarImage, setSelectedAvatarImage] =
     useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [isAvatarDeleted, setIsAvatarDeleted] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -76,6 +80,7 @@ export default function ProfileEditModal() {
     setUsername(currentUser.username || "");
     setBackdropMode(currentUser.backdropMode || "color");
     setBackdropColor(currentUser.backdropColor || "#7C3AED");
+    setIsAvatarDeleted(false);
   }, [currentUser]);
 
   useEffect(() => {
@@ -86,8 +91,14 @@ export default function ProfileEditModal() {
     const colorChanged =
       (backdropColor || null) !== (currentUser.backdropColor || null);
     const pendingMedia = !!selectedBackdropImage || !!selectedAvatarImage;
+    const avatarRemoved = isAvatarDeleted && !!currentUser?.avatar;
     setHasChanges(
-      displayNameChanged || usernameChanged || modeChanged || colorChanged || pendingMedia
+      displayNameChanged ||
+        usernameChanged ||
+        modeChanged ||
+        colorChanged ||
+        pendingMedia ||
+        avatarRemoved
     );
   }, [
     displayName,
@@ -96,6 +107,7 @@ export default function ProfileEditModal() {
     backdropColor,
     selectedBackdropImage,
     selectedAvatarImage,
+    isAvatarDeleted,
     currentUser,
   ]);
 
@@ -114,7 +126,10 @@ export default function ProfileEditModal() {
       aspect: [1, 1],
       quality: 0.9,
     });
-    if (!result.canceled) setSelectedAvatarImage(result.assets[0]);
+    if (!result.canceled) {
+      setIsAvatarDeleted(false);
+      setSelectedAvatarImage(result.assets[0]);
+    }
   };
 
   const handlePickBackdrop = async () => {
@@ -139,6 +154,24 @@ export default function ProfileEditModal() {
     }
   };
 
+  const handleDeleteAvatar = () => {
+    Haptics.selectionAsync();
+    if (!selectedAvatarImage && !currentUser?.avatar) {
+      Toast.show({
+        type: "info",
+        text1: "Aucun avatar à supprimer",
+      });
+      return;
+    }
+    setSelectedAvatarImage(null);
+    setIsAvatarDeleted(true);
+    Toast.show({
+      type: "info",
+      text1: "Avatar supprimé",
+      text2: "Enregistrez pour appliquer le changement",
+    });
+  };
+
   const handleSave = async () => {
     if (!username.trim()) {
       Toast.show({
@@ -153,6 +186,10 @@ export default function ProfileEditModal() {
       setIsSaving(true);
 
       // Upload avatar if changed
+      if (isAvatarDeleted && !selectedAvatarImage) {
+        await deleteAvatar();
+      }
+
       if (selectedAvatarImage) {
         await uploadAvatar(selectedAvatarImage);
       }
@@ -363,7 +400,10 @@ export default function ProfileEditModal() {
             style={styles.avatarWrap}
           >
             <Avatar
-              image={selectedAvatarImage?.uri || currentUser.avatar || ""}
+              image={
+                selectedAvatarImage?.uri ||
+                (isAvatarDeleted ? undefined : currentUser.avatar || undefined)
+              }
               size={96}
               borderWidth={4}
               borderColor={colors.background}
@@ -378,6 +418,26 @@ export default function ProfileEditModal() {
             </View>
           </TouchableOpacity>
         </View>
+
+        {/* Delete avatar */}
+        {(selectedAvatarImage || (currentUser?.avatar && !isAvatarDeleted)) && (
+          <Pressable
+            onPress={handleDeleteAvatar}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              marginTop: 16,
+              marginBottom: 16,
+            }}
+          >
+            <Ionicons name="trash" size={24} color={colors.error} />
+            <Text style={[typography.bodyBold, { color: colors.error }]}>
+              Supprimer l'avatar
+            </Text>
+          </Pressable>
+        )}
 
         {/* Color swatches */}
         {backdropMode === "color" && (
@@ -407,7 +467,8 @@ export default function ProfileEditModal() {
           </View>
         )}
 
-        {/* Display name */}
+        <View style={{ gap: 16 }}>
+          {/* Display name */}
         <TextField
           label="Nom d'affichage"
           value={displayName}
@@ -430,6 +491,7 @@ export default function ProfileEditModal() {
           returnKeyType="done"
           placeholder="Entrez votre nom d'utilisateur"
         />
+        </View>
       </ScrollView>
     </View>
   );

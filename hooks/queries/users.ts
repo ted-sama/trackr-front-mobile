@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery, QueryClient } from '@tanstack/react-query';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { api } from '@/services/api';
 import { Book } from '@/types/book';
@@ -7,6 +7,32 @@ import { PaginatedResponse } from '@/types/api';
 import { List } from '@/types/list';
 import { User } from '@/types/user';
 import { queryKeys } from './keys';
+import Toast from 'react-native-toast-message';
+
+function invalidateUserQueries(qc: QueryClient, userId?: string) {
+  qc.invalidateQueries({ queryKey: ['user', 'top', 'me'], refetchType: 'active' });
+  qc.invalidateQueries({ queryKey: queryKeys.userLists(), refetchType: 'active' });
+  qc.invalidateQueries({ queryKey: queryKeys.myListsBase, refetchType: 'active' });
+
+  if (!userId) return;
+
+  qc.invalidateQueries({ queryKey: queryKeys.user(userId), refetchType: 'active' });
+  qc.invalidateQueries({ queryKey: ['user', 'top', userId], refetchType: 'active' });
+  qc.invalidateQueries({ queryKey: queryKeys.userLists(userId), refetchType: 'active' });
+}
+
+function syncUserCache(qc: QueryClient, user?: User | null) {
+  invalidateUserQueries(qc, user?.id);
+  if (!user?.id) return;
+  qc.setQueryData(queryKeys.user(user.id), user);
+}
+
+async function refreshCurrentUser(qc: QueryClient): Promise<User | null> {
+  await useUserStore.getState().fetchCurrentUser();
+  const user = useUserStore.getState().currentUser;
+  syncUserCache(qc, user);
+  return user;
+}
 
 export function useUser(userId: string) {
   return useQuery({
@@ -80,6 +106,10 @@ async function uploadAvatarRequest(image: ImagePickerAsset): Promise<void> {
   await api.put('/me/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 }
 
+async function deleteAvatarRequest(): Promise<void> {
+  await api.delete('/me/avatar');
+}
+
 async function uploadBackdropRequest(image: ImagePickerAsset): Promise<void> {
   const formData = new FormData();
   const uri = image.uri;
@@ -91,11 +121,13 @@ async function uploadBackdropRequest(image: ImagePickerAsset): Promise<void> {
 }
 
 async function addBookToFavoritesRequest(bookId: string): Promise<void> {
-  await api.post(`/me/top/${bookId}`);
+  const { data } = await api.post(`/me/top/${bookId}`);
+  return data;
 }
 
 async function removeBookFromFavoritesRequest(bookId: string): Promise<void> {
-  await api.delete(`/me/top/${bookId}`);
+  const { data } = await api.delete(`/me/top/${bookId}`);
+  return data;
 }
 
 async function reorderTopRequest(bookIds: string[]): Promise<void> {
@@ -106,11 +138,10 @@ export function useUpdateMe() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (updated: Partial<User>) => updateMeRequest(updated),
-    onSuccess: (freshUser) => {
+    onSuccess: async (freshUser) => {
       useUserStore.getState().setUser(freshUser);
-      qc.invalidateQueries({ queryKey: ['user', 'top', 'me'] });
-      qc.invalidateQueries({ queryKey: queryKeys.userLists() });
-      qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
+      const hydratedUser = await refreshCurrentUser(qc);
+      if (!hydratedUser) syncUserCache(qc, freshUser);
     },
   });
 }
@@ -120,8 +151,17 @@ export function useUpdateUserAvatarImage() {
   return useMutation({
     mutationFn: (image: ImagePickerAsset) => uploadAvatarRequest(image),
     onSuccess: async () => {
-      await useUserStore.getState().fetchCurrentUser();
-      qc.invalidateQueries({ queryKey: ['user', 'top', 'me'] });
+      await refreshCurrentUser(qc);
+    },
+  });
+}
+
+export function useDeleteUserAvatar() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => deleteAvatarRequest(),
+    onSuccess: async () => {
+      await refreshCurrentUser(qc);
     },
   });
 }
@@ -131,8 +171,7 @@ export function useUpdateUserBackdropImage() {
   return useMutation({
     mutationFn: (image: ImagePickerAsset) => uploadBackdropRequest(image),
     onSuccess: async () => {
-      await useUserStore.getState().fetchCurrentUser();
-      qc.invalidateQueries({ queryKey: ['user', 'top', 'me'] });
+      await refreshCurrentUser(qc);
     },
   });
 }
@@ -143,6 +182,9 @@ export function useAddBookToFavorites() {
     mutationFn: (bookId: string) => addBookToFavoritesRequest(bookId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['user', 'top', 'me'] });
+    },
+    onError: (error: any) => {
+      Toast.show({ type: 'info', text1: error.response?.data?.message,  });
     },
   });
 }

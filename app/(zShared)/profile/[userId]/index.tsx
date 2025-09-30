@@ -1,3 +1,4 @@
+import React, { useCallback, useState } from "react";
 import { useUserStore } from "@/stores/userStore";
 import {
   View,
@@ -15,12 +16,11 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import Avatar from "@/components/ui/Avatar";
 import PlusBadge from "@/components/ui/PlusBadge";
-import { router , useLocalSearchParams } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import BookCard from "@/components/BookCard";
 import { useUser, useUserLists, useUserTop } from "@/hooks/queries/users";
 import CollectionListElement from "@/components/CollectionListElement";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
-import { useState } from "react";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
@@ -30,7 +30,8 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function UserProfileScreen() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const { data: user } = useUser(userId);
+  const router = useRouter();
+  const { data: user, refetch: refetchUser } = useUser(userId);
   const { data: topBooks } = useUserTop(userId);
   const { data: userLists } = useUserLists(userId);
   const { currentUser } = useUserStore();
@@ -44,6 +45,13 @@ export default function UserProfileScreen() {
   const [titleY, setTitleY] = useState<number>(0);
 
   const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!userId) return;
+      refetchUser();
+    }, [userId, refetchUser])
+  );
 
   return (
     <View style={{ flex: 1 }}>

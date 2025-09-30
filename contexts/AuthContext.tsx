@@ -57,7 +57,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                 await useUserStore.getState().fetchCurrentUser();
                 setToken(token);
-                router.push('/');
             } else {
                 Toast.show({
                     type: "error",

@@ -6,6 +6,7 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import MaskedView from "@react-native-masked-view/masked-view";
@@ -27,6 +28,7 @@ import Animated, {
 } from "react-native-reanimated";
 import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { Settings } from "lucide-react-native";
 
 export default function Profile() {
   const { currentUser } = useUserStore();
@@ -50,6 +52,13 @@ export default function Profile() {
         title={currentUser?.username || "Profil"}
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
+        rightButton={
+          <Pressable onPress={() => {
+            router.push(`/me/edit`);
+          }}>
+            <Settings size={22} color={colors.icon} />
+          </Pressable>
+        }
       />
       <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} contentContainerStyle={{ paddingBottom: 64 }}>
         <View>
@@ -213,7 +222,7 @@ export default function Profile() {
                   { backgroundColor: colors.actionButton, marginTop: 16 },
                 ]}
                 onPress={() => {
-                  router.push("/profile/lists");
+                  router.push("/me/lists");
                 }}
               >
                 <Text style={[typography.caption, { color: colors.text }]}>

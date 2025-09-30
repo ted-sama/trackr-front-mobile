@@ -36,13 +36,13 @@ const TrackingIconButton = ({
           styles.backgroundCircle,
           {
             backgroundColor: backgroundColor,
-            width: backgroundSize,
-            height: backgroundSize,
+            width: backgroundSize - 1,
+            height: backgroundSize - 1,
             borderRadius: backgroundSize / 2,
             // Position behind the main icon
             position: 'absolute',
-            top: (size - backgroundSize) / 2, // Center the background
-            left: (size - backgroundSize) / 2,
+            top: (size - backgroundSize + 2) / 2, // Center the background
+            left: (size - backgroundSize + 1) / 2,
           },
         ]}
       />

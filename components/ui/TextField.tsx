@@ -1,57 +1,68 @@
-import React from 'react';
-import { View, Text, TextInput, StyleSheet, ViewStyle, TextStyle, TextInputProps } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, StyleSheet, ViewStyle, TextStyle, TextInputProps, Pressable } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
+import { Ionicons } from '@expo/vector-icons';
 
 interface TextFieldProps extends Omit<TextInputProps, 'style'> {
   label?: string;
-  containerStyle?: ViewStyle;
-  inputStyle?: TextStyle;
+  type?: 'default' | 'password';
 }
 
-export function TextField({ label, containerStyle, inputStyle, ...inputProps }: TextFieldProps) {
+export function TextField({ label, type = 'default', ...inputProps }: TextFieldProps) {
   const { colors } = useTheme();
   const typography = useTypography();
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <View style={[styles.container, containerStyle]}> 
+    <View> 
       {label ? (
         <Text style={[typography.h3, styles.label, { color: colors.text }]}>
           {label}
         </Text>
       ) : null}
-      <TextInput
-        {...inputProps}
-        placeholderTextColor={colors.secondaryText}
-        style={[
-          styles.input,
-          typography.body,
-          {
-            backgroundColor: colors.card,
-            borderColor: colors.border,
-            color: colors.text,
-          },
-          inputStyle,
-        ]}
-      />
+      <View style={[styles.inputContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <TextInput
+          {...inputProps}
+          placeholderTextColor={colors.secondaryText}
+          style={[
+            typography.bodyInput,
+            styles.input,
+            {
+              color: colors.text,
+            },
+          ]}
+          autoCapitalize='none'
+          autoCorrect={false}
+          secureTextEntry={type === 'password' && !showPassword}
+          clearTextOnFocus={false}
+        />
+        {type === 'password' && (
+          <Pressable onPress={() => setShowPassword(!showPassword)} style={{ marginLeft: 16 }}>
+            <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={18} color={colors.text} />
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 24,
-  },
   label: {
     marginBottom: 8,
     fontWeight: '600',
   },
-  input: {
-    height: 52,
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     borderWidth: 1,
     borderRadius: 16,
     paddingHorizontal: 16,
-    fontSize: 16,
+    paddingVertical: 14,
+  },
+  input: {
+    flex: 1,
   },
 });
 

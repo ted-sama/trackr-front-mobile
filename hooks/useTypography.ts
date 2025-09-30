@@ -5,6 +5,7 @@ export interface Typography {
   h1: object;
   h2: object;
   h3: object;
+  bodyInput: object;
   body: object;
   bodyCaption: object;
   bodyBold: object;
@@ -41,6 +42,11 @@ export function useTypography(): Typography {
     },
     h3: {
       fontFamily: 'Manrope_700Bold',
+      fontSize: 14,
+      letterSpacing: -0.3,
+    },
+    bodyInput: {
+      fontFamily: 'Manrope_500Medium',
       fontSize: 14,
       letterSpacing: -0.3,
     },

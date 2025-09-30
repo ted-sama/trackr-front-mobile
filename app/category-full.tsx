@@ -56,10 +56,6 @@ export default function CategoryFull() {
 
   const { data: category } = useCategory(id as string);
 
-  useEffect(() => {
-    // Fetched via query hook
-  }, [id]);
-
   // Load layout preference
   useEffect(() => {
     const loadLayoutPreference = async () => {

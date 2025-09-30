@@ -149,12 +149,15 @@ const toastConfig: ToastConfig = {
           headerShown: false,
           contentStyle: { backgroundColor: colors.background },
         }}
-        initialRouteName="(tabs)"
       >
-        <Stack.Screen name="auth/login" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(zShared)" />
-        <Stack.Screen name="category-full" />
+        <Stack.Protected guard={!isAuthenticated}>
+          <Stack.Screen name="auth/login" />
+        </Stack.Protected>
+        <Stack.Protected guard={isAuthenticated}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(zShared)" />
+          <Stack.Screen name="category-full" />
+        </Stack.Protected>
       </Stack>
       {/* Global Book Actions BottomSheet */}
       {selectedBook && (

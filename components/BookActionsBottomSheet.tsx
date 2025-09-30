@@ -342,7 +342,6 @@ const BookActionsBottomSheet = forwardRef<
     const handleAddBookToFavorites = async () => {
       await addBookToFavorites(book.id);
       closeSheet();
-      Toast.show({ type: 'info', text1: 'Livre ajouté aux favoris',  });
     };
 
     const handleRemoveBookFromFavorites = async () => {

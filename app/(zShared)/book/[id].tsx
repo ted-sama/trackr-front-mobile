@@ -343,38 +343,6 @@ export default function BookScreen() {
       }
     }
   };
-  
-  const onTrackingToggleInSuggestions = async (bookId: string, isCurrentlyTracking: boolean, bookObject?: Book) => {
-    if (!bookObject) {
-      console.warn("Book object is missing in onTrackingToggleInSuggestions");
-      Toast.show({ type: 'error', text1: 'Erreur de suivi', text2: 'Données du livre manquantes.' });
-      return;
-    }
-
-    if (isCurrentlyTracking) {
-      try {
-        await removeTrackedBookFromStore(bookId);
-        Toast.show({
-          text1: 'Livre retiré de votre bibliothèque',
-          type: 'info',
-        });
-      } catch (err) {
-        console.warn(`Failed to remove book ${bookId} from tracking:`, err);
-        Toast.show({ type: 'error', text1: 'Erreur', text2: 'Impossible de retirer le livre.'});
-      }
-    } else {
-      try {
-        await addTrackedBookToStore(bookObject);
-        Toast.show({
-          text1: 'Livre ajouté à votre bibliothèque',
-          type: 'info',
-        });
-      } catch (err) {
-        console.warn(`Failed to add book ${bookId} to tracking:`, err);
-        Toast.show({ type: 'error', text1: 'Erreur', text2: `Impossible d'ajouter le livre.` });
-      }
-    }
-  };
 
   const handleRatingCardPress = () => {
     if (bookTracking) {
@@ -382,29 +350,6 @@ export default function BookScreen() {
     } else {
       handlePresentModalPress("actions");
     }
-  };
-
-  const handleSummaryPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push({
-      pathname: '/book/summary',
-      params: {
-        bookId: book?.id.toString(),
-        bookTitle: book?.title
-      }
-    });
-  };
-
-  // TODO MAYBE: Implement chatbot
-  const handleChatPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push({
-      pathname: '/book/chat',
-      params: {
-        bookId: book?.id.toString(),
-        bookTitle: book?.title
-      }
-    });
   };
 
   return (
@@ -743,11 +688,6 @@ export default function BookScreen() {
         scrollY={scrollY}
         collapseThreshold={HEADER_THRESHOLD}
         onBack={() => router.back()}
-        rightButton={bookTracking ? (
-          <Pressable onPress={handleSummaryPress}>
-            <ChartPie size={22} color={colors.icon} />
-          </Pressable>
-        ) : undefined}
       />
     </SafeAreaView>
   );

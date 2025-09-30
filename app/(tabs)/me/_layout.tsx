@@ -24,6 +24,7 @@ export default function MeLayout() {
         headerShown: false,
       }} />
       <Stack.Screen name="lists" />
+      <Stack.Screen name="settings" />
     </Stack>
   );
 }
