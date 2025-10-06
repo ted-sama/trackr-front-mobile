@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import SearchBar from '@/components/discover/SearchBar';
 import { useTypography } from '@/hooks/useTypography';
+import { useTranslation } from 'react-i18next';
 
 interface HeaderCollectionProps {
   searchText: string;
@@ -26,7 +27,7 @@ export function HeaderCollection({
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const [isSearchActive, setIsSearchActive] = useState(false);
-
+  const { t } = useTranslation();
   const initialWidth = screenWidth - paddingHorizontal * 2;
 
   const handleSearchIconPress = useCallback(() => {
@@ -58,7 +59,7 @@ export function HeaderCollection({
       {isSearchActive ? (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <SearchBar
-            placeholder="Rechercher dans la collection..."
+            placeholder={t("collection.searchPlaceholder")}
             isEditable
             value={searchText}
             onChangeText={onSearchTextChange}
@@ -66,7 +67,7 @@ export function HeaderCollection({
             containerStyle={{ flex: 1 }}
           />
           <TouchableOpacity onPress={handleCancelSearch} style={styles.cancelButton}>
-            <Text style={[typography.h3, { color: colors.primary }]}>Annuler</Text>
+            <Text style={[typography.h3, { color: colors.primary }]}>{t("discover.cancel")}</Text>
           </TouchableOpacity>
         </View>
       ) : (

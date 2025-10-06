@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   View,
   Text,
@@ -30,7 +31,7 @@ export default function ListEdit() {
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
-
+  const { t } = useTranslation();
   // Data
   const { data: list } = useList(listId as string);
   const { mutateAsync: updateList } = useUpdateList();
@@ -251,7 +252,7 @@ export default function ListEdit() {
           <Ionicons name="arrow-back" size={24} color={colors.icon} />
         </TouchableOpacity>
         <Text style={[typography.h3, { color: colors.text }]}>
-          Modifier la liste
+          {t("list.editModal.title")}
         </Text>
         <TouchableOpacity
           onPress={handleSave}
@@ -286,7 +287,7 @@ export default function ListEdit() {
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Palette size={18} color={colors.text} />
-                <Text style={[typography.body, styles.modeToggleText, { color: colors.text }]}>Couleur</Text>
+                <Text style={[typography.body, styles.modeToggleText, { color: colors.text }]}>{t("list.editModal.color")}</Text>
               </View>
             </TouchableOpacity>
 
@@ -311,7 +312,7 @@ export default function ListEdit() {
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Camera size={18} color={colors.text} />
-                <Text style={[typography.body, styles.modeToggleText, { color: colors.text }]}>Illustration</Text>
+                <Text style={[typography.body, styles.modeToggleText, { color: colors.text }]}>{t("list.editModal.backdrop")}</Text>
                 {!isPlus && <PlusBadge />}
               </View>
             </TouchableOpacity>
@@ -331,7 +332,7 @@ export default function ListEdit() {
                 >
                   <View style={styles.cameraIconContainer}>
                     <Camera size={24} color="white" />
-                    <Text style={[typography.body, styles.cameraText]}>Changer la bannière</Text>
+                    <Text style={[typography.body, styles.cameraText]}>{t("list.editModal.chooseBackdrop")}</Text>
                   </View>
                 </LinearGradient>
               </ImageBackground>
@@ -344,7 +345,7 @@ export default function ListEdit() {
               >
                 <View style={styles.cameraIconContainer}>
                   <Palette size={24} color="white" />
-                  <Text style={[typography.body, styles.cameraText]}>Choisir une couleur</Text>
+                  <Text style={[typography.body, styles.cameraText]}>{t("list.editModal.chooseColor")}</Text>
                 </View>
               </LinearGradient>
             </View>
@@ -375,7 +376,7 @@ export default function ListEdit() {
               <Text
                 style={[typography.h3, styles.label, { color: colors.text }]}
               >
-                Nom de la liste
+                {t("list.editModal.name")}
               </Text>
               <TextInput
                 style={[
@@ -387,8 +388,6 @@ export default function ListEdit() {
                     color: colors.text,
                   },
                 ]}
-                placeholder="Entrez le nom de la liste"
-                placeholderTextColor={colors.secondaryText}
                 value={name}
                 onChangeText={setName}
                 maxLength={100}
@@ -402,7 +401,7 @@ export default function ListEdit() {
               <Text
                 style={[typography.h3, styles.label, { color: colors.text }]}
               >
-                Description
+                {t("list.editModal.description")}
               </Text>
               <TextInput
                 style={[
@@ -415,7 +414,7 @@ export default function ListEdit() {
                     color: colors.text,
                   },
                 ]}
-                placeholder="Décrivez votre liste (optionnel)"
+                placeholder={t("list.editModal.descriptionPlaceholder")}
                 placeholderTextColor={colors.secondaryText}
                 value={description}
                 onChangeText={setDescription}
@@ -433,7 +432,7 @@ export default function ListEdit() {
               <Text
                 style={[typography.h3, styles.label, { color: colors.text }]}
               >
-                Tags
+                {t("list.editModal.tags")}
               </Text>
 
               {/* Add Tag Input */}
@@ -449,7 +448,7 @@ export default function ListEdit() {
                       color: colors.text,
                     },
                   ]}
-                  placeholder="Ajouter un tag"
+                  placeholder={t("list.editModal.tagsPlaceholder")}
                   placeholderTextColor={colors.secondaryText}
                   value={newTag}
                   onChangeText={setNewTag}
@@ -505,7 +504,7 @@ export default function ListEdit() {
               <Text
                 style={[typography.h3, styles.label, { color: colors.text }]}
               >
-                Options
+                {t("list.editModal.options")}
               </Text>
               
               <View style={styles.toggleContainer}>
@@ -535,7 +534,7 @@ export default function ListEdit() {
                           { color: colors.text },
                         ]}
                       >
-                        {isPublic ? "Publique" : "Privée"}
+                        {isPublic ? t("list.editModal.public") : t("list.editModal.private")}
                       </Text>
                       <Text
                         style={[
@@ -545,8 +544,8 @@ export default function ListEdit() {
                         ]}
                       >
                         {isPublic 
-                          ? "Visible par tous les utilisateurs"
-                          : "Visible seulement par vous"
+                          ? t("list.editModal.publicDescription")
+                          : t("list.editModal.privateDescription")
                         }
                       </Text>
                     </View>
@@ -579,7 +578,7 @@ export default function ListEdit() {
                           { color: colors.text },
                         ]}
                       >
-                        {ranked ? "Classement" : "Collection"}
+                        {ranked ? t("list.editModal.ranked") : t("list.editModal.collection")}
                       </Text>
                       <Text
                         style={[
@@ -589,8 +588,8 @@ export default function ListEdit() {
                         ]}
                       >
                         {ranked 
-                          ? "Liste avec ordre de préférence"
-                          : "Collection simple sans classement"
+                          ? t("list.editModal.rankedDescription")
+                          : t("list.editModal.collectionDescription")
                         }
                       </Text>
                     </View>

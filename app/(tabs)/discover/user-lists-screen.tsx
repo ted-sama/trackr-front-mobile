@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, ActivityIndicator , RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -15,11 +16,12 @@ interface UserListsHeaderProps {
 
 const UserListsHeader: React.FC<UserListsHeaderProps> = React.memo(
   ({ colors, typography }) => {
+    const { t } = useTranslation();
     return (
       <View style={styles.headerContainer}>
-        <Text style={[typography.categoryTitle, { color: colors.text }]}>Listes populaires</Text>
+        <Text style={[typography.categoryTitle, { color: colors.text }]}>{t("discover.lists.header")}</Text>
         <Text style={[typography.caption, { color: colors.secondaryText, marginTop: 4 }]}>
-          Découvrez les listes créées par la communauté
+          {t("discover.lists.description")}
         </Text>
       </View>
     );

@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useUserStore } from "@/stores/userStore";
 import {
   View,
@@ -39,6 +40,7 @@ export default function UserProfileScreen() {
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const scrollY = useSharedValue(0);
+  const { t } = useTranslation();
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollY.value = event.contentOffset.y;
   });
@@ -57,7 +59,7 @@ export default function UserProfileScreen() {
     <View style={{ flex: 1 }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedHeader
-        title={user?.username || "Profil"}
+        title={user?.username || t("profile.title")}
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
         onBack={() => router.back()}
@@ -143,14 +145,14 @@ export default function UserProfileScreen() {
         <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
           <PillButton
             icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
-            title="Modifier le profil"
+            title={t("profile.edit")}
             onPress={() => {
               router.push(`/profile/${userId}/edit`);
               }}
             />
             <PillButton
               icon={<Ionicons name="swap-vertical" size={16} color={colors.secondaryText} />}
-              title="Réordonner les favoris"
+              title={t("profile.reorder")}
               onPress={() => {
                 router.push(`/profile/${userId}/reorder`);
               }}
@@ -166,7 +168,7 @@ export default function UserProfileScreen() {
                   { color: colors.text, marginBottom: 12 },
                 ]}
               >
-                Favoris
+                {t("profile.favorites")}
               </Text>
               <View style={{ marginHorizontal: -16 }}>
                 <FlatList
@@ -200,7 +202,7 @@ export default function UserProfileScreen() {
                   { color: colors.text, marginBottom: 12 },
                 ]}
               >
-                Listes
+                {t("profile.lists")}
               </Text>
               <FlatList
                 data={userLists.pages.flatMap(page => page.data).slice(0, 2)}
@@ -225,7 +227,7 @@ export default function UserProfileScreen() {
                 }}
               >
                 <Text style={[typography.caption, { color: colors.text }]}>
-                  Voir toutes les listes
+                  {t("profile.seeAllLists")}
                 </Text>
               </TouchableOpacity>
             </View>

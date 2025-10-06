@@ -1,23 +1,19 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import * as Haptics from "expo-haptics";
 import { View, Text, StyleSheet, FlatList, Alert, Pressable } from "react-native";
 import { Image } from "expo-image";
-// import { LegendList, LegendListRef } from "@legendapp/list";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import Animated, { useSharedValue, useAnimatedScrollHandler } from "react-native-reanimated";
-// import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import BookListElement from "@/components/BookListElement";
 import BookCard from "@/components/BookCard";
 import { Book } from "@/types/book";
-// import { List } from "@/types/list";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
-// import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-// import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";
@@ -41,7 +37,7 @@ export default function ListFullScreen() {
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
-  // const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollY.value = event.contentOffset.y;
@@ -213,7 +209,7 @@ export default function ListFullScreen() {
                 <View style={{ marginTop: 16 }}>
                   <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
                     <PillButton
-                      title="Ordonner"
+                      title={t("list.reorder")}
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         router.push(`/list/${listId}/reorder`);
@@ -221,7 +217,7 @@ export default function ListFullScreen() {
                       icon={<Ionicons name="swap-vertical" size={16} color={colors.secondaryText} />}
                     />
                     <PillButton
-                      title="Modifier"
+                      title={t("list.edit")}
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         router.push(`/list/${listId}/edit`);
@@ -229,7 +225,7 @@ export default function ListFullScreen() {
                       icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
                     />
                     <PillButton
-                      title="Supprimer"
+                      title={t("list.delete")}
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         handleDeleteList();

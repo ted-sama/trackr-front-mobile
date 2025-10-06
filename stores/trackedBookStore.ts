@@ -11,10 +11,10 @@ interface TrackedBooksState {
   error: string | null;
   addTrackedBook: (book: Book) => Promise<void>;
   removeTrackedBook: (id: string) => Promise<void>;
-  updateTrackedBook: (id: string, tracking: Partial<BookTracking>) => Promise<void>;
-  isBookTracked: (id: string) => boolean;
+  updateTrackedBook: (id: string | number, tracking: Partial<BookTracking>) => Promise<void>;
+  isBookTracked: (id: string | number) => boolean;
   getTrackedBooks: () => TrackedBookWithMeta[];
-  getTrackedBookStatus: (id: string) => BookTracking | null;
+  getTrackedBookStatus: (id: string | number) => BookTracking | null;
   clearTrackedBooks: () => void;
   fetchMyLibraryBooks: () => Promise<void>;
   checkBookTrackedServer: (id: string) => Promise<BookTracking | null>;
@@ -33,10 +33,11 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
       status: 'plan_to_read',
       createdAt: new Date(),
     };
+    const bookKey = String(book.id);
     set((state) => ({
       trackedBooks: {
         ...state.trackedBooks,
-        [book.id]: {
+        [bookKey]: {
           ...book,
           tracking: true,
           trackingStatus: optimisticTracking,
@@ -48,11 +49,12 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
     try {
       await api.post(`/me/books/${book.id}`);
       // Refresh the book data from the server to get the full tracking object
-      await refreshBookTracking(book.id);
+      await refreshBookTracking(String(book.id));
     } catch (e: any) {
       // Revert optimistic update on failure
+      const bookKey = String(book.id);
       set((state) => {
-        const { [book.id]: _, ...rest } = state.trackedBooks;
+        const { [bookKey]: _, ...rest } = state.trackedBooks;
         return { trackedBooks: rest, error: e.message || "Erreur lors de l'ajout du suivi" };
       });
     } finally {
@@ -61,11 +63,12 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   },
 
   removeTrackedBook: async (id) => {
+    const bookKey = String(id);
     set({ isLoading: true, error: null });
     try {
       await api.delete(`/me/books/${id}`);
       set((state) => {
-        const { [id]: _, ...rest } = state.trackedBooks;
+        const { [bookKey]: _, ...rest } = state.trackedBooks;
         return { trackedBooks: rest };
       });
     } catch (e: any) {
@@ -76,6 +79,7 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   },
 
   updateTrackedBook: async (id, tracking) => {
+    const bookKey = String(id);
     set({ isLoading: true, error: null });
     try {
       const response = await api.patch<TrackedBook>(`/me/books/${id}`, tracking);
@@ -100,14 +104,14 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
       };
       
       // Ensure the book ID is consistent
-      if (freshBook.id !== id) {
-        console.warn(`Book ID mismatch: expected ${id}, received ${freshBook.id}`);
+      if (String(freshBook.id) !== bookKey) {
+        console.warn(`Book ID mismatch: expected ${bookKey}, received ${freshBook.id}`);
       }
 
       set((state) => ({
         trackedBooks: {
           ...state.trackedBooks,
-          [id]: { 
+          [bookKey]: { 
             ...freshBook, 
             tracking: true, 
             trackingStatus: updatedTracking,
@@ -121,15 +125,15 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
     }
   },
 
-  isBookTracked: (id) => Boolean(get().trackedBooks[id]?.tracking),
+  isBookTracked: (id) => Boolean(get().trackedBooks[String(id)]?.tracking),
 
   getTrackedBooks: () => {
     const books = Object.values(get().trackedBooks);
     // Filter out any books that don't have a valid ID to prevent rendering issues
-    return books.filter(book => book && book.id && typeof book.id === 'string');
+    return books.filter(book => book && book.id);
   },
 
-  getTrackedBookStatus: (id) => get().trackedBooks[id]?.trackingStatus || null,
+  getTrackedBookStatus: (id) => get().trackedBooks[String(id)]?.trackingStatus || null,
 
   clearTrackedBooks: () => set({ trackedBooks: {} }),
 
@@ -140,6 +144,12 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
       const books: Record<string, TrackedBookWithMeta> = {};
       for (const trackedBook of response.data.data) {
         const bookData = trackedBook.book;
+        
+        if (!bookData || !bookData.id) {
+          console.warn('TrackedBooksStore - Invalid book data, skipping:', trackedBook);
+          continue;
+        }
+        
         const trackingStatus: BookTracking = {
           status: trackedBook.status as ReadingStatus,
           currentChapter: trackedBook.currentChapter,
@@ -152,10 +162,11 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
           createdAt: trackedBook.createdAt ? new Date(trackedBook.createdAt) : null,
           updatedAt: trackedBook.updatedAt ? new Date(trackedBook.updatedAt) : null,
         };
-        books[bookData.id] = { ...bookData, tracking: true, trackingStatus: trackingStatus };
+        books[String(bookData.id)] = { ...bookData, tracking: true, trackingStatus: trackingStatus };
       }
       set({ trackedBooks: books });
     } catch (e: any) {
+      console.error('TrackedBooksStore - Error fetching books:', e);
       set({ error: e.message || 'Erreur de chargement de la bibliothèque' });
     } finally {
       set({ isLoading: false });
@@ -172,6 +183,7 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
   },
 
   refreshBookTracking: async (id) => {
+    const bookKey = String(id);
     set({ isLoading: true, error: null });
     try {
       const response = await api.get<Book>(`/books/${id}`);
@@ -179,7 +191,7 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
       set((state) => ({
         trackedBooks: {
           ...state.trackedBooks,
-          [id]: { ...freshBook, tracking: true, trackingStatus: state.trackedBooks[id]?.trackingStatus },
+          [bookKey]: { ...freshBook, tracking: true, trackingStatus: state.trackedBooks[bookKey]?.trackingStatus },
         },
       }));
     } catch (e: any) {

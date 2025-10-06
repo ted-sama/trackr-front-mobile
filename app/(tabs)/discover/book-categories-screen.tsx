@@ -18,8 +18,6 @@ export default function BookCategoriesScreen({}: BookCategoriesScreenProps) {
 
   const { data: categories, isLoading, error, refetch, isFetching } = useCategories();
 
-  const { addTrackedBook: addTrackedBookToStore, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -28,8 +26,6 @@ export default function BookCategoriesScreen({}: BookCategoriesScreenProps) {
       setRefreshing(false);
     }
   }, [refetch]);
-
-  // Tracking toggle now handled inside BookCard/BookListElement
 
   useEffect(() => {
     if (categories) setHasLoadedOnce(true);

@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Image } from "expo-image";
-// import { LegendList } from "@legendapp/list";
 import {
   BottomSheetModal,
   BottomSheetView,
@@ -47,6 +47,7 @@ import CollectionListElement from "./CollectionListElement";
 import Button from "./ui/Button";
 import SecondaryButton from "./ui/SecondaryButton";
 import RatingSlider from "./ui/RatingSlider";
+import { handleErrorCodes } from "@/utils/handleErrorCodes";
 
 export interface BookActionsBottomSheetProps {
   book: Book;
@@ -128,6 +129,7 @@ const BookActionsBottomSheet = forwardRef<
     },
     ref
   ) => {
+    const { t } = useTranslation();
     const { colors } = useTheme();
     const typography = useTypography();
     const {
@@ -217,44 +219,44 @@ const BookActionsBottomSheet = forwardRef<
 
     const actions = [
       {
-        label: "Ajouter à ma bibliothèque",
+        label: t("bookBottomSheet.addToTracking"),
         icon: <PlusIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: !isTracking,
         onPress: () => handleAddBookToTracking(),
       },
       {
-        label: "Modifier le statut",
+        label: t("bookBottomSheet.editStatus"),
         icon: <BookOpenIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: isTracking,
         onPress: () => setCurrentView(VIEW_STATUS_EDITOR),
       },
       {
-        label: "Ajouter aux favoris",
+        label: t("bookBottomSheet.addToFavorites"),
         icon: <HeartIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: !isFavorited,
         onPress: () => handleAddBookToFavorites(),
       },
       {
-        label: "Retirer des favoris",
+        label: t("bookBottomSheet.removeFromFavorites"),
         icon: <HeartMinusIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: isFavorited,
         onPress: () => handleRemoveBookFromFavorites(),
       },
       {
-        label: "Supprimer de ma bibliothèque",
+        label: t("bookBottomSheet.removeFromTracking"),
         icon: <MinusIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: isTracking,
         onPress: () => handleRemoveBookFromTracking(),
       },
       // Remove-from-list action is only shown on list page and when a listId is provided
       currentListId && isFromListPage ? {
-        label: "Supprimer de la liste",
+        label: t("bookBottomSheet.removeFromList"),
         icon: <MinusIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: true,
         onPress: () => handleRemoveBookFromList(),
       } : null,
       {
-        label: "Ajouter à une liste",
+        label: t("bookBottomSheet.addToList"),
         icon: <PlusIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: true,
         onPress: () => {
@@ -262,20 +264,20 @@ const BookActionsBottomSheet = forwardRef<
         },
       },
       {
-        label: "Noter",
+        label: t("bookBottomSheet.rate"),
         icon: <StarIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: isTracking,
         onPress: () => setCurrentView(VIEW_RATING_EDITOR),
       },
       {
-        label: "Changer de couverture",
+        label: t("bookBottomSheet.changeCover"),
         icon: (
           <BookImageIcon size={16} strokeWidth={2.75} color={colors.text} />
         ),
         show: true,
       },
       {
-        label: "Partager",
+        label: t("bookBottomSheet.share"),
         icon: <ShareIcon size={16} strokeWidth={2.75} color={colors.text} />,
         show: true,
       },
@@ -284,31 +286,31 @@ const BookActionsBottomSheet = forwardRef<
     const statusOptions = [
       {
         status: "reading",
-        label: "En cours",
+        label: t("status.reading"),
         icon: <BookOpenIcon size={16} strokeWidth={2.75} color={colors.text} />,
         onPress: () => updateStatus("reading"),
       },
       {
         status: "plan_to_read",
-        label: "A lire",
+        label: t("status.planToRead"),
         icon: <Clock3 size={16} strokeWidth={2.75} color={colors.text} />,
         onPress: () => updateStatus("plan_to_read"),
       },
       {
         status: "completed",
-        label: "Complété",
+        label: t("status.completed"),
         icon: <BookCheck size={16} strokeWidth={2.75} color={colors.text} />,
         onPress: () => updateStatus("completed"),
       },
       {
         status: "on_hold",
-        label: "En pause",
+        label: t("status.onHold"),
         icon: <Pause size={16} strokeWidth={2.75} color={colors.text} />,
         onPress: () => updateStatus("on_hold"),
       },
       {
         status: "dropped",
-        label: "Abandonné",
+        label: t("status.dropped"),
         icon: <Square size={16} strokeWidth={2.75} color={colors.text} />,
         onPress: () => updateStatus("dropped"),
       },
@@ -331,23 +333,47 @@ const BookActionsBottomSheet = forwardRef<
     };
 
     const handleAddBookToTracking = async () => {
-      await addTrackedBook(book);
+      try {
+        await addTrackedBook(book);
+        Toast.show({ type: 'info', text1: t("toast.addedToTracking") });
+      } catch (error) {
+        Toast.show({ type: 'info', text1: t(handleErrorCodes(error)) });
+      } finally {
+        closeSheet();
+      }
     };
 
     const handleRemoveBookFromTracking = async () => {
-      await removeTrackedBook(book.id);
-      closeSheet();
+      try {
+        await removeTrackedBook(book.id);
+        Toast.show({ type: 'info', text1: t("toast.removedFromTracking") });
+      } catch (error) {
+        Toast.show({ type: 'info', text1: t(handleErrorCodes(error)) });
+      } finally {
+        closeSheet();
+      }
     };
 
     const handleAddBookToFavorites = async () => {
-      await addBookToFavorites(book.id);
-      closeSheet();
+      try {
+        await addBookToFavorites(book.id);
+        Toast.show({ type: 'info', text1: t("toast.addedToFavorites") });
+      } catch (error) {
+        Toast.show({ type: 'info', text1: t(handleErrorCodes(error)) });
+      } finally {
+        closeSheet();
+      }
     };
 
     const handleRemoveBookFromFavorites = async () => {
-      await removeBookFromFavorites(book.id);
-      closeSheet();
-      Toast.show({ type: 'info', text1: 'Livre retiré des favoris',  });
+      try {
+        await removeBookFromFavorites(book.id);
+        Toast.show({ type: 'info', text1: t("toast.removedFromFavorites") });
+      } catch (error) {
+      Toast.show({ type: 'info', text1: t(handleErrorCodes(error)) });
+      } finally {
+        closeSheet();
+      }
     };
 
     const handleRemoveBookFromList = async () => {
@@ -432,7 +458,7 @@ const BookActionsBottomSheet = forwardRef<
                       ]}
                       numberOfLines={1}
                     >
-                      {book.author}
+                      {book.authors?.map((author) => author.name).join(", ")}
                     </Text>
                     <View style={[styles.ratingContainer, { marginTop: 4 }]}>
                       <Ionicons
@@ -493,7 +519,7 @@ const BookActionsBottomSheet = forwardRef<
                     { color: colors.text, textAlign: "center" },
                   ]}
                 >
-                  Modifier le statut
+                  {t("bookBottomSheet.editStatus")}
                 </Text>
               </View>
               <View style={styles.bottomSheetActions}>

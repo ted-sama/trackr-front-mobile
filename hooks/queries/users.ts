@@ -7,7 +7,6 @@ import { PaginatedResponse } from '@/types/api';
 import { List } from '@/types/list';
 import { User } from '@/types/user';
 import { queryKeys } from './keys';
-import Toast from 'react-native-toast-message';
 
 function invalidateUserQueries(qc: QueryClient, userId?: string) {
   qc.invalidateQueries({ queryKey: ['user', 'top', 'me'], refetchType: 'active' });
@@ -182,9 +181,6 @@ export function useAddBookToFavorites() {
     mutationFn: (bookId: string) => addBookToFavoritesRequest(bookId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['user', 'top', 'me'] });
-    },
-    onError: (error: any) => {
-      Toast.show({ type: 'info', text1: error.response?.data?.message,  });
     },
   });
 }

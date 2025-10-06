@@ -6,7 +6,9 @@ import { Book } from "./book";
 export interface Category {
   id: string;
   title: string;
+  titleFr: string;
   description: string;
+  descriptionFr: string;
   isFeatured: boolean;
   createdAt: Date;
   updatedAt: Date;

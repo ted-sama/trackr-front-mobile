@@ -7,6 +7,7 @@ import SearchBar from "@/components/discover/SearchBar";
 import PillTabBar from "@/components/discover/PillTabBar";
 import { useRouter } from "expo-router";
 import { useTypography } from "@/hooks/useTypography";
+import { useTranslation } from "react-i18next";
 type TabType = 'books' | 'lists';
 
 interface HeaderDiscoverProps {
@@ -36,11 +37,11 @@ export default function HeaderDiscover({
   activeTab = 'books',
   onTabChange = () => {},
 }: HeaderDiscoverProps) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const router = useRouter();
-  // State is managed in screens; remove store coupling
   const initialWidth = screenWidth - paddingHorizontal * 2;
   const searchBarWidth = useSharedValue(initialWidth);
   const cancelButtonOpacity = useSharedValue(0);
@@ -107,8 +108,8 @@ export default function HeaderDiscover({
   });
 
   const navigationTabs = [
-    { label: 'Livres', value: 'books' as TabType },
-    { label: 'Listes', value: 'lists' as TabType },
+    { label: t("discover.books.title"), value: 'books' as TabType },
+    { label: t("discover.lists.title"), value: 'lists' as TabType },
   ];
 
   return (
@@ -132,7 +133,7 @@ export default function HeaderDiscover({
       
       <View style={styles.searchBarContainer}>
         <SearchBar
-          placeholder="Commencez votre recherche"
+          placeholder={t("discover.searchPlaceholder")}
           isEditable={isEditable}
           value={searchText}
           onChangeText={isEditable ? onSearchTextChange : () => {}}
@@ -143,7 +144,7 @@ export default function HeaderDiscover({
         {isEditable && (
           <Animated.View style={[styles.cancelButtonContainer, animatedCancelButtonStyle]}>
             <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
-              <Text style={[typography.h3, { color: colors.primary }]}>Annuler</Text>
+              <Text style={[typography.h3, { color: colors.primary }]}>{t("discover.cancel")}</Text>
             </TouchableOpacity>
           </Animated.View>
         )}

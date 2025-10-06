@@ -6,6 +6,7 @@ export default function SharedLayout() {
       <Stack.Screen name="book/[id]" />
       <Stack.Screen name="list/[listId]" />
       <Stack.Screen name="profile/[userId]" />
+      <Stack.Screen name="settings" />
     </Stack>
   );
 }

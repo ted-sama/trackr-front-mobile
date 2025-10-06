@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -19,7 +20,7 @@ export default function ListOrder() {
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const insets = useSafeAreaInsets();
-
+  const { t } = useTranslation();
   const { data: list } = useList(listId as string);
   const { mutateAsync: reorderBooksInList } = useReorderBooksInList();
   const isLoading = false;
@@ -177,7 +178,7 @@ export default function ListOrder() {
           <Ionicons name="arrow-back" size={24} color={colors.icon} />
         </TouchableOpacity>
         <Text style={[typography.h3, { color: colors.text }]}>
-          Ordonner la liste
+          {t("list.reorderModal.title")}
         </Text>
         <TouchableOpacity
           onPress={handleSave}
@@ -206,14 +207,12 @@ export default function ListOrder() {
             </Text>
             <Text style={{ color: colors.secondaryText }}>·</Text>
             <Text style={[typography.h3, { color: colors.text }]}>
-              {list.books?.items?.length || 0} livre
+              {list.books?.items?.length || 0} {t("list.reorderModal.book")}
               {list.books?.items?.length === 1 ? "" : "s"}
             </Text>
           </View>
           <Text style={[typography.bodyCaption, { color: colors.secondaryText }]}>
-            Maintenez appuyé sur un élément et faites-le glisser pour
-            réorganiser. Les modifications seront sauvegardées quand vous
-            appuierez sur le bouton de sauvegarde.
+            {t("list.reorderModal.description")}
           </Text>
         </View>
 

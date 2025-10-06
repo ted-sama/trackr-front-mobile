@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { getPalette } from "@somesoap/react-native-image-palette";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Book } from "@/types/book";
-import { Category } from "@/types/category";
 import { BookTracking } from "@/types/reading-status";
 import {
   Text,
@@ -73,8 +72,6 @@ export default function BookScreen() {
   const { data: booksBySameAuthor } = useBooksBySameAuthorCategory(id as string);
   const typography = useTypography();
   const insets = useSafeAreaInsets();
-  const [dummyRecommendations, setDummyRecommendations] =
-    useState<Category | null>(null);
   const { isFrench } = useLocalization();
 
   // Get the full BookTracking object
@@ -195,15 +192,6 @@ export default function BookScreen() {
     },
   });
 
-  const typeMap = {
-    manga: "Manga",
-    novel: "Roman",
-    light_novel: "Light Novel",
-    web_novel: "Web Novel",
-    comic: "Comic",
-    other: "Autre",
-  };
-
   // Présenter le bottom sheet d'actions
   const handlePresentModalPress = useCallback(
     (view: "actions" | "status_editor" | "rating_editor") => {
@@ -257,7 +245,7 @@ export default function BookScreen() {
   const gradientTopColor = (() => {
     return dominantColor;
   })();
-  const gradientHeight = 120 + IMAGE_HEIGHT * 0.5;
+  const gradientHeight = 200 + IMAGE_HEIGHT * 0.5;
 
   // Animate gradient opacity when gradient color is available
   useEffect(() => {
@@ -305,9 +293,9 @@ export default function BookScreen() {
     if (!book) return;
     const currentBookIdStr = book.id.toString();
 
-    if (isBookTracked(book.id)) {
+    if (isBookTracked(book.id.toString())) {
       try {
-        await removeTrackedBookFromStore(book.id);
+        await removeTrackedBookFromStore(book.id.toString());
         Toast.show({
           text1: "Livre retiré de votre bibliothèque",
           type: "info",
@@ -434,14 +422,14 @@ export default function BookScreen() {
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                {book?.author}
+                {book?.authors?.map((author) => author.name).join(", ")}
               </Text>
               <View style={[styles.infosContainer]}>
                 <Text
                   style={[typography.caption, { color: colors.secondaryText }]}
                   numberOfLines={1}
                 >
-                  {book?.type ? typeMap[book.type as keyof typeof typeMap] : ''}
+                  {book?.type}
                 </Text>
                 {separator()}
                 <Text
@@ -472,9 +460,9 @@ export default function BookScreen() {
             </View>
           </View>
           {/* Tags */}
-          {book?.genres && book?.tags && (
+          {book?.genres && (
             <View style={styles.tagsContainer}>
-              {[...(book.genres || []), ...(book.tags || [])].map((tag) => (
+              {book.genres.map((tag) => (
                 <Badge
                   key={tag}
                   text={tag}
@@ -605,20 +593,6 @@ export default function BookScreen() {
                 <View style={{ marginHorizontal: -16 }}>
                   <CategorySlider
                     category={booksBySameAuthor}
-                    isBottomSheetVisible={false}
-                    header={false}
-                  />
-                </View>
-              </View>
-            )}
-            {dummyRecommendations && dummyRecommendations.books.length > 0 && (
-            <View>
-              <Text style={[typography.categoryTitle, { color: colors.text }]}>
-                Les utilisateurs suivent aussi
-              </Text>
-                <View style={{ marginHorizontal: -16 }}>
-                  <CategorySlider
-                    category={dummyRecommendations}
                     isBottomSheetVisible={false}
                     header={false}
                   />

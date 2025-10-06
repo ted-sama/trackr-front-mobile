@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   View,
   Text,
@@ -57,13 +58,13 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
   const { colors } = useTheme();
   const { isBottomSheetVisible, openBookActions } = useBottomSheet();
   const typography = useTypography();
-
+  const { t } = useTranslation();
   const trackingStatusValues: Record<ReadingStatus, { text: string, icon: React.ReactNode }> = {
-    'plan_to_read': { text: 'À lire', icon: <Clock3 size={12} strokeWidth={2.75} color={colors.planToRead} /> },
-    'reading': { text: 'En cours', icon: <BookOpenIcon size={12} strokeWidth={2.75} color={colors.reading} /> },
-    'completed': { text: 'Complété', icon: <BookCheck size={12} strokeWidth={2.75} color={colors.completed} /> },
-    'on_hold': { text: 'En pause', icon: <Pause size={12} strokeWidth={2.75} color={colors.onHold} /> },
-    'dropped': { text: 'Abandonné', icon: <Square size={12} strokeWidth={2.75} color={colors.dropped} /> },
+    'plan_to_read': { text: t('status.planToRead'), icon: <Clock3 size={12} strokeWidth={2.75} color={colors.planToRead} /> },
+    'reading': { text: t('status.reading'), icon: <BookOpenIcon size={12} strokeWidth={2.75} color={colors.reading} /> },
+    'completed': { text: t('status.completed'), icon: <BookCheck size={12} strokeWidth={2.75} color={colors.completed} /> },
+    'on_hold': { text: t('status.onHold'), icon: <Pause size={12} strokeWidth={2.75} color={colors.onHold} /> },
+    'dropped': { text: t('status.dropped'), icon: <Square size={12} strokeWidth={2.75} color={colors.dropped} /> },
   }
 
   // Shared value for scale animation
@@ -243,7 +244,7 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
                 ]}
                 numberOfLines={1}
               >
-                {book.author}
+                {book.authors?.map((author) => author.name).join(", ")}
               </Text>
             )}
             {showRating && (

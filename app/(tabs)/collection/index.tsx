@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { View, StyleSheet, Text, Pressable, FlatList } from "react-native";
 import { Image as ExpoImage } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -62,6 +63,8 @@ interface MyLibraryHeaderProps {
 
 const MyLibraryHeader: React.FC<MyLibraryHeaderProps> = React.memo(
   ({ mosaicBooks, colors, typography, onPress, totalBooks }) => {
+    const { t } = useTranslation();
+
     return (
       <Pressable onPress={onPress} style={{ marginBottom: 16 }}>
         <View style={[styles.myLibraryHeaderMenu, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -70,8 +73,8 @@ const MyLibraryHeader: React.FC<MyLibraryHeaderProps> = React.memo(
               <AnimatedCover key={book.id} book={book} index={index} colors={colors} />
             ))}
           </View>
-          <Text style={[typography.h3, { marginTop: 16, color: colors.text }]}>Ma bibliothèque</Text>
-          <Text style={[typography.caption, { color: colors.secondaryText }]}>{totalBooks} livres</Text>
+          <Text style={[typography.h3, { marginTop: 16, color: colors.text }]}>{t("collection.myLibrary")}</Text>
+          <Text style={[typography.caption, { color: colors.secondaryText }]}>{totalBooks} {t("collection.books")}</Text>
         </View>
       </Pressable>
     );
@@ -98,18 +101,22 @@ export default function Collection() {
   const { colors } = useTheme();
   const [searchText, setSearchText] = useState("");
   const debouncedQuery = useStableTrimmedQuery(searchText);
-  const { getTrackedBooks } = useTrackedBooksStore();
-  const myLibrary = getTrackedBooks();
+  // Subscribe to trackedBooks state directly so the component re-renders when it changes
+  const trackedBooks = useTrackedBooksStore((state) => state.trackedBooks);
+  const isLoading = useTrackedBooksStore((state) => state.isLoading);
+  const error = useTrackedBooksStore((state) => state.error);
+  
+  const myLibrary = useMemo(() => {
+    const books = Object.values(trackedBooks);
+    return books.filter(book => book && book.id);
+  }, [trackedBooks]);
+  
   const mosaicBooks = useMemo(() => myLibrary.slice(0, 10), [myLibrary]);
   const { data: myLists } = useMyLists(debouncedQuery);
   const lists = (myLists?.pages.flatMap((p: any) => p.data) ?? []) as any[];
   
   const handleSearchTextChange = useCallback((text: string) => {
     setSearchText(text);
-  }, []);
-
-  const handleSubmitSearch = useCallback(() => {
-    // TODO: brancher la recherche sur la liste
   }, []);
 
   const renderListHeader = useCallback(() => (
@@ -127,7 +134,6 @@ export default function Collection() {
       <CollectionHeader
         searchText={searchText}
         onSearchTextChange={handleSearchTextChange}
-        onSubmitSearch={handleSubmitSearch}
       />
       <View>
         <FlatList

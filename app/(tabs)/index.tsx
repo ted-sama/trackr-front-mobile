@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { View, Text, StyleSheet, FlatList, ScrollView, Pressable } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -13,23 +14,25 @@ import { useMostTrackedCategory, useTopRatedCategory } from "@/hooks/queries/cat
 import Avatar from "@/components/ui/Avatar";
 
 export default function Index() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { currentUser } = useUserStore();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
-  const { getTrackedBooks } = useTrackedBooksStore();
+  // Subscribe to trackedBooks state directly so the component re-renders when it changes
+  const trackedBooks = useTrackedBooksStore((state) => state.trackedBooks);
   const { data: mostTracked } = useMostTrackedCategory();
   const { data: topRated } = useTopRatedCategory();
-  const lastRead = getTrackedBooks().filter(book => book.trackingStatus?.currentChapter && book.trackingStatus?.lastReadAt !== null).sort((a, b) => {
-    if (a.trackingStatus?.lastReadAt && b.trackingStatus?.lastReadAt) {
-      return new Date(b.trackingStatus.lastReadAt).getTime() - new Date(a.trackingStatus.lastReadAt).getTime();
-    }
-    return 0;
-  }).slice(0, 3);
-
-  useEffect(() => {
-    // Data fetched via React Query hooks
-  }, []);
+  
+  const lastRead = React.useMemo(() => {
+    const booksArray = Object.values(trackedBooks).filter(book => book && book.id);
+    return booksArray.filter(book => book.trackingStatus?.currentChapter && book.trackingStatus?.lastReadAt !== null).sort((a, b) => {
+      if (a.trackingStatus?.lastReadAt && b.trackingStatus?.lastReadAt) {
+        return new Date(b.trackingStatus.lastReadAt).getTime() - new Date(a.trackingStatus.lastReadAt).getTime();
+      }
+      return 0;
+    }).slice(0, 3);
+  }, [trackedBooks]);
 
   return (
     <SafeAreaView
@@ -46,7 +49,7 @@ export default function Index() {
           numberOfLines={1}
           ellipsizeMode="tail"
         >
-          Bonjour, {currentUser?.displayName}
+          {t("home.greeting", { name: currentUser?.displayName })}
         </Text>
       </View>
       <ScrollView
@@ -54,7 +57,7 @@ export default function Index() {
       >
       <View style={styles.content}>
         <View style={styles.lastReadContainer}>
-          <Text style={[typography.categoryTitle, { color: colors.text, marginBottom: 16 }]}>Dernières lectures</Text>
+          <Text style={[typography.categoryTitle, { color: colors.text, marginBottom: 16 }]}>{t("home.lastRead")}</Text>
           {lastRead.length > 0 ? (
             <FlatList
               data={lastRead}
@@ -63,7 +66,7 @@ export default function Index() {
               scrollEnabled={false}
             />
           ) : (
-            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>Commencez à lire pour voir vos dernières lectures</Text>
+            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("home.noLastRead")}</Text>
           )}
         </View>
         <View style={{ marginHorizontal: -16 }}>

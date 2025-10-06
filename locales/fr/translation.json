@@ -1,0 +1,120 @@
+{
+    "status": {
+        "reading": "En cours",
+        "planToRead": "À lire",
+        "completed": "Complété",
+        "onHold": "En pause",
+        "dropped": "Abandonné"
+    },
+    "listItem": {
+        "item": "élément",
+        "items": "éléments",
+        "by": "Par",
+        "public": "Publique",
+        "private": "Privée"
+    },
+    "home": {
+        "title": "Accueil",
+        "greeting": "Bonjour, {{name}}",
+        "lastRead": "Dernières lectures",
+        "noLastRead": "Commencez à lire pour voir vos dernières lectures",
+        "mostTracked": "Les plus suivis",
+        "topRated": "Les mieux notés"
+    },
+    "discover": {
+        "title": "Découvrir",
+        "searchPlaceholder": "Commencez votre recherche",
+        "cancel": "Annuler",
+        "books": {
+            "title": "Livres"
+        },
+        "lists": {
+            "title": "Listes",
+            "header": "Listes populaires",
+            "description": "Découvrez les listes créées par la communauté"
+        },
+        "search": {
+            "empty": "Commencez votre recherche en tapant ci-dessus.",
+            "noResults": "Aucun résultat trouvé"
+        }
+    },
+    "collection": {
+        "title": "Collection",
+        "myLibrary": "Ma bibliothèque",
+        "searchPlaceholder": "Rechercher dans la collection",
+        "cancel": "Annuler",
+        "books": "livres"
+    },
+    "profile": {
+        "title": "Profil",
+        "edit": "Modifier le profil",
+        "reorder": "Réordonner les favoris",
+        "favorites": "Favoris",
+        "noFavorites": "Aucun favori",
+        "lists": "Listes",
+        "seeAllLists": "Voir toutes les listes"
+    },
+    "settings": {
+        "title": "Paramètres",
+        "language": "Langue"
+    },
+    "languages": {
+        "english": "Anglais",
+        "french": "Français"
+    },
+    "list": {
+        "reorder": "Réordonner",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "reorderModal": {
+            "title": "Réordonner la liste",
+            "book": "livre",
+            "description": "Maintenez appuyé sur un élément et faites-le glisser pour réorganiser."
+        },
+        "editModal": {
+            "title": "Modifier la liste",
+            "color": "Couleur",
+            "chooseColor": "Choisir une couleur",
+            "backdrop": "Illustration",
+            "chooseBackdrop": "Changer l'illustration",
+            "name": "Nom de la liste",
+            "namePlaceholder": "Entrez le nom de la liste",
+            "description": "Description",
+            "descriptionPlaceholder": "Décrivez votre liste",
+            "tags": "Tags",
+            "tagsPlaceholder": "Ajouter un tag",
+            "options": "Options",
+            "public": "Public",
+            "publicDescription": "Visible par tous les utilisateurs",
+            "private": "Privé",
+            "privateDescription": "Visible seulement par vous",
+            "ranked": "Classement",
+            "rankedDescription": "Liste avec ordre de préférence",
+            "collection": "Collection",
+            "collectionDescription": "Collection simple sans classement"
+        }
+    },
+    "bookBottomSheet": {
+        "addToTracking": "Ajouter à ma bibliothèque",
+        "addToFavorites": "Ajouter aux favoris",
+        "addToList": "Ajouter à une liste",
+        "changeCover": "Changer de couverture",
+        "share": "Partager",
+        "rate": "Noter",
+        "removeFromTracking": "Retirer de ma bibliothèque",
+        "removeFromFavorites": "Retirer des favoris",
+        "removeFromList": "Retirer de la liste",
+        "editStatus": "Modifier le statut"
+    },
+    "toast": {
+        "addedToFavorites": "Livre ajouté aux favoris",
+        "removedFromFavorites": "Livre retiré des favoris",
+        "addedToTracking": "Livre ajouté à la bibliothèque",
+        "removedFromTracking": "Livre retiré de la bibliothèque",
+        "addedToList": "Livre ajouté à la liste",
+        "removedFromList": "Livre retiré de la liste"
+    },
+    "errors": {
+        "BOOKS_TOP_LIMIT_REACHED": "Vous avez atteint la limite des 5 livres favoris"
+    }
+}

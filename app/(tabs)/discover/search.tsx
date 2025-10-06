@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import HeaderDiscover from '@/components/discover/HeaderDiscover';
@@ -8,13 +9,12 @@ import BookListElement from '@/components/BookListElement';
 import CollectionListElement from '@/components/CollectionListElement';
 import { LegendList } from '@legendapp/list';
 import { useTypography } from '@/hooks/useTypography';
-import MaskedView from '@react-native-masked-view/masked-view';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSearch } from '@/hooks/queries/search';
 import { Book } from '@/types/book';
 import { List } from '@/types/list';
 
 export default function SearchScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const typography = useTypography();
   const [searchQuery, setQuery] = React.useState('');
@@ -115,7 +115,7 @@ export default function SearchScreen() {
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <Text style={[typography.body, { color: colors.text }]}>
-                  {error ? String(error) : (searchQuery.trim() ? "Aucun résultat trouvé" : "Commencez votre recherche en tapant ci-dessus.")}
+                  {error ? String(error) : (searchQuery.trim() ? t("discover.search.noResults") : t("discover.search.empty"))}
                 </Text>
               </View>
             }

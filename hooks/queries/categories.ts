@@ -20,8 +20,10 @@ async function fetchMostTrackedCategory(): Promise<Category> {
   const now = new Date();
   return {
     id: 'most-tracked',
-    title: 'Mangas les plus suivis',
-    description: 'Les mangas les plus suivis',
+    title: 'Most tracked mangas',
+    titleFr: 'Mangas les plus suivis',
+    description: 'Most tracked mangas',
+    descriptionFr: 'Les mangas les plus suivis',
     isFeatured: true,
     createdAt: now,
     updatedAt: now,
@@ -34,8 +36,10 @@ async function fetchTopRatedCategory(): Promise<Category> {
   const now = new Date();
   return {
     id: 'top-rated',
-    title: 'Mangas les mieux notés',
-    description: 'Les mangas les mieux notés',
+    title: 'Top rated mangas',
+    titleFr: 'Mangas les mieux notés',
+    description: 'Top rated mangas',
+    descriptionFr: 'Les mangas les mieux notés',
     isFeatured: true,
     createdAt: now,
     updatedAt: now,

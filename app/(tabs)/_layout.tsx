@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function TabLayout() {
   const { colors, currentTheme } = useTheme();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   return (
     <Tabs
@@ -44,7 +46,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index" // Correspondra à app/(tabs)/index.tsx
         options={{
-          title: 'Accueil',
+          title: t('home.title'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
@@ -53,7 +55,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="discover" // Correspondra au layout app/(tabs)/discover/_layout.tsx
         options={{
-          title: 'Découvrir',
+          title: t('discover.title'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="compass-outline" size={size} color={color} />
           ),
@@ -62,7 +64,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="collection"
         options={{
-          title: 'Collection',
+          title: t('collection.title'),
           tabBarIcon: ({ color, size }) => (
             <Library size={size} color={color} />
           ),
@@ -71,7 +73,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="me"
         options={{
-          title: 'Profil',
+          title: t('profile.title'),
           tabBarIcon: ({ color, size }) => (
             <CircleUserRound size={size} color={color} />
           ),

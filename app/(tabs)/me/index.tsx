@@ -29,6 +29,7 @@ import Animated, {
 import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Settings } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 export default function Profile() {
   const { currentUser } = useUserStore();
@@ -41,7 +42,7 @@ export default function Profile() {
     scrollY.value = event.contentOffset.y;
   });
   const [titleY, setTitleY] = useState<number>(0);
-
+  const { t } = useTranslation();
   const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
   // no-op
@@ -49,12 +50,12 @@ export default function Profile() {
     <View style={{ flex: 1 }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedHeader
-        title={currentUser?.username || "Profil"}
+        title={currentUser?.username || t("profile.title")}
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
         rightButton={
           <Pressable onPress={() => {
-            router.push(`/me/edit`);
+            router.push(`/settings`);
           }}>
             <Settings size={22} color={colors.icon} />
           </Pressable>
@@ -140,14 +141,14 @@ export default function Profile() {
         <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
           <PillButton
             icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
-            title="Modifier le profil"
+            title={t("profile.edit")}
             onPress={() => {
               router.push(`/me/edit`);
             }}
           />
           <PillButton
             icon={<Ionicons name="swap-vertical" size={16} color={colors.secondaryText} />}
-            title="Réordonner les favoris"
+            title={t("profile.reorder")}
             disabled={topBooks?.length === 0}
             onPress={() => {
               router.push(`/me/reorder`);
@@ -163,7 +164,7 @@ export default function Profile() {
                   { color: colors.text, marginBottom: 12 },
                 ]}
               >
-                Favoris
+                {t("profile.favorites")}
               </Text>
               {topBooks.length > 0 ? (
                   <View style={{ marginHorizontal: -16 }}>
@@ -189,7 +190,7 @@ export default function Profile() {
                   />
                 </View>
               ) : (
-                <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>Aucun favori</Text>
+                <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.noFavorites")}</Text>
               )}
             </View>
           )}
@@ -201,7 +202,7 @@ export default function Profile() {
                   { color: colors.text, marginBottom: 12 },
                 ]}
               >
-                Listes
+                {t("profile.lists")}
               </Text>
               <FlatList
                 data={(userListsPages.pages.flatMap((page) => page.data) ?? []).slice(0, 2)}
@@ -226,7 +227,7 @@ export default function Profile() {
                 }}
               >
                 <Text style={[typography.caption, { color: colors.text }]}>
-                  Voir toutes les listes
+                  {t("profile.seeAllLists")}
                 </Text>
               </TouchableOpacity>
             </View>

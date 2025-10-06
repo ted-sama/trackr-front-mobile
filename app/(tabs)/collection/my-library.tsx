@@ -42,8 +42,15 @@ export default function MyLibrary() {
     router.back();
   }
 
-  const { getTrackedBooks, addTrackedBook, removeTrackedBook: removeTrackedBookFromStore } = useTrackedBooksStore();
-  const books = getTrackedBooks();
+  // Subscribe to trackedBooks state directly so the component re-renders when it changes
+  const trackedBooks = useTrackedBooksStore((state) => state.trackedBooks);
+  const addTrackedBook = useTrackedBooksStore((state) => state.addTrackedBook);
+  const removeTrackedBookFromStore = useTrackedBooksStore((state) => state.removeTrackedBook);
+  
+  const books = React.useMemo(() => {
+    const booksArray = Object.values(trackedBooks);
+    return booksArray.filter(book => book && book.id);
+  }, [trackedBooks]);
 
   const switchLayout = () => {
     const newLayout = currentLayout === 'grid' ? 'list' : 'grid';
@@ -63,7 +70,7 @@ export default function MyLibrary() {
         ref={scrollRef}
         data={books}
         key={currentLayout}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ marginTop: insets.top, paddingHorizontal: 16, paddingBottom: 64, flexGrow: 1 }}
         numColumns={currentLayout === 'grid' ? 3 : 1}
         onScroll={scrollHandler}

@@ -1,12 +1,13 @@
+import { Author } from "./author";
 import { BookTracking } from "./reading-status";
 
 /**
  * Interface représentant un manga
  */
 export interface Book {
-  id: string; // Changed from number to string to match API
+  id: string | number; // API returns number but can be converted to string for keys
   title: string;
-  author?: string;
+  authors?: Author[];
   rating?: number;
   ratingCount: number;
   releaseYear?: number;
@@ -18,7 +19,6 @@ export interface Book {
   description?: string;
   descriptionFr?: string;
   genres?: string[];
-  tags?: string[];
   status: string;
   createdAt?: Date;
   updatedAt?: Date;

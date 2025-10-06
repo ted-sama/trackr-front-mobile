@@ -14,8 +14,10 @@ async function fetchBooksBySameAuthorCategory(bookId: string): Promise<Category>
   const now = new Date();
   return {
     id: bookId,
-    title: "Autres livres de l'auteur",
-    description: '',
+    title: "Other books by the same author",
+    titleFr: "Autres livres de l'auteur",
+    description: 'Other books by the same author',
+    descriptionFr: 'Autres livres de l\'auteur',
     isFeatured: false,
     books: data,
     createdAt: now,

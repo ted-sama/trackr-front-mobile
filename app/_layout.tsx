@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Platform } from "react-native";
+import '@/i18n'
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import ThemeProvider, { useTheme } from "../contexts/ThemeContext";
@@ -127,7 +127,7 @@ const toastConfig: ToastConfig = {
       fetchMyLibraryBooks();
       fetchCurrentUser();
     }
-  }, [isAuthenticated, fetchMyLibraryBooks, fetchCurrentUser]);
+  }, [isAuthenticated]);
 
   // Present or dismiss global bottom sheet when visibility changes
   useEffect(() => {
@@ -173,7 +173,7 @@ const toastConfig: ToastConfig = {
       )}
       <Toast
         autoHide={true}
-        visibilityTime={2000}
+        visibilityTime={3500}
         position="top"
         topOffset={80}
         config={toastConfig}

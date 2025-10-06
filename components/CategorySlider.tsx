@@ -6,6 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { router } from 'expo-router';
 import { useTypography } from '@/hooks/useTypography';
 import { ChevronRight } from 'lucide-react-native';
+import { useLocalization } from '@/hooks/useLocalization';
 
 interface CategorySliderProps {
   category: Category;
@@ -21,6 +22,7 @@ const CARD_WIDTH = width * 0.33;
 const CategorySlider = ({ category, isBottomSheetVisible = false, header = true, seeMore = true, ranked = false }: CategorySliderProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
+  const { isFrench } = useLocalization();
   
   // Ensure books is always an array
   const books = useMemo(() => (Array.isArray(category?.books) ? category.books : []), [category?.books]);
@@ -30,7 +32,7 @@ const CategorySlider = ({ category, isBottomSheetVisible = false, header = true,
       {header && (
         <Pressable style={styles.categoryHeader} onPress={() => seeMore ? router.push({pathname: "/category-full", params: {id: category.id}}) : null}>
           <Text style={[styles.categoryTitle, typography.categoryTitle, { color: colors.text }]} numberOfLines={1}>
-            {category.title}
+            {isFrench ? category.titleFr : category.title}
           </Text>
           {seeMore ? <ChevronRight size={20} strokeWidth={2.5} color={colors.secondaryText} /> : null}
         </Pressable>

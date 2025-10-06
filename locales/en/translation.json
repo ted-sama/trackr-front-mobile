@@ -1,0 +1,123 @@
+{
+    "status": {
+        "reading": "Reading",
+        "planToRead": "Plan to read",
+        "completed": "Completed",
+        "onHold": "On hold",
+        "dropped": "Dropped"
+    },
+    "planToRead": "Plan to read",
+    "completed": "Completed",
+    "onHold": "On hold",
+    "dropped": "Dropped",
+    "listItem": {
+        "item": "item",
+        "items": "items",
+        "by": "By",
+        "public": "Public",
+        "private": "Private"
+    },
+    "home": {
+        "title": "Home",
+        "greeting": "Hello, {{name}}",
+        "lastRead": "Last read",
+        "noLastRead": "Start reading to see your last reads",
+        "mostTracked": "Most tracked",
+        "topRated": "Top rated"
+    },
+    "discover": {
+        "title": "Discover",
+        "searchPlaceholder": "Start your search",
+        "cancel": "Cancel",
+        "books": {
+            "title": "Books"
+        },
+        "lists": {
+            "title": "Lists",
+            "header": "Popular lists",
+            "description": "Discover the lists created by the community"
+        },
+        "search": {
+            "empty": "Start your search by typing above.",
+            "noResults": "No results found"
+        }
+    },
+    "collection": {
+        "title": "Collection",
+        "myLibrary": "My library",
+        "searchPlaceholder": "Search in collection",
+        "cancel": "Cancel",
+        "books": "books"
+    },
+    "profile": {
+        "title": "Profile",
+        "edit": "Edit profile",
+        "reorder": "Reorder favorites",
+        "favorites": "Favorites",
+        "noFavorites": "No favorites",
+        "lists": "Lists",
+        "seeAllLists": "See all lists"
+    },
+    "settings": {
+        "title": "Settings",
+        "language": "Language"
+    },
+    "languages": {
+        "english": "English",
+        "french": "French"
+    },
+    "list": {
+        "reorder": "Reorder",
+        "edit": "Edit",
+        "delete": "Delete",
+        "reorderModal": {
+            "title": "Reorder list",
+            "book": "book",
+            "description": "Hold an item and drag it to reorder."
+        },
+        "editModal": {
+            "title": "Edit list",
+            "color": "Color",
+            "chooseColor": "Choose a color",
+            "backdrop": "Backdrop",
+            "chooseBackdrop": "Change backdrop",
+            "name": "Name",
+            "description": "Description",
+            "descriptionPlaceholder": "Describe your list",
+            "tags": "Tags",
+            "tagsPlaceholder": "Add a tag",
+            "options": "Options",
+            "public": "Public",
+            "publicDescription": "Visible by all users",
+            "private": "Private",
+            "privateDescription": "Visible only by you",
+            "ranked": "Ranked",
+            "rankedDescription": "List with preference order",
+            "collection": "Collection",
+            "collectionDescription": "Simple collection without ranking"
+        }
+    },
+    "bookBottomSheet": {
+        "addToTracking": "Add to library",
+        "addToFavorites": "Add to favorites",
+        "addToList": "Add to list",
+        "changeCover": "Change cover",
+        "share": "Share",
+        "rate": "Rate",
+        "removeFromTracking": "Remove from library",
+        "removeFromFavorites": "Remove from favorites",
+        "removeFromList": "Remove from list",
+        "editStatus": "Edit status"
+    },
+    "toast": {
+        "addedToFavorites": "Book added to favorites",
+        "removedFromFavorites": "Book removed from favorites",
+        "addedToTracking": "Book added to library",
+        "removedFromTracking": "Book removed from library",
+        "addedToList": "Book added to list",
+        "removedFromList": "Book removed from list"
+    },
+    "errors": {
+        "BOOKS_TOP_LIMIT_REACHED": "You have reached the limit of 5 favorite books"
+    }
+}

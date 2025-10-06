@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 interface CollectionListElementProps {
   list: List;
@@ -28,6 +29,7 @@ export default function CollectionListElement({
 }: CollectionListElementProps) {
   const { colors } = useTheme();
   const typography = useTypography();
+  const { t } = useTranslation();
 
   const separator = () => {
     return (
@@ -152,7 +154,7 @@ export default function CollectionListElement({
           </Text>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={[typography.caption, { color: colors.secondaryText }]}>
-              {list.books.total} {list.books.total > 1 ? "éléments" : "élément"}
+              {list.books.total} {list.books.total > 1 ? t("listItem.items") : t("listItem.item")}
             </Text>
             {size === "compact" && (
               <>
@@ -160,7 +162,7 @@ export default function CollectionListElement({
                 <Text
                   style={[typography.caption, { color: colors.secondaryText }]}
                 >
-                  {list.isPublic ? "Public" : "Privé"}
+                  {list.isPublic ? t("listItem.public") : t("listItem.private")}
                 </Text>
               </>
             )}
@@ -170,13 +172,13 @@ export default function CollectionListElement({
               <Text
                 style={[typography.caption, { color: colors.secondaryText }]}
               >
-                Par {list.owner.displayName}
+                {t("listItem.by")} {list.owner.displayName}
               </Text>
               {separator()}
               <Text
                 style={[typography.caption, { color: colors.secondaryText }]}
               >
-                {list.isPublic ? "Publique" : "Privée"}
+                {list.isPublic ? t("listItem.public") : t("listItem.private")}
               </Text>
             </View>
           )}
