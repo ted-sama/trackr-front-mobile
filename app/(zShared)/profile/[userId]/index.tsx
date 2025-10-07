@@ -33,15 +33,19 @@ import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 export default function UserProfileScreen() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const router = useRouter();
-  const { data: user, refetch: refetchUser, isLoading } = useUser(userId);
-  const { data: topBooks } = useUserTop(userId);
-  const { data: userLists } = useUserLists(userId);
   const { currentUser } = useUserStore();
+  const { data: user, refetch: refetchUser, isLoading } = useUser(userId);
   const isMe = user?.id === currentUser?.id;
+  const { data: topBooks } = useUserTop(isMe ? undefined : userId);
+  const { data: userLists } = useUserLists(isMe ? undefined : userId);
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const scrollY = useSharedValue(0);
@@ -243,6 +247,8 @@ export default function UserProfileScreen() {
               </Text>
               {user?.plan === "plus" && <PlusBadge />}
             </View>
+            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{user?.username}</Text>
+            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>Membre depuis le {dayjs.utc(user?.createdAt).format("DD/MM/YYYY")}</Text>
           </View>
         </View>
         {isMe && (
@@ -257,6 +263,7 @@ export default function UserProfileScreen() {
             <PillButton
               icon={<Ionicons name="swap-vertical" size={16} color={colors.secondaryText} />}
               title={t("profile.reorder")}
+              disabled={topBooks?.length === 0}
               onPress={() => {
                 router.push(`/profile/${userId}/reorder`);
               }}
@@ -274,31 +281,35 @@ export default function UserProfileScreen() {
               >
                 {t("profile.favorites")}
               </Text>
-              <View style={{ marginHorizontal: -16 }}>
-                <FlatList
-                  data={topBooks}
-                  horizontal
-                  renderItem={({ item }) => (
-                    <BookCard
-                      book={item}
-                      size="compact-small"
-                      showRating={false}
-                      showAuthor={false}
-                      showTitle={false}
-                      onPress={() => {
-                        router.push(`/book/${item.id}`);
-                      }}
-                    />
-                  )}
-                  ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-                  scrollEnabled={true}
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.sliderContent}
-                />
-              </View>
+              {topBooks.length > 0 ? (
+                <View style={{ marginHorizontal: -16 }}>
+                  <FlatList
+                    data={topBooks}
+                    horizontal
+                    renderItem={({ item }) => (
+                      <BookCard
+                        book={item}
+                        size="compact-small"
+                        showRating={false}
+                        showAuthor={false}
+                        showTitle={false}
+                        onPress={() => {
+                          router.push(`/book/${item.id}`);
+                        }}
+                      />
+                    )}
+                    ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+                    scrollEnabled={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.sliderContent}
+                  />
+                </View>
+              ) : (
+                <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.noFavorites")}</Text>
+              )}
             </View>
           )}
-          {userLists && (
+          {userLists && userLists.pages?.length ? (
             <View>
               <Text
                 style={[
@@ -308,34 +319,40 @@ export default function UserProfileScreen() {
               >
                 {t("profile.lists")}
               </Text>
-              <FlatList
-                data={userLists.pages.flatMap(page => page.data).slice(0, 2)}
-                renderItem={({ item }) => (
-                  <CollectionListElement
-                    list={item}
-                    onPress={() => {
-                      router.push(`/list/${item.id}`);
-                    }}
-                  />
-                )}
-                ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-                scrollEnabled={false}
-              />
+              {userLists.pages.flatMap((page) => page.data).slice(0, 2).length > 0 ? (
+                <FlatList
+                  data={(userLists.pages.flatMap((page) => page.data) ?? []).slice(0, 2)}
+                  renderItem={({ item }) => (
+                    <CollectionListElement
+                      list={item}
+                      onPress={() => {
+                        router.push(`/list/${item.id}`);
+                      }}
+                    />
+                  )}
+                  ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+                  scrollEnabled={false}
+                />
+              ) : (
+                <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.noLists")}</Text>
+              )}
               <TouchableOpacity
                 style={[
                   styles.actionButton,
                   { backgroundColor: colors.actionButton, marginTop: 16 },
+                  { opacity: userLists.pages.flatMap((page) => page.data).slice(0, 2).length === 0 ? 0.5 : 1 },
                 ]}
                 onPress={() => {
                   router.push(`/profile/${userId}/lists`);
                 }}
+                disabled={userLists.pages.flatMap((page) => page.data).slice(0, 2).length === 0}
               >
                 <Text style={[typography.caption, { color: colors.text }]}>
                   {t("profile.seeAllLists")}
                 </Text>
               </TouchableOpacity>
             </View>
-          )}
+          ) : null}
         </View>
       </AnimatedScrollView>
     </View>

@@ -102,10 +102,10 @@
             "chooseColor": "Choisir une couleur",
             "backdrop": "Illustration",
             "chooseBackdrop": "Changer l'illustration",
-            "displayName": "Nom d'utilisateur",
-            "displayNamePlaceholder": "Entrez votre nom d'utilisateur",
-            "email": "Email",
-            "emailPlaceholder": "Entrez votre email"
+            "displayName": "Nom d'affichage",
+            "displayNamePlaceholder": "Entrez votre nom d'affichage",
+            "username": "Nom d'utilisateur",
+            "usernamePlaceholder": "Entrez votre nom d'utilisateur"
         }
     },
     "settings": {

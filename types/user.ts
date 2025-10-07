@@ -12,6 +12,6 @@ export interface User {
     preferences?: {
         [key: string]: any;
     };
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
 };

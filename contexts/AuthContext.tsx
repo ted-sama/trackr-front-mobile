@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { handleErrorCodes } from '@/utils/handleErrorCodes';
 import { useTranslation } from 'react-i18next';
+import { queryClient } from '@/lib/queryClient';
 
 const TOKEN_KEY = 'user_auth_token';
 const REFRESH_TOKEN_KEY = 'user_refresh_token';
@@ -98,8 +99,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
             delete api.defaults.headers.common['Authorization'];
             setToken(null);
+            // Clear all stores
             useTrackedBooksStore.getState().clearTrackedBooks();
             useUserStore.getState().logout();
+            // Clear all React Query cache (lists, books, categories, etc.)
+            queryClient.clear();
         } catch (error) {
             console.error('Error deleting token:', error);
         } finally {
