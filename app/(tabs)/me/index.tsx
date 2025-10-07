@@ -25,6 +25,9 @@ import { useState } from "react";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolate,
 } from "react-native-reanimated";
 import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -45,6 +48,28 @@ export default function Profile() {
   const { t } = useTranslation();
   const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
+  // Animated style for elastic backdrop effect
+  const backdropAnimatedStyle = useAnimatedStyle(() => {
+    const BACKDROP_HEIGHT = 275;
+    const scale = interpolate(
+      scrollY.value,
+      [-BACKDROP_HEIGHT, 0],
+      [2, 1],
+      Extrapolate.CLAMP
+    );
+    
+    const translateY = interpolate(
+      scrollY.value,
+      [-BACKDROP_HEIGHT, 0],
+      [-BACKDROP_HEIGHT / 2, 0],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      transform: [{ scale }, { translateY }],
+    };
+  });
+
   // no-op
   return (
     <View style={{ flex: 1 }}>
@@ -63,15 +88,15 @@ export default function Profile() {
       />
       <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} contentContainerStyle={{ paddingBottom: 64 }}>
         <View>
-          <View
-            style={{
+          <Animated.View
+            style={[{
               position: "relative",
               width: "110%",
               height: 275,
               alignSelf: "center",
               marginHorizontal: -16,
               zIndex: -99,
-            }}
+            }, backdropAnimatedStyle]}
           >
             {currentUser?.backdropMode === "image" &&
             currentUser?.backdropImage ? (
@@ -99,7 +124,7 @@ export default function Profile() {
                 }}
               />
             )}
-          </View>
+          </Animated.View>
           <View
             style={{
               alignItems: "center",

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Keyboard, TouchableWithoutFeedback, FlatList } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -7,7 +7,6 @@ import HeaderDiscover from '@/components/discover/HeaderDiscover';
 import { useTheme } from '@/contexts/ThemeContext';
 import BookListElement from '@/components/BookListElement';
 import CollectionListElement from '@/components/CollectionListElement';
-import { LegendList } from '@legendapp/list';
 import { useTypography } from '@/hooks/useTypography';
 import { useSearch } from '@/hooks/queries/search';
 import { Book } from '@/types/book';
@@ -107,7 +106,7 @@ export default function SearchScreen() {
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
-          <LegendList
+          <FlatList
             data={flatResults}
             renderItem={renderItem}
             keyExtractor={(item, index) => `${item.id}-${index}`}

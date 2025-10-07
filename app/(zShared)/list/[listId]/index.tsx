@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, FlatList, Alert, Pressable } from "react-native
 import { Image } from "expo-image";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import Animated, { useSharedValue, useAnimatedScrollHandler } from "react-native-reanimated";
+import Animated, { useSharedValue, useAnimatedScrollHandler, useAnimatedStyle, interpolate, Extrapolate } from "react-native-reanimated";
 import { StatusBar } from "expo-status-bar";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import BookListElement from "@/components/BookListElement";
@@ -115,6 +115,28 @@ export default function ListFullScreen() {
     listActionsBottomSheetRef.current?.present();
   }, []);
 
+  // Animated style for elastic backdrop effect
+  const backdropAnimatedStyle = useAnimatedStyle(() => {
+    const BACKDROP_HEIGHT = 275;
+    const scale = interpolate(
+      scrollY.value,
+      [-BACKDROP_HEIGHT, 0],
+      [2, 1],
+      Extrapolate.CLAMP
+    );
+    
+    const translateY = interpolate(
+      scrollY.value,
+      [-BACKDROP_HEIGHT, 0],
+      [-BACKDROP_HEIGHT / 2, 0],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      transform: [{ scale }, { translateY }],
+    };
+  });
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
@@ -139,15 +161,15 @@ export default function ListFullScreen() {
           onScroll={scrollHandler}
           ListHeaderComponent={
             <View>
-              <View
-                style={{
+              <Animated.View
+                style={[{
                   position: "relative",
                   width: "110%",
                   height: 275,
                   alignSelf: "center",
                   marginHorizontal: -16,
                   zIndex: -99,
-                }}
+                }, backdropAnimatedStyle]}
               >
                 {list.backdropMode === "image" && list.backdropImage ? (
                   <MaskedView
@@ -174,7 +196,7 @@ export default function ListFullScreen() {
                     }}
                   />
                 )}
-              </View>
+              </Animated.View>
               <View
                 style={{
                   marginTop: 16,

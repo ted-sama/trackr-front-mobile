@@ -186,6 +186,33 @@ export default function BookScreen() {
     };
   });
 
+  // Constants for gradient calculation (moved here before elastic style)
+  const IMAGE_WIDTH = 202.5;
+  const IMAGE_HEIGHT = 303.75;
+  const gradientHeight = 200 + IMAGE_HEIGHT * 0.5;
+
+  // Animated style for elastic gradient effect
+  const gradientElasticStyle = useAnimatedStyle(() => {
+    const GRADIENT_HEIGHT = gradientHeight;
+    const scale = interpolate(
+      scrollY.value,
+      [-GRADIENT_HEIGHT, 0],
+      [2, 1],
+      Extrapolate.CLAMP
+    );
+    
+    const translateY = interpolate(
+      scrollY.value,
+      [-GRADIENT_HEIGHT, 0],
+      [-GRADIENT_HEIGHT / 2, 0],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      transform: [{ scale }, { translateY }],
+    };
+  });
+
   // Scroll handler to update scrollY
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -218,9 +245,6 @@ export default function BookScreen() {
     }
   };
 
-  const IMAGE_WIDTH = 202.5;
-  const IMAGE_HEIGHT = 303.75;
-
   const {
     addTrackedBook: addTrackedBookToStore,
     removeTrackedBook: removeTrackedBookFromStore,
@@ -242,11 +266,10 @@ export default function BookScreen() {
     }
   }, [book?.coverImage]);
 
-  // Compute gradient color and height
+  // Compute gradient color
   const gradientTopColor = (() => {
     return dominantColor;
   })();
-  const gradientHeight = 200 + IMAGE_HEIGHT * 0.5;
 
   // Animate gradient opacity when gradient color is available
   useEffect(() => {
@@ -370,17 +393,25 @@ export default function BookScreen() {
       >
         {gradientTopColor && (
         <Animated.View
-          style={[styles.topGradient, { height: gradientHeight }, gradientAnimatedStyle]}
+          style={[{
+            position: "relative",
+            width: "110%",
+            height: gradientHeight,
+            alignSelf: "center",
+            marginHorizontal: -16,
+            marginTop: 0,
+            zIndex: -99,
+          }, gradientAnimatedStyle, gradientElasticStyle]}
         >
           <LinearGradient
             colors={[gradientTopColor, colors.background]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
-            style={StyleSheet.absoluteFillObject}
+            style={{ width: "100%", height: "100%" }}
           />
         </Animated.View>
       )}
-        <View style={styles.shadowContainer}>
+        <View style={[styles.shadowContainer, { marginTop: gradientTopColor ? -gradientHeight + 72 : 72 }]}>
           <View style={styles.imageContainer}>
             {isLoading ? (
               <SkeletonLoader width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
@@ -689,7 +720,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 6,
     elevation: 8,
-    marginTop: 72,
   },
   imageContainer: {
     width: "100%",
@@ -858,11 +888,5 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     overflow: "hidden",
-  },
-  topGradient: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
   },
 });
