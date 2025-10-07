@@ -364,6 +364,191 @@ export default function BookScreen() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["right", "left"]}
+      >
+        <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+        <DefaultScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
+          {/* Skeleton for cover image */}
+          <View style={[styles.shadowContainer, { marginTop: 72 }]}>
+            <View style={styles.imageContainer}>
+              <SkeletonLoader width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            </View>
+          </View>
+
+          {/* Skeleton for title and info section */}
+          <View style={styles.detailsContainer}>
+            <View style={styles.titleTextContainer}>
+              <View style={{ flex: 3 }}>
+                {/* Title skeleton - 2 lines */}
+                <SkeletonLoader 
+                  width="90%" 
+                  height={28} 
+                  style={{ marginBottom: 8 }} 
+                />
+                <SkeletonLoader 
+                  width="70%" 
+                  height={28} 
+                  style={{ marginBottom: 12 }} 
+                />
+                
+                {/* Author skeleton */}
+                <SkeletonLoader 
+                  width="50%" 
+                  height={14} 
+                  style={{ marginBottom: 4 }} 
+                />
+                
+                {/* Info row skeleton */}
+                <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                  <SkeletonLoader width={60} height={14} />
+                  <SkeletonLoader width={80} height={14} />
+                  <SkeletonLoader width={90} height={14} />
+                </View>
+              </View>
+              
+              {/* Action buttons skeleton */}
+              <View style={styles.actionsContainer}>
+                <SkeletonLoader 
+                  width={32} 
+                  height={32} 
+                  style={{ borderRadius: 16 }} 
+                />
+                <SkeletonLoader 
+                  width={32} 
+                  height={32} 
+                  style={{ borderRadius: 16 }} 
+                />
+              </View>
+            </View>
+
+            {/* Tags skeleton */}
+            <View style={[styles.tagsContainer, { marginTop: 8 }]}>
+              <SkeletonLoader 
+                width={80} 
+                height={28} 
+                style={{ borderRadius: 14 }} 
+              />
+              <SkeletonLoader 
+                width={100} 
+                height={28} 
+                style={{ borderRadius: 14 }} 
+              />
+              <SkeletonLoader 
+                width={90} 
+                height={28} 
+                style={{ borderRadius: 14 }} 
+              />
+            </View>
+
+            {/* Description skeleton */}
+            <View style={styles.descriptionContainer}>
+              <SkeletonLoader 
+                width="100%" 
+                height={14} 
+                style={{ marginBottom: 6 }} 
+              />
+              <SkeletonLoader 
+                width="100%" 
+                height={14} 
+                style={{ marginBottom: 6 }} 
+              />
+              <SkeletonLoader 
+                width="100%" 
+                height={14} 
+                style={{ marginBottom: 6 }} 
+              />
+              <SkeletonLoader 
+                width="80%" 
+                height={14} 
+              />
+            </View>
+
+            {/* Ratings section skeleton */}
+            <View style={[styles.ratingsContainer, { borderColor: colors.border }]}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 16 }}>
+                <SkeletonLoader 
+                  width={24} 
+                  height={24} 
+                  style={{ borderRadius: 12 }} 
+                />
+                <SkeletonLoader 
+                  width={40} 
+                  height={20} 
+                  style={{ marginLeft: 4 }} 
+                />
+                <View style={{ width: 4 }} />
+                <SkeletonLoader width={80} height={14} />
+              </View>
+              
+              <View style={styles.socialsContainer}>
+                <SkeletonLoader 
+                  width="100%" 
+                  height={60} 
+                  style={{ borderRadius: 10 }} 
+                />
+              </View>
+            </View>
+
+            {/* Recommendations section skeleton */}
+            <View style={[styles.recommendationsContainer, { borderColor: colors.border }]}>
+              <SkeletonLoader 
+                width={180} 
+                height={20} 
+                style={{ marginBottom: 16 }} 
+              />
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                <SkeletonLoader 
+                  width={120} 
+                  height={180} 
+                  style={{ borderRadius: 6 }} 
+                />
+                <SkeletonLoader 
+                  width={120} 
+                  height={180} 
+                  style={{ borderRadius: 6 }} 
+                />
+              </View>
+            </View>
+          </View>
+        </DefaultScrollView>
+
+        {/* Custom animated header skeleton */}
+        <View
+          style={[
+            {
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 44 + insets.top,
+              paddingTop: insets.top,
+              paddingHorizontal: 16,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            },
+          ]}
+        >
+          <SkeletonLoader 
+            width={38} 
+            height={38} 
+            style={{ borderRadius: 19 }} 
+          />
+          <SkeletonLoader 
+            width={150} 
+            height={20} 
+            style={{ borderRadius: 4 }} 
+          />
+          <View style={{ width: 38 }} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
@@ -413,14 +598,10 @@ export default function BookScreen() {
       )}
         <View style={[styles.shadowContainer, { marginTop: gradientTopColor ? -gradientHeight + 72 : 72 }]}>
           <View style={styles.imageContainer}>
-            {isLoading ? (
-              <SkeletonLoader width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-            ) : (
-              <Image
-                source={{ uri: book?.coverImage }}
-                style={styles.imageContent}
-              />
-            )}
+            <Image
+              source={{ uri: book?.coverImage }}
+              style={styles.imageContent}
+            />
           </View>
         </View>
         <View style={styles.detailsContainer}>
@@ -434,17 +615,13 @@ export default function BookScreen() {
             }}
           >
             <View style={{ flex: 3 }}>
-              {isLoading ? (
-                <SkeletonLoader width={"90%"} height={40} />
-              ) : (
-                <Text
-                  style={[styles.title, typography.h1, { color: colors.text }]}
-                  numberOfLines={2}
-                  ellipsizeMode="tail"
-                >
-                  {book?.title}
-                </Text>
-              )}
+              <Text
+                style={[styles.title, typography.h1, { color: colors.text }]}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {book?.title}
+              </Text>
               <Text
                 style={[
                   styles.author,

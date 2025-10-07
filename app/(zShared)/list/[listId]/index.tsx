@@ -28,6 +28,8 @@ import Avatar from "@/components/ui/Avatar";
 import PlusBadge from "@/components/ui/PlusBadge";
 import PillButton from "@/components/ui/PillButton";
 import { useUIStore } from "@/stores/uiStore";
+import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const AnimatedList = Animated.createAnimatedComponent(FlatList<Book>);
 
@@ -46,8 +48,9 @@ export default function ListFullScreen() {
   const listActionsBottomSheetRef = useRef<BottomSheetModal>(null);
   const currentLayout = useUIStore(state => state.listLayout);
   const setLayout = useUIStore(state => state.setListLayout);
+  const insets = useSafeAreaInsets();
 
-  const { data: list, refetch } = useList(listId);
+  const { data: list, refetch, isLoading } = useList(listId);
   const { mutateAsync: deleteListFromStore } = useDeleteList();
   const { currentUser } = useUserStore();
   const isEditable = (listId: string) => Boolean(list && currentUser && list.owner?.id === currentUser.id);
@@ -136,6 +139,83 @@ export default function ListFullScreen() {
       transform: [{ scale }, { translateY }],
     };
   });
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+        <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+          {/* Backdrop skeleton */}
+          <View style={{ width: "110%", height: 275, marginHorizontal: -16, marginBottom: 16 }}>
+            <SkeletonLoader width="100%" height="100%" />
+          </View>
+
+          {/* Owner info skeleton */}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 16 }}>
+            <SkeletonLoader width={28} height={28} style={{ borderRadius: 14 }} />
+            <SkeletonLoader width={120} height={14} />
+          </View>
+
+          {/* Title and actions skeleton */}
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 32, marginBottom: 16 }}>
+            <SkeletonLoader width="60%" height={32} />
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <SkeletonLoader width={32} height={32} style={{ borderRadius: 16 }} />
+              <SkeletonLoader width={32} height={32} style={{ borderRadius: 16 }} />
+            </View>
+          </View>
+
+          {/* Description skeleton */}
+          <View style={{ marginBottom: 32 }}>
+            <SkeletonLoader width="100%" height={14} style={{ marginBottom: 6 }} />
+            <SkeletonLoader width="100%" height={14} style={{ marginBottom: 6 }} />
+            <SkeletonLoader width="70%" height={14} />
+          </View>
+
+          {/* Tags skeleton */}
+          <View style={{ flexDirection: "row", gap: 8, marginBottom: 32 }}>
+            <SkeletonLoader width={80} height={28} style={{ borderRadius: 14 }} />
+            <SkeletonLoader width={100} height={28} style={{ borderRadius: 14 }} />
+            <SkeletonLoader width={90} height={28} style={{ borderRadius: 14 }} />
+          </View>
+
+          {/* Book items skeleton */}
+          {[1, 2, 3, 4].map((item) => (
+            <View key={item} style={{ flexDirection: "row", gap: 12, marginBottom: 12 }}>
+              <SkeletonLoader width={60} height={90} style={{ borderRadius: 4 }} />
+              <View style={{ flex: 1, justifyContent: "space-between" }}>
+                <View>
+                  <SkeletonLoader width="80%" height={18} style={{ marginBottom: 6 }} />
+                  <SkeletonLoader width="60%" height={14} style={{ marginBottom: 4 }} />
+                  <SkeletonLoader width="40%" height={14} />
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Header skeleton */}
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 44 + insets.top,
+            paddingTop: insets.top,
+            paddingHorizontal: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <SkeletonLoader width={38} height={38} style={{ borderRadius: 19 }} />
+          <SkeletonLoader width={120} height={20} style={{ borderRadius: 4 }} />
+          <View style={{ width: 38 }} />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>

@@ -11,6 +11,7 @@ import { useTypography } from '@/hooks/useTypography';
 import { useSearch } from '@/hooks/queries/search';
 import { Book } from '@/types/book';
 import { List } from '@/types/list';
+import SkeletonLoader from '@/components/skeleton-loader/SkeletonLoader';
 
 export default function SearchScreen() {
   const { t } = useTranslation();
@@ -102,8 +103,24 @@ export default function SearchScreen() {
 
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       {isFetching && !hasResults && !error ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
+        <View style={styles.listContainer}>
+          {[1, 2, 3, 4, 5].map((item) => (
+            <View key={item} style={{ marginBottom: 12 }}>
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                <SkeletonLoader width={60} height={90} style={{ borderRadius: 4 }} />
+                <View style={{ flex: 1, justifyContent: "space-between" }}>
+                  <View>
+                    <SkeletonLoader width="80%" height={18} style={{ marginBottom: 6 }} />
+                    <SkeletonLoader width="60%" height={14} style={{ marginBottom: 4 }} />
+                    <SkeletonLoader width="40%" height={14} />
+                  </View>
+                  <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                    <SkeletonLoader width={24} height={24} style={{ borderRadius: 12 }} />
+                  </View>
+                </View>
+              </View>
+            </View>
+          ))}
         </View>
       ) : (
           <FlatList

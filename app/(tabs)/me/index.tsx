@@ -33,14 +33,17 @@ import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Settings } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
+import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Profile() {
   const { currentUser } = useUserStore();
-  const { data: topBooks } = useUserTop();
+  const { data: topBooks, isLoading } = useUserTop();
   const { data: userListsPages } = useUserLists();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const scrollY = useSharedValue(0);
+  const insets = useSafeAreaInsets();
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollY.value = event.contentOffset.y;
   });
@@ -69,6 +72,82 @@ export default function Profile() {
       transform: [{ scale }, { translateY }],
     };
   });
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+        <ScrollView contentContainerStyle={{ paddingBottom: 64 }}>
+          {/* Backdrop skeleton */}
+          <View style={{ width: "110%", height: 275, marginHorizontal: -16 }}>
+            <SkeletonLoader width="100%" height="100%" />
+          </View>
+
+          {/* Avatar and name skeleton */}
+          <View style={{ alignItems: "center", marginTop: -40, paddingHorizontal: 16 }}>
+            <SkeletonLoader width={80} height={80} style={{ borderRadius: 40, borderWidth: 4, borderColor: colors.background }} />
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 16 }}>
+              <SkeletonLoader width={150} height={28} />
+            </View>
+          </View>
+
+          {/* Action buttons skeleton */}
+          <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center" }}>
+            <SkeletonLoader width={100} height={36} style={{ borderRadius: 18 }} />
+            <SkeletonLoader width={100} height={36} style={{ borderRadius: 18 }} />
+          </View>
+
+          {/* Favorites section skeleton */}
+          <View style={{ paddingHorizontal: 16, marginTop: 24 }}>
+            <SkeletonLoader width={120} height={20} style={{ marginBottom: 12 }} />
+            <View style={{ flexDirection: "row", gap: 12 }}>
+              {[1, 2, 3, 4].map((item) => (
+                <SkeletonLoader key={item} width={80} height={120} style={{ borderRadius: 4 }} />
+              ))}
+            </View>
+          </View>
+
+          {/* Lists section skeleton */}
+          <View style={{ paddingHorizontal: 16, marginTop: 24 }}>
+            <SkeletonLoader width={100} height={20} style={{ marginBottom: 12 }} />
+            {[1, 2].map((item) => (
+              <View key={item} style={{ marginBottom: 16 }}>
+                <View style={{ flexDirection: "row", gap: 12 }}>
+                  <SkeletonLoader width={80} height={80} style={{ borderRadius: 4 }} />
+                  <View style={{ flex: 1 }}>
+                    <SkeletonLoader width="80%" height={18} style={{ marginBottom: 6 }} />
+                    <SkeletonLoader width="60%" height={14} style={{ marginBottom: 6 }} />
+                    <SkeletonLoader width="40%" height={14} />
+                  </View>
+                </View>
+              </View>
+            ))}
+            <SkeletonLoader width="100%" height={48} style={{ borderRadius: 16, marginTop: 16 }} />
+          </View>
+        </ScrollView>
+
+        {/* Header skeleton */}
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 44 + insets.top,
+            paddingTop: insets.top,
+            paddingHorizontal: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={{ width: 38 }} />
+          <SkeletonLoader width={120} height={20} style={{ borderRadius: 4 }} />
+          <SkeletonLoader width={22} height={22} style={{ borderRadius: 11 }} />
+        </View>
+      </View>
+    );
+  }
 
   // no-op
   return (
