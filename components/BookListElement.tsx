@@ -52,11 +52,11 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
   const handleTrackingToggle = async () => {
     try {
       if (isTracking) {
-        await useTrackedBooksStore.getState().removeTrackedBook(book.id);
-        Toast.show({ text1: 'Livre retiré de votre bibliothèque', type: 'info' });
+        await useTrackedBooksStore.getState().removeTrackedBook(book.id.toString());
+        Toast.show({ text1: t('toast.removedFromTracking'), type: 'info' });
       } else {
         await useTrackedBooksStore.getState().addTrackedBook(book);
-        Toast.show({ text1: 'Livre ajouté à votre bibliothèque', type: 'info' });
+        Toast.show({ text1: t('toast.addedToTracking'), type: 'info' });
       }
     } catch (err) {
       Toast.show({ type: 'error', text1: 'Erreur', text2: isTracking ? 'Impossible de retirer le livre.' : `Impossible d\'ajouter le livre.` });

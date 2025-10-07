@@ -3,9 +3,11 @@ import * as SecureStore from 'expo-secure-store';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { useUserStore } from '@/stores/userStore';
 import { api } from '@/services/api';
-import { LoginResponse } from '@/types/auth';
+import { LoginResponse, RegisterResponse } from '@/types/auth';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
+import { handleErrorCodes } from '@/utils/handleErrorCodes';
+import { useTranslation } from 'react-i18next';
 
 const TOKEN_KEY = 'user_auth_token';
 const REFRESH_TOKEN_KEY = 'user_refresh_token';
@@ -14,6 +16,7 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  register: (email: string,  password: string, username: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -28,6 +31,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const loadToken = async () => {
@@ -46,6 +50,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         loadToken();    
     }, []);
 
+    const register = async (email: string, password: string, username: string) => {
+        setIsLoading(true);
+        try {
+            const response = await api.post<RegisterResponse>('/auth/register', { email, password, username, displayName: username });
+            Toast.show({
+                type: "info",
+                text1: t("toast.registerSuccess")
+            });
+            router.push('/auth/login');
+        } catch (error: any) {
+            Toast.show({
+                type: "info",
+                text1: t(handleErrorCodes(error))
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const login = async (email: string, password: string) => {
         setIsLoading(true);
         try {
@@ -57,35 +80,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                 await useUserStore.getState().fetchCurrentUser();
                 setToken(token);
-            } else {
-                Toast.show({
-                    type: "error",
-                    text1: "Erreur de connexion",
-                    text2: 'Réponse invalide du serveur.',
-                });
             }
         } catch (error: any) {
-            console.error('Error logging in:', error);
-            let errorMessage = 'Une erreur de réseau est survenue.';
-            if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
-                console.error('Error data:', error.response.data);
-                console.error('Error status:', error.response.status);
-                errorMessage = error.response.data?.message || `Erreur ${error.response.status}`;
-            } else if (error.request) {
-                // The request was made but no response was received
-                console.error('Error request:', error.request);
-                errorMessage = 'Le serveur ne répond pas. Veuillez vérifier votre connexion.';
-            } else {
-                // Something happened in setting up the request that triggered an Error
-                console.error('Error message:', error.message);
-                errorMessage = error.message;
-            }
             Toast.show({
-                type: "error",
-                text1: 'Erreur de connexion',
-                text2: errorMessage,
+                type: "info",
+                text1: t(handleErrorCodes(error))
             });
         } finally {
             setIsLoading(false);
@@ -109,7 +108,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     return (
-        <AuthContext.Provider value={{ token, isAuthenticated: !!token, isLoading, login, logout }}>
+        <AuthContext.Provider value={{ token, isAuthenticated: !!token, isLoading, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
+  ImageBackground,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -30,6 +31,8 @@ import {
 } from "@/hooks/queries/users";
 import { Image } from "expo-image";
 import PlusBadge from "@/components/ui/PlusBadge";
+import { useTranslation } from "react-i18next";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function ProfileEditModal() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
@@ -38,7 +41,7 @@ export default function ProfileEditModal() {
   const typography = useTypography();
   const currentUser = useUserStore((s) => s.currentUser);
   const isPlus = currentUser?.plan === "plus";
-
+  const { t } = useTranslation();
   const { mutateAsync: updateMe } = useUpdateMe();
   const { mutateAsync: uploadAvatar, isPending: isUploadingAvatar } =
     useUpdateUserAvatarImage();
@@ -273,7 +276,7 @@ export default function ProfileEditModal() {
           <Ionicons name="arrow-back" size={24} color={colors.icon} />
         </TouchableOpacity>
         <Text style={[typography.h3, { color: colors.text }]}>
-          Modifier le profil
+          {t("profile.editModal.title")}
         </Text>
         <TouchableOpacity
           onPress={handleSave}
@@ -318,7 +321,7 @@ export default function ProfileEditModal() {
                   { color: colors.text },
                 ]}
               >
-                Couleur
+                {t("profile.editModal.color")}
               </Text>
             </View>
           </TouchableOpacity>
@@ -358,7 +361,7 @@ export default function ProfileEditModal() {
                   { color: colors.text },
                 ]}
               >
-                Illustration
+                {t("profile.editModal.backdrop")}
               </Text>
               {!isPlus && <PlusBadge />}
             </View>
@@ -369,7 +372,7 @@ export default function ProfileEditModal() {
         <View style={styles.headerPreview}>
           {backdropMode === "image" ? (
             <TouchableOpacity onPress={handlePickBackdrop} activeOpacity={0.9}>
-              <Image
+              <ImageBackground
                 source={{
                   uri:
                     selectedBackdropImage?.uri ||
@@ -380,7 +383,17 @@ export default function ProfileEditModal() {
                   styles.headerBackdrop,
                   { backgroundColor: colors.card },
                 ]}
-              ></Image>
+              >
+                <LinearGradient
+                  colors={["rgba(0,0,0,0.5)", "rgba(0,0,0,0.1)", "rgba(0,0,0,0.5)"]}
+                  style={styles.backdropOverlay}
+                >
+                  <View style={styles.cameraIconContainer}>
+                    <Camera size={24} color="white" />
+                    <Text style={[typography.body, styles.cameraText]}>{t("profile.editModal.chooseBackdrop")}</Text>
+                  </View>
+                </LinearGradient>
+              </ImageBackground>
             </TouchableOpacity>
           ) : (
             <View
@@ -470,26 +483,26 @@ export default function ProfileEditModal() {
         <View style={{ gap: 16 }}>
           {/* Display name */}
         <TextField
-          label="Nom d'affichage"
+          label={t("profile.editModal.displayName")}
           value={displayName}
           onChangeText={setDisplayName}
           autoCapitalize="none"
           autoCorrect={false}
           maxLength={32}
           returnKeyType="done"
-          placeholder="Entrez votre nom d'utilisateur"
+          placeholder={t("profile.editModal.displayNamePlaceholder")}
         />
 
         {/* Username */}
         <TextField
-          label="Nom d'utilisateur"
+          label={t("profile.editModal.username")}
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
           autoCorrect={false}
           maxLength={32}
           returnKeyType="done"
-          placeholder="Entrez votre nom d'utilisateur"
+          placeholder={t("profile.editModal.usernamePlaceholder")}
         />
         </View>
       </ScrollView>
@@ -551,6 +564,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 16,
     marginBottom: 24,
+  },
+  backdropOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
   },
   cameraIconContainer: {
     flexDirection: "row",

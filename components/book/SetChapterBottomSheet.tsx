@@ -8,6 +8,7 @@ import { useTypography } from '@/hooks/useTypography';
 import { Book } from '@/types/book';
 import { Plus, Minus } from 'lucide-react-native';
 import Button from '@/components/ui/Button';
+import { useTranslation } from 'react-i18next';
 
 
 interface SetChapterBottomSheetProps {
@@ -26,6 +27,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
     const typography = useTypography();
     const isTracking = bookTracking !== null;
     const [chapter, setChapter] = useState(bookTracking?.currentChapter?.toString() ?? '0');
+    const { t } = useTranslation();
 
     const handleDismiss = () => {
         if (onDismiss) {
@@ -81,7 +83,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
             backdropComponent={renderBackdrop}
         >
             <BottomSheetView style={styles.bottomSheetContent}>
-                <Text style={[typography.categoryTitle, styles.title, { color: colors.text }]}>Dernier chapitre lu</Text>
+                <Text style={[typography.categoryTitle, styles.title, { color: colors.text }]}>{t("book.lastChapterRead")}</Text>
                 <View style={[styles.inputContainer, { backgroundColor: colors.actionButton }]}>
                     <Pressable 
                         onPress={() => {
@@ -117,7 +119,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
                         <Plus size={24} color={colors.text} />
                     </Pressable>
                 </View>
-                <Button title="Enregistrer" onPress={handleSave} style={{ marginTop: 36 }} />
+                <Button title={t("save")} onPress={handleSave} style={{ marginTop: 36 }} />
             </BottomSheetView>
         </BottomSheetModal>
     );

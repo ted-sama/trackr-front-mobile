@@ -1,9 +1,6 @@
 import { User } from "./user";
 
-export interface RegisterResponse {
-    message: string;
-    user?: User;
-}
+export interface RegisterResponse extends Partial<User> {}
 
 export interface LoginResponse {
     type: 'bearer';

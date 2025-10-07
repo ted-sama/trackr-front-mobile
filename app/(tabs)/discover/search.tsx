@@ -68,7 +68,7 @@ export default function SearchScreen() {
 
   const renderItem = ({ item }: { item: Book | List }) => {
     // Type guard pour distinguer Book de List
-    if ('author' in item) {
+    if ('authors' in item) {
       // C'est un Book
       return (
         <BookListElement 

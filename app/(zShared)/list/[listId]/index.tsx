@@ -13,7 +13,6 @@ import BookCard from "@/components/BookCard";
 import { Book } from "@/types/book";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";

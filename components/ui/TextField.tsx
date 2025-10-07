@@ -7,21 +7,31 @@ import { Ionicons } from '@expo/vector-icons';
 interface TextFieldProps extends Omit<TextInputProps, 'style'> {
   label?: string;
   type?: 'default' | 'password';
+  error?: string;
 }
 
-export function TextField({ label, type = 'default', ...inputProps }: TextFieldProps) {
+export function TextField({ label, type = 'default', error, ...inputProps }: TextFieldProps) {
   const { colors } = useTheme();
   const typography = useTypography();
   const [showPassword, setShowPassword] = useState(false);
+  
+  const hasError = error && error.length > 0;
 
   return (
     <View> 
       {label ? (
-        <Text style={[typography.h3, styles.label, { color: colors.text }]}>
+        <Text style={[typography.h3, styles.label, { color: hasError ? colors.error : colors.text }]}>
           {label}
         </Text>
       ) : null}
-      <View style={[styles.inputContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={[
+        styles.inputContainer, 
+        { 
+          backgroundColor: colors.card, 
+          borderColor: hasError ? colors.error : colors.border,
+          borderWidth: hasError ? 2 : 1,
+        }
+      ]}>
         <TextInput
           {...inputProps}
           placeholderTextColor={colors.secondaryText}
@@ -43,6 +53,11 @@ export function TextField({ label, type = 'default', ...inputProps }: TextFieldP
           </Pressable>
         )}
       </View>
+      {hasError && (
+        <Text style={[typography.body, styles.errorText, { color: colors.error }]}>
+          {error}
+        </Text>
+      )}
     </View>
   );
 }
@@ -56,13 +71,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
   input: {
     flex: 1,
+  },
+  errorText: {
+    fontSize: 13,
+    marginTop: 6,
+    marginLeft: 4,
   },
 });
 

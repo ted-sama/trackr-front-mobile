@@ -151,7 +151,7 @@ const toastConfig: ToastConfig = {
         }}
       >
         <Stack.Protected guard={!isAuthenticated}>
-          <Stack.Screen name="auth/login" />
+          <Stack.Screen name="auth" />
         </Stack.Protected>
         <Stack.Protected guard={isAuthenticated}>
           <Stack.Screen name="(tabs)" />

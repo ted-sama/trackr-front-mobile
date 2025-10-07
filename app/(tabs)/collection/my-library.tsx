@@ -2,8 +2,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, FlatList, Platform, StyleSheet } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
-import Animated, { useSharedValue, useAnimatedScrollHandler, withTiming, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import BookListElement from '@/components/BookListElement';
@@ -12,20 +12,14 @@ import { Book } from '@/types/book';
 import { useRouter } from 'expo-router';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import SwitchLayoutButton from '@/components/SwitchLayoutButton';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Toast from 'react-native-toast-message';
 import { useUIStore } from '@/stores/uiStore';
-
-// AsyncStorage key for layout preference
-const LAYOUT_STORAGE_KEY = '@MyApp:layoutPreference';
-
-// Default layout preference
-const DEFAULT_LAYOUT = 'list';
+import { useTranslation } from 'react-i18next';
 
 const AnimatedList = Animated.createAnimatedComponent(FlatList<Book>);
 
 export default function MyLibrary() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const insets = useSafeAreaInsets();
@@ -61,7 +55,7 @@ export default function MyLibrary() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />
       <AnimatedHeader
-        title="Ma bibliothèque"
+        title={t("collection.myLibrary")}
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
         onBack={handleBack}
@@ -82,7 +76,7 @@ export default function MyLibrary() {
               accessibilityLabel="Library"
               numberOfLines={1}
             >
-              Ma bibliothèque
+              {t("collection.myLibrary")}
             </Text>
             <SwitchLayoutButton onPress={switchLayout} currentView={currentLayout} />
           </View>

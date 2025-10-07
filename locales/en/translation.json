@@ -1,4 +1,45 @@
 {
+    "save": "Save",
+    "auth": {
+        "login": {
+            "title": "Sign in to your account",
+            "email": "Email",
+            "emailPlaceholder": "Enter your email",
+            "password": "Password",
+            "passwordPlaceholder": "Enter your password",
+            "forgotPassword": "Forgot password?",
+            "loginButton": "Sign in",
+            "noAccount": "Don't have an account?",
+            "createAccount": "Create account",
+            "alreadyLoggedIn": "You are already logged in"
+        },
+        "signup": {
+            "title": "Create your account",
+            "subtitle": "Join the community and start tracking your reads",
+            "username": "Username",
+            "usernamePlaceholder": "Enter your username",
+            "email": "Email",
+            "emailPlaceholder": "Enter your email",
+            "password": "Password",
+            "passwordPlaceholder": "Enter your password",
+            "confirmPassword": "Confirm password",
+            "confirmPasswordPlaceholder": "Confirm your password",
+            "terms": "By creating an account, you agree to our",
+            "termsLink": "Terms of Service",
+            "and": "and our",
+            "privacyLink": "Privacy Policy",
+            "signupButton": "Create my account",
+            "hasAccount": "Already have an account?",
+            "loginLink": "Sign in"
+        },
+        "errors": {
+            "passwordMismatch": "Passwords do not match",
+            "passwordTooShort": "Password must be at least 8 characters long",
+            "invalidEmail": "Invalid email address",
+            "requiredField": "This field is required",
+            "usernameTooShort": "Username must be at least 3 characters long"
+        }
+    },
     "status": {
         "reading": "Reading",
         "planToRead": "Plan to read",
@@ -6,10 +47,6 @@
         "onHold": "On hold",
         "dropped": "Dropped"
     },
-    "planToRead": "Plan to read",
-    "completed": "Completed",
-    "onHold": "On hold",
-    "dropped": "Dropped",
     "listItem": {
         "item": "item",
         "items": "items",
@@ -56,15 +93,54 @@
         "favorites": "Favorites",
         "noFavorites": "No favorites",
         "lists": "Lists",
-        "seeAllLists": "See all lists"
+        "seeAllLists": "See all lists",
+        "editModal": {
+            "title": "Edit profile",
+            "color": "Color",
+            "chooseColor": "Choose a color",
+            "backdrop": "Backdrop",
+            "chooseBackdrop": "Change backdrop",
+            "displayName": "Username",
+            "displayNamePlaceholder": "Enter your username",
+            "email": "Email",
+            "emailPlaceholder": "Enter your email"
+        }
     },
     "settings": {
         "title": "Settings",
-        "language": "Language"
+        "account": {
+            "title": "Account",
+            "profile": "Edit profile",
+            "logout": "Logout"
+        },
+        "appearance": {
+            "title": "Appearance",
+            "theme": "Theme"
+        },
+        "language": {
+            "title": "Language",
+            "current": "Current language"
+        },
+        "about": {
+            "title": "About",
+            "version": "Version",
+            "privacy": "Privacy policy",
+            "terms": "Terms of service"
+        }
     },
     "languages": {
         "english": "English",
         "french": "French"
+    },
+    "book": {
+        "publicationStatus": {
+            "completed": "completed",
+            "ongoing": "ongoing",
+            "hiatus": "hiatus"
+        },
+        "rating": "rating",
+        "chapter": "Chapter",
+        "lastChapterRead": "Last chapter read"
     },
     "list": {
         "reorder": "Reorder",
@@ -86,7 +162,7 @@
             "descriptionPlaceholder": "Describe your list",
             "tags": "Tags",
             "tagsPlaceholder": "Add a tag",
-            "options": "Options",
+            "settings": "Settings",
             "public": "Public",
             "publicDescription": "Visible by all users",
             "private": "Private",
@@ -96,6 +172,10 @@
             "collection": "Collection",
             "collectionDescription": "Simple collection without ranking"
         }
+    },
+    "description": {
+        "readMore": "Read more",
+        "collapse": "Collapse"
     },
     "bookBottomSheet": {
         "addToTracking": "Add to library",
@@ -110,14 +190,19 @@
         "editStatus": "Edit status"
     },
     "toast": {
+        "registerSuccess": "Account created successfully",
         "addedToFavorites": "Book added to favorites",
         "removedFromFavorites": "Book removed from favorites",
         "addedToTracking": "Book added to library",
         "removedFromTracking": "Book removed from library",
         "addedToList": "Book added to list",
-        "removedFromList": "Book removed from list"
+        "removedFromList": "Book removed from list",
+        "incrementChapter": "Chapter {{number}} marked as read"
     },
     "errors": {
-        "BOOKS_TOP_LIMIT_REACHED": "You have reached the limit of 5 favorite books"
+        "AUTH_EMAIL_ALREADY_USED": "An account with this email already exists",
+        "AUTH_USERNAME_TAKEN": "This username is already taken, please choose another one",
+        "BOOKS_TOP_LIMIT_REACHED": "You have reached the limit of 5 favorite books",
+        "E_INVALID_CREDENTIALS": "Invalid email or password"
     }
 }

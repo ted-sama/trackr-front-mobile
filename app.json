@@ -1,19 +1,19 @@
 {
   "expo": {
-    "name": "Trackrr",
-    "slug": "trackrr",
+    "name": "Trackr",
+    "slug": "trackr",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "trackrr",
+    "scheme": "trackr",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "icon": "./assets/app.icon",
       "supportsTablet": true,
-      "bundleIdentifier": "com.ted.trackrr.app",
+      "bundleIdentifier": "com.trackr.client",
       "infoPlist": {
-        "CFBundleDisplayName": "Trackrr",
+        "CFBundleDisplayName": "Trackr",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.ted.trackrr.app"
+      "package": "com.ted.trackr.app"
     },
     "web": {
       "bundler": "metro",
@@ -51,7 +51,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "7dd01086-4205-493b-83aa-45797677e90f"
+        "projectId": "7571c77a-00f5-4dde-869a-5412c1b46609"
       }
     }
   }

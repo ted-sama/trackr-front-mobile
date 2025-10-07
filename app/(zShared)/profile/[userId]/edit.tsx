@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
+  ImageBackground,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -30,6 +31,8 @@ import {
 } from "@/hooks/queries/users";
 import { Image } from "expo-image";
 import PlusBadge from "@/components/ui/PlusBadge";
+import { LinearGradient } from "expo-linear-gradient";
+import { useTranslation } from "react-i18next";
 
 export default function ProfileEditModal() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
@@ -39,6 +42,7 @@ export default function ProfileEditModal() {
   const currentUser = useUserStore((s) => s.currentUser);
   const isPlus = currentUser?.plan === "plus";
   const refreshCurrentUser = useUserStore((s) => s.fetchCurrentUser);
+  const { t } = useTranslation();
 
   const { mutateAsync: updateMe } = useUpdateMe();
   const { mutateAsync: uploadAvatar, isPending: isUploadingAvatar } =
@@ -364,7 +368,7 @@ export default function ProfileEditModal() {
         <View style={styles.headerPreview}>
           {backdropMode === "image" ? (
             <TouchableOpacity onPress={handlePickBackdrop} activeOpacity={0.9}>
-              <Image
+              <ImageBackground
                 source={{
                   uri:
                     selectedBackdropImage?.uri ||
@@ -375,7 +379,17 @@ export default function ProfileEditModal() {
                   styles.headerBackdrop,
                   { backgroundColor: colors.card },
                 ]}
-              ></Image>
+              >
+                <LinearGradient
+                  colors={["rgba(0,0,0,0.5)", "rgba(0,0,0,0.1)", "rgba(0,0,0,0.5)"]}
+                  style={styles.backdropOverlay}
+                >
+                  <View style={styles.cameraIconContainer}>
+                    <Camera size={24} color="white" />
+                    <Text style={[typography.body, styles.cameraText]}>{t("profile.editModal.chooseBackdrop")}</Text>
+                  </View>
+                </LinearGradient>
+              </ImageBackground>
             </TouchableOpacity>
           ) : (
             <View
@@ -546,6 +560,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 16,
     marginBottom: 24,
+  },
+  backdropOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
   },
   cameraIconContainer: {
     flexDirection: "row",

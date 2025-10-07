@@ -339,15 +339,6 @@ export default function ListEdit() {
             </TouchableOpacity>
           ) : (
             <View style={[styles.backdrop, { backgroundColor: backdropColor || list.backdropColor || "#7C3AED" }] }>
-              <LinearGradient
-                colors={["rgba(0,0,0,0.5)", "rgba(0,0,0,0.1)", "rgba(0,0,0,0.5)"]}
-                style={styles.backdropOverlay}
-              >
-                <View style={styles.cameraIconContainer}>
-                  <Palette size={24} color="white" />
-                  <Text style={[typography.body, styles.cameraText]}>{t("list.editModal.chooseColor")}</Text>
-                </View>
-              </LinearGradient>
             </View>
           )}
 
@@ -504,7 +495,7 @@ export default function ListEdit() {
               <Text
                 style={[typography.h3, styles.label, { color: colors.text }]}
               >
-                {t("list.editModal.options")}
+                {t("list.editModal.settings")}
               </Text>
               
               <View style={styles.toggleContainer}>

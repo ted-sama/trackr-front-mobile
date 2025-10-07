@@ -9,14 +9,13 @@ import Animated, {
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "@/contexts/ThemeContext"; // Assuming useTheme provides colors
 import { useTypography } from "@/hooks/useTypography"; // Assuming useTypography provides typography styles
+import { useTranslation } from "react-i18next";
 
 interface ExpandableDescriptionProps {
   text: string;
   initialCollapsedHeight?: number;
   textStyle?: StyleProp<TextStyle>;
   toggleButtonTextStyle?: StyleProp<TextStyle>;
-  readMoreText?: string;
-  collapseText?: string;
 }
 
 const DEFAULT_COLLAPSED_HEIGHT = 70; // Default height for ~3 lines
@@ -28,14 +27,12 @@ export default function ExpandableDescription({
   initialCollapsedHeight = DEFAULT_COLLAPSED_HEIGHT,
   textStyle,
   toggleButtonTextStyle,
-  readMoreText = "Lire la suite",
-  collapseText = "Réduire",
 }: ExpandableDescriptionProps) {
   const { colors } = useTheme();
   const typography = useTypography();
   const [isExpanded, setIsExpanded] = useState(false);
   const descriptionMaxHeight = useSharedValue(initialCollapsedHeight);
-
+  const { t } = useTranslation();
   const expandable = text.length > 200
 
   const animatedDescriptionStyle = useAnimatedStyle(() => {
@@ -85,7 +82,7 @@ export default function ExpandableDescription({
             toggleButtonTextStyle,
           ]}
         >
-          {isExpanded ? collapseText : readMoreText}
+          {isExpanded ? t("description.collapse") : t("description.readMore")}
         </Text>
       </Pressable>
       )}

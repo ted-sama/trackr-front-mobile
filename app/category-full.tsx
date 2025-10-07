@@ -20,16 +20,9 @@ import { Category } from "@/types/category";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import Toast from "react-native-toast-message";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import { useCategory } from "@/hooks/queries/categories";
-
-// AsyncStorage key for layout preference
-const LAYOUT_STORAGE_KEY = "@MyApp:layoutPreference";
-
-// Default layout preference
-const DEFAULT_LAYOUT = "list";
+import { useUIStore } from "@/stores/uiStore";
 
 const AnimatedList = Animated.createAnimatedComponent(LegendList<Book>);
 
@@ -45,9 +38,8 @@ export default function CategoryFull() {
   });
   const [titleY, setTitleY] = useState<number>(0);
   const scrollRef = useRef<LegendListRef | null>(null);
-  const [currentLayout, setCurrentLayout] = useState<"grid" | "list">(
-    DEFAULT_LAYOUT as "grid" | "list"
-  );
+  const currentLayout = useUIStore((state) => state.categoryLayout);
+  const setLayout = useUIStore((state) => state.setCategoryLayout);
 
   const {
     addTrackedBook: addTrackedBookToStore,
@@ -56,22 +48,6 @@ export default function CategoryFull() {
 
   const { data: category } = useCategory(id as string);
 
-  // Load layout preference
-  useEffect(() => {
-    const loadLayoutPreference = async () => {
-      const storedLayout = (await AsyncStorage.getItem(LAYOUT_STORAGE_KEY)) as
-        | "grid"
-        | "list";
-      if (storedLayout) setCurrentLayout(storedLayout);
-    };
-    loadLayoutPreference();
-  }, []);
-
-  // Save layout preference
-  useEffect(() => {
-    AsyncStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout);
-  }, [currentLayout]);
-
   const handleBack = () => {
     router.back();
   };
@@ -79,7 +55,8 @@ export default function CategoryFull() {
   // Tracking toggle now handled inside BookCard/BookListElement
 
   const switchLayout = () => {
-    setCurrentLayout(currentLayout === "grid" ? "list" : "grid");
+    const newLayout = currentLayout === "grid" ? "list" : "grid";
+    setLayout(newLayout);
   };
 
   return (

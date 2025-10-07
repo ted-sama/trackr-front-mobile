@@ -6,6 +6,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { ReadingStatus } from "@/types/reading-status";
 import { Clock3, BookOpenIcon, BookCheck, Pause, Square, BookMarked, Eye } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 interface TrackingTabBarProps {
   status: string;
@@ -28,13 +29,14 @@ export function TrackingTabBar({
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const typography = useTypography();
+  const { t } = useTranslation();
 
   const trackingStatusValues: Record<ReadingStatus, { text: string, icon: React.ReactNode }> = {
-    'plan_to_read': { text: 'À lire', icon: <Clock3 size={20} strokeWidth={2.75} color={colors.planToRead} /> },
-    'reading': { text: 'En cours', icon: <BookOpenIcon size={20} strokeWidth={2.75} color={colors.reading} /> },
-    'completed': { text: 'Complété', icon: <BookCheck size={20} strokeWidth={2.75} color={colors.completed} /> },
-    'on_hold': { text: 'En pause', icon: <Pause size={20} strokeWidth={2.75} color={colors.onHold} /> },
-    'dropped': { text: 'Abandonné', icon: <Square size={20} strokeWidth={2.75} color={colors.dropped} /> },
+    'plan_to_read': { text: t("status.planToRead"), icon: <Clock3 size={20} strokeWidth={2.75} color={colors.planToRead} /> },
+    'reading': { text: t("status.reading"), icon: <BookOpenIcon size={20} strokeWidth={2.75} color={colors.reading} /> },
+    'completed': { text: t("status.completed"), icon: <BookCheck size={20} strokeWidth={2.75} color={colors.completed} /> },
+    'on_hold': { text: t("status.onHold"), icon: <Pause size={20} strokeWidth={2.75} color={colors.onHold} /> },
+    'dropped': { text: t("status.dropped"), icon: <Square size={20} strokeWidth={2.75} color={colors.dropped} /> },
   };
 
   return (
@@ -74,7 +76,7 @@ export function TrackingTabBar({
               </View>
               {currentChapter && (
                 <View>
-                  <Text style={[typography.trackingTabBarText2, { color: colors.icon }]} numberOfLines={1} accessibilityLabel={`Chapitre : ${currentChapter}`}>Ch. {currentChapter}</Text>
+                  <Text style={[typography.trackingTabBarText2, { color: colors.icon }]} numberOfLines={1} accessibilityLabel={`Chapitre : ${currentChapter}`}>{t("book.chapter")} {currentChapter}</Text>
                 </View>
               )}
             </View>

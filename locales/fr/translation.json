@@ -1,6 +1,47 @@
 {
+    "save": "Enregistrer",
+    "auth": {
+        "login": {
+            "title": "Connectez-vous à votre compte",
+            "email": "Email",
+            "emailPlaceholder": "Entrez votre email",
+            "password": "Mot de passe",
+            "passwordPlaceholder": "Entrez votre mot de passe",
+            "forgotPassword": "Mot de passe oublié ?",
+            "loginButton": "Se connecter",
+            "noAccount": "Vous n'avez pas de compte ?",
+            "createAccount": "Créer un compte",
+            "alreadyLoggedIn": "Vous êtes déjà connecté"
+        },
+        "signup": {
+            "title": "Créez votre compte",
+            "subtitle": "Rejoignez la communauté et commencez à suivre vos lectures",
+            "username": "Nom d'utilisateur",
+            "usernamePlaceholder": "Entrez votre nom d'utilisateur",
+            "email": "Email",
+            "emailPlaceholder": "Entrez votre email",
+            "password": "Mot de passe",
+            "passwordPlaceholder": "Entrez votre mot de passe",
+            "confirmPassword": "Confirmer le mot de passe",
+            "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+            "terms": "En créant un compte, vous acceptez nos",
+            "termsLink": "Conditions d'utilisation",
+            "and": "et notre",
+            "privacyLink": "Politique de confidentialité",
+            "signupButton": "Créer mon compte",
+            "hasAccount": "Vous avez déjà un compte ?",
+            "loginLink": "Se connecter"
+        },
+        "errors": {
+            "passwordMismatch": "Les mots de passe ne correspondent pas",
+            "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
+            "invalidEmail": "Adresse email invalide",
+            "requiredField": "Ce champ est requis",
+            "usernameTooShort": "Le nom d'utilisateur doit contenir au moins 3 caractères"
+        }
+    },
     "status": {
-        "reading": "En cours",
+        "reading": "En lecture",
         "planToRead": "À lire",
         "completed": "Complété",
         "onHold": "En pause",
@@ -52,15 +93,54 @@
         "favorites": "Favoris",
         "noFavorites": "Aucun favori",
         "lists": "Listes",
-        "seeAllLists": "Voir toutes les listes"
+        "seeAllLists": "Voir toutes les listes",
+        "editModal": {
+            "title": "Modifier le profil",
+            "color": "Couleur",
+            "chooseColor": "Choisir une couleur",
+            "backdrop": "Illustration",
+            "chooseBackdrop": "Changer l'illustration",
+            "displayName": "Nom d'utilisateur",
+            "displayNamePlaceholder": "Entrez votre nom d'utilisateur",
+            "email": "Email",
+            "emailPlaceholder": "Entrez votre email"
+        }
     },
     "settings": {
         "title": "Paramètres",
-        "language": "Langue"
+        "account": {
+            "title": "Compte",
+            "profile": "Modifier le profil",
+            "logout": "Se déconnecter"
+        },
+        "appearance": {
+            "title": "Apparence",
+            "theme": "Thème"
+        },
+        "language": {
+            "title": "Langue",
+            "current": "Langue actuelle"
+        },
+        "about": {
+            "title": "À propos",
+            "version": "Version",
+            "privacy": "Politique de confidentialité",
+            "terms": "Conditions d'utilisation"
+        }
     },
     "languages": {
         "english": "Anglais",
         "french": "Français"
+    },
+    "book": {
+        "publicationStatus": {
+            "completed": "complété",
+            "ongoing": "en cours",
+            "hiatus": "en pause"
+        },
+        "rating": "note",
+        "chapter": "Chapitre",
+        "lastChapterRead": "Dernier chapitre lu"
     },
     "list": {
         "reorder": "Réordonner",
@@ -83,7 +163,7 @@
             "descriptionPlaceholder": "Décrivez votre liste",
             "tags": "Tags",
             "tagsPlaceholder": "Ajouter un tag",
-            "options": "Options",
+            "settings": "Options",
             "public": "Public",
             "publicDescription": "Visible par tous les utilisateurs",
             "private": "Privé",
@@ -106,15 +186,24 @@
         "removeFromList": "Retirer de la liste",
         "editStatus": "Modifier le statut"
     },
+    "description": {
+        "readMore": "Lire plus",
+        "collapse": "Réduire"
+    },
     "toast": {
+        "registerSuccess": "Compte créé avec succès",
         "addedToFavorites": "Livre ajouté aux favoris",
         "removedFromFavorites": "Livre retiré des favoris",
         "addedToTracking": "Livre ajouté à la bibliothèque",
         "removedFromTracking": "Livre retiré de la bibliothèque",
         "addedToList": "Livre ajouté à la liste",
-        "removedFromList": "Livre retiré de la liste"
+        "removedFromList": "Livre retiré de la liste",
+        "incrementChapter": "Chapitre {{number}} marqué comme lu"
     },
     "errors": {
-        "BOOKS_TOP_LIMIT_REACHED": "Vous avez atteint la limite des 5 livres favoris"
+        "AUTH_EMAIL_ALREADY_USED": "Un compte avec cet email existe déjà",
+        "AUTH_USERNAME_TAKEN": "Ce nom d'utilisateur est déjà pris, veuillez en choisir un autre",
+        "BOOKS_TOP_LIMIT_REACHED": "Vous avez atteint la limite des 5 livres favoris",
+        "E_INVALID_CREDENTIALS": "Email ou mot de passe incorrect"
     }
 }

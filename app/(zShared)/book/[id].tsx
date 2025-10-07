@@ -54,6 +54,7 @@ import { useBook, useBooksBySameAuthorCategory } from "@/hooks/queries/books";
 import RatingStars from "@/components/ui/RatingStars";
 import { useLocalization } from "@/hooks/useLocalization";
 import { getLocalizedDescription } from "@/utils/description";
+import { useTranslation } from "react-i18next";
 // Constants for animation
 const HEADER_THRESHOLD = 320; // Threshold for header animation
 
@@ -73,7 +74,7 @@ export default function BookScreen() {
   const typography = useTypography();
   const insets = useSafeAreaInsets();
   const { isFrench } = useLocalization();
-
+  const { t } = useTranslation();
   // Get the full BookTracking object
   const getTrackedBookStatus = useTrackedBooksStore(
     (state) => state.getTrackedBookStatus
@@ -211,7 +212,7 @@ export default function BookScreen() {
     if (bookTracking && book) {
       updateTrackedBook(book.id, { currentChapter: bookTracking.currentChapter ? bookTracking.currentChapter + 1 : 1 });
       Toast.show({
-        text1: "Nouveau chapitre marqué comme lu",
+        text1: t("toast.incrementChapter", { number: bookTracking.currentChapter ? bookTracking.currentChapter + 1 : 1 }),
         type: "info",
       });
     }
@@ -284,7 +285,7 @@ export default function BookScreen() {
       !book?.endYear &&
       book?.status === "ongoing"
     ) {
-      return `${book?.releaseYear} - en cours`;
+      return `${book?.releaseYear} - ${t("book.publicationStatus.ongoing")}`;
     }
     return book?.releaseYear;
   };
@@ -297,7 +298,7 @@ export default function BookScreen() {
       try {
         await removeTrackedBookFromStore(book.id.toString());
         Toast.show({
-          text1: "Livre retiré de votre bibliothèque",
+          text1: t("toast.removedFromTracking"),
           type: "info",
         });
       } catch (error) {
@@ -315,7 +316,7 @@ export default function BookScreen() {
       try {
         await addTrackedBookToStore(book);
         Toast.show({
-          text1: "Livre ajouté à votre bibliothèque",
+          text1: t("toast.addedToTracking"),
           type: "info",
         });
       } catch (error) {
@@ -517,9 +518,9 @@ export default function BookScreen() {
                 {book?.ratingCount}{" "}
                 {book?.ratingCount
                   ? book?.ratingCount > 1
-                    ? "notes"
-                    : "note"
-                  : "note"}
+                    ? t("book.rating") + "s"
+                    : t("book.rating")
+                  : t("book.rating")}
               </Text>
             </View>
             <View style={styles.socialsContainer}>

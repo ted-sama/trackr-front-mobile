@@ -1,35 +1,56 @@
 {
   "fill" : {
-    "automatic-gradient" : "display-p3:0.34985,0.05115,0.89648,1.00000"
+    "solid" : "display-p3:0.57564,0.25150,0.88232,1.00000"
   },
   "groups" : [
     {
       "layers" : [
         {
-          "fill" : {
-            "linear-gradient" : [
-              "display-p3:0.84078,0.76832,1.00000,1.00000",
-              "display-p3:0.52465,0.24306,1.00000,1.00000"
-            ]
-          },
-          "glass" : true,
-          "hidden" : false,
-          "image-name" : "TrackrLogo.png",
-          "name" : "TrackrLogo",
-          "opacity" : 0.94,
+          "fill-specializations" : [
+            {
+              "value" : {
+                "linear-gradient" : [
+                  "extended-gray:1.00000,1.00000",
+                  "display-p3:0.94195,0.69706,1.00000,1.00000"
+                ]
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "linear-gradient" : [
+                  "display-p3:0.39618,0.38220,0.88232,1.00000",
+                  "display-p3:0.71758,0.34999,0.88232,1.00000"
+                ]
+              }
+            }
+          ],
+          "image-name" : "trackrr-logo.png",
+          "name" : "trackrr-logo",
+          "opacity-specializations" : [
+            {
+              "value" : 1
+            },
+            {
+              "appearance" : "dark",
+              "value" : 1
+            }
+          ],
           "position" : {
-            "scale" : 1.03,
+            "scale" : 1,
             "translation-in-points" : [
               0,
-              0
+              -25
             ]
           }
         }
       ],
+      "lighting" : "individual",
       "shadow" : {
         "kind" : "neutral",
         "opacity" : 0.5
       },
+      "specular" : true,
       "translucency" : {
         "enabled" : true,
         "value" : 0.5
