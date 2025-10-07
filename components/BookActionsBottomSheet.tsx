@@ -1,5 +1,11 @@
 /* eslint-disable react/display-name */
-import React, { forwardRef, useCallback, useState, useEffect, useMemo } from "react";
+import React, {
+  forwardRef,
+  useCallback,
+  useState,
+  useEffect,
+  useMemo,
+} from "react";
 import {
   View,
   Text,
@@ -16,7 +22,12 @@ import {
   BottomSheetBackdropProps,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
-import Animated, { withTiming, withSpring, EntryAnimationsValues, ExitAnimationsValues } from "react-native-reanimated";
+import Animated, {
+  withTiming,
+  withSpring,
+  EntryAnimationsValues,
+  ExitAnimationsValues,
+} from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { Book } from "@/types/book";
 import { ReadingStatus } from "@/types/reading-status";
@@ -39,8 +50,17 @@ import {
 } from "lucide-react-native";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
-import { useMyLists, useAddBookToList, useRemoveBookFromList, useCreateList } from "@/hooks/queries/lists";
-import { useAddBookToFavorites, useRemoveBookFromFavorites, useUserTop } from "@/hooks/queries/users";
+import {
+  useMyLists,
+  useAddBookToList,
+  useRemoveBookFromList,
+  useCreateList,
+} from "@/hooks/queries/lists";
+import {
+  useAddBookToFavorites,
+  useRemoveBookFromFavorites,
+  useUserTop,
+} from "@/hooks/queries/users";
 import { hexToRgba } from "@/utils/colors";
 import Toast from "react-native-toast-message";
 import CollectionListElement from "./CollectionListElement";
@@ -144,15 +164,19 @@ const BookActionsBottomSheet = forwardRef<
     const { mutateAsync: removeBookFromList } = useRemoveBookFromList();
     const { mutateAsync: createList } = useCreateList();
     const { mutateAsync: addBookToFavorites } = useAddBookToFavorites();
-    const { mutateAsync: removeBookFromFavorites } = useRemoveBookFromFavorites();
+    const { mutateAsync: removeBookFromFavorites } =
+      useRemoveBookFromFavorites();
     const { data: favoriteBooks } = useUserTop();
     const lists = useMemo(
-      () => (myListsData?.pages.flatMap((page: any) => page.data) ?? []) as any[],
+      () =>
+        (myListsData?.pages.flatMap((page: any) => page.data) ?? []) as any[],
       [myListsData]
     );
     const isTracking = isBookTracked(book.id);
     const isFavorited = useMemo(
-      () => favoriteBooks?.some((favoriteBook) => favoriteBook.id === book.id) ?? false,
+      () =>
+        favoriteBooks?.some((favoriteBook) => favoriteBook.id === book.id) ??
+        false,
       [favoriteBooks, book.id]
     );
     const [currentView, setCurrentView] = useState(view);
@@ -161,6 +185,11 @@ const BookActionsBottomSheet = forwardRef<
     const [initialListIds, setInitialListIds] = useState<string[]>([]);
     const [tempStatus, setTempStatus] = useState<ReadingStatus>();
     const [tempRating, setTempRating] = useState<number>(0);
+
+    // Synchronize currentView with the view prop whenever it changes
+    useEffect(() => {
+      setCurrentView(view);
+    }, [view]);
 
     const resetSheetState = useCallback(() => {
       setCurrentView(view);
@@ -190,11 +219,17 @@ const BookActionsBottomSheet = forwardRef<
       if (currentView === VIEW_LIST_EDITOR) {
         // Without a direct endpoint in hooks, infer selected lists from lists containing the book if available in list data
         const inLists = lists
-          .filter((list: any) => list.books?.items?.some((bookItem: any) => bookItem.id === book.id))
+          .filter((list: any) =>
+            list.books?.items?.some((bookItem: any) => bookItem.id === book.id)
+          )
           .map((list: any) => list.id);
 
-        setSelectedListIds((previous) => (haveSameIds(previous, inLists) ? previous : inLists));
-        setInitialListIds((previous) => (haveSameIds(previous, inLists) ? previous : inLists));
+        setSelectedListIds((previous) =>
+          haveSameIds(previous, inLists) ? previous : inLists
+        );
+        setInitialListIds((previous) =>
+          haveSameIds(previous, inLists) ? previous : inLists
+        );
       }
     }, [currentView, book.id, lists]);
 
@@ -238,7 +273,9 @@ const BookActionsBottomSheet = forwardRef<
       },
       {
         label: t("bookBottomSheet.removeFromFavorites"),
-        icon: <HeartMinusIcon size={16} strokeWidth={2.75} color={colors.text} />,
+        icon: (
+          <HeartMinusIcon size={16} strokeWidth={2.75} color={colors.text} />
+        ),
         show: isFavorited,
         onPress: () => handleRemoveBookFromFavorites(),
       },
@@ -249,12 +286,16 @@ const BookActionsBottomSheet = forwardRef<
         onPress: () => handleRemoveBookFromTracking(),
       },
       // Remove-from-list action is only shown on list page and when a listId is provided
-      currentListId && isFromListPage ? {
-        label: t("bookBottomSheet.removeFromList"),
-        icon: <MinusIcon size={16} strokeWidth={2.75} color={colors.text} />,
-        show: true,
-        onPress: () => handleRemoveBookFromList(),
-      } : null,
+      currentListId && isFromListPage
+        ? {
+            label: t("bookBottomSheet.removeFromList"),
+            icon: (
+              <MinusIcon size={16} strokeWidth={2.75} color={colors.text} />
+            ),
+            show: true,
+            onPress: () => handleRemoveBookFromList(),
+          }
+        : null,
       {
         label: t("bookBottomSheet.addToList"),
         icon: <PlusIcon size={16} strokeWidth={2.75} color={colors.text} />,
@@ -335,9 +376,9 @@ const BookActionsBottomSheet = forwardRef<
     const handleAddBookToTracking = async () => {
       try {
         await addTrackedBook(book);
-        Toast.show({ type: 'info', text1: t("toast.addedToTracking") });
+        Toast.show({ type: "info", text1: t("toast.addedToTracking") });
       } catch (error) {
-        Toast.show({ type: 'info', text1: t(handleErrorCodes(error)) });
+        Toast.show({ type: "info", text1: t(handleErrorCodes(error)) });
       } finally {
         closeSheet();
       }
@@ -346,9 +387,9 @@ const BookActionsBottomSheet = forwardRef<
     const handleRemoveBookFromTracking = async () => {
       try {
         await removeTrackedBook(book.id);
-        Toast.show({ type: 'info', text1: t("toast.removedFromTracking") });
+        Toast.show({ type: "info", text1: t("toast.removedFromTracking") });
       } catch (error) {
-        Toast.show({ type: 'info', text1: t(handleErrorCodes(error)) });
+        Toast.show({ type: "info", text1: t(handleErrorCodes(error)) });
       } finally {
         closeSheet();
       }
@@ -357,9 +398,9 @@ const BookActionsBottomSheet = forwardRef<
     const handleAddBookToFavorites = async () => {
       try {
         await addBookToFavorites(book.id);
-        Toast.show({ type: 'info', text1: t("toast.addedToFavorites") });
+        Toast.show({ type: "info", text1: t("toast.addedToFavorites") });
       } catch (error) {
-        Toast.show({ type: 'info', text1: t(handleErrorCodes(error)) });
+        Toast.show({ type: "info", text1: t(handleErrorCodes(error)) });
       } finally {
         closeSheet();
       }
@@ -368,9 +409,9 @@ const BookActionsBottomSheet = forwardRef<
     const handleRemoveBookFromFavorites = async () => {
       try {
         await removeBookFromFavorites(book.id);
-        Toast.show({ type: 'info', text1: t("toast.removedFromFavorites") });
+        Toast.show({ type: "info", text1: t("toast.removedFromFavorites") });
       } catch (error) {
-      Toast.show({ type: 'info', text1: t(handleErrorCodes(error)) });
+        Toast.show({ type: "info", text1: t(handleErrorCodes(error)) });
       } finally {
         closeSheet();
       }
@@ -380,7 +421,7 @@ const BookActionsBottomSheet = forwardRef<
       if (currentListId) {
         await removeBookFromList({ listId: currentListId, bookId: book.id });
         closeSheet();
-        Toast.show({ type: 'info', text1: 'Livre retiré de la liste',  });
+        Toast.show({ type: "info", text1: "Livre retiré de la liste" });
       }
     };
 
@@ -479,7 +520,7 @@ const BookActionsBottomSheet = forwardRef<
                   </View>
                 </View>
                 <View style={styles.bottomSheetActions}>
-                  {actions.filter(Boolean).map((action: any, idx) => (
+                  {actions.filter(Boolean).map((action: any, idx) =>
                     action.show ? (
                       <TouchableOpacity
                         key={idx}
@@ -490,12 +531,14 @@ const BookActionsBottomSheet = forwardRef<
                         onPress={action.onPress}
                       >
                         {action.icon}
-                        <Text style={[typography.caption, { color: colors.text }]}>
+                        <Text
+                          style={[typography.caption, { color: colors.text }]}
+                        >
                           {action.label}
                         </Text>
                       </TouchableOpacity>
                     ) : null
-                  ))}
+                  )}
                 </View>
               </View>
             </Animated.View>
@@ -562,12 +605,12 @@ const BookActionsBottomSheet = forwardRef<
                     { color: colors.text, textAlign: "center" },
                   ]}
                 >
-                  Ajouter à une liste
+                  {t("bookBottomSheet.listEditor.title")}
                 </Text>
               </View>
               <View>
                 <SecondaryButton
-                  title="Créer une liste"
+                  title={t("bookBottomSheet.listEditor.createList")}
                   onPress={() => {
                     setCurrentView(VIEW_LIST_CREATOR);
                   }}
@@ -575,40 +618,48 @@ const BookActionsBottomSheet = forwardRef<
                 />
               </View>
               {/* Liste des listes */}
-              <View style={{ height: 380 }}>
-                <LinearGradient
-                  colors={[
-                    hexToRgba(colors.background, 1),
-                    hexToRgba(colors.background, 0),
-                  ]}
-                  style={styles.fadeTop}
-                  pointerEvents="none"
-                />
-                <FlatList
-                  data={lists}
-                  renderItem={({ item }) => (
-                    <CollectionListElement
-                      list={item}
-                      onPress={() => toggleListSelection(item.id)}
-                      size="compact"
-                      isSelected={selectedListIds.includes(item.id)}
+              <View style={{ maxHeight: 250 }}>
+                {lists.length > 0 ? (
+                  <>
+                    <LinearGradient
+                      colors={[
+                        hexToRgba(colors.background, 1),
+                        hexToRgba(colors.background, 0),
+                      ]}
+                      style={styles.fadeTop}
+                      pointerEvents="none"
                     />
-                  )}
-                  keyExtractor={(item) => item.id.toString()}
-                  ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-                  contentContainerStyle={{ flexGrow: 1, paddingTop: 12 }}
-                />
-                <LinearGradient
-                  colors={[
-                    hexToRgba(colors.background, 0),
-                    hexToRgba(colors.background, 1),
-                  ]}
-                  style={styles.fadeBottom}
-                  pointerEvents="none"
-                />
+                    <FlatList
+                      data={lists}
+                      renderItem={({ item }) => (
+                        <CollectionListElement
+                          list={item}
+                          onPress={() => toggleListSelection(item.id)}
+                          size="compact"
+                          isSelected={selectedListIds.includes(item.id)}
+                        />
+                      )}
+                      keyExtractor={(item) => item.id.toString()}
+                      ItemSeparatorComponent={() => (
+                        <View style={{ height: 12 }} />
+                      )}
+                      contentContainerStyle={{ flexGrow: 1, paddingTop: 12 }}
+                    />
+                    <LinearGradient
+                      colors={[
+                        hexToRgba(colors.background, 0),
+                        hexToRgba(colors.background, 1),
+                      ]}
+                      style={styles.fadeBottom}
+                      pointerEvents="none"
+                    />
+                  </>
+                ) : (
+                  <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("bookBottomSheet.listEditor.noListsFound")}</Text>
+                )}
               </View>
               <Button
-                title="Sauvegarder"
+                title={t("save")}
                 onPress={async () => {
                   // Determine which lists to add to and which to remove from
                   const listsToAdd = selectedListIds.filter(
@@ -621,7 +672,9 @@ const BookActionsBottomSheet = forwardRef<
                   try {
                     // Add book to new lists
                     await Promise.all(
-                      listsToAdd.map((listId) => addBookToList({ listId, bookId: book.id }))
+                      listsToAdd.map((listId) =>
+                        addBookToList({ listId, bookId: book.id })
+                      )
                     );
 
                     // Remove book from unchecked lists
@@ -662,7 +715,7 @@ const BookActionsBottomSheet = forwardRef<
                     { color: colors.text, textAlign: "center" },
                   ]}
                 >
-                  Créer une nouvelle liste
+                  {t("bookBottomSheet.listEditor.createList")}
                 </Text>
               </View>
               <View style={{ marginBottom: 36 }}>
@@ -677,7 +730,7 @@ const BookActionsBottomSheet = forwardRef<
                   }}
                 >
                   <BottomSheetTextInput
-                    placeholder="Nom de la liste"
+                    placeholder={t("bookBottomSheet.listEditor.namePlaceholder")}
                     value={newListName}
                     onChangeText={setNewListName}
                     placeholderTextColor={colors.secondaryText}
@@ -690,7 +743,7 @@ const BookActionsBottomSheet = forwardRef<
                 </View>
               </View>
               <Button
-                title="Créer la liste"
+                title={t("create")}
                 onPress={handleCreateList}
                 disabled={!newListName.trim()}
               />

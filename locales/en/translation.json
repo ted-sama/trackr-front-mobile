@@ -1,5 +1,6 @@
 {
     "save": "Save",
+    "create": "Create",
     "auth": {
         "login": {
             "title": "Sign in to your account",
@@ -94,6 +95,7 @@
         "noFavorites": "No favorites",
         "lists": "Lists",
         "seeAllLists": "See all lists",
+        "noLists": "No lists",
         "editModal": {
             "title": "Edit profile",
             "color": "Color",
@@ -187,7 +189,13 @@
         "removeFromTracking": "Remove from library",
         "removeFromFavorites": "Remove from favorites",
         "removeFromList": "Remove from list",
-        "editStatus": "Edit status"
+        "editStatus": "Edit status",
+        "listEditor": {
+            "title": "Add to list",
+            "createList": "Create list",
+            "noListsFound": "No lists found, create one",
+            "namePlaceholder": "Enter the list name"
+        }
     },
     "toast": {
         "registerSuccess": "Account created successfully",

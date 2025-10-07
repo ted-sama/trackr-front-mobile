@@ -204,27 +204,33 @@ export default function Profile() {
               >
                 {t("profile.lists")}
               </Text>
-              <FlatList
-                data={(userListsPages.pages.flatMap((page) => page.data) ?? []).slice(0, 2)}
-                renderItem={({ item }) => (
-                  <CollectionListElement
-                    list={item}
-                    onPress={() => {
-                      router.push(`/list/${item.id}`);
-                    }}
-                  />
-                )}
-                ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-                scrollEnabled={false}
-              />
+              {userListsPages.pages.flatMap((page) => page.data).slice(0, 2).length > 0 ? (
+                <FlatList
+                  data={(userListsPages.pages.flatMap((page) => page.data) ?? []).slice(0, 2)}
+                  renderItem={({ item }) => (
+                    <CollectionListElement
+                      list={item}
+                      onPress={() => {
+                        router.push(`/list/${item.id}`);
+                      }}
+                    />
+                  )}
+                  ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+                  scrollEnabled={false}
+                />
+              ) : (
+                <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.noLists")}</Text>
+              )}
               <TouchableOpacity
                 style={[
                   styles.actionButton,
                   { backgroundColor: colors.actionButton, marginTop: 16 },
+                  { opacity: userListsPages.pages.flatMap((page) => page.data).slice(0, 2).length === 0 ? 0.5 : 1 },
                 ]}
                 onPress={() => {
                   router.push("/me/lists");
                 }}
+                disabled={userListsPages.pages.flatMap((page) => page.data).slice(0, 2).length === 0}
               >
                 <Text style={[typography.caption, { color: colors.text }]}>
                   {t("profile.seeAllLists")}

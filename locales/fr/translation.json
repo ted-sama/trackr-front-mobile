@@ -1,5 +1,6 @@
 {
     "save": "Enregistrer",
+    "create": "Créer",
     "auth": {
         "login": {
             "title": "Connectez-vous à votre compte",
@@ -94,6 +95,7 @@
         "noFavorites": "Aucun favori",
         "lists": "Listes",
         "seeAllLists": "Voir toutes les listes",
+        "noLists": "Aucune liste",
         "editModal": {
             "title": "Modifier le profil",
             "color": "Couleur",
@@ -184,7 +186,13 @@
         "removeFromTracking": "Retirer de ma bibliothèque",
         "removeFromFavorites": "Retirer des favoris",
         "removeFromList": "Retirer de la liste",
-        "editStatus": "Modifier le statut"
+        "editStatus": "Modifier le statut",
+        "listEditor": {
+            "title": "Ajouter à une liste",
+            "createList": "Créer une liste",
+            "noListsFound": "Aucune liste, créez-en une",
+            "namePlaceholder": "Entrez le nom de la liste"
+        }
     },
     "description": {
         "readMore": "Lire plus",
