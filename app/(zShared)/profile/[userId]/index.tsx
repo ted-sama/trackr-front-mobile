@@ -8,6 +8,7 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import MaskedView from "@react-native-masked-view/masked-view";
@@ -31,6 +32,7 @@ import Animated, {
 } from "react-native-reanimated";
 import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { Notebook } from "lucide-react-native";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import dayjs from "dayjs";
@@ -171,6 +173,13 @@ export default function UserProfileScreen() {
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
         onBack={() => router.back()}
+        rightButton={
+          <Pressable onPress={() => {
+            router.push(`/activity/${user?.username}`);
+          }}>
+            <Notebook size={22} color={colors.icon} />
+          </Pressable>
+        }
       />
       <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} contentContainerStyle={{ paddingBottom: 64 }}>
         <View>

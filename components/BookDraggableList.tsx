@@ -48,7 +48,7 @@ export const BookDraggableList: React.FC<BookDraggableListProps> = ({
           {item.title}
         </Text>
         <Text style={[typography.caption, { color: colors.secondaryText }]} numberOfLines={1}>
-          {item.author}
+          {item.authors?.map((author) => author.name).join(", ")}
         </Text>
       </View>
       

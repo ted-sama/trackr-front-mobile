@@ -13,12 +13,13 @@ interface AnimatedHeaderProps {
   scrollY: SharedValue<number>;
   collapseThreshold?: number;
   onBack?: () => void;
+  closeRightButton?: React.ReactNode;
   rightButton?: React.ReactNode;
 }
 
 const DEFAULT_THRESHOLD = 320;
 
-export function AnimatedHeader({ title, backgroundColor , scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, rightButton }: AnimatedHeaderProps) {
+export function AnimatedHeader({ title, backgroundColor , scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, closeRightButton, rightButton }: AnimatedHeaderProps) {
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -97,7 +98,21 @@ export function AnimatedHeader({ title, backgroundColor , scrollY, collapseThres
         >
           {title}
         </Animated.Text>
-        <View style={styles.rightContainer}>
+        {/* width: 80, -- 36*2 (buttons) + 8 (gap) */}
+        <View style={[styles.rightContainer, { width: closeRightButton ? 80 : 36 }]}> 
+          {closeRightButton ? (
+            <View style={styles.closeRightButton}>
+              <Animated.View
+                style={[
+                  StyleSheet.absoluteFillObject,
+                  styles.backButtonBg,
+                  { backgroundColor: colors.backButtonBackground },
+                  backButtonBgStyle,
+                ]}
+              />
+              {closeRightButton}
+            </View>
+          ) : null}
           {rightButton ? (
             <View style={styles.rightButton}>
               <Animated.View
@@ -157,8 +172,17 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   rightContainer: {
-    width: 36,
     alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  closeRightButton: {
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 38,
+    minHeight: 38,
+    overflow: 'hidden',
   },
   rightButton: {
     padding: 8,

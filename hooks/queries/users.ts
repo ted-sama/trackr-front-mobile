@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/userStore';
 import { PaginatedResponse } from '@/types/api';
 import { List } from '@/types/list';
 import { User } from '@/types/user';
+import { ActivityLog } from '@/types/activityLog';
 import { queryKeys } from './keys';
 
 function invalidateUserQueries(qc: QueryClient, userId?: string) {
@@ -202,5 +203,32 @@ export function useReorderUserTop() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['user', 'top', 'me'] });
     },
+  });
+}
+
+export function useUserActivity(username?: string) {
+  const { currentUser } = useUserStore();
+  const isMe = !username || username === currentUser?.username;
+  const endpoint = isMe ? '/me/activity' : `/users/${username}/activity`;
+
+  return useInfiniteQuery({
+    queryKey: ['user', 'activity', isMe ? 'me' : username],
+    queryFn: async ({ pageParam }) => {
+      const page = pageParam ?? 1;
+      const { data } = await api.get<PaginatedResponse<ActivityLog>>(endpoint, {
+        params: {
+          page,
+          limit: 10,
+        },
+      });
+      return data;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPageData) => {
+      const { currentPage, lastPage } = lastPageData.meta;
+      return currentPage < lastPage ? currentPage + 1 : undefined;
+    },
+    enabled: isMe || Boolean(username),
+    staleTime: 30_000,
   });
 }

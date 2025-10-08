@@ -142,7 +142,9 @@
         },
         "rating": "rating",
         "chapter": "Chapter",
-        "lastChapterRead": "Last chapter read"
+        "lastChapterRead": "Last chapter read",
+        "youRatedIt": "You rated this book",
+        "rateIt": "Track this book and rate it"
     },
     "list": {
         "reorder": "Reorder",
@@ -212,5 +214,27 @@
         "AUTH_USERNAME_TAKEN": "This username is already taken, please choose another one",
         "BOOKS_TOP_LIMIT_REACHED": "You have reached the limit of 5 favorite books",
         "E_INVALID_CREDENTIALS": "Invalid email or password"
+    },
+    "activity": {
+        "title": "Activity",
+        "empty": "No activity yet",
+        "me": {
+            "addedToLibrary": "You have added <bold>{{title}}</bold> to library",
+            "removedFromLibrary": "You have removed <bold>{{title}}</bold> from library",
+            "addedToFavorites": "You have added <bold>{{title}}</bold> to favorites",
+            "removedFromFavorites": "You have removed <bold>{{title}}</bold> from favorites",
+            "statusUpdated": "You have changed status of <bold>{{title}}</bold> to {{status}}",
+            "chapterUpdated": "You have read chapter {{chapter}} of <bold>{{title}}</bold>",
+            "ratingUpdated": "You have rated <bold>{{title}}</bold>"
+        },
+        "profile": {
+            "addedToLibrary": "{{user}} added <bold>{{title}}</bold> to library",
+            "removedFromLibrary": "{{user}} removed <bold>{{title}}</bold> from library",
+            "addedToFavorites": "{{user}} added <bold>{{title}}</bold> to favorites",
+            "removedFromFavorites": "{{user}} removed <bold>{{title}}</bold> from favorites",
+            "statusUpdated": "{{user}} changed status of <bold>{{title}}</bold> to {{status}}",
+            "chapterUpdated": "{{user}} read chapter {{chapter}} of <bold>{{title}}</bold>",
+            "ratingUpdated": "{{user}} rated <bold>{{title}}</bold>"
+        }
     }
 }

@@ -31,7 +31,7 @@ import Animated, {
 } from "react-native-reanimated";
 import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Settings } from "lucide-react-native";
+import { Notebook, Settings } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -161,6 +161,13 @@ export default function Profile() {
         title={currentUser?.username || t("profile.title")}
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
+        closeRightButton={
+          <Pressable onPress={() => {
+            router.push(`/activity/${currentUser?.username}`);
+          }}>
+            <Notebook size={22} color={colors.icon} />
+          </Pressable>
+        }
         rightButton={
           <Pressable onPress={() => {
             router.push(`/settings`);

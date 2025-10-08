@@ -763,7 +763,7 @@ export default function BookScreen() {
                           { color: colors.text, marginBottom: 6 },
                         ]}
                       >
-                        Vous avez noté ce livre
+                        {t("book.youRatedIt")}
                       </Text>
                       {bookTracking?.rating && (
                         <RatingStars
@@ -780,7 +780,7 @@ export default function BookScreen() {
                         { color: colors.secondaryText },
                       ]}
                     >
-                      Ajoutez ce livre, suivez-le et notez-le
+                      {t("book.rateIt")}
                     </Text>
                   )}
                 </Animated.View>

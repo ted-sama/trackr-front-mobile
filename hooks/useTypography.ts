@@ -9,6 +9,7 @@ export interface Typography {
   body: object;
   bodyCaption: object;
   bodyBold: object;
+  bodyBold2: object;
   caption: object;
   username: object;
   plusBadge: object;
@@ -64,8 +65,14 @@ export function useTypography(): Typography {
     },
     bodyBold: {
       fontFamily: 'Manrope_600SemiBold',
-      fontSize: 16,
-      lineHeight: 22,
+      fontSize: 14,
+      lineHeight: 21,
+      letterSpacing: -0.3,
+    },
+    bodyBold2: {
+      fontFamily: 'Manrope_700Bold',
+      fontSize: 14,
+      lineHeight: 21,
       letterSpacing: -0.3,
     },
     caption: {

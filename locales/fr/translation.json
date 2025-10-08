@@ -142,7 +142,9 @@
         },
         "rating": "note",
         "chapter": "Chapitre",
-        "lastChapterRead": "Dernier chapitre lu"
+        "lastChapterRead": "Dernier chapitre lu",
+        "youRatedIt": "Vous avez noté ce livre",
+        "rateIt": "Suivez ce livre et notez-le"
     },
     "list": {
         "reorder": "Réordonner",
@@ -213,5 +215,27 @@
         "AUTH_USERNAME_TAKEN": "Ce nom d'utilisateur est déjà pris, veuillez en choisir un autre",
         "BOOKS_TOP_LIMIT_REACHED": "Vous avez atteint la limite des 5 livres favoris",
         "E_INVALID_CREDENTIALS": "Email ou mot de passe incorrect"
+    },
+    "activity": {
+        "title": "Activité",
+        "empty": "Aucune activité pour le moment",
+        "me": {
+            "addedToLibrary": "Vous avez ajouté <bold>{{title}}</bold> à la bibliothèque",
+            "removedFromLibrary": "Vous avez retiré <bold>{{title}}</bold> de la bibliothèque",
+            "addedToFavorites": "Vous avez ajouté <bold>{{title}}</bold> aux favoris",
+            "removedFromFavorites": "Vous avez retiré <bold>{{title}}</bold> des favoris",
+            "statusUpdated": "Vous avez changé le statut de <bold>{{title}}</bold> à {{status}}",
+            "chapterUpdated": "Vous avez lu le chapitre {{chapter}} de <bold>{{title}}</bold>",
+            "ratingUpdated": "Vous avez noté <bold>{{title}}</bold>"
+        },
+        "profile": {
+            "addedToLibrary": "{{user}} a ajouté <bold>{{title}}</bold> à la bibliothèque",
+            "removedFromLibrary": "{{user}} a retiré <bold>{{title}}</bold> de la bibliothèque",
+            "addedToFavorites": "{{user}} a ajouté <bold>{{title}}</bold> aux favoris",
+            "removedFromFavorites": "{{user}} a retiré <bold>{{title}}</bold> des favoris",
+            "statusUpdated": "{{user}} a changé le statut de <bold>{{title}}</bold> à {{status}}",
+            "chapterUpdated": "{{user}} a lu le chapitre {{chapter}} de <bold>{{title}}</bold>",
+            "ratingUpdated": "{{user}} a noté <bold>{{title}}</bold>"
+        }
     }
 }
