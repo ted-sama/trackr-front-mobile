@@ -43,6 +43,12 @@ export default function Signup() {
     if (username.trim().length < 3) {
       return t("auth.errors.usernameTooShort");
     }
+    if (username.trim().length > 30) {
+      return t("auth.errors.usernameTooLong");
+    }
+    if (username.trim().includes(" ")) {
+      return t("auth.errors.usernameContainsSpace");
+    }
     return "";
   };
 

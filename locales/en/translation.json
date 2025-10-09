@@ -38,7 +38,9 @@
             "passwordTooShort": "Password must be at least 8 characters long",
             "invalidEmail": "Invalid email address",
             "requiredField": "This field is required",
-            "usernameTooShort": "Username must be at least 3 characters long"
+            "usernameTooShort": "Username must be at least 3 characters long",
+            "usernameTooLong": "Username must be less than 30 characters long",
+            "usernameContainsSpace": "Username cannot contain spaces"
         }
     },
     "status": {

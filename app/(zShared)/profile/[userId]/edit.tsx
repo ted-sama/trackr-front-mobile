@@ -78,6 +78,25 @@ export default function ProfileEditModal() {
   const [isAvatarDeleted, setIsAvatarDeleted] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [errors, setErrors] = useState({
+    username: "",
+  });
+
+  const validateUsername = () => {
+    if (!username.trim()) {
+      return t("auth.errors.requiredField");
+    }
+    if (username.trim().length < 3) {
+      return t("auth.errors.usernameTooShort");
+    }
+    if (username.trim().length > 30) {
+      return t("auth.errors.usernameTooLong");
+    }
+    if (username.trim().includes(" ")) {
+      return t("auth.errors.usernameContainsSpace");
+    }
+    return "";
+  };
 
   useEffect(() => {
     if (!currentUser) return;
@@ -169,12 +188,11 @@ export default function ProfileEditModal() {
   };
 
   const handleSave = async () => {
-    if (!username.trim()) {
-      Toast.show({
-        type: "error",
-        text1: "Erreur",
-        text2: "Le nom d'utilisateur est requis",
-      });
+    const usernameError = validateUsername();
+    setErrors({
+      username: usernameError,
+    });
+    if (usernameError) {
       return;
     }
 
@@ -498,7 +516,8 @@ export default function ProfileEditModal() {
           autoCorrect={false}
           maxLength={32}
           returnKeyType="done"
-            placeholder="Entrez votre nom d'utilisateur"
+          placeholder="Entrez votre nom d'utilisateur"
+          error={errors.username}
           />
         </View>
       </ScrollView>
