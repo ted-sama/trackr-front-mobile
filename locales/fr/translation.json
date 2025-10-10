@@ -91,6 +91,7 @@
     },
     "profile": {
         "title": "Profil",
+        "memberSince": "Membre depuis le",
         "edit": "Modifier le profil",
         "reorder": "Réordonner les favoris",
         "favorites": "Favoris",
@@ -222,19 +223,19 @@
         "title": "Activité",
         "empty": "Aucune activité pour le moment",
         "me": {
-            "addedToLibrary": "Vous avez ajouté <bold>{{title}}</bold> à la bibliothèque",
-            "removedFromLibrary": "Vous avez retiré <bold>{{title}}</bold> de la bibliothèque",
-            "addedToFavorites": "Vous avez ajouté <bold>{{title}}</bold> aux favoris",
-            "removedFromFavorites": "Vous avez retiré <bold>{{title}}</bold> des favoris",
+            "addedToLibrary": "Vous avez ajouté <bold>{{title}}</bold> à votre bibliothèque",
+            "removedFromLibrary": "Vous avez retiré <bold>{{title}}</bold> de votre bibliothèque",
+            "addedToFavorites": "Vous avez ajouté <bold>{{title}}</bold> à vos favoris",
+            "removedFromFavorites": "Vous avez retiré <bold>{{title}}</bold> de vos favoris",
             "statusUpdated": "Vous avez changé le statut de <bold>{{title}}</bold> à {{status}}",
             "chapterUpdated": "Vous avez lu le chapitre {{chapter}} de <bold>{{title}}</bold>",
             "ratingUpdated": "Vous avez noté <bold>{{title}}</bold>"
         },
         "profile": {
-            "addedToLibrary": "{{user}} a ajouté <bold>{{title}}</bold> à la bibliothèque",
-            "removedFromLibrary": "{{user}} a retiré <bold>{{title}}</bold> de la bibliothèque",
-            "addedToFavorites": "{{user}} a ajouté <bold>{{title}}</bold> aux favoris",
-            "removedFromFavorites": "{{user}} a retiré <bold>{{title}}</bold> des favoris",
+            "addedToLibrary": "{{user}} a ajouté <bold>{{title}}</bold> à sa bibliothèque",
+            "removedFromLibrary": "{{user}} a retiré <bold>{{title}}</bold> de sa bibliothèque",
+            "addedToFavorites": "{{user}} a ajouté <bold>{{title}}</bold> à ses favoris",
+            "removedFromFavorites": "{{user}} a retiré <bold>{{title}}</bold> ses favoris",
             "statusUpdated": "{{user}} a changé le statut de <bold>{{title}}</bold> à {{status}}",
             "chapterUpdated": "{{user}} a lu le chapitre {{chapter}} de <bold>{{title}}</bold>",
             "ratingUpdated": "{{user}} a noté <bold>{{title}}</bold>"

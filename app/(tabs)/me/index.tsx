@@ -252,7 +252,7 @@ export default function Profile() {
               {currentUser?.plan === "plus" && <PlusBadge />}
             </View>
             <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{currentUser?.username}</Text>
-            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>Membre depuis le {dayjs.utc(currentUser?.createdAt).format("DD/MM/YYYY")}</Text>
+            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.memberSince")} {dayjs.utc(currentUser?.createdAt).format("DD/MM/YYYY")}</Text>
           </View>
         </View>
         <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
@@ -260,7 +260,7 @@ export default function Profile() {
             icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
             title={t("profile.edit")}
             onPress={() => {
-              router.push(`/me/edit`);
+              router.push(`/profile/${currentUser?.id}/edit`);
             }}
           />
           <PillButton
@@ -268,7 +268,7 @@ export default function Profile() {
             title={t("profile.reorder")}
             disabled={topBooks?.length === 0}
             onPress={() => {
-              router.push(`/me/reorder`);
+              router.push(`/profile/${currentUser?.id}/reorder`);
             }}
           />
         </View>

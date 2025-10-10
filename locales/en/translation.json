@@ -91,6 +91,7 @@
     },
     "profile": {
         "title": "Profile",
+        "memberSince": "Member since",
         "edit": "Edit profile",
         "reorder": "Reorder favorites",
         "favorites": "Favorites",
@@ -221,19 +222,19 @@
         "title": "Activity",
         "empty": "No activity yet",
         "me": {
-            "addedToLibrary": "You have added <bold>{{title}}</bold> to library",
-            "removedFromLibrary": "You have removed <bold>{{title}}</bold> from library",
-            "addedToFavorites": "You have added <bold>{{title}}</bold> to favorites",
-            "removedFromFavorites": "You have removed <bold>{{title}}</bold> from favorites",
+            "addedToLibrary": "You have added <bold>{{title}}</bold> to your library",
+            "removedFromLibrary": "You have removed <bold>{{title}}</bold> from your library",
+            "addedToFavorites": "You have added <bold>{{title}}</bold> to your favorites",
+            "removedFromFavorites": "You have removed <bold>{{title}}</bold> from your favorites",
             "statusUpdated": "You have changed status of <bold>{{title}}</bold> to {{status}}",
             "chapterUpdated": "You have read chapter {{chapter}} of <bold>{{title}}</bold>",
             "ratingUpdated": "You have rated <bold>{{title}}</bold>"
         },
         "profile": {
-            "addedToLibrary": "{{user}} added <bold>{{title}}</bold> to library",
-            "removedFromLibrary": "{{user}} removed <bold>{{title}}</bold> from library",
-            "addedToFavorites": "{{user}} added <bold>{{title}}</bold> to favorites",
-            "removedFromFavorites": "{{user}} removed <bold>{{title}}</bold> from favorites",
+            "addedToLibrary": "{{user}} added <bold>{{title}}</bold> to their library",
+            "removedFromLibrary": "{{user}} removed <bold>{{title}}</bold> from their library",
+            "addedToFavorites": "{{user}} added <bold>{{title}}</bold> to their favorites",
+            "removedFromFavorites": "{{user}} removed <bold>{{title}}</bold> from their favorites",
             "statusUpdated": "{{user}} changed status of <bold>{{title}}</bold> to {{status}}",
             "chapterUpdated": "{{user}} read chapter {{chapter}} of <bold>{{title}}</bold>",
             "ratingUpdated": "{{user}} rated <bold>{{title}}</bold>"

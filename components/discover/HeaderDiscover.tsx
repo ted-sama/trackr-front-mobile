@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, StatusBar, NativeSyntheticEvent, TextInputSubmitEditingEventData, TouchableOpacity, Text, Dimensions } from "react-native";
+import { View, StyleSheet, StatusBar, NativeSyntheticEvent, TextInputSubmitEditingEventData, TouchableOpacity, Text, Dimensions, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS } from 'react-native-reanimated';
 import { useTheme } from "@/contexts/ThemeContext";
@@ -118,8 +118,8 @@ export default function HeaderDiscover({
       style={[
         styles.header,
         {
-          paddingTop: insets.top,
-          height: 130 + insets.top,
+          paddingTop: Platform.OS === 'android' ? insets.top + 20 : insets.top,
+          height: Platform.OS === 'android' ? 130 + insets.top + 20 : 130 + insets.top,
           backgroundColor: colors.background,
           borderBottomColor: colors.tabBarBorder,
           borderBottomWidth: 1,

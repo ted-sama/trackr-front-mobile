@@ -2,22 +2,43 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, View } from 'react-native';
 import { Tabs } from 'expo-router';
+import { NativeTabs, Icon, Label } from 'expo-router/unstable-native-tabs';
+import { isLiquidGlassAvailable } from 'expo-glass-effect';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext'; // Ajustement du chemin
 import { CircleUserRound, Library } from 'lucide-react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
   const { colors, currentTheme } = useTheme();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const supportsLiquidGlass = Platform.OS === 'ios' && isLiquidGlassAvailable();
+
+  if (supportsLiquidGlass) {
+    return (
+      <NativeTabs tintColor={colors.accent} minimizeBehavior='onScrollDown'>
+        <NativeTabs.Trigger name="index">
+          <Icon sf="house.fill" />
+          <Label>{t('home.title')}</Label>
+        </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="discover">
+          <Icon sf="safari" />
+          <Label>{t('discover.title')}</Label>
+        </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="collection">
+          <Icon sf="books.vertical.fill" />
+          <Label>{t('collection.title')}</Label>
+        </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="me">
+          <Icon sf="person.crop.circle" />
+          <Label>{t('profile.title')}</Label>
+        </NativeTabs.Trigger>
+      </NativeTabs>
+    );
+  }
 
   return (
     <Tabs
       detachInactiveScreens={false}
-      safeAreaInsets={{
-        bottom: Platform.OS === "android" ? 10 : insets.bottom
-      }}
       screenOptions={{
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: currentTheme === 'dark' ? '#888' : '#999',

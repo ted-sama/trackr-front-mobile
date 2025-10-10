@@ -7,7 +7,6 @@ export default function ListLayout() {
       <Stack.Screen
           name="edit"
           options={{
-            presentation: "modal",
             gestureEnabled: true,
             headerShown: false,
           }}
@@ -15,7 +14,6 @@ export default function ListLayout() {
         <Stack.Screen
           name="reorder"
           options={{
-            presentation: "modal",
             gestureEnabled: true,
             headerShown: false,
           }}

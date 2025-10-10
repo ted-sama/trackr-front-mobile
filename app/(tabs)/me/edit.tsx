@@ -2,14 +2,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   ScrollView,
   Pressable,
   ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
@@ -41,6 +43,7 @@ export default function ProfileEditModal() {
   const typography = useTypography();
   const currentUser = useUserStore((s) => s.currentUser);
   const isPlus = currentUser?.plan === "plus";
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { mutateAsync: updateMe } = useUpdateMe();
   const { mutateAsync: uploadAvatar, isPending: isUploadingAvatar } =
@@ -261,7 +264,7 @@ export default function ProfileEditModal() {
 
   if (!currentUser) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
         <View style={styles.loadingContainer}>
           <Text style={[typography.body, { color: colors.secondaryText }]}>
@@ -273,17 +276,25 @@ export default function ProfileEditModal() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={0}
+    >
       <StatusBar style="light" />
       <View
         style={{
-          padding: 16,
+          paddingTop: insets.top + 16,
+          paddingHorizontal: 16,
+          paddingBottom: 16,
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
+          borderBottomWidth: 1,
+          borderBottomColor: colors.tabBarBorder,
         }}
       >
-        <TouchableOpacity
+        <Pressable
           onPress={handleBack}
           style={[
             styles.backButton,
@@ -291,11 +302,11 @@ export default function ProfileEditModal() {
           ]}
         >
           <Ionicons name="arrow-back" size={24} color={colors.icon} />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={[typography.h3, { color: colors.text }]}>
           {t("profile.editModal.title")}
         </Text>
-        <TouchableOpacity
+        <Pressable
           onPress={handleSave}
           style={[
             styles.backButton,
@@ -306,7 +317,7 @@ export default function ProfileEditModal() {
           }
         >
           <Check size={24} color={colors.buttonText} strokeWidth={2.5} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <ScrollView
@@ -315,7 +326,7 @@ export default function ProfileEditModal() {
       >
         {/* Backdrop mode toggle */}
         <View style={styles.modeToggleRow}>
-          <TouchableOpacity
+          <Pressable
             style={[
               styles.modeToggleButton,
               { backgroundColor: colors.card, borderColor: colors.border },
@@ -325,7 +336,6 @@ export default function ProfileEditModal() {
               Haptics.selectionAsync();
               setBackdropMode("color");
             }}
-            activeOpacity={0.7}
           >
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
@@ -341,8 +351,8 @@ export default function ProfileEditModal() {
                 {t("profile.editModal.color")}
               </Text>
             </View>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             style={[
               styles.modeToggleButton,
               {
@@ -365,7 +375,6 @@ export default function ProfileEditModal() {
               Haptics.selectionAsync();
               setBackdropMode("image");
             }}
-            activeOpacity={0.7}
           >
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
@@ -382,13 +391,13 @@ export default function ProfileEditModal() {
               </Text>
               {!isPlus && <PlusBadge />}
             </View>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Backdrop + Avatar preview styled as final */}
         <View style={styles.headerPreview}>
           {backdropMode === "image" ? (
-            <TouchableOpacity onPress={handlePickBackdrop} activeOpacity={0.9}>
+            <Pressable onPress={handlePickBackdrop}>
               <ImageBackground
                 source={{
                   uri:
@@ -411,7 +420,7 @@ export default function ProfileEditModal() {
                   </View>
                 </LinearGradient>
               </ImageBackground>
-            </TouchableOpacity>
+            </Pressable>
           ) : (
             <View
               style={[
@@ -424,9 +433,8 @@ export default function ProfileEditModal() {
             ></View>
           )}
 
-          <TouchableOpacity
+          <Pressable
             onPress={handlePickAvatar}
-            activeOpacity={0.9}
             style={styles.avatarWrap}
           >
             <Avatar
@@ -446,7 +454,7 @@ export default function ProfileEditModal() {
             >
               <Ionicons name="camera" size={14} color={colors.buttonText} />
             </View>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Delete avatar */}
@@ -473,13 +481,12 @@ export default function ProfileEditModal() {
         {backdropMode === "color" && (
           <View style={styles.swatchesContainer}>
             {presetColors.map((c) => (
-              <TouchableOpacity
+              <Pressable
                 key={c}
                 onPress={() => {
                   Haptics.selectionAsync();
                   setBackdropColor(c);
                 }}
-                activeOpacity={0.8}
                 style={[
                   styles.swatch,
                   {
@@ -524,7 +531,7 @@ export default function ProfileEditModal() {
         />
         </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -606,8 +613,9 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 44,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
+    borderRadius: 22,
+    borderCurve: "continuous",
+    paddingHorizontal: 16,
     justifyContent: "center",
   },
   modeToggleText: { fontWeight: "600" },

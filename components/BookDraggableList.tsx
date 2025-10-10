@@ -40,7 +40,7 @@ export const BookDraggableList: React.FC<BookDraggableListProps> = ({
       delayLongPress={150}
     >
       {showDragHandle && (
-        <Image source={item.coverImage} style={styles.coverImage} />
+        <Image source={{ uri: item.coverImage }} style={styles.coverImage} />
       )}
       
       <View style={[styles.bookInfo, !showDragHandle && styles.bookInfoNoHandle]}>

@@ -3,9 +3,11 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
@@ -108,20 +110,24 @@ export default function ReorderFavoritesModal() {
   const isSaveDisabled = !hasChanges || isPending;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}> 
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={0}
+    >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-      <View style={{ padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+      <View style={{ paddingTop: insets.top + 16, paddingHorizontal: 16, paddingBottom: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: colors.tabBarBorder }}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <TouchableOpacity
+          <Pressable
             onPress={handleBack}
             style={[styles.iconButton, { backgroundColor: colors.backButtonBackground }]}
             accessibilityRole="button"
             accessibilityLabel="Revenir en arrière"
           >
             <Ionicons name="arrow-back" size={24} color={colors.icon} />
-          </TouchableOpacity>
+          </Pressable>
           <Text style={[typography.h3, { color: colors.text, flex: 1, textAlign: "center" }]}>Réordonner les favoris</Text>
-          <TouchableOpacity
+          <Pressable
             onPress={handleSave}
             disabled={isSaveDisabled}
             style={[styles.iconButton, { backgroundColor: colors.primary, opacity: isSaveDisabled ? 0.5 : 1 }]}
@@ -129,7 +135,7 @@ export default function ReorderFavoritesModal() {
             accessibilityLabel="Sauvegarder l'ordre des favoris"
           >
             <Check size={24} color={colors.buttonText} strokeWidth={2.5} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 
@@ -168,7 +174,7 @@ export default function ReorderFavoritesModal() {
           )}
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -195,6 +201,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    paddingTop: 16,
     paddingHorizontal: 16,
     paddingBottom: 16,
   },

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, Pressable, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -124,18 +124,18 @@ export default function ListOrder() {
 
   if (!list) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
         <View
           style={[
             styles.header,
-            { paddingTop: insets.top, backgroundColor: colors.background },
+            { backgroundColor: colors.background },
           ]}
         >
           <View style={styles.headerContent}>
-            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <Pressable onPress={handleBack} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
-            </TouchableOpacity>
+            </Pressable>
             <Text
               style={[
                 typography.h2,
@@ -157,18 +157,26 @@ export default function ListOrder() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={0}
+    >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
 
       <View
         style={{
-          padding: 16,
+          paddingTop: insets.top + 16,
+          paddingHorizontal: 16,
+          paddingBottom: 16,
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
+          borderBottomWidth: 1,
+          borderBottomColor: colors.tabBarBorder,
         }}
       >
-        <TouchableOpacity
+        <Pressable
           onPress={handleBack}
           style={[
             styles.backButton,
@@ -176,11 +184,11 @@ export default function ListOrder() {
           ]}
         >
           <Ionicons name="arrow-back" size={24} color={colors.icon} />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={[typography.h3, { color: colors.text }]}>
           {t("list.reorderModal.title")}
         </Text>
-        <TouchableOpacity
+        <Pressable
           onPress={handleSave}
           style={[
             styles.backButton,
@@ -189,7 +197,7 @@ export default function ListOrder() {
           disabled={!hasChanges || isLoading}
         >
           <Check size={24} color={colors.buttonText} strokeWidth={2.5} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <View style={styles.content}>
@@ -245,7 +253,7 @@ export default function ListOrder() {
           />
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

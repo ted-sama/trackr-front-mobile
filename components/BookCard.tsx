@@ -160,7 +160,7 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
               </View>
             )}
             <Image
-              source={book.coverImage}
+              source={{ uri: book.coverImage }}
               style={[
                 styles.mangaCover,
                 size === 'compact' && {

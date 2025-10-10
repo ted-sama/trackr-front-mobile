@@ -5,13 +5,16 @@ import {
   Text,
   TextInput,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   Alert,
   ImageBackground,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
@@ -31,6 +34,7 @@ export default function ListEdit() {
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   // Data
   const { data: list } = useList(listId as string);
@@ -225,7 +229,7 @@ export default function ListEdit() {
 
   if (!list) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
         <View style={styles.loadingContainer}>
           <Text style={[typography.body, { color: colors.secondaryText }]}>
@@ -237,12 +241,14 @@ export default function ListEdit() {
   }
 
   return (
-    <View
+    <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.background }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={0}
     >
       <StatusBar style="light" />
-      <View style={{ padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <TouchableOpacity
+      <View style={{ paddingTop: insets.top + 16, paddingHorizontal: 16, paddingBottom: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: colors.tabBarBorder }}>
+        <Pressable
           onPress={handleBack}
           style={[
             styles.backButton,
@@ -250,11 +256,11 @@ export default function ListEdit() {
           ]}
         >
           <Ionicons name="arrow-back" size={24} color={colors.icon} />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={[typography.h3, { color: colors.text }]}>
           {t("list.editModal.title")}
         </Text>
-        <TouchableOpacity
+        <Pressable
           onPress={handleSave}
           style={[
             styles.backButton,
@@ -263,7 +269,7 @@ export default function ListEdit() {
           disabled={!hasChanges || isSaving}
         >
           <Check size={24} color={colors.buttonText} strokeWidth={2.5} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
         <View style={{ flex: 1 }} collapsable={false}>
@@ -273,7 +279,7 @@ export default function ListEdit() {
         >
           {/* Backdrop Mode Toggle */}
           <View style={styles.modeToggleRow}>
-            <TouchableOpacity
+            <Pressable
               style={[
                 styles.modeToggleButton,
                 { backgroundColor: colors.card, borderColor: colors.border },
@@ -283,15 +289,14 @@ export default function ListEdit() {
                 Haptics.selectionAsync();
                 setBackdropMode("color");
               }}
-              activeOpacity={0.7}
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Palette size={18} color={colors.text} />
                 <Text style={[typography.body, styles.modeToggleText, { color: colors.text }]}>{t("list.editModal.color")}</Text>
               </View>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
+            <Pressable
               style={[
                 styles.modeToggleButton,
                 { backgroundColor: colors.card, borderColor: colors.border, opacity: isPlus ? 1 : 0.6 },
@@ -308,19 +313,18 @@ export default function ListEdit() {
                 Haptics.selectionAsync();
                 setBackdropMode("image");
               }}
-              activeOpacity={0.7}
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Camera size={18} color={colors.text} />
                 <Text style={[typography.body, styles.modeToggleText, { color: colors.text }]}>{t("list.editModal.backdrop")}</Text>
                 {!isPlus && <PlusBadge />}
               </View>
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* Backdrop Preview */}
           {backdropMode === "image" ? (
-            <TouchableOpacity onPress={handlePickImage} activeOpacity={0.8}>
+            <Pressable onPress={handlePickImage}>
               <ImageBackground
                 source={{ uri: selectedImage?.uri || list.backdropImage || undefined }}
                 style={[styles.backdrop, { backgroundColor: colors.card }]}
@@ -336,7 +340,7 @@ export default function ListEdit() {
                   </View>
                 </LinearGradient>
               </ImageBackground>
-            </TouchableOpacity>
+            </Pressable>
           ) : (
             <View style={[styles.backdrop, { backgroundColor: backdropColor || list.backdropColor || "#7C3AED" }] }>
             </View>
@@ -346,13 +350,12 @@ export default function ListEdit() {
           {backdropMode === "color" && (
             <View style={styles.swatchesContainer}>
               {presetColors.map((c) => (
-                <TouchableOpacity
+                <Pressable
                   key={c}
                   onPress={() => {
                     Haptics.selectionAsync();
                     setBackdropColor(c);
                   }}
-                  activeOpacity={0.8}
                   style={[
                     styles.swatch,
                     { backgroundColor: c, borderColor: (backdropColor || list.backdropColor || "#7C3AED") === c ? colors.primary : "transparent" },
@@ -448,7 +451,7 @@ export default function ListEdit() {
                   autoCapitalize="none"
                   returnKeyType="done"
                 />
-                <TouchableOpacity
+                <Pressable
                   style={[
                     styles.addTagButton,
                     { opacity: newTag.trim() ? 1 : 0.5 },
@@ -457,7 +460,7 @@ export default function ListEdit() {
                   disabled={!newTag.trim()}
                 >
                   <Plus size={20} color={colors.icon} strokeWidth={2.5} />
-                </TouchableOpacity>
+                </Pressable>
               </View>
 
               {/* Tags Display */}
@@ -478,12 +481,12 @@ export default function ListEdit() {
                         backgroundColor={colors.badgeBackground}
                         borderColor={colors.badgeBorder}
                       />
-                      <TouchableOpacity
+                      <Pressable
                         style={styles.removeTagButton}
                         onPress={() => removeTag(tag)}
                       >
                         <X size={14} color={colors.secondaryText} />
-                      </TouchableOpacity>
+                      </Pressable>
                     </Animated.View>
                   ))}
                 </Animated.View>
@@ -500,7 +503,7 @@ export default function ListEdit() {
               
               <View style={styles.toggleContainer}>
                 {/* Public/Private Toggle */}
-                <TouchableOpacity
+                <Pressable
                   style={[
                     styles.toggleButton,
                     {
@@ -509,7 +512,6 @@ export default function ListEdit() {
                     },
                   ]}
                   onPress={togglePublic}
-                  activeOpacity={0.7}
                 >
                   <View style={styles.toggleContent}>
                     {isPublic ? (
@@ -541,10 +543,10 @@ export default function ListEdit() {
                       </Text>
                     </View>
                   </View>
-                </TouchableOpacity>
+                </Pressable>
 
                 {/* Ranked Toggle */}
-                <TouchableOpacity
+                <Pressable
                   style={[
                     styles.toggleButton,
                     {
@@ -553,7 +555,6 @@ export default function ListEdit() {
                     },
                   ]}
                   onPress={toggleRanked}
-                  activeOpacity={0.7}
                 >
                   <View style={styles.toggleContent}>
                     {ranked ? (
@@ -585,12 +586,12 @@ export default function ListEdit() {
                       </Text>
                     </View>
                   </View>
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
         </ScrollView>
         </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -744,8 +745,9 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 44,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
+    borderRadius: 22,
+    borderCurve: "continuous",
+    paddingHorizontal: 16,
     justifyContent: "center",
   },
   modeToggleText: {

@@ -153,7 +153,7 @@ function ActivityContent({ activity, colors, isMe, userDisplayName }: ActivityCo
       );
     case "book.ratingUpdated":
       return (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 4, maxWidth: "100%" }}>
           <Text style={baseStyle}>
             <Trans 
               i18nKey={`${keyPrefix}.ratingUpdated`}
@@ -163,8 +163,9 @@ function ActivityContent({ activity, colors, isMe, userDisplayName }: ActivityCo
               }}
               components={{ bold: <Text style={typography.bodyBold2} /> }}
             />
+            {" "}
+            <RatingStars rating={metadata.rating} size={14} color={colors.text} />
           </Text>
-          <RatingStars rating={metadata.rating} size={14} color={colors.text} />
         </View>
       );
     default:

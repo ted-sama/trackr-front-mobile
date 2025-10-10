@@ -79,7 +79,7 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
           style={styles.container}
         >
           <View style={styles.detailsGroup}>
-            <Image source={book.coverImage} style={[styles.image, compact && styles.imageCompact]} />
+            <Image source={{ uri: book.coverImage }} style={[styles.image, compact && styles.imageCompact]} />
           <View style={[styles.infoContainer, compact && styles.infoContainerCompact]}>
             {rank && (
               <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: compact ? 2 : 4 }]}>

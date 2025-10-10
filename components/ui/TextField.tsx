@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ViewStyle, TextStyle, TextInputProps, Pressable } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ViewStyle, TextStyle, TextInputProps, Pressable, Platform } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,6 +30,7 @@ export function TextField({ label, type = 'default', error, ...inputProps }: Tex
           backgroundColor: colors.card, 
           borderColor: hasError ? colors.error : colors.border,
           borderWidth: hasError ? 2 : 1,
+          paddingVertical: Platform.OS === 'android' ? 6 : 14,
         }
       ]}>
         <TextInput
@@ -40,12 +41,14 @@ export function TextField({ label, type = 'default', error, ...inputProps }: Tex
             styles.input,
             {
               color: colors.text,
+              paddingVertical: 0,
             },
           ]}
           autoCapitalize='none'
           autoCorrect={false}
           secureTextEntry={type === 'password' && !showPassword}
           clearTextOnFocus={false}
+          {...(Platform.OS === 'android' && { includeFontPadding: false })}
         />
         {type === 'password' && (
           <Pressable onPress={() => setShowPassword(!showPassword)} style={{ marginLeft: 16 }}>
@@ -73,7 +76,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderRadius: 16,
     paddingHorizontal: 16,
-    paddingVertical: 14,
   },
   input: {
     flex: 1,

@@ -12,6 +12,7 @@ import { useSearch } from '@/hooks/queries/search';
 import { Book } from '@/types/book';
 import { List } from '@/types/list';
 import SkeletonLoader from '@/components/skeleton-loader/SkeletonLoader';
+import { LegendList } from '@legendapp/list';
 
 export default function SearchScreen() {
   const { t } = useTranslation();
@@ -123,7 +124,7 @@ export default function SearchScreen() {
           ))}
         </View>
       ) : (
-          <FlatList
+          <LegendList
             data={flatResults}
             renderItem={renderItem}
             keyExtractor={(item, index) => `${item.id}-${index}`}
