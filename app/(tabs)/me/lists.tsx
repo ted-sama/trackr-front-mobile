@@ -14,10 +14,12 @@ import CollectionListElement from '@/components/CollectionListElement';
 import { useMyLists } from '@/hooks/queries/lists';
 import { List } from '@/types/list';
 import { useUserStore } from '@/stores/userStore';
+import { useTranslation } from 'react-i18next';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<List>);
 
 export default function UserListsScreen() {
+  const { t } = useTranslation();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const insets = useSafeAreaInsets();
@@ -105,7 +107,7 @@ export default function UserListsScreen() {
       <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />
       
       <AnimatedHeader
-        title={`Listes de ${currentUser?.displayName}`}
+        title={t("profile.listsScreen.title", { username: currentUser?.username })}
         scrollY={scrollY}
         onBack={handleBack}
         collapseThreshold={titleY > 0 ? titleY : undefined}
@@ -134,7 +136,7 @@ export default function UserListsScreen() {
                 accessibilityLabel="Lists"
                 numberOfLines={1}
               >
-                Listes de {currentUser?.displayName}
+                {t("profile.listsScreen.title", { username: currentUser?.username })}
               </Text>
             </View>
           }

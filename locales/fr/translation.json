@@ -84,7 +84,10 @@
     },
     "collection": {
         "title": "Collection",
-        "myLibrary": "Ma bibliothèque",
+        "myLibrary": {
+            "title": "Ma bibliothèque",
+            "noBooks": "Aucun livre trouvé dans votre bibliothèque."
+        },
         "searchPlaceholder": "Rechercher dans la collection",
         "cancel": "Annuler",
         "books": "livres"
@@ -109,6 +112,14 @@
             "displayNamePlaceholder": "Entrez votre nom d'affichage",
             "username": "Nom d'utilisateur",
             "usernamePlaceholder": "Entrez votre nom d'utilisateur"
+        },
+        "reorderModal": {
+            "title": "Réordonner les favoris",
+            "description": "Maintenez appuyé sur un élément et faites-le glisser pour réorganiser votre top."
+        },
+        "listsScreen": {
+            "title": "Listes de {{username}}",
+            "noLists": "Aucune liste"
         }
     },
     "settings": {

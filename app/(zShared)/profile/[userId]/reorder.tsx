@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Toast from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
 import { Check } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
@@ -24,6 +25,7 @@ import { useUserTop, useReorderUserTop } from "@/hooks/queries/users";
 import { Book } from "@/types/book";
 
 export default function ReorderFavoritesModal() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -126,7 +128,7 @@ export default function ReorderFavoritesModal() {
           >
             <Ionicons name="arrow-back" size={24} color={colors.icon} />
           </Pressable>
-          <Text style={[typography.h3, { color: colors.text, flex: 1, textAlign: "center" }]}>Réordonner les favoris</Text>
+          <Text style={[typography.h3, { color: colors.text, flex: 1, textAlign: "center" }]}>{t("profile.reorderModal.title")}</Text>
           <Pressable
             onPress={handleSave}
             disabled={isSaveDisabled}
@@ -141,8 +143,8 @@ export default function ReorderFavoritesModal() {
 
       <View style={styles.content}>
         <View style={[styles.infoCard, { backgroundColor: colors.card }]}> 
-          <Text style={[typography.h3, { color: colors.text }]}>Vos favoris</Text>
-          <Text style={[typography.caption, { color: colors.secondaryText, marginTop: 8 }]}>Maintenez un livre appuyé pour le déplacer et réorganiser votre top.</Text>
+          <Text style={[typography.h3, { color: colors.text }]}>{t("profile.reorderModal.title")}</Text>
+          <Text style={[typography.caption, { color: colors.secondaryText, marginTop: 8 }]}>{t("profile.reorderModal.description")}</Text>
         </View>
 
         {error && (

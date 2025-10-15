@@ -9,10 +9,12 @@ interface PillButtonProps {
     icon?: React.ReactNode;
     style?: 'default' | 'destructive';
     disabled?: boolean;
+    selected?: boolean;
+    toggleable?: boolean;
     onPress?: () => void;
 }
 
-export default function PillButton({title, icon = null, style = 'default', disabled = false, onPress = () => {}}: PillButtonProps) {
+export default function PillButton({title, icon = null, style = 'default', disabled = false, selected = false, toggleable = false, onPress = () => {}}: PillButtonProps) {
     const { colors } = useTheme();
     const typography = useTypography();
     const scaleAnim = useSharedValue(1);
@@ -26,6 +28,7 @@ export default function PillButton({title, icon = null, style = 'default', disab
                     styles.actionButton,
                     { backgroundColor: colors.card, borderColor: colors.border },
                     style === 'destructive' && { backgroundColor: colors.card, borderColor: colors.error },
+                    toggleable && !selected && { opacity: 0.4 },
                     disabled && { opacity: 0.5 },
                 ]}
                 onPress={onPress}

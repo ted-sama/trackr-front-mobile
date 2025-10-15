@@ -452,7 +452,7 @@ const BookActionsBottomSheet = forwardRef<
       }
 
       // Update the book with the new rating
-      await updateTrackedBook(book.id, { rating: tempRating });
+      await updateTrackedBook(book.id, { rating: tempRating === 0 ? null : tempRating });
       closeSheet();
     };
 

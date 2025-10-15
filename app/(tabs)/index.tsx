@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   content: {
     paddingTop: 12,
     paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingBottom: 78,
   },
   lastReadContainer: {
     flexDirection: "column",

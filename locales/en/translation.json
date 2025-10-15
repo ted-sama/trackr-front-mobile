@@ -84,7 +84,10 @@
     },
     "collection": {
         "title": "Collection",
-        "myLibrary": "My library",
+        "myLibrary": {
+            "title": "My library",
+            "noBooks": "No books found in your library."
+        },
         "searchPlaceholder": "Search in collection",
         "cancel": "Cancel",
         "books": "books"
@@ -109,6 +112,14 @@
             "displayNamePlaceholder": "Enter your display name",
             "username": "Username",
             "usernamePlaceholder": "Enter your username"
+        },
+        "reorderModal": {
+            "title": "Reorder favorites",
+            "description": "Hold an item and drag it to reorder your top."
+        },
+        "listsScreen": {
+            "title": "Lists of {{username}}",
+            "noLists": "No lists"
         }
     },
     "settings": {

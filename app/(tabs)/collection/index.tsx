@@ -73,7 +73,7 @@ const MyLibraryHeader: React.FC<MyLibraryHeaderProps> = React.memo(
               <AnimatedCover key={book.id} book={book} index={index} colors={colors} />
             ))}
           </View>
-          <Text style={[typography.h3, { marginTop: 16, color: colors.text }]}>{t("collection.myLibrary")}</Text>
+          <Text style={[typography.h3, { marginTop: 16, color: colors.text }]}>{t("collection.myLibrary.title")}</Text>
           <Text style={[typography.caption, { color: colors.secondaryText }]}>{totalBooks} {t("collection.books")}</Text>
         </View>
       </Pressable>

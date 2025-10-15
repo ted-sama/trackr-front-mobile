@@ -5,7 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { ReadingStatus } from "@/types/reading-status";
-import { Clock3, BookOpenIcon, BookCheck, Pause, Square, BookMarked, Eye } from "lucide-react-native";
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square, BookMarked, BookmarkPlus } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 interface TrackingTabBarProps {
@@ -89,7 +89,7 @@ export function TrackingTabBar({
                 accessibilityRole="button"
                 accessibilityLabel="Mark last chapter as read"
               >
-                <Eye size={20} strokeWidth={2.5} color={colors.icon} />
+                <BookmarkPlus size={20} strokeWidth={2.5} color={colors.icon} />
               </Pressable>
             )}
             <Pressable

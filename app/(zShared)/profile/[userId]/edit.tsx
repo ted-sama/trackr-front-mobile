@@ -278,7 +278,7 @@ export default function ProfileEditModal() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={0}
     >
-      <StatusBar style="light" />
+      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <View
         style={{
           paddingTop: insets.top + 16,
@@ -301,7 +301,7 @@ export default function ProfileEditModal() {
           <Ionicons name="arrow-back" size={24} color={colors.icon} />
         </Pressable>
         <Text style={[typography.h3, { color: colors.text }]}>
-          Modifier le profil
+          {t("profile.editModal.title")}
         </Text>
         <Pressable
           onPress={handleSave}
@@ -345,7 +345,7 @@ export default function ProfileEditModal() {
                   { color: colors.text },
                 ]}
               >
-                Couleur
+                {t("profile.editModal.color")}
               </Text>
             </View>
           </Pressable>
@@ -384,7 +384,7 @@ export default function ProfileEditModal() {
                   { color: colors.text },
                 ]}
               >
-                Illustration
+                {t("profile.editModal.backdrop")}
               </Text>
               {!isPlus && <PlusBadge />}
             </View>
@@ -469,7 +469,7 @@ export default function ProfileEditModal() {
           >
             <Ionicons name="trash" size={24} color={colors.error} />
             <Text style={[typography.bodyBold, { color: colors.error }]}>
-              Supprimer l'avatar
+              {t("profile.editModal.deleteAvatar")}
             </Text>
           </Pressable>
         )}
@@ -504,26 +504,26 @@ export default function ProfileEditModal() {
         <View style={{ gap: 16 }}>
           {/* Display name */}
         <TextField
-          label="Nom d'affichage"
+          label={t("profile.editModal.displayName")}
           value={displayName}
           onChangeText={setDisplayName}
           autoCapitalize="none"
           autoCorrect={false}
           maxLength={32}
           returnKeyType="done"
-          placeholder="Entrez votre nom d'utilisateur"
+          placeholder={t("profile.editModal.displayNamePlaceholder")}
         />
 
         {/* Username */}
         <TextField
-          label="Nom d'utilisateur"
+          label={t("profile.editModal.username")}
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
           autoCorrect={false}
           maxLength={32}
           returnKeyType="done"
-          placeholder="Entrez votre nom d'utilisateur"
+          placeholder={t("profile.editModal.usernamePlaceholder")}
           error={errors.username}
           />
         </View>
