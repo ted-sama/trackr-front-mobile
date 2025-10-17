@@ -15,22 +15,22 @@ export default function TabLayout() {
 
   if (supportsLiquidGlass) {
     return (
-      <NativeTabs tintColor={colors.accent} minimizeBehavior='onScrollDown'>
+      <NativeTabs tintColor={colors.accent}  minimizeBehavior='onScrollDown'>
         <NativeTabs.Trigger name="index">
           <Icon sf="house.fill" />
-          <Label>{t('home.title')}</Label>
+          <Label hidden>{t('home.title')}</Label>
         </NativeTabs.Trigger>
         <NativeTabs.Trigger name="discover">
           <Icon sf="safari" />
-          <Label>{t('discover.title')}</Label>
+          <Label hidden>{t('discover.title')}</Label>
         </NativeTabs.Trigger>
         <NativeTabs.Trigger name="collection">
           <Icon sf="books.vertical.fill" />
-          <Label>{t('collection.title')}</Label>
+          <Label hidden>{t('collection.title')}</Label>
         </NativeTabs.Trigger>
         <NativeTabs.Trigger name="me">
           <Icon sf="person.crop.circle" />
-          <Label>{t('profile.title')}</Label>
+          <Label hidden>{t('profile.title')}</Label>
         </NativeTabs.Trigger>
       </NativeTabs>
     );
@@ -47,6 +47,7 @@ export default function TabLayout() {
           borderTopColor: colors.tabBarBorder,
           borderTopWidth: 1,
         },
+        tabBarShowLabel: false,
         tabBarLabelStyle: {
           fontSize: 12,
         },
