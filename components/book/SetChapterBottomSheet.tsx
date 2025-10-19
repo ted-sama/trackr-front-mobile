@@ -101,6 +101,8 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
         // Si book.chapters existe, limiter au maximum disponible
         if (book.chapters !== null && book.chapters !== undefined && numericValue > book.chapters) {
             setChapter(book.chapters.toString());
+        } else if (numericValue >= 999999) {
+            setChapter('999999');
         } else {
             setChapter(numeric);
         }
@@ -149,7 +151,10 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
             backdropComponent={renderBackdrop}
         >
             <BottomSheetView style={styles.bottomSheetContent}>
-                <Text style={[typography.categoryTitle, styles.title, { color: colors.text }]}>{t("book.lastChapterRead")}</Text>
+                <View style={styles.titleContainer}>
+                    <Text style={[typography.categoryTitle, { color: colors.text }]}>{t("book.lastChapterRead")}</Text>
+                    <Text style={[typography.caption, { color: colors.secondaryText, textAlign: 'center' }]} numberOfLines={2}>{book.title}</Text>
+                </View>
                 <View style={styles.chapterActionsContainer}>
                     <AnimatedPressable style={[styles.chapterActionButton, { borderColor: colors.border, backgroundColor: colors.backButtonBackground, opacity: Number(chapter) <= 0 ? 0.5 : 1 }]} onPress={() => setChapter((Number(chapter) - 1).toString())} disabled={Number(chapter) <= 0}>
                         <Minus size={24} color={colors.icon} />
@@ -169,7 +174,25 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
                         <Text style={[typography.slashSeparator, { color: colors.text }]}>/</Text>
                         <Text style={[typography.categoryTitle, { color: colors.text }]}>Ch. {book.chapters?.toString() ?? '?'}</Text>
                     </View>
-                    <AnimatedPressable style={[styles.chapterActionButton, { borderColor: colors.border, backgroundColor: colors.backButtonBackground, opacity: book.chapters !== null && Number(chapter) >= (book.chapters ?? 0) ? 0.5 : 1 }]} onPress={() => setChapter((Number(chapter) + 1).toString())} disabled={book.chapters !== null && Number(chapter) >= (book.chapters ?? 0)}>
+                    <AnimatedPressable
+                        style={[
+                            styles.chapterActionButton,
+                            {
+                                borderColor: colors.border,
+                                backgroundColor: colors.backButtonBackground,
+                                opacity:
+                                    (book.chapters !== null && Number(chapter) >= (book.chapters ?? 0)) ||
+                                    Number(chapter) >= 999999
+                                        ? 0.5
+                                        : 1,
+                            },
+                        ]}
+                        onPress={() => setChapter((Number(chapter) + 1).toString())}
+                        disabled={
+                            (book.chapters !== null && Number(chapter) >= (book.chapters ?? 0)) ||
+                            Number(chapter) >= 999999
+                        }
+                    >
                         <Plus size={24} color={colors.icon} />
                     </AnimatedPressable>
                 </View>
@@ -225,9 +248,12 @@ const styles = StyleSheet.create({
         padding: 24,
         paddingBottom: 64,
     },
-    title: {
-        textAlign: 'center',
+    titleContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
         marginBottom: 32,
+        gap: 8,
     },
     chapterActionsContainer: {
         alignItems: 'center',
@@ -245,7 +271,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row',
-        width: 200,
+        overflow: 'hidden',
+        width: 225,
         gap: 4,
     },
     chapterInputContainer: {
