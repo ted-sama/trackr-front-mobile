@@ -12,7 +12,7 @@ import { Book } from "@/types/book";
 import { Ionicons } from "@expo/vector-icons";
 import { Check } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 
 export default function ListOrder() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
@@ -102,23 +102,9 @@ export default function ListOrder() {
       setOriginalBooks([...localBooks]);
 
       router.back();
-      Toast.show({
-        type: "info",
-        text1: "L'ordre de la liste a été mis à jour.",
-      });
+      toast(t("toast.listUpdated"));
     } catch (error: any) {
-      console.error("Erreur lors de la sauvegarde:", error);
-      console.error("Error details:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-
-      Alert.alert(
-        "Erreur de sauvegarde",
-        "Une erreur est survenue lors de la sauvegarde. Veuillez réessayer.",
-        [{ text: "OK" }]
-      );
+      toast.error(t("toast.errorSavingList"));
     }
   };
 

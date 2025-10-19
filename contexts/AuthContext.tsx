@@ -5,7 +5,7 @@ import { useUserStore } from '@/stores/userStore';
 import { api } from '@/services/api';
 import { LoginResponse, RegisterResponse } from '@/types/auth';
 import { useRouter } from 'expo-router';
-import Toast from 'react-native-toast-message';
+import { toast } from 'sonner-native';
 import { handleErrorCodes } from '@/utils/handleErrorCodes';
 import { useTranslation } from 'react-i18next';
 import { queryClient } from '@/lib/queryClient';
@@ -55,16 +55,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsLoading(true);
         try {
             const response = await api.post<RegisterResponse>('/auth/register', { email, password, username, displayName: username });
-            Toast.show({
-                type: "info",
-                text1: t("toast.registerSuccess")
-            });
+            toast(t("toast.registerSuccess"));
             router.push('/auth/login');
         } catch (error: any) {
-            Toast.show({
-                type: "info",
-                text1: t(handleErrorCodes(error))
-            });
+            toast.error(t(handleErrorCodes(error)));
         } finally {
             setIsLoading(false);
         }
@@ -83,10 +77,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 setToken(token);
             }
         } catch (error: any) {
-            Toast.show({
-                type: "info",
-                text1: t(handleErrorCodes(error))
-            });
+            toast.error(t(handleErrorCodes(error)));
         } finally {
             setIsLoading(false);
         }

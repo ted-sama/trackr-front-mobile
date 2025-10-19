@@ -41,7 +41,7 @@ import MaskedView from "@react-native-masked-view/masked-view";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import Badge from "@/components/ui/Badge";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { Ellipsis, Minus, Plus, ChartPie, Sparkles } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -238,10 +238,7 @@ export default function BookScreen() {
   const incrementCurrentChapter = () => {
     if (bookTracking && book) {
       updateTrackedBook(book.id, { currentChapter: bookTracking.currentChapter ? bookTracking.currentChapter + 1 : 1 });
-      Toast.show({
-        text1: t("toast.incrementChapter", { number: bookTracking.currentChapter ? bookTracking.currentChapter + 1 : 1 }),
-        type: "info",
-      });
+      toast(t("toast.incrementChapter", { number: bookTracking.currentChapter ? bookTracking.currentChapter + 1 : 1 }));
     }
   };
 
@@ -320,38 +317,24 @@ export default function BookScreen() {
     if (isBookTracked(book.id.toString())) {
       try {
         await removeTrackedBookFromStore(book.id.toString());
-        Toast.show({
-          text1: t("toast.removedFromTracking"),
-          type: "info",
-        });
+        toast(t("toast.removedFromTracking"));
       } catch (error) {
         console.warn(
           `Failed to remove book ${currentBookIdStr} from tracking:`,
           error
         );
-        Toast.show({
-          type: "error",
-          text1: "Erreur",
-          text2: "Impossible de retirer le livre.",
-        });
+        toast.error(t("toast.errorRemovingFromTracking"));
       }
     } else {
       try {
         await addTrackedBookToStore(book);
-        Toast.show({
-          text1: t("toast.addedToTracking"),
-          type: "info",
-        });
+        toast(t("toast.addedToTracking"));
       } catch (error) {
         console.warn(
           `Failed to add book ${currentBookIdStr} to tracking:`,
           error
         );
-        Toast.show({
-          type: "error",
-          text1: "Erreur",
-          text2: `Impossible d'ajouter le livre.`,
-        });
+        toast.error(t("toast.errorAddingToTracking"));
       }
     }
   };

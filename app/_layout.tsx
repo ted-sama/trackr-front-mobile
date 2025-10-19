@@ -7,7 +7,7 @@ import {
   BottomSheetProvider,
   useBottomSheet,
 } from "../contexts/BottomSheetContext";
-import Toast, { BaseToast, ToastConfig } from "react-native-toast-message";
+import { Toaster } from "sonner-native"
 import { Stack } from "expo-router";
 import {
   useFonts,
@@ -83,39 +83,6 @@ function RootLayoutContent() {
     Manrope_800ExtraBold,
   });
 
-  // Config Toast
-const toastConfig: ToastConfig = {
-  info: (props) => (
-    <BaseToast
-      {...props}
-      style={{
-        borderLeftWidth: 0,
-        width: "90%",
-        height: 50,
-        borderRadius: 10,
-        borderColor: colors.border,
-        borderWidth: 1,
-        backgroundColor: colors.badgeBackground,
-      }}
-      contentContainerStyle={{ paddingHorizontal: 15 }}
-      text1Style={{
-        color: colors.text,
-        fontFamily: "Manrope_500Medium",
-        fontSize: 14,
-        lineHeight: 21,
-        letterSpacing: -0.3,
-      }}
-      text2Style={{
-        color: colors.text,
-        fontFamily: "Manrope_500Medium",
-        fontSize: 14,
-        lineHeight: 21,
-        letterSpacing: -0.3,
-      }}
-    />
-  ),
-};
-
   useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
@@ -171,12 +138,28 @@ const toastConfig: ToastConfig = {
           backdropDismiss
         />
       )}
-      <Toast
-        autoHide={true}
-        visibilityTime={3500}
-        position="top"
-        topOffset={80}
-        config={toastConfig}
+      <Toaster
+        visibleToasts={1}
+        toastOptions={{
+          style: {
+            backgroundColor: colors.background,
+            borderColor: colors.border,
+            borderWidth: 1,
+            borderRadius: 15,
+          },
+          titleStyle: {
+            color: colors.text,
+            fontFamily: "Manrope_500Medium",
+            fontSize: 14,
+            letterSpacing: -0.3,
+          },
+          descriptionStyle: {
+            color: colors.text,
+            fontFamily: "Manrope_500Medium",
+            fontSize: 14,
+            letterSpacing: -0.3,
+          },
+        }}
       />
     </>
   );

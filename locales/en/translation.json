@@ -219,15 +219,35 @@
         "removedFromFavorites": "Book removed from favorites",
         "addedToTracking": "Book added to library",
         "removedFromTracking": "Book removed from library",
+        "errorRemovingFromTracking": "Unable to remove book from library",
+        "errorAddingToTracking": "Unable to add book to library",
         "addedToList": "Book added to list",
         "removedFromList": "Book removed from list",
-        "incrementChapter": "Chapter {{number}} marked as read"
+        "incrementChapter": "Chapter {{number}} marked as read",
+        "backdropReserved": "The backdrop image is reserved for the Plus plan",
+        "listNameRequired": "The list name is required",
+        "listUpdated": "List updated",
+        "errorUpdatingList": "Unable to update list",
+        "errorSavingList": "Unable to save list",
+        "changesNotSaved": "Changes not saved",
+        "profileUpdated": "Profile updated",
+        "errorUpdatingProfile": "Unable to update profile",
+        "favoritesReordered": "Favorites reordered",
+        "errorSavingFavorites": "Unable to save favorites",
+        "errorLoadingFavorites": "Unable to load favorites",
+        "saveFavorites": "Save favorites",
+        "goBack": "Go back",
+        "comingSoon": "Coming soon",
+        "errorTrackingToggle": "Unable to remove or add book",
+        "errorSavingLists": "Unable to save lists",
+        "errorLoadingLists": "Unable to load lists"
     },
     "errors": {
         "AUTH_EMAIL_ALREADY_USED": "An account with this email already exists",
         "AUTH_USERNAME_TAKEN": "This username is already taken, please choose another one",
         "BOOKS_TOP_LIMIT_REACHED": "You have reached the limit of 5 favorite books",
-        "E_INVALID_CREDENTIALS": "Invalid email or password"
+        "E_INVALID_CREDENTIALS": "Invalid email or password",
+        "errorCorrectionForm": "Please correct the errors in the form"
     },
     "activity": {
         "title": "Activity",

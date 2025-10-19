@@ -3,7 +3,6 @@ import { StyleSheet, ScrollView, ActivityIndicator, Text, View, RefreshControl }
 import { useTheme } from "@/contexts/ThemeContext";
 import { useBottomSheet } from "@/contexts/BottomSheetContext";
 import { Book } from "@/types/book";
-import Toast from "react-native-toast-message";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { useCategories } from '@/hooks/queries/categories';
 import CategorySlider from "@/components/CategorySlider";

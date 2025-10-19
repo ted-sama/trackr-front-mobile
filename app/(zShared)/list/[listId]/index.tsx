@@ -14,7 +14,7 @@ import { Book } from "@/types/book";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import SwitchLayoutButton from "@/components/SwitchLayoutButton";
 import { LinearGradient } from "expo-linear-gradient";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import BadgeSlider from "@/components/BadgeSlider";
 import { useList, useDeleteList } from "@/hooks/queries/lists";
@@ -88,16 +88,10 @@ export default function ListFullScreen() {
             if (!list) return;
             try {
               await deleteListFromStore(list.id);
-              Toast.show({
-                type: "info",
-                text1: "Liste supprimée",
-              });
+              toast(t("toast.listDeleted"));
               router.back();
             } catch (error) {
-              Toast.show({
-                type: "info",
-                text1: "Une erreur est survenue",
-              });
+              toast.error(t("toast.errorDeletingList"));
               console.error("Failed to delete list:", error);
             }
           },

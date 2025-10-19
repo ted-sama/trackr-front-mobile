@@ -11,7 +11,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useRouter } from "expo-router";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 import { TextField } from "@/components/ui/TextField";
 import LinkButton from "@/components/ui/LinkButton";
 import { StatusBar } from "expo-status-bar";
@@ -98,11 +98,7 @@ export default function Signup() {
     });
 
     if (usernameError || emailError || passwordError || confirmPasswordError) {
-      Toast.show({
-        type: "error",
-        text1: "Erreur",
-        text2: "Veuillez corriger les erreurs dans le formulaire",
-      });
+      toast.error(t("toast.errorCorrectionForm"));
       return;
     }
 
@@ -205,10 +201,7 @@ export default function Signup() {
             style={{ color: colors.accent, fontWeight: "600" }}
             onPress={() => {
               // TODO: Navigation vers les conditions d'utilisation
-              Toast.show({
-                type: "info",
-                text1: "En cours de développement",
-              });
+              toast(t("toast.comingSoon"));
             }}
           >
             {t("auth.signup.termsLink")}
@@ -218,10 +211,7 @@ export default function Signup() {
             style={{ color: colors.accent, fontWeight: "600" }}
             onPress={() => {
               // TODO: Navigation vers la politique de confidentialité
-              Toast.show({
-                type: "info",
-                text1: "En cours de développement",
-              });
+              toast(t("toast.comingSoon"));
             }}
           >
             {t("auth.signup.privacyLink")}

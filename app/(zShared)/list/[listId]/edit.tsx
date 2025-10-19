@@ -22,7 +22,7 @@ import { useList, useUpdateList, useUpdateBackdropImage } from "@/hooks/queries/
 import { useUserStore } from "@/stores/userStore";
 import Badge from "@/components/ui/Badge";
 import { X, Plus, Check, Globe, Lock, Trophy, Users, Palette, Camera } from "lucide-react-native";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -123,10 +123,7 @@ export default function ListEdit() {
 
   const handlePickImage = async () => {
     if (!isPlus) {
-      Toast.show({
-        type: "info",
-        text1: "L'illustration de bannière est réservée au plan Plus",
-      });
+      toast(t("toast.backdropReserved"));
       return;
     }
     Haptics.selectionAsync();
@@ -159,11 +156,7 @@ export default function ListEdit() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Toast.show({
-        type: "error",
-        text1: "Erreur",
-        text2: "Le nom de la liste est requis",
-      });
+      toast.error(t("toast.listNameRequired"));
       return;
     }
 
@@ -173,10 +166,7 @@ export default function ListEdit() {
       // Backdrop handling
       if (backdropMode === "image") {
         if (!isPlus) {
-          Toast.show({
-            type: "info",
-            text1: "L'illustration de bannière est réservée au plan Plus",
-          });
+          toast(t("toast.backdropReserved"));
         } else if (selectedImage) {
           await updateBackdropImage({ listId: listId as string, image: selectedImage });
         }
@@ -196,20 +186,13 @@ export default function ListEdit() {
 
       await updateList({ listId: listId as string, updated: payload });
 
-      Toast.show({
-        type: "info",
-        text1: "Liste mise à jour",
-      });
+      toast(t("toast.listUpdated"));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       router.back();
   } catch {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Toast.show({
-        type: "error",
-        text1: "Erreur",
-        text2: "Impossible de mettre à jour la liste",
-      });
+      toast.error(t("toast.errorUpdatingList"));
     } finally {
       setIsSaving(false);
     }
@@ -304,10 +287,7 @@ export default function ListEdit() {
               ]}
               onPress={() => {
                 if (!isPlus) {
-                  Toast.show({
-                    type: "info",
-                    text1: "L'illustration de bannière est réservée au plan Plus",
-                  });
+                  toast(t("toast.backdropReserved"));
                   return;
                 }
                 Haptics.selectionAsync();

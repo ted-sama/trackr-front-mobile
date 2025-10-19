@@ -220,15 +220,35 @@
         "removedFromFavorites": "Livre retiré des favoris",
         "addedToTracking": "Livre ajouté à la bibliothèque",
         "removedFromTracking": "Livre retiré de la bibliothèque",
+        "errorRemovingFromTracking": "Impossible de retirer le livre de la bibliothèque",
+        "errorAddingToTracking": "Impossible d'ajouter le livre à la bibliothèque",
         "addedToList": "Livre ajouté à la liste",
         "removedFromList": "Livre retiré de la liste",
-        "incrementChapter": "Chapitre {{number}} marqué comme lu"
+        "incrementChapter": "Chapitre {{number}} marqué comme lu",
+        "backdropReserved": "L'illustration de bannière est réservée au plan Plus",
+        "listNameRequired": "Le nom de la liste est requis",
+        "listUpdated": "Liste mise à jour",
+        "errorUpdatingList": "Impossible de mettre à jour la liste",
+        "errorSavingList": "Impossible de sauvegarder la liste",
+        "changesNotSaved": "Modifications non sauvegardées",
+        "profileUpdated": "Profil mis à jour",
+        "errorUpdatingProfile": "Impossible de mettre à jour le profil",
+        "favoritesReordered": "Favoris réorganisés",
+        "errorSavingFavorites": "Impossible de sauvegarder les favoris",
+        "errorLoadingFavorites": "Impossible de charger les favoris",
+        "saveFavorites": "Sauvegarder les favoris",
+        "goBack": "Retour",
+        "comingSoon": "En cours de développement",
+        "errorTrackingToggle": "Impossible de retirer ou d'ajouter le livre",
+        "errorSavingLists": "Impossible de sauvegarder les listes",
+        "errorLoadingLists": "Impossible de charger les listes"
     },
     "errors": {
         "AUTH_EMAIL_ALREADY_USED": "Un compte avec cet email existe déjà",
         "AUTH_USERNAME_TAKEN": "Ce nom d'utilisateur est déjà pris, veuillez en choisir un autre",
         "BOOKS_TOP_LIMIT_REACHED": "Vous avez atteint la limite des 5 livres favoris",
-        "E_INVALID_CREDENTIALS": "Email ou mot de passe incorrect"
+        "E_INVALID_CREDENTIALS": "Email ou mot de passe incorrect",
+        "errorCorrectionForm": "Veuillez corriger les erreurs dans le formulaire"
     },
     "activity": {
         "title": "Activité",

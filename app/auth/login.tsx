@@ -12,7 +12,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useRouter } from "expo-router";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 import { TextField } from "@/components/ui/TextField";
 import LinkButton from "@/components/ui/LinkButton";
 import { StatusBar } from "expo-status-bar";
@@ -60,6 +60,7 @@ export default function Login() {
     });
 
     if (emailError || passwordError) {
+      toast.error(t("toast.errorCorrectionForm"));
       return;
     }
 
@@ -119,10 +120,7 @@ export default function Login() {
         title={t("auth.login.forgotPassword")}
         onPress={() => {
           // TODO: Créer la page forgot-password
-          Toast.show({
-            type: "info",
-            text1: "En cours de développement",
-          });
+          toast(t("toast.comingSoon"));
         }}
         style={styles.forgotPassword}
       />

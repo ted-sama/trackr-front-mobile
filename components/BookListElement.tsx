@@ -13,7 +13,7 @@ import Badge from "./ui/Badge";
 import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Ellipsis } from "lucide-react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import Ionicons from "@expo/vector-icons/Ionicons";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 import { useTranslation } from "react-i18next";
 
 interface BookListElementProps {
@@ -53,13 +53,13 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
     try {
       if (isTracking) {
         await useTrackedBooksStore.getState().removeTrackedBook(book.id.toString());
-        Toast.show({ text1: t('toast.removedFromTracking'), type: 'info' });
+        toast(t('toast.removedFromTracking'));
       } else {
         await useTrackedBooksStore.getState().addTrackedBook(book);
-        Toast.show({ text1: t('toast.addedToTracking'), type: 'info' });
+        toast(t('toast.addedToTracking'));
       }
     } catch (err) {
-      Toast.show({ type: 'error', text1: 'Erreur', text2: isTracking ? 'Impossible de retirer le livre.' : `Impossible d\'ajouter le livre.` });
+      toast.error(t('toast.errorTrackingToggle'));
     }
   };
 

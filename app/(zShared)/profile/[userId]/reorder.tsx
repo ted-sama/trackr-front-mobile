@@ -13,7 +13,7 @@ import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Check } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
@@ -68,46 +68,18 @@ export default function ReorderFavoritesModal() {
       setHasChanges(false);
       setOriginalBooks([...localBooks]);
       router.back();
-      Toast.show({
-        type: "info",
-        text1: "Favoris réorganisés.",
-      });
+      toast(t("toast.favoritesReordered"));
     } catch (err) {
-      console.error("Erreur lors de la sauvegarde des favoris", err);
-      Alert.alert(
-        "Erreur",
-        "Une erreur est survenue lors de la sauvegarde. Veuillez réessayer.",
-        [{ text: "OK" }]
-      );
+      toast.error(t("toast.errorSavingFavorites"));
     }
   }, [hasChanges, localBooks, reorderUserTop, router]);
 
   const handleBack = useCallback(() => {
     if (hasChanges) {
-      Alert.alert(
-        "Modifications non sauvegardées",
-        "Vous avez des modifications non sauvegardées. Voulez-vous vraiment quitter sans sauvegarder ?",
-        [
-          { text: "Annuler", style: "cancel" },
-          {
-            text: "Quitter sans sauvegarder",
-            style: "destructive",
-            onPress: () => router.back(),
-          },
-          {
-            text: "Sauvegarder et quitter",
-            onPress: async () => {
-              await handleSave();
-              router.back();
-            },
-          },
-        ]
-      );
-      return;
+      toast(t("toast.changesNotSaved"));
     }
-
     router.back();
-  }, [handleSave, hasChanges, router]);
+  }, [hasChanges, router]);
 
   const isSaveDisabled = !hasChanges || isPending;
 
@@ -124,7 +96,7 @@ export default function ReorderFavoritesModal() {
             onPress={handleBack}
             style={[styles.iconButton, { backgroundColor: colors.backButtonBackground }]}
             accessibilityRole="button"
-            accessibilityLabel="Revenir en arrière"
+            accessibilityLabel={t("toast.goBack")}
           >
             <Ionicons name="arrow-back" size={24} color={colors.icon} />
           </Pressable>
@@ -134,7 +106,7 @@ export default function ReorderFavoritesModal() {
             disabled={isSaveDisabled}
             style={[styles.iconButton, { backgroundColor: colors.primary, opacity: isSaveDisabled ? 0.5 : 1 }]}
             accessibilityRole="button"
-            accessibilityLabel="Sauvegarder l'ordre des favoris"
+            accessibilityLabel={t("toast.saveFavorites")}
           >
             <Check size={24} color={colors.buttonText} strokeWidth={2.5} />
           </Pressable>
@@ -149,7 +121,7 @@ export default function ReorderFavoritesModal() {
 
         {error && (
           <View style={[styles.errorCard, { backgroundColor: colors.error + "20" }]}> 
-            <Text style={[typography.caption, { color: colors.error }]}>Impossible de charger vos favoris.</Text>
+            <Text style={[typography.caption, { color: colors.error }]}>{t("toast.errorLoadingFavorites")}</Text>
           </View>
         )}
 

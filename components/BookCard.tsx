@@ -24,7 +24,7 @@ import { Book } from "@/types/book";
 import { ReadingStatus } from "@/types/reading-status";
 import { useTheme } from "../contexts/ThemeContext";
 import { useBottomSheet } from "../contexts/BottomSheetContext";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
@@ -86,13 +86,13 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
     try {
       if (isTracking) {
         await useTrackedBooksStore.getState().removeTrackedBook(book.id.toString());
-        Toast.show({ text1: t('toast.removedFromTracking'), type: 'info' });
+        toast(t('toast.removedFromTracking'));
       } else {
         await useTrackedBooksStore.getState().addTrackedBook(book);
-        Toast.show({ text1: t('toast.addedToTracking'), type: 'info' });
+        toast(t('toast.addedToTracking'));
       }
     } catch (err) {
-      Toast.show({ type: 'error', text1: 'Erreur', text2: isTracking ? 'Impossible de retirer le livre.' : `Impossible d\'ajouter le livre.` });
+      toast.error(t('toast.errorTrackingToggle'));
     }
   };
 

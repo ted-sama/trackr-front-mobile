@@ -14,17 +14,14 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import * as Haptics from "expo-haptics";
-import Toast from "react-native-toast-message";
-//
+import { toast } from "sonner-native";
 import { Camera, Check, Lock, Palette } from "lucide-react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useUserStore } from "@/stores/userStore";
 import { TextField } from "@/components/ui/TextField";
 import Avatar from "@/components/ui/Avatar";
-//
 import {
   useUpdateMe,
   useUpdateUserAvatarImage,
@@ -140,7 +137,7 @@ export default function ProfileEditModal() {
 
   const handleBack = () => {
     if (hasChanges) {
-      Toast.show({ type: "info", text1: "Modifications non sauvegardées" });
+      toast(t("toast.changesNotSaved"));
     }
     router.back();
   };
@@ -161,11 +158,7 @@ export default function ProfileEditModal() {
 
   const handlePickBackdrop = async () => {
     if (!isPlus) {
-      Toast.show({
-        type: "info",
-        text1: "Réservé au plan Plus",
-        text2: "L'illustration de bannière est disponible avec le plan Plus.",
-      });
+      toast(t("toast.backdropReserved"));
       return;
     }
     Haptics.selectionAsync();
@@ -214,10 +207,7 @@ export default function ProfileEditModal() {
       // Upload backdrop if image mode and selected
       if (backdropMode === "image" && selectedBackdropImage) {
         if (!isPlus) {
-          Toast.show({
-            type: "info",
-            text1: "L'illustration de bannière est réservée au plan Plus",
-          });
+          toast(t("toast.backdropReserved"));
         } else {
           await uploadBackdrop(selectedBackdropImage);
         }
@@ -241,19 +231,12 @@ export default function ProfileEditModal() {
       await updateMe(updated);
       await refreshCurrentUser();
 
-      Toast.show({
-        type: "info",
-        text1: "Profil mis à jour",
-      });
+      toast(t("toast.profileUpdated"));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.back();
     } catch {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Toast.show({
-        type: "error",
-        text1: "Erreur",
-        text2: "Impossible de mettre à jour le profil",
-      });
+      toast.error(t("toast.errorUpdatingProfile"));
     } finally {
       setIsSaving(false);
     }
@@ -363,10 +346,7 @@ export default function ProfileEditModal() {
             ]}
             onPress={() => {
               if (!isPlus) {
-                Toast.show({
-                  type: "info",
-                  text1: "L'illustration de bannière est réservée au plan Plus",
-                });
+                toast(t("toast.backdropReserved"));
                 return;
               }
               Haptics.selectionAsync();

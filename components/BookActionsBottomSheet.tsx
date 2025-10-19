@@ -62,7 +62,7 @@ import {
   useUserTop,
 } from "@/hooks/queries/users";
 import { hexToRgba } from "@/utils/colors";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 import CollectionListElement from "./CollectionListElement";
 import Button from "./ui/Button";
 import SecondaryButton from "./ui/SecondaryButton";
@@ -376,9 +376,9 @@ const BookActionsBottomSheet = forwardRef<
     const handleAddBookToTracking = async () => {
       try {
         await addTrackedBook(book);
-        Toast.show({ type: "info", text1: t("toast.addedToTracking") });
+        toast(t("toast.addedToTracking"));
       } catch (error) {
-        Toast.show({ type: "info", text1: t(handleErrorCodes(error)) });
+        toast.error(t(handleErrorCodes(error)));
       } finally {
         closeSheet();
       }
@@ -387,9 +387,9 @@ const BookActionsBottomSheet = forwardRef<
     const handleRemoveBookFromTracking = async () => {
       try {
         await removeTrackedBook(book.id);
-        Toast.show({ type: "info", text1: t("toast.removedFromTracking") });
+        toast(t("toast.removedFromTracking"));
       } catch (error) {
-        Toast.show({ type: "info", text1: t(handleErrorCodes(error)) });
+        toast.error(t(handleErrorCodes(error)));
       } finally {
         closeSheet();
       }
@@ -398,9 +398,9 @@ const BookActionsBottomSheet = forwardRef<
     const handleAddBookToFavorites = async () => {
       try {
         await addBookToFavorites(book.id);
-        Toast.show({ type: "info", text1: t("toast.addedToFavorites") });
+        toast(t("toast.addedToFavorites"));
       } catch (error) {
-        Toast.show({ type: "info", text1: t(handleErrorCodes(error)) });
+        toast.error(t(handleErrorCodes(error)));
       } finally {
         closeSheet();
       }
@@ -409,9 +409,9 @@ const BookActionsBottomSheet = forwardRef<
     const handleRemoveBookFromFavorites = async () => {
       try {
         await removeBookFromFavorites(book.id);
-        Toast.show({ type: "info", text1: t("toast.removedFromFavorites") });
+        toast(t("toast.removedFromFavorites"));
       } catch (error) {
-        Toast.show({ type: "info", text1: t(handleErrorCodes(error)) });
+        toast.error(t(handleErrorCodes(error)));
       } finally {
         closeSheet();
       }
@@ -420,8 +420,8 @@ const BookActionsBottomSheet = forwardRef<
     const handleRemoveBookFromList = async () => {
       if (currentListId) {
         await removeBookFromList({ listId: currentListId, bookId: book.id });
+        toast(t("toast.removedFromList"));
         closeSheet();
-        Toast.show({ type: "info", text1: "Livre retiré de la liste" });
       }
     };
 
@@ -686,10 +686,9 @@ const BookActionsBottomSheet = forwardRef<
 
                     closeSheet();
                   } catch (error) {
-                    console.error(
-                      "Erreur lors de la sauvegarde des listes:",
-                      error
-                    );
+                    toast.error(t("toast.errorSavingLists"));
+                  } finally {
+                    closeSheet();
                   }
                 }}
                 style={{ marginTop: 36 }}
