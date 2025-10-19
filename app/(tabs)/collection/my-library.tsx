@@ -33,7 +33,7 @@ export default function MyLibrary() {
   const scrollRef = useRef<FlatList<Book> | null>(null);
   const currentLayout = useUIStore(state => state.myLibraryLayout);
   const setLayout = useUIStore(state => state.setMyLibraryLayout);
-  const [selectedStatuses, setSelectedStatuses] = useState<ReadingStatus[]>(['reading', 'plan_to_read', 'completed', 'on_hold', 'dropped']);
+  const [selectedStatuses, setSelectedStatuses] = useState<ReadingStatus[]>([]);
 
   const handleBack = () => {
     router.back();
