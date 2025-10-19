@@ -157,6 +157,8 @@
         "rating": "note",
         "chapter": "Chapitre",
         "lastChapterRead": "Dernier chapitre lu",
+        "lastReadOn": "Dernière lecture il y a {{time}}",
+        "chaptersLeft": "Plus que {{chapters}} chapitre(s)",
         "youRatedIt": "Vous avez noté ce livre",
         "rateIt": "Suivez ce livre et notez-le"
     },

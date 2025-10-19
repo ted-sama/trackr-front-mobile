@@ -157,6 +157,8 @@
         "rating": "rating",
         "chapter": "Chapter",
         "lastChapterRead": "Last chapter read",
+        "lastReadOn": "Last read {{time}}",
+        "chaptersLeft": "{{chapters}} chapter(s) left",
         "youRatedIt": "You rated this book",
         "rateIt": "Track this book and rate it"
     },

@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { forwardRef, useCallback, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
@@ -9,7 +9,13 @@ import { Book } from '@/types/book';
 import { Plus, Minus } from 'lucide-react-native';
 import Button from '@/components/ui/Button';
 import { useTranslation } from 'react-i18next';
+import ProgressBar from '@/components/ui/ProgressBar';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/fr';
+import 'dayjs/locale/en';
 
+dayjs.extend(relativeTime);
 
 interface SetChapterBottomSheetProps {
     book: Book;
@@ -29,9 +35,15 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
     const [chapter, setChapter] = useState(bookTracking?.currentChapter?.toString() ?? '0');
     const { t } = useTranslation();
 
+    useEffect(() => {
+        setChapter(bookTracking?.currentChapter?.toString() ?? '0');
+    }, [bookTracking?.currentChapter]);
+
     const handleDismiss = () => {
+        // Toujours réinitialiser l'état du chapitre à la fermeture
+        setChapter(bookTracking?.currentChapter?.toString() ?? '0');
+        
         if (onDismiss) {
-            setChapter(bookTracking?.currentChapter?.toString() ?? '0');
             onDismiss();
         }
     };
@@ -58,6 +70,13 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
         }
     };
 
+    const handleSheetChange = useCallback((newIndex: number) => {
+        // Quand le bottom sheet s'ouvre (index >= 0), réinitialiser le chapitre
+        if (newIndex >= 0) {
+            setChapter(bookTracking?.currentChapter?.toString() ?? '0');
+        }
+    }, [bookTracking?.currentChapter]);
+
     const renderBackdrop = useCallback((props: BottomSheetBackdropProps) => (
         <BottomSheetBackdrop
           {...props}
@@ -72,6 +91,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
             ref={ref}
             snapPoints={snapPoints}
             index={index}
+            onChange={handleSheetChange}
             onDismiss={handleDismiss}
             backgroundStyle={{
                 backgroundColor: colors.background,
@@ -84,41 +104,60 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
         >
             <BottomSheetView style={styles.bottomSheetContent}>
                 <Text style={[typography.categoryTitle, styles.title, { color: colors.text }]}>{t("book.lastChapterRead")}</Text>
-                <View style={[styles.inputContainer, { backgroundColor: colors.actionButton }]}>
-                    <Pressable 
-                        onPress={() => {
-                            const newValue = Number(chapter) - 1;
-                            if (newValue >= 0) {
-                                setChapter(newValue.toString());
-                            }
-                        }}
-                        disabled={Number(chapter) <= 0}
-                        style={{ opacity: Number(chapter) <= 0 ? 0.5 : 1 }}
-                    >
-                        <Minus size={24} color={colors.text} />
+                <View style={styles.chapterActionsContainer}>
+                    <Pressable style={[styles.chapterActionButton, { borderColor: colors.border, backgroundColor: colors.backButtonBackground, opacity: Number(chapter) <= 0 ? 0.5 : 1 }]} onPress={() => setChapter((Number(chapter) - 1).toString())} disabled={Number(chapter) <= 0}>
+                        <Minus size={24} color={colors.icon} />
                     </Pressable>
-                    <BottomSheetTextInput
-                        style={[typography.categoryTitle, styles.input, { color: colors.text }]}
-                        inputMode='numeric'
-                        keyboardType='numeric'
-                        numberOfLines={1}
-                        value={chapter}
-                        onChangeText={handleInputChange}
-                    />
-                    <Pressable 
-                        onPress={() => {
-                            const newValue = Number(chapter) + 1;
-                            const maxChapters = book.chapters !== null && book.chapters !== undefined ? book.chapters : Number.MAX_SAFE_INTEGER;
-                            if (newValue <= maxChapters) {
-                                setChapter(newValue.toString());
-                            }
-                        }}
-                        disabled={book.chapters !== null && book.chapters !== undefined && Number(chapter) >= book.chapters}
-                        style={{ opacity: book.chapters !== null && book.chapters !== undefined && Number(chapter) >= book.chapters ? 0.5 : 1 }}
-                    >
-                        <Plus size={24} color={colors.text} />
+                    <View style={styles.chapterContainer}>
+                        <View style={styles.chapterInputContainer}>
+                            <Text style={[typography.categoryTitle, { color: colors.accent }]}>Ch.</Text>
+                            <BottomSheetTextInput
+                                style={[typography.categoryTitle, { color: colors.accent }]}
+                                inputMode='numeric'
+                                keyboardType='numeric'
+                                numberOfLines={1}
+                                value={chapter}
+                                onChangeText={handleInputChange}
+                            />
+                        </View>
+                        <Text style={[typography.slashSeparator, { color: colors.text }]}>/</Text>
+                        <Text style={[typography.categoryTitle, { color: colors.text }]}>Ch. {book.chapters?.toString() ?? '?'}</Text>
+                    </View>
+                    <Pressable style={[styles.chapterActionButton, { borderColor: colors.border, backgroundColor: colors.backButtonBackground, opacity: book.chapters !== null && Number(chapter) >= (book.chapters ?? 0) ? 0.5 : 1 }]} onPress={() => setChapter((Number(chapter) + 1).toString())} disabled={book.chapters !== null && Number(chapter) >= (book.chapters ?? 0)}>
+                        <Plus size={24} color={colors.icon} />
                     </Pressable>
                 </View>
+                <ProgressBar
+                    current={Number(chapter)}
+                    max={book.chapters ?? 0}
+                    height={7}
+                    showGlow={true}
+                    style={{ marginBottom: 8 }}
+                />
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                        <View style={{ flex: 1 }}>
+                            {bookTracking?.lastReadAt && (
+                                <Text style={typography.caption}>
+                                    {t("book.lastReadOn", { time: dayjs(bookTracking.lastReadAt).fromNow() })}
+                                </Text>
+                            )}
+                        </View>
+                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                            {book.chapters === undefined || book.chapters === null ? (
+                                <Text style={typography.caption}>
+                                    {t("book.chaptersLeft", { chapters: "?" })}
+                                </Text>
+                            ) : book.chapters > Number(chapter) ? (
+                                <Text style={typography.caption}>
+                                    {t("book.chaptersLeft", { chapters: (book.chapters - Number(chapter)).toString() })}
+                                </Text>
+                            ) : (
+                                <Text style={[typography.caption, { color: colors.accent }]}>
+                                    {t("status.completed")}
+                                </Text>
+                            )}
+                        </View>
+                    </View>
                 <Button title={t("save")} onPress={handleSave} style={{ marginTop: 36 }} />
             </BottomSheetView>
         </BottomSheetModal>
@@ -143,6 +182,30 @@ const styles = StyleSheet.create({
     title: {
         textAlign: 'center',
         marginBottom: 32,
+    },
+    chapterActionsContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+        marginBottom: 16,
+        gap: 8,
+    },
+    chapterActionButton: {
+        padding: 8,
+        borderWidth: 1,
+        borderRadius: 25,
+    },
+    chapterContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+        gap: 4,
+    },
+    chapterInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 2,
     },
     inputContainer: {
         width: '100%',
