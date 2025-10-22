@@ -9,22 +9,25 @@ import { useTypography } from '@/hooks/useTypography';
 
 interface AnimatedHeaderProps {
   title: string;
-  backgroundColor?: string;
   scrollY: SharedValue<number>;
   collapseThreshold?: number;
   onBack?: () => void;
   closeRightButton?: React.ReactNode;
   rightButton?: React.ReactNode;
+  static?: boolean; // When true, displays header in final state without animation
 }
 
 const DEFAULT_THRESHOLD = 320;
 
-export function AnimatedHeader({ title, backgroundColor , scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, closeRightButton, rightButton }: AnimatedHeaderProps) {
+export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, closeRightButton, rightButton, static: isStatic = false }: AnimatedHeaderProps) {
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
 
   const headerContainerStyle = useAnimatedStyle(() => {
+    if (isStatic) {
+      return { opacity: 1 };
+    }
     const opacity = interpolate(
       scrollY.value,
       [0, collapseThreshold - 10],
@@ -35,6 +38,9 @@ export function AnimatedHeader({ title, backgroundColor , scrollY, collapseThres
   });
 
   const headerTitleStyle = useAnimatedStyle(() => {
+    if (isStatic) {
+      return { opacity: 1 };
+    }
     const opacity = interpolate(
       scrollY.value,
       [collapseThreshold - 60, collapseThreshold + 10],
@@ -45,6 +51,9 @@ export function AnimatedHeader({ title, backgroundColor , scrollY, collapseThres
   });
 
   const backButtonBgStyle = useAnimatedStyle(() => {
+    if (isStatic) {
+      return { opacity: 0 };
+    }
     const opacity = interpolate(
       scrollY.value,
       [0, collapseThreshold - 10],
@@ -61,7 +70,7 @@ export function AnimatedHeader({ title, backgroundColor , scrollY, collapseThres
           StyleSheet.absoluteFillObject,
           styles.background,
           headerContainerStyle,
-          { borderBottomColor: colors.tabBarBorder, borderBottomWidth: 1, backgroundColor: backgroundColor ? `${backgroundColor}73` : undefined },
+          { borderBottomColor: colors.tabBarBorder, borderBottomWidth: 1 },
         ]}
       >
         <BlurView

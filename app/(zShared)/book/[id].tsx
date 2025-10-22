@@ -43,7 +43,7 @@ import Badge from "@/components/ui/Badge";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import { toast } from "sonner-native";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
-import { Ellipsis, Minus, Plus, ChartPie, Sparkles } from "lucide-react-native";
+import { Ellipsis, Minus, Plus, ChartPie, Sparkles, MessageCircle } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 import * as Haptics from "expo-haptics";
@@ -854,6 +854,9 @@ export default function BookScreen() {
         scrollY={scrollY}
         collapseThreshold={HEADER_THRESHOLD}
         onBack={() => router.back()}
+        rightButton={<Pressable onPress={() => router.push("/chat")}>
+          <MessageCircle size={24} fill={colors.icon} color={colors.icon} />
+        </Pressable>}
       />
     </SafeAreaView>
   );
