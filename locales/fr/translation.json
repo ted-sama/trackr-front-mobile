@@ -162,6 +162,9 @@
         "youRatedIt": "Vous avez noté ce livre",
         "rateIt": "Suivez ce livre et notez-le"
     },
+    "chat": {
+        "sources": "Sources utilisées"
+    },
     "list": {
         "reorder": "Réordonner",
         "edit": "Modifier",
@@ -255,6 +258,8 @@
     "activity": {
         "title": "Activité",
         "empty": "Aucune activité pour le moment",
+        "loadingMore": "Chargement d'autres activités...",
+        "noMoreActivities": "Aucune autre activité à charger",
         "me": {
             "addedToLibrary": "Vous avez ajouté <bold>{{title}}</bold> à votre bibliothèque",
             "removedFromLibrary": "Vous avez retiré <bold>{{title}}</bold> de votre bibliothèque",

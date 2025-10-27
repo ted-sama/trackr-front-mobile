@@ -16,6 +16,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useTranslation } from 'react-i18next';
 import PillButton from '@/components/ui/PillButton';
 import { ReadingStatus } from '@/types/reading-status';
+import { BookCheck, BookOpenIcon, Clock3, Pause, Square } from 'lucide-react-native';
 
 const AnimatedList = Animated.createAnimatedComponent(FlatList<Book>);
 
@@ -66,12 +67,12 @@ export default function MyLibrary() {
     });
   };
 
-  const statusOptions: { key: ReadingStatus; label: string }[] = [
-    { key: 'reading', label: t('status.reading') },
-    { key: 'plan_to_read', label: t('status.planToRead') },
-    { key: 'completed', label: t('status.completed') },
-    { key: 'on_hold', label: t('status.onHold') },
-    { key: 'dropped', label: t('status.dropped') },
+  const statusOptions: { key: ReadingStatus; label: string; icon: React.ReactNode }[] = [
+    { key: 'reading', label: t('status.reading'), icon: <BookOpenIcon size={16} strokeWidth={1.75} color={colors.icon} /> },
+    { key: 'plan_to_read', label: t('status.planToRead'), icon: <Clock3 size={16} strokeWidth={1.75} color={colors.icon} /> },
+    { key: 'completed', label: t('status.completed'), icon: <BookCheck size={16} strokeWidth={1.75} color={colors.icon} /> },
+    { key: 'on_hold', label: t('status.onHold'), icon: <Pause size={16} strokeWidth={1.75} color={colors.icon} /> },
+    { key: 'dropped', label: t('status.dropped'), icon: <Square size={16} strokeWidth={1.75} color={colors.icon} /> },
   ];
 
   return (
@@ -114,6 +115,7 @@ export default function MyLibrary() {
                 <PillButton
                   key={status.key}
                   title={status.label}
+                  icon={status.icon}
                   toggleable={true}
                   selected={selectedStatuses.includes(status.key)}
                   onPress={() => toggleStatus(status.key)}

@@ -37,8 +37,8 @@ export function useTypography(): Typography {
       letterSpacing: -0.3,
     },
     h2: {
-      fontFamily: 'Manrope_600SemiBold',
-      fontSize: 24,
+      fontFamily: 'Manrope_700Bold',
+      fontSize: 20,
       lineHeight: 30,
       letterSpacing: -0.3,
     },

@@ -13,14 +13,6 @@ export default function MeLayout() {
       }}
     >
       <Stack.Screen name="index" />
-      <Stack.Screen name="edit" options={{
-        gestureEnabled: true,
-        headerShown: false,
-      }} />
-      <Stack.Screen name="reorder" options={{
-        gestureEnabled: true,
-        headerShown: false,
-      }} />
       <Stack.Screen name="lists" />
     </Stack>
   );

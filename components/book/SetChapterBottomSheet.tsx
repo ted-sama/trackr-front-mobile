@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { forwardRef, useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, interpolateColor, withTiming } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
@@ -74,16 +74,37 @@ const AnimatedPressable: React.FC<AnimatedPressableProps> = ({ style, onPress, d
 const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheetProps>(({ book, snapPoints, index, onDismiss, backdropDismiss }, ref) => {
     const { getTrackedBookStatus, updateTrackedBook } = useTrackedBooksStore();
     const bookTracking = getTrackedBookStatus(book.id);
-    
+
     const { colors } = useTheme();
     const typography = useTypography();
     const isTracking = bookTracking !== null;
     const [chapter, setChapter] = useState(bookTracking?.currentChapter?.toString() ?? '0');
     const { t } = useTranslation();
+    const colorTransition = useSharedValue(0);
 
     useEffect(() => {
         setChapter(bookTracking?.currentChapter?.toString() ?? '0');
     }, [bookTracking?.currentChapter]);
+
+    const isComplete = book.chapters !== undefined && book.chapters !== null && book.chapters <= Number(chapter);
+
+    useEffect(() => {
+        colorTransition.value = withTiming(isComplete ? 1 : 0, {
+            duration: 600,
+        });
+    }, [isComplete]);
+
+    const animatedTextStyle = useAnimatedStyle(() => {
+        const textColor = interpolateColor(
+            colorTransition.value,
+            [0, 1],
+            [colors.secondaryText, colors.completed]
+        );
+
+        return {
+            color: textColor,
+        };
+    });
 
     const handleDismiss = () => {
         // Toujours réinitialiser l'état du chapitre à la fermeture
@@ -118,13 +139,6 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
         }
     };
 
-    const handleSheetChange = useCallback((newIndex: number) => {
-        // Quand le bottom sheet s'ouvre (index >= 0), réinitialiser le chapitre
-        if (newIndex >= 0) {
-            setChapter(bookTracking?.currentChapter?.toString() ?? '0');
-        }
-    }, [bookTracking?.currentChapter]);
-
     const renderBackdrop = useCallback((props: BottomSheetBackdropProps) => (
         <BottomSheetBackdrop
           {...props}
@@ -139,7 +153,6 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
             ref={ref}
             snapPoints={snapPoints}
             index={index}
-            onChange={handleSheetChange}
             onDismiss={handleDismiss}
             backgroundStyle={{
                 backgroundColor: colors.background,
@@ -201,6 +214,8 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
                     max={book.chapters ?? 0}
                     height={7}
                     showGlow={true}
+                    progressColor={colors.reading}
+                    completionColor={colors.completed}
                     style={{ marginBottom: 8 }}
                 />
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
@@ -221,9 +236,9 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
                                     {t("book.chaptersLeft", { chapters: (book.chapters - Number(chapter)).toString() })}
                                 </Text>
                             ) : (
-                                <Text style={[typography.caption, { color: colors.accent }]}>
+                                <Animated.Text style={[typography.caption, animatedTextStyle]}>
                                     {t("status.completed")}
-                                </Text>
+                                </Animated.Text>
                             )}
                         </View>
                     </View>

@@ -549,6 +549,7 @@ export default function BookScreen() {
           <SetChapterBottomSheet
             book={book}
             ref={setChapterBottomSheetRef}
+            key={bookTracking?.currentChapter}
             backdropDismiss
           />
         </>
@@ -850,11 +851,10 @@ export default function BookScreen() {
       {/* Custom animated header */}
       <AnimatedHeader
         title={book?.title ?? ""}
-        backgroundColor={dominantColor ?? colors.background}
         scrollY={scrollY}
         collapseThreshold={HEADER_THRESHOLD}
         onBack={() => router.back()}
-        rightButton={<Pressable onPress={() => router.push("/chat")}>
+        rightButton={<Pressable onPress={() => router.push(`/chat/${book?.id}`)}>
           <MessageCircle size={24} fill={colors.icon} color={colors.icon} />
         </Pressable>}
       />

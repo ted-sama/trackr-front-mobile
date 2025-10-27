@@ -5,6 +5,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   withTiming,
+  interpolateColor,
 } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -36,6 +37,10 @@ interface ProgressBarProps {
    */
   progressColor?: string;
   /**
+   * Custom color when progress is completed (100%)
+   */
+  completionColor?: string;
+  /**
    * Animation type
    * @default 'spring'
    */
@@ -58,15 +63,18 @@ export default function ProgressBar({
   borderRadius = 999,
   backgroundColor,
   progressColor,
+  completionColor,
   animationType = 'spring',
   style,
   showGlow = false,
 }: ProgressBarProps) {
   const { colors } = useTheme();
   const progress = useSharedValue(0);
+  const colorTransition = useSharedValue(0);
 
   // Calculate progress percentage
   const percentage = max > 0 ? Math.min((current / max) * 100, 100) : 0;
+  const isComplete = percentage === 100;
 
   useEffect(() => {
     if (animationType === 'spring') {
@@ -80,16 +88,29 @@ export default function ProgressBar({
         duration: 500,
       });
     }
-  }, [percentage, animationType]);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      width: `${progress.value}%`,
-    };
-  });
+    // Animate color transition when reaching 100%
+    colorTransition.value = withTiming(isComplete ? 1 : 0, {
+      duration: 600,
+    });
+  }, [percentage, animationType, isComplete]);
 
   const bgColor = backgroundColor || colors.border;
   const fillColor = progressColor || colors.accent;
+  const completeColor = completionColor || fillColor;
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const currentColor = interpolateColor(
+      colorTransition.value,
+      [0, 1],
+      [fillColor, completeColor]
+    );
+
+    return {
+      width: `${progress.value}%`,
+      backgroundColor: currentColor,
+    };
+  });
 
   return (
     <View
@@ -109,9 +130,8 @@ export default function ProgressBar({
           {
             height,
             borderRadius,
-            backgroundColor: fillColor,
             ...(showGlow && {
-              shadowColor: fillColor,
+              shadowColor: isComplete ? completeColor : fillColor,
               shadowOffset: { width: 0, height: 0 },
               shadowOpacity: 0.5,
               shadowRadius: 4,
