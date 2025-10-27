@@ -373,42 +373,51 @@ export default function ProfileEditModal() {
 
         {/* Backdrop + Avatar preview styled as final */}
         <View style={styles.headerPreview}>
-          {backdropMode === "image" ? (
-            <Pressable onPress={handlePickBackdrop}>
-              <ImageBackground
-                source={{
-                  uri:
-                    selectedBackdropImage?.uri ||
-                    currentUser.backdropImage ||
-                    undefined,
-                }}
+          <View
+            style={{
+              borderRadius: 24,
+              borderWidth: 2,
+              borderColor: colors.border,
+              overflow: "hidden",
+            }}
+          >
+            {backdropMode === "image" ? (
+              <Pressable onPress={handlePickBackdrop}>
+                <ImageBackground
+                  source={{
+                    uri:
+                      selectedBackdropImage?.uri ||
+                      currentUser.backdropImage ||
+                      undefined,
+                  }}
+                  style={[
+                    styles.headerBackdrop,
+                    { backgroundColor: colors.card },
+                  ]}
+                >
+                  <LinearGradient
+                    colors={["rgba(0,0,0,0.5)", "rgba(0,0,0,0.1)", "rgba(0,0,0,0.5)"]}
+                    style={styles.backdropOverlay}
+                  >
+                    <View style={styles.cameraIconContainer}>
+                      <Camera size={24} color="white" />
+                      <Text style={[typography.body, styles.cameraText]}>{t("profile.editModal.chooseBackdrop")}</Text>
+                    </View>
+                  </LinearGradient>
+                </ImageBackground>
+              </Pressable>
+            ) : (
+              <View
                 style={[
                   styles.headerBackdrop,
-                  { backgroundColor: colors.card },
+                  {
+                    backgroundColor:
+                      backdropColor || currentUser.backdropColor || "#7C3AED",
+                  },
                 ]}
-              >
-                <LinearGradient
-                  colors={["rgba(0,0,0,0.5)", "rgba(0,0,0,0.1)", "rgba(0,0,0,0.5)"]}
-                  style={styles.backdropOverlay}
-                >
-                  <View style={styles.cameraIconContainer}>
-                    <Camera size={24} color="white" />
-                    <Text style={[typography.body, styles.cameraText]}>{t("profile.editModal.chooseBackdrop")}</Text>
-                  </View>
-                </LinearGradient>
-              </ImageBackground>
-            </Pressable>
-          ) : (
-            <View
-              style={[
-                styles.headerBackdrop,
-                {
-                  backgroundColor:
-                    backdropColor || currentUser.backdropColor || "#7C3AED",
-                },
-              ]}
-            ></View>
-          )}
+              ></View>
+            )}
+          </View>
 
           <Pressable
             onPress={handlePickAvatar}
@@ -543,13 +552,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   headerPreview: {
-    marginHorizontal: -16,
-    width: "110%",
-    alignSelf: "center",
     marginTop: 8,
     marginBottom: 48,
   },
-  headerBackdrop: { height: 260, justifyContent: "flex-end" },
+  headerBackdrop: { height: 215, justifyContent: "flex-end" },
   changeBannerCta: { position: "absolute", right: 16, bottom: 16 },
   bannerCtaInner: {
     flexDirection: "row",

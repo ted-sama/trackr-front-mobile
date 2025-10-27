@@ -9,7 +9,6 @@ import {
   Pressable,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -21,13 +20,14 @@ import BookCard from "@/components/BookCard";
 import { useUserLists, useUserTop } from "@/hooks/queries/users";
 import CollectionListElement from "@/components/CollectionListElement";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
   useAnimatedStyle,
   interpolate,
   Extrapolate,
+  withTiming,
 } from "react-native-reanimated";
 import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -37,6 +37,7 @@ import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { getPalette } from "@somesoap/react-native-image-palette";
 
 dayjs.extend(utc);
 
@@ -55,20 +56,30 @@ export default function Profile() {
   const { t } = useTranslation();
   const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
-  // Animated style for elastic backdrop effect
-  const backdropAnimatedStyle = useAnimatedStyle(() => {
-    const BACKDROP_HEIGHT = 275;
+  // Dominant color for gradient
+  const [dominantColor, setDominantColor] = useState<string | null>(null);
+  const gradientOpacity = useSharedValue(0);
+
+  const gradientAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: gradientOpacity.value,
+    };
+  });
+
+  const gradientHeight = 275;
+
+  const gradientElasticStyle = useAnimatedStyle(() => {
     const scale = interpolate(
       scrollY.value,
-      [-BACKDROP_HEIGHT, 0],
+      [-gradientHeight, 0],
       [2, 1],
       Extrapolate.CLAMP
     );
-    
+
     const translateY = interpolate(
       scrollY.value,
-      [-BACKDROP_HEIGHT, 0],
-      [-BACKDROP_HEIGHT / 2, 0],
+      [-gradientHeight, 0],
+      [-gradientHeight / 2, 0],
       Extrapolate.CLAMP
     );
 
@@ -76,6 +87,26 @@ export default function Profile() {
       transform: [{ scale }, { translateY }],
     };
   });
+
+  // Extract dominant color only from backdrop image (not color mode, not avatar)
+  useEffect(() => {
+    if (currentUser?.backdropMode === "image" && currentUser?.backdropImage) {
+      getPalette(currentUser.backdropImage).then(palette => {
+        setDominantColor(palette.vibrant);
+      });
+    } else {
+      setDominantColor(null);
+    }
+  }, [currentUser?.backdropImage, currentUser?.backdropMode]);
+
+  // Animate gradient opacity when dominant color is available
+  useEffect(() => {
+    if (dominantColor) {
+      gradientOpacity.value = withTiming(0.45, { duration: 100 });
+    } else {
+      gradientOpacity.value = withTiming(0, { duration: 100 });
+    }
+  }, [dominantColor]);
 
   if (isLoading) {
     return (
@@ -157,6 +188,26 @@ export default function Profile() {
   return (
     <View style={{ flex: 1 }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+      {dominantColor && (
+        <Animated.View
+          style={[{
+            position: "absolute",
+            width: "110%",
+            height: gradientHeight,
+            alignSelf: "center",
+            marginHorizontal: -16,
+            marginTop: 0,
+            zIndex: -99,
+          }, gradientAnimatedStyle, gradientElasticStyle]}
+        >
+          <LinearGradient
+            colors={[dominantColor, colors.background]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{ width: "100%", height: "100%" }}
+          />
+        </Animated.View>
+      )}
       <AnimatedHeader
         title={currentUser?.username || t("profile.title")}
         scrollY={scrollY}
@@ -176,51 +227,51 @@ export default function Profile() {
           </Pressable>
         }
       />
-      <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} contentContainerStyle={{ paddingBottom: 64 }}>
-        <View>
-          <Animated.View
-            style={[{
-              position: "relative",
-              width: "110%",
-              height: 275,
-              alignSelf: "center",
+      <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} contentContainerStyle={{ paddingTop: insets.top, paddingBottom: 64 }}>
+        <View style={{ paddingHorizontal: 16 }}>
+          {/* Backdrop */}
+          <View
+            style={{
+              marginTop: -insets.top,
+              height: 275 + insets.top,
+              paddingTop: insets.top + 60,
               marginHorizontal: -16,
-              zIndex: -99,
-            }, backdropAnimatedStyle]}
+            }}
           >
-            {currentUser?.backdropMode === "image" &&
-            currentUser?.backdropImage ? (
-              <MaskedView
-                style={{ flex: 1 }}
-                maskElement={
-                  <LinearGradient
-                    colors={["rgba(0,0,0,1)", "rgba(0,0,0,0)"]}
-                    style={{ flex: 1 }}
-                  />
-                }
-              >
+            <View
+              style={{
+                flex: 1,
+                marginHorizontal: 16,
+                borderRadius: 24,
+                borderWidth: 2,
+                borderColor: colors.border,
+                overflow: "hidden",
+              }}
+            >
+              {currentUser?.backdropMode === "image" &&
+              currentUser?.backdropImage ? (
                 <Image
                   source={{ uri: currentUser?.backdropImage }}
                   style={{ width: "100%", height: "100%" }}
                   contentFit="cover"
                 />
-              </MaskedView>
-            ) : (
-              <View
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  backgroundColor: currentUser?.backdropColor || colors.accent,
-                }}
-              />
-            )}
-          </Animated.View>
+              ) : (
+                <View
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: currentUser?.backdropColor || colors.accent,
+                  }}
+                />
+              )}
+            </View>
+          </View>
           <View
             style={{
               alignItems: "center",
               alignSelf: "center",
-              paddingHorizontal: 16,
               marginTop: -40,
+              zIndex: 1,
             }}
           >
             <Avatar
@@ -272,7 +323,7 @@ export default function Profile() {
             }}
           />
         </View>
-        <View style={{ paddingHorizontal: 16, marginTop: 24, gap: 24 }}>
+        <View style={{ marginTop: 24, gap: 24 }}>
           {topBooks && (
             <View>
               <Text

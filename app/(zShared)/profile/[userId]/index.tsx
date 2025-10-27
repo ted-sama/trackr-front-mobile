@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useUserStore } from "@/stores/userStore";
 import {
@@ -11,7 +11,6 @@ import {
   Pressable,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -29,6 +28,7 @@ import Animated, {
   useAnimatedStyle,
   interpolate,
   Extrapolate,
+  withTiming,
 } from "react-native-reanimated";
 import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -37,6 +37,7 @@ import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { getPalette } from "@somesoap/react-native-image-palette";
 
 dayjs.extend(utc);
 
@@ -60,27 +61,30 @@ export default function UserProfileScreen() {
 
   const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!userId) return;
-      refetchUser();
-    }, [userId, refetchUser])
-  );
+  // Dominant color for gradient
+  const [dominantColor, setDominantColor] = useState<string | null>(null);
+  const gradientOpacity = useSharedValue(0);
 
-  // Animated style for elastic backdrop effect
-  const backdropAnimatedStyle = useAnimatedStyle(() => {
-    const BACKDROP_HEIGHT = 275;
+  const gradientAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: gradientOpacity.value,
+    };
+  });
+
+  const gradientHeight = 275;
+
+  const gradientElasticStyle = useAnimatedStyle(() => {
     const scale = interpolate(
       scrollY.value,
-      [-BACKDROP_HEIGHT, 0],
+      [-gradientHeight, 0],
       [2, 1],
       Extrapolate.CLAMP
     );
-    
+
     const translateY = interpolate(
       scrollY.value,
-      [-BACKDROP_HEIGHT, 0],
-      [-BACKDROP_HEIGHT / 2, 0],
+      [-gradientHeight, 0],
+      [-gradientHeight / 2, 0],
       Extrapolate.CLAMP
     );
 
@@ -88,6 +92,34 @@ export default function UserProfileScreen() {
       transform: [{ scale }, { translateY }],
     };
   });
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!userId) return;
+      refetchUser();
+    }, [userId, refetchUser])
+  );
+
+  // Extract dominant color only from backdrop image (not color mode, not avatar)
+  useEffect(() => {
+    if (user?.backdropMode === "image" && user?.backdropImage) {
+      getPalette(user.backdropImage).then(palette => {
+        setDominantColor(palette.vibrant);
+      });
+    } else {
+      setDominantColor(null);
+    }
+  }, [user?.backdropImage, user?.backdropMode]);
+
+  // Animate gradient opacity when dominant color is available
+  useEffect(() => {
+    if (dominantColor) {
+      gradientOpacity.value = withTiming(0.45, { duration: 100 });
+    } else {
+      gradientOpacity.value = withTiming(0, { duration: 100 });
+    }
+  }, [dominantColor]);
+
 
   if (isLoading) {
     return (
@@ -168,6 +200,26 @@ export default function UserProfileScreen() {
   return (
     <View style={{ flex: 1 }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+      {dominantColor && (
+        <Animated.View
+          style={[{
+            position: "absolute",
+            width: "110%",
+            height: gradientHeight,
+            alignSelf: "center",
+            marginHorizontal: -16,
+            marginTop: 0,
+            zIndex: -99,
+          }, gradientAnimatedStyle, gradientElasticStyle]}
+        >
+          <LinearGradient
+            colors={[dominantColor, colors.background]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{ width: "100%", height: "100%" }}
+          />
+        </Animated.View>
+      )}
       <AnimatedHeader
         title={user?.username || t("profile.title")}
         scrollY={scrollY}
@@ -181,51 +233,51 @@ export default function UserProfileScreen() {
           </Pressable>
         }
       />
-      <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} contentContainerStyle={{ paddingBottom: 64 }}>
-        <View>
-          <Animated.View
-            style={[{
-              position: "relative",
-              width: "110%",
-              height: 275,
-              alignSelf: "center",
+      <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} contentContainerStyle={{ paddingTop: insets.top, paddingBottom: 64 }}>
+        <View style={{ paddingHorizontal: 16 }}>
+          {/* Backdrop */}
+          <View
+            style={{
+              marginTop: -insets.top,
+              height: 275 + insets.top,
+              paddingTop: insets.top + 60,
               marginHorizontal: -16,
-              zIndex: -99,
-            }, backdropAnimatedStyle]}
+            }}
           >
-            {user?.backdropMode === "image" &&
-            user?.backdropImage ? (
-              <MaskedView
-                style={{ flex: 1 }}
-                maskElement={
-                  <LinearGradient
-                    colors={["rgba(0,0,0,1)", "rgba(0,0,0,0)"]}
-                    style={{ flex: 1 }}
-                  />
-                }
-              >
+            <View
+              style={{
+                flex: 1,
+                marginHorizontal: 16,
+                borderRadius: 24,
+                borderWidth: 2,
+                borderColor: colors.border,
+                overflow: "hidden",
+              }}
+            >
+              {user?.backdropMode === "image" &&
+              user?.backdropImage ? (
                 <Image
                   source={{ uri: user?.backdropImage }}
                   style={{ width: "100%", height: "100%" }}
                   contentFit="cover"
                 />
-              </MaskedView>
-            ) : (
-              <View
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  backgroundColor: user?.backdropColor || colors.accent,
-                }}
-              />
-            )}
-          </Animated.View>
+              ) : (
+                <View
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: user?.backdropColor || colors.accent,
+                  }}
+                />
+              )}
+            </View>
+          </View>
           <View
             style={{
               alignItems: "center",
               alignSelf: "center",
-              paddingHorizontal: 16,
               marginTop: -40,
+              zIndex: 1,
             }}
           >
             <Avatar
@@ -261,7 +313,7 @@ export default function UserProfileScreen() {
           </View>
         </View>
         {isMe && (
-        <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
+        <View style={{ flexDirection: "row", gap: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
           <PillButton
             icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
             title={t("profile.edit")}
@@ -279,7 +331,7 @@ export default function UserProfileScreen() {
             />
           </View>
         )}
-        <View style={{ paddingHorizontal: 16, marginTop: 24, gap: 24 }}>
+        <View style={{ marginTop: 24, gap: 24 }}>
           {topBooks && (
             <View>
               <Text

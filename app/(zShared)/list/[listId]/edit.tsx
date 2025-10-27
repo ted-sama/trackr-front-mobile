@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Pressable,
   Alert,
-  ImageBackground,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -26,8 +25,8 @@ import { toast } from "sonner-native";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { LinearGradient } from "expo-linear-gradient";
 import PlusBadge from "@/components/ui/PlusBadge";
+import { Image } from "expo-image";
 
 export default function ListEdit() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
@@ -303,28 +302,49 @@ export default function ListEdit() {
           </View>
 
           {/* Backdrop Preview */}
-          {backdropMode === "image" ? (
-            <Pressable onPress={handlePickImage}>
-              <ImageBackground
-                source={{ uri: selectedImage?.uri || list.backdropImage || undefined }}
-                style={[styles.backdrop, { backgroundColor: colors.card }]}
-                imageStyle={{ borderRadius: 16 }}
-              >
-                <LinearGradient
-                  colors={["rgba(0,0,0,0.5)", "rgba(0,0,0,0.1)", "rgba(0,0,0,0.5)"]}
-                  style={styles.backdropOverlay}
-                >
-                  <View style={styles.cameraIconContainer}>
-                    <Camera size={24} color="white" />
-                    <Text style={[typography.body, styles.cameraText]}>{t("list.editModal.chooseBackdrop")}</Text>
+          <Pressable onPress={backdropMode === "image" ? handlePickImage : undefined}>
+            <View
+              style={[
+                styles.backdrop,
+                {
+                  borderRadius: 24,
+                  borderWidth: 2,
+                  borderColor: colors.border,
+                  overflow: "hidden",
+                }
+              ]}
+            >
+              {backdropMode === "image" ? (
+                selectedImage?.uri || list.backdropImage ? (
+                  <Image
+                    source={{ uri: selectedImage?.uri || list.backdropImage || undefined }}
+                    style={{ width: "100%", height: "100%" }}
+                    contentFit="cover"
+                  />
+                ) : (
+                  <View style={{
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: colors.card,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}>
+                    <Camera size={32} color={colors.secondaryText} />
+                    <Text style={[typography.body, { color: colors.secondaryText, marginTop: 8 }]}>
+                      {t("list.editModal.chooseBackdrop")}
+                    </Text>
                   </View>
-                </LinearGradient>
-              </ImageBackground>
-            </Pressable>
-          ) : (
-            <View style={[styles.backdrop, { backgroundColor: backdropColor || list.backdropColor || "#7C3AED" }] }>
+                )
+              ) : (
+                <View style={{
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: backdropColor || list.backdropColor || "#7C3AED",
+                }}>
+                </View>
+              )}
             </View>
-          )}
+          </Pressable>
 
           {/* Color Swatches */}
           {backdropMode === "color" && (
@@ -692,10 +712,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backdrop: {
-    height: 225,
+    height: 215,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 16,
     marginBottom: 24,
   },
   backdropOverlay: {

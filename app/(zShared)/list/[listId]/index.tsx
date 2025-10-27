@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, FlatList, Alert, Pressable } from "react-native
 import { Image } from "expo-image";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import Animated, { useSharedValue, useAnimatedScrollHandler, useAnimatedStyle, interpolate, Extrapolate } from "react-native-reanimated";
+import Animated, { useSharedValue, useAnimatedScrollHandler, useAnimatedStyle, interpolate, Extrapolate, withTiming } from "react-native-reanimated";
 import { StatusBar } from "expo-status-bar";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import BookListElement from "@/components/BookListElement";
@@ -19,7 +19,6 @@ import ExpandableDescription from "@/components/ExpandableDescription";
 import BadgeSlider from "@/components/BadgeSlider";
 import { useList, useDeleteList } from "@/hooks/queries/lists";
 import { useUserStore } from "@/stores/userStore";
-import MaskedView from "@react-native-masked-view/masked-view";
 import { Ionicons } from "@expo/vector-icons";
 import { Ellipsis } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -30,6 +29,7 @@ import PillButton from "@/components/ui/PillButton";
 import { useUIStore } from "@/stores/uiStore";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getPalette } from "@somesoap/react-native-image-palette";
 
 const AnimatedList = Animated.createAnimatedComponent(FlatList<Book>);
 
@@ -55,6 +55,38 @@ export default function ListFullScreen() {
   const { currentUser } = useUserStore();
   const isEditable = (listId: string) => Boolean(list && currentUser && list.owner?.id === currentUser.id);
 
+  // Dominant color for gradient
+  const [dominantColor, setDominantColor] = useState<string | null>(null);
+  const gradientOpacity = useSharedValue(0);
+
+  const gradientAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: gradientOpacity.value,
+    };
+  });
+
+  const gradientHeight = 275;
+
+  const gradientElasticStyle = useAnimatedStyle(() => {
+    const scale = interpolate(
+      scrollY.value,
+      [-gradientHeight, 0],
+      [2, 1],
+      Extrapolate.CLAMP
+    );
+
+    const translateY = interpolate(
+      scrollY.value,
+      [-gradientHeight, 0],
+      [-gradientHeight / 2, 0],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      transform: [{ scale }, { translateY }],
+    };
+  });
+
   // Animation refs for buttons (kept if used elsewhere)
 
   // Charger la liste initialement et quand on revient sur l'écran
@@ -66,6 +98,26 @@ export default function ListFullScreen() {
       return () => {};
     }, [listId, refetch])
   );
+
+  // Extract dominant color from backdrop image (only for image mode)
+  useEffect(() => {
+    if (list?.backdropMode === "image" && list?.backdropImage) {
+      getPalette(list.backdropImage).then(palette => {
+        setDominantColor(palette.vibrant);
+      });
+    } else {
+      setDominantColor(null);
+    }
+  }, [list?.backdropImage, list?.backdropMode]);
+
+  // Animate gradient opacity when dominant color is available
+  useEffect(() => {
+    if (dominantColor) {
+      gradientOpacity.value = withTiming(0.45, { duration: 100 });
+    } else {
+      gradientOpacity.value = withTiming(0, { duration: 100 });
+    }
+  }, [dominantColor]);
 
   const handleBack = () => {
     router.back();
@@ -112,27 +164,6 @@ export default function ListFullScreen() {
     listActionsBottomSheetRef.current?.present();
   }, []);
 
-  // Animated style for elastic backdrop effect
-  const backdropAnimatedStyle = useAnimatedStyle(() => {
-    const BACKDROP_HEIGHT = 275;
-    const scale = interpolate(
-      scrollY.value,
-      [-BACKDROP_HEIGHT, 0],
-      [2, 1],
-      Extrapolate.CLAMP
-    );
-    
-    const translateY = interpolate(
-      scrollY.value,
-      [-BACKDROP_HEIGHT, 0],
-      [-BACKDROP_HEIGHT / 2, 0],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      transform: [{ scale }, { translateY }],
-    };
-  });
 
   if (isLoading) {
     return (
@@ -228,6 +259,7 @@ export default function ListFullScreen() {
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{
             paddingHorizontal: 16,
+            paddingTop: insets.top,
             paddingBottom: 64,
             flexGrow: 1,
           }}
@@ -235,42 +267,62 @@ export default function ListFullScreen() {
           onScroll={scrollHandler}
           ListHeaderComponent={
             <View>
-              <Animated.View
-                style={[{
-                  position: "relative",
-                  width: "110%",
-                  height: 275,
-                  alignSelf: "center",
-                  marginHorizontal: -16,
-                  zIndex: -99,
-                }, backdropAnimatedStyle]}
+              {/* Gradient */}
+              {dominantColor && (
+                <Animated.View
+                  style={[{
+                    position: "absolute",
+                    width: "110%",
+                    height: gradientHeight,
+                    alignSelf: "center",
+                    marginHorizontal: -16,
+                    marginTop: -insets.top,
+                    zIndex: 0,
+                  }, gradientAnimatedStyle, gradientElasticStyle]}
+                >
+                  <LinearGradient
+                    colors={[dominantColor, colors.background]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                    style={{ width: "100%", height: "100%" }}
+                  />
+                </Animated.View>
+              )}
+              {/* Backdrop */}
+              <View
+                style={{
+                  marginTop: -insets.top,
+                  height: 275 + insets.top,
+                  paddingTop: insets.top + 60,
+                  zIndex: 1,
+                }}
               >
-                {list.backdropMode === "image" && list.backdropImage ? (
-                  <MaskedView
-                    style={{ flex: 1 }}
-                    maskElement={
-                      <LinearGradient
-                        colors={["rgba(0,0,0,1)", "rgba(0,0,0,0)"]}
-                        style={{ flex: 1 }}
-                      />
-                    }
-                  >
+                <View
+                  style={{
+                    flex: 1,
+                    borderRadius: 24,
+                    borderWidth: 2,
+                    borderColor: colors.border,
+                    overflow: "hidden",
+                  }}
+                >
+                  {list.backdropMode === "image" && list.backdropImage ? (
                     <Image
                       source={{ uri: list.backdropImage }}
                       style={{ width: "100%", height: "100%" }}
                       contentFit="cover"
                     />
-                  </MaskedView>
-                ) : (
-                  <View
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      backgroundColor: list.backdropColor || colors.accent,
-                    }}
-                  />
-                )}
-              </Animated.View>
+                  ) : (
+                    <View
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        backgroundColor: list.backdropColor || colors.accent,
+                      }}
+                    />
+                  )}
+                </View>
+              </View>
               <View
                 style={{
                   marginTop: 16,
