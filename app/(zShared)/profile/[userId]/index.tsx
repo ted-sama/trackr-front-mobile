@@ -313,7 +313,7 @@ export default function UserProfileScreen() {
           </View>
         </View>
         {isMe && (
-        <View style={{ flexDirection: "row", gap: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
+        <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
           <PillButton
             icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
             title={t("profile.edit")}
@@ -331,7 +331,7 @@ export default function UserProfileScreen() {
             />
           </View>
         )}
-        <View style={{ marginTop: 24, gap: 24 }}>
+        <View style={{ paddingHorizontal: 16, marginTop: 24, gap: 24 }}>
           {topBooks && (
             <View>
               <Text

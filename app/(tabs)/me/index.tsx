@@ -323,7 +323,7 @@ export default function Profile() {
             }}
           />
         </View>
-        <View style={{ marginTop: 24, gap: 24 }}>
+        <View style={{ paddingHorizontal: 16, marginTop: 24, gap: 24 }}>
           {topBooks && (
             <View>
               <Text
