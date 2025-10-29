@@ -12,6 +12,9 @@ import BookListElement from "@/components/BookListElement";
 import CategorySlider from "@/components/CategorySlider";
 import { useMostTrackedCategory, useTopRatedCategory } from "@/hooks/queries/categories";
 import Avatar from "@/components/ui/Avatar";
+import { ChevronRight } from "lucide-react-native";
+import { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 
 export default function Index() {
   const { t } = useTranslation();
@@ -33,6 +36,19 @@ export default function Index() {
       return 0;
     }).slice(0, 3);
   }, [trackedBooks]);
+
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withTiming(0.95, { duration: 220 });
+  };
+
+  const handlePressOut = () => {
+    scale.value = withTiming(1, { duration: 220 });
+  };
 
   return (
     <SafeAreaView
@@ -66,8 +82,19 @@ export default function Index() {
               scrollEnabled={false}
             />
           ) : (
-            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("home.noLastRead")}</Text>
+            <Text style={[typography.bodyBold, { color: colors.secondaryText, textAlign: "center" }]}>{t("home.noLastRead")}</Text>
           )}
+          <Animated.View style={animatedStyle}>
+            <Pressable 
+              style={{flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 22 }} 
+              onPress={() => router.push("/collection/my-library")}
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
+            >
+              <Text style={[typography.body, { color: colors.accent }]}>{t("home.goToLibrary")}</Text>
+              <ChevronRight size={16} strokeWidth={2.5} color={colors.accent} />
+            </Pressable>
+          </Animated.View>
         </View>
         <View style={{ marginHorizontal: -16 }}>
           {mostTracked && (

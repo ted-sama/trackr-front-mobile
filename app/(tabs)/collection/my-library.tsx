@@ -68,11 +68,11 @@ export default function MyLibrary() {
   };
 
   const statusOptions: { key: ReadingStatus; label: string; icon: React.ReactNode }[] = [
-    { key: 'reading', label: t('status.reading'), icon: <BookOpenIcon size={16} strokeWidth={1.75} color={colors.icon} /> },
-    { key: 'plan_to_read', label: t('status.planToRead'), icon: <Clock3 size={16} strokeWidth={1.75} color={colors.icon} /> },
-    { key: 'completed', label: t('status.completed'), icon: <BookCheck size={16} strokeWidth={1.75} color={colors.icon} /> },
-    { key: 'on_hold', label: t('status.onHold'), icon: <Pause size={16} strokeWidth={1.75} color={colors.icon} /> },
-    { key: 'dropped', label: t('status.dropped'), icon: <Square size={16} strokeWidth={1.75} color={colors.icon} /> },
+    { key: 'reading', label: `${t('status.reading')} • ${books.filter(book => book.trackingStatus?.status === 'reading').length}`, icon: <BookOpenIcon size={16} strokeWidth={1.75} color={colors.icon} /> },
+    { key: 'plan_to_read', label: `${t('status.planToRead')} • ${books.filter(book => book.trackingStatus?.status === 'plan_to_read').length}`, icon: <Clock3 size={16} strokeWidth={1.75} color={colors.icon} /> },
+    { key: 'completed', label: `${t('status.completed')} • ${books.filter(book => book.trackingStatus?.status === 'completed').length}`, icon: <BookCheck size={16} strokeWidth={1.75} color={colors.icon} /> },
+    { key: 'on_hold', label: `${t('status.onHold')} • ${books.filter(book => book.trackingStatus?.status === 'on_hold').length}`, icon: <Pause size={16} strokeWidth={1.75} color={colors.icon} /> },
+    { key: 'dropped', label: `${t('status.dropped')} • ${books.filter(book => book.trackingStatus?.status === 'dropped').length}`, icon: <Square size={16} strokeWidth={1.75} color={colors.icon} /> },
   ];
 
   return (
@@ -95,14 +95,17 @@ export default function MyLibrary() {
         ListHeaderComponent={
           <View>
             <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
+              <View style={{ flex: 1, flexDirection: 'column', alignItems: 'flex-start', gap: 8}}>
               <Text
-                style={[typography.h1, { color: colors.text, maxWidth: '80%' }]}
-                accessibilityRole="header"
-                accessibilityLabel="Library"
-                numberOfLines={1}
-              >
-                {t("collection.myLibrary.title")}
-              </Text>
+                  style={[typography.h1, { color: colors.text, maxWidth: '80%' }]}
+                  accessibilityRole="header"
+                  accessibilityLabel="Library"
+                  numberOfLines={1}
+                >
+                  {t("collection.myLibrary.title")}
+                </Text>
+                <Text style={[typography.body, { color: colors.secondaryText }]}>{books.length} {t("common.book")}{books.length > 1 ? "s" : ""}</Text>
+              </View>
               <SwitchLayoutButton onPress={switchLayout} currentView={currentLayout} />
             </View>
             <ScrollView 
