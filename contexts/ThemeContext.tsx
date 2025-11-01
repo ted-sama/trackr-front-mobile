@@ -90,7 +90,7 @@ const lightColors = {
 };
 
 const darkColors = {
-  background: '#121212',
+  background: '#0a0a0a',
   card: '#1E1E1E',
   text: '#FFFFFF',
   icon: '#acacac',
