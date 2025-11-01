@@ -43,7 +43,7 @@ import Badge from "@/components/ui/Badge";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import { toast } from "sonner-native";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
-import { Ellipsis, Minus, Plus, ChartPie, Sparkles, MessageCircle } from "lucide-react-native";
+import { Ellipsis, Minus, Plus, ChartPie, Sparkles, MessageCircle, Heart } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 import * as Haptics from "expo-haptics";
@@ -55,6 +55,7 @@ import RatingStars from "@/components/ui/RatingStars";
 import { useLocalization } from "@/hooks/useLocalization";
 import { getLocalizedDescription } from "@/utils/description";
 import { useTranslation } from "react-i18next";
+import { useUserTop } from "@/hooks/queries/users";
 // Constants for animation
 const HEADER_THRESHOLD = 320; // Threshold for header animation
 
@@ -71,6 +72,7 @@ export default function BookScreen() {
   >("actions");
   const { data: book, isLoading, error } = useBook(id as string);
   const { data: booksBySameAuthor } = useBooksBySameAuthorCategory(id as string);
+  const { data: favoriteBooks } = useUserTop();
   const typography = useTypography();
   const insets = useSafeAreaInsets();
   const { isFrench } = useLocalization();
@@ -80,6 +82,7 @@ export default function BookScreen() {
     (state) => state.getTrackedBookStatus
   );
   const bookTracking = book ? getTrackedBookStatus(book.id) : null;
+  const isInFavorites = favoriteBooks?.some((favoriteBook) => favoriteBook.id === book?.id);
 
   // Bottom sheet ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -636,6 +639,15 @@ export default function BookScreen() {
                     {separator()}
                     <Text style={[typography.caption, { color: colors.secondaryText }]}>
                       {book?.chapters} chapitres
+                    </Text>
+                  </>
+                )}
+                {isInFavorites && (
+                  <>
+                    {separator()}
+                    <Heart size={14} fill={colors.favorite} color={colors.favorite} />
+                    <Text style={[typography.caption, { color: colors.secondaryText, marginLeft: 4 }]}>
+                      {t("book.inYourFavorites")}
                     </Text>
                   </>
                 )}

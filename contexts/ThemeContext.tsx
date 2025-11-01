@@ -44,6 +44,7 @@ interface ThemeContextType {
     completed: string;
     onHold: string;
     dropped: string;
+    favorite: string;
   };
 };
 
@@ -85,6 +86,7 @@ const lightColors = {
   completed: '#12ac4d',
   onHold: '#f6c43c',
   dropped: '#d21212',
+  favorite: '#f09343',
 };
 
 const darkColors = {
@@ -124,6 +126,7 @@ const darkColors = {
   completed: '#12ac4d',
   onHold: '#f6c43c',
   dropped: '#d21212',
+  favorite: '#f09343',
 };
 // Création du contexte avec une valeur par défaut initiale (sera mise à jour après chargement)
 const ThemeContext = createContext<ThemeContextType>({

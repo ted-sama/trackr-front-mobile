@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, FlatList, Platform, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, FlatList, Platform, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
@@ -16,7 +16,10 @@ import { useUIStore } from '@/stores/uiStore';
 import { useTranslation } from 'react-i18next';
 import PillButton from '@/components/ui/PillButton';
 import { ReadingStatus } from '@/types/reading-status';
-import { BookCheck, BookOpenIcon, Clock3, Pause, Square } from 'lucide-react-native';
+import { BookCheck, BookOpenIcon, Clock3, Pause, Square, ArrowUpDown } from 'lucide-react-native';
+import SortBottomSheet, { SortOption } from '@/components/SortBottomSheet';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import * as Haptics from 'expo-haptics';
 
 const AnimatedList = Animated.createAnimatedComponent(FlatList<Book>);
 
@@ -32,9 +35,11 @@ export default function MyLibrary() {
   });
   const [titleY, setTitleY] = useState<number>(0);
   const scrollRef = useRef<FlatList<Book> | null>(null);
+  const sortSheetRef = useRef<BottomSheetModal>(null);
   const currentLayout = useUIStore(state => state.myLibraryLayout);
   const setLayout = useUIStore(state => state.setMyLibraryLayout);
   const [selectedStatuses, setSelectedStatuses] = useState<ReadingStatus[]>([]);
+  const [sortOption, setSortOption] = useState<SortOption>({ type: 'date', order: 'desc' });
 
   const handleBack = () => {
     router.back();
@@ -47,10 +52,40 @@ export default function MyLibrary() {
   
   const books = React.useMemo(() => {
     const booksArray = Object.values(trackedBooks);
-    return booksArray
+    const filtered = booksArray
       .filter(book => book && book.id)
       .filter(book => selectedStatuses.length === 0 || selectedStatuses.includes(book.trackingStatus?.status as ReadingStatus));
-  }, [trackedBooks, selectedStatuses]);
+
+    // Apply sorting
+    const sorted = [...filtered].sort((a, b) => {
+      let comparison = 0;
+
+      switch (sortOption.type) {
+        case 'rating':
+          const ratingA = a.trackingStatus?.rating ?? 0;
+          const ratingB = b.trackingStatus?.rating ?? 0;
+          comparison = ratingA - ratingB;
+          break;
+        case 'title':
+          comparison = (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' });
+          break;
+        case 'author':
+          const authorA = a.authors?.[0]?.name || '';
+          const authorB = b.authors?.[0]?.name || '';
+          comparison = authorA.localeCompare(authorB, undefined, { sensitivity: 'base' });
+          break;
+        case 'date':
+          const dateA = a.trackingStatus?.createdAt ? new Date(a.trackingStatus.createdAt).getTime() : 0;
+          const dateB = b.trackingStatus?.createdAt ? new Date(b.trackingStatus.createdAt).getTime() : 0;
+          comparison = dateA - dateB;
+          break;
+      }
+
+      return sortOption.order === 'asc' ? comparison : -comparison;
+    });
+
+    return sorted;
+  }, [trackedBooks, selectedStatuses, sortOption]);
 
   const switchLayout = () => {
     const newLayout = currentLayout === 'grid' ? 'list' : 'grid';
@@ -65,6 +100,15 @@ export default function MyLibrary() {
         return [...prev, status];
       }
     });
+  };
+
+  const handleOpenSortSheet = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    sortSheetRef.current?.present();
+  };
+
+  const handleSortChange = (newSortOption: SortOption) => {
+    setSortOption(newSortOption);
   };
 
   const statusOptions: { key: ReadingStatus; label: string; icon: React.ReactNode }[] = [
@@ -106,7 +150,12 @@ export default function MyLibrary() {
                 </Text>
                 <Text style={[typography.body, { color: colors.secondaryText }]}>{books.length} {t("common.book")}{books.length > 1 ? "s" : ""}</Text>
               </View>
-              <SwitchLayoutButton onPress={switchLayout} currentView={currentLayout} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Pressable onPress={handleOpenSortSheet} style={{ width: 32, height: 32, justifyContent: 'center', alignItems: 'center' }}>
+                  <ArrowUpDown size={22} color={colors.icon} />
+                </Pressable>
+                <SwitchLayoutButton onPress={switchLayout} currentView={currentLayout} />
+              </View>
             </View>
             <ScrollView 
               horizontal 
@@ -146,6 +195,11 @@ export default function MyLibrary() {
         ListFooterComponent={null}
         showsVerticalScrollIndicator={true}
         accessibilityRole="list"
+      />
+      <SortBottomSheet
+        ref={sortSheetRef}
+        onSortChange={handleSortChange}
+        currentSort={sortOption}
       />
     </View>
   );

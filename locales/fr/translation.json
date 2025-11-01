@@ -1,6 +1,7 @@
 {
     "common": {
-        "book": "livre"
+        "book": "livre",
+        "search": "Rechercher des livres..."
     },
     "save": "Enregistrer",
     "create": "Créer",
@@ -90,7 +91,19 @@
         "title": "Collection",
         "myLibrary": {
             "title": "Ma bibliothèque",
-            "noBooks": "Aucun livre trouvé dans votre bibliothèque."
+            "noBooks": "Aucun livre trouvé dans votre bibliothèque.",
+            "searchPlaceholder": "Rechercher des livres...",
+            "sort": {
+                "title": "Trier par",
+                "rating_desc": "Mieux notés",
+                "rating_asc": "Moins bien notés",
+                "title_asc": "Titre A-Z",
+                "title_desc": "Titre Z-A",
+                "author_asc": "Auteur A-Z",
+                "author_desc": "Auteur Z-A",
+                "date_desc": "Ajoutés récemment",
+                "date_asc": "Ajoutés anciennement"
+            }
         },
         "searchPlaceholder": "Rechercher dans la collection",
         "cancel": "Annuler",
@@ -164,7 +177,8 @@
         "lastReadOn": "Dernière lecture il y a {{time}}",
         "chaptersLeft": "Plus que {{chapters}} chapitre(s)",
         "youRatedIt": "Vous avez noté ce livre",
-        "rateIt": "Suivez ce livre et notez-le"
+        "rateIt": "Suivez ce livre et notez-le",
+        "inYourFavorites": "Dans vos favoris"
     },
     "chat": {
         "sources": "Sources utilisées"
