@@ -181,7 +181,13 @@
         "inYourFavorites": "Dans vos favoris"
     },
     "chat": {
-        "sources": "Sources utilisées"
+        "sources": "Sources utilisées",
+        "messagePlaceholder": "Posez votre question",
+        "predefinedQuestions": {
+            "summarizeLastChapter": "Résume le dernier chapitre lu",
+            "presentWork": "Présente-moi l'œuvre",
+            "analyzeCurrentArc": "Analyse l'arc actuel"
+        }
     },
     "list": {
         "reorder": "Réordonner",

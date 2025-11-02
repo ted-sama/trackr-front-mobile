@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Pressable, TextInput, ScrollView as DefaultScrollView, StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Image } from "react-native";
+import { View, Text, Pressable, TextInput, ScrollView as DefaultScrollView, StyleSheet, Platform, Image, Keyboard } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
@@ -8,7 +8,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
+import { useSharedValue, useAnimatedStyle, withTiming, withSpring } from "react-native-reanimated";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -18,17 +18,22 @@ import { getPalette } from "@somesoap/react-native-image-palette";
 import Animated from "react-native-reanimated";
 import Markdown from "@ronradtke/react-native-markdown-display";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "react-i18next";
+import { Circle } from "lucide-react-native";
+import { PredefinedQuestions } from "@/components/chat/PredefinedQuestions";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(DefaultScrollView);
 
 export default function ChatScreen() {
     const { colors } = useTheme();
+    const { t } = useTranslation();
     const { bookId } = useLocalSearchParams();
     const { data: book } = useBook(bookId as string);
     const typography = useTypography();
     const [input, setInput] = useState<string>('');
     const [inputHeight, setInputHeight] = useState(48);
     const [dominantColor, setDominantColor] = useState<string | null>(null);
+    const keyboardHeight = useSharedValue(30);
     const scrollViewRef = useRef<DefaultScrollView>(null);
     const { token } = useAuth();
     const { messages, error, sendMessage, status } = useChat({
@@ -71,6 +76,30 @@ export default function ChatScreen() {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, [messages]);
 
+    useEffect(() => {
+      const keyboardWillShow = Keyboard.addListener(
+        Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+        (e) => {
+          keyboardHeight.value = withTiming(e.endCoordinates.height, {
+            duration: Platform.OS === 'ios' ? 250 : 200,
+          });
+        }
+      );
+      const keyboardWillHide = Keyboard.addListener(
+        Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+        () => {
+          keyboardHeight.value = withTiming(30, {
+            duration: Platform.OS === 'ios' ? 250 : 200,
+          });
+        }
+      );
+
+      return () => {
+        keyboardWillShow.remove();
+        keyboardWillHide.remove();
+      };
+    }, []);
+
     const handleSend = () => {
       if (input.trim()) {
         sendMessage({
@@ -80,7 +109,19 @@ export default function ChatScreen() {
       }
     };
 
+    const handlePredefinedQuestion = (question: string) => {
+      sendMessage({
+        text: question,
+      });
+    };
+
   const gradientHeight = 250;
+
+  const inputContainerStyle = useAnimatedStyle(() => {
+    return {
+      bottom: keyboardHeight.value,
+    };
+  });
 
   // Créer les styles Markdown en fusionnant typography avec les couleurs
   const markdownStyles = React.useMemo(() => ({
@@ -236,21 +277,12 @@ export default function ChatScreen() {
           static={true}
         />
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardView}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-        >
-          <AnimatedScrollView
+        <AnimatedScrollView
             ref={scrollViewRef}
             style={styles.messagesContainer}
             contentContainerStyle={styles.messagesContent}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={styles.bookInfo}>
-              <Image source={{ uri: book?.coverImage }} style={styles.bookImage} />
-              <Text style={[typography.body, { color: colors.text }]}>{book?.title}</Text>
-            </View>
             {messages.length > 0 && (
               messages.map((m) => {
                 const isUser = m.role === 'user';
@@ -292,14 +324,19 @@ export default function ChatScreen() {
                       </View>
                     ) : (
                       <View style={styles.aiMessageContent}>
-                        {messageSources.length > 0 && (
-                            <View style={{ marginBottom: 8 }}>
-                                <Sources sources={messageSources} />
-                            </View>
+                        {dominantColor && (
+                          <View style={styles.aiHeader}>
+                            <Circle size={22} color={dominantColor} fill={dominantColor} />
+                          </View>
                         )}
                         <Markdown style={markdownStyles}>
                           {messageText}
                         </Markdown>
+                        {messageSources.length > 0 && (
+                          <View style={{ marginTop: 8 }}>
+                            <Sources sources={messageSources} />
+                          </View>
+                        )}
                       </View>
                     )}
                   </View>
@@ -308,19 +345,30 @@ export default function ChatScreen() {
             )}
           </AnimatedScrollView>
 
-          <View style={styles.inputContainer}>
+          <Animated.View style={[styles.inputContainer, inputContainerStyle]}>
             <MaskedView
-              style={[styles.gradientOverlay, { height: inputHeight + 120 }]}
+              style={[styles.gradientOverlay, { height: inputHeight + 160 }]}
               maskElement={
                 <LinearGradient
-                  colors={['transparent', 'black']}
-                  locations={[0, 0.3]}
+                  colors={[
+                    'transparent',
+                    'rgba(0,0,0,0.1)',
+                    'rgba(0,0,0,0.4)',
+                    'rgba(0,0,0,0.7)',
+                    'black'
+                  ]}
+                  locations={[0, 0.3, 0.6, 0.8, 1]}
                   style={StyleSheet.absoluteFill}
                 />
               }
             >
               <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.background }]} />
             </MaskedView>
+            {messages.length === 0 && (
+              <PredefinedQuestions
+                onQuestionPress={handlePredefinedQuestion}
+              />
+            )}
             <View style={[styles.inputWrapper, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <TextInput
                 style={[
@@ -334,7 +382,7 @@ export default function ChatScreen() {
                 onContentSizeChange={(e) => {
                   setInputHeight(Math.min(100, Math.max(48, e.nativeEvent.contentSize.height + 16)));
                 }}
-                placeholder="Écrivez votre message..."
+                placeholder={t("chat.messagePlaceholder")}
                 placeholderTextColor={colors.secondaryText}
                 multiline
                 maxLength={1000}
@@ -362,8 +410,7 @@ export default function ChatScreen() {
                 )}
               </Pressable>
             </View>
-          </View>
-        </KeyboardAvoidingView>
+          </Animated.View>
     </SafeAreaView>
   );
 }
@@ -378,7 +425,7 @@ const styles = StyleSheet.create({
   },
   messagesContainer: {
     flex: 1,
-    paddingTop: 70,
+    paddingTop: 160,
   },
   messagesContent: {
     padding: 16,

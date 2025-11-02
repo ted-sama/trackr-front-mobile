@@ -181,7 +181,13 @@
         "inYourFavorites": "In your favorites"
     },
     "chat": {
-        "sources": "Used sources"
+        "sources": "Used sources",
+        "messagePlaceholder": "Ask a question",
+        "predefinedQuestions": {
+            "summarizeLastChapter": "Summarize the last chapter read",
+            "presentWork": "Introduce the work to me",
+            "analyzeCurrentArc": "Analyze the current arc"
+        }
     },
     "list": {
         "reorder": "Reorder",
