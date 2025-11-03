@@ -29,6 +29,7 @@ import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import Badge from "./ui/Badge";
+import StarRating from "./ui/StarRating";
 
 interface BookCardProps {
   book: Book;
@@ -37,6 +38,7 @@ interface BookCardProps {
   showTitle?: boolean;
   showAuthor?: boolean;
   showRating?: boolean;
+  showUserRating?: boolean;
   showTrackingStatus?: boolean;
   showTrackingButton?: boolean;
   rank?: number;
@@ -49,7 +51,7 @@ const CARD_WIDTH = width * 0.33;
 const COMPACT_CARD_WIDTH = width * 0.29;
 const COMPACT_SMALL_CARD_WIDTH = width * 0.25;
 
-const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showTrackingStatus = false, showTrackingButton = true, rank, currentListId, isFromListPage }: BookCardProps) => {
+const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showUserRating = false, showTrackingStatus = false, showTrackingButton = true, rank, currentListId, isFromListPage }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const { isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
@@ -273,6 +275,15 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
                 />
               </View>
             )}
+            {showUserRating && trackingStatus?.rating && (
+              <View style={styles.userRatingContainer}>
+                <StarRating
+                  rating={trackingStatus.rating}
+                  size={size === 'compact-small' ? 10 : 12}
+                  color={colors.secondaryText}
+                />
+              </View>
+            )}
           </View>
         </Animated.View>
       </Pressable>
@@ -361,6 +372,9 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 12,
     marginLeft: 4,
+  },
+  userRatingContainer: {
+    marginTop: 6,
   },
   badgeContainer: {
     flexDirection: 'column',

@@ -10,6 +10,7 @@ import TrackingIconButton from "./TrackingIconButton";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import Badge from "./ui/Badge";
+import StarRating from "./ui/StarRating";
 import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Ellipsis } from "lucide-react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -23,13 +24,14 @@ interface BookListElementProps {
   showTrackingStatus?: boolean;
   showAuthor?: boolean;
   showRating?: boolean;
+  showUserRating?: boolean;
   rank?: number;
   currentListId?: string;
   isFromListPage?: boolean;
   compact?: boolean;
 }
 
-const BookListElement = ({ book, onPress, showAuthor = true, showRating = false, showTrackingButton = false, showTrackingStatus = false, rank, currentListId, isFromListPage, compact = false }: BookListElementProps) => {
+const BookListElement = ({ book, onPress, showAuthor = true, showRating = false, showUserRating = false, showTrackingButton = false, showTrackingStatus = false, rank, currentListId, isFromListPage, compact = false }: BookListElementProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
   const { isBottomSheetVisible, openBookActions } = useBottomSheet();
@@ -123,6 +125,15 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
                 )}
               </View>
             )}
+            {showUserRating && trackingStatus?.rating && (
+              <View style={styles.userRatingContainer}>
+                <StarRating
+                  rating={trackingStatus.rating}
+                  size={compact ? 10 : 12}
+                  color={colors.secondaryText}
+                />
+              </View>
+            )}
           </View>
         </View>
         <View style={[styles.actionsContainer, compact && styles.actionsContainerCompact]}>
@@ -197,6 +208,9 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 12,
     marginLeft: 4,
+  },
+  userRatingContainer: {
+    marginTop: 6,
   },
   actionsContainer: {
     flexDirection: "row",
