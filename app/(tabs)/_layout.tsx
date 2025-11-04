@@ -15,7 +15,7 @@ export default function TabLayout() {
 
   if (supportsLiquidGlass) {
     return (
-      <NativeTabs tintColor={colors.accent} minimizeBehavior='onScrollDown'>
+      <NativeTabs tintColor={colors.accent}>
         <NativeTabs.Trigger name="index">
           <Icon sf="house.fill" />
           <Label>{t('home.title')}</Label>

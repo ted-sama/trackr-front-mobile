@@ -642,16 +642,15 @@ export default function BookScreen() {
                     </Text>
                   </>
                 )}
-                {isInFavorites && (
-                  <>
-                    {separator()}
+              </View>
+              {isInFavorites && (
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 8 }}>
                     <Heart size={14} fill={colors.favorite} color={colors.favorite} />
-                    <Text style={[typography.caption, { color: colors.secondaryText, marginLeft: 4 }]}>
+                    <Text style={[typography.caption, { color: colors.secondaryText }]}>
                       {t("book.inYourFavorites")}
                     </Text>
-                  </>
+                  </View>
                 )}
-              </View>
             </View>
             <View style={styles.actionsContainer}>
               <Pressable onPress={() => handlePresentModalPress("actions")}>
@@ -935,11 +934,11 @@ const styles = StyleSheet.create({
   tagsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginTop: 8,
+    marginTop: 48,
     gap: 4,
   },
   descriptionContainer: {
-    marginTop: 24,
+    marginTop: 8,
   },
   // Styles for the animated button
   buttonContainer: {

@@ -24,27 +24,63 @@ interface AnimatedCoverProps {
 
 const AnimatedCover: React.FC<AnimatedCoverProps> = ({ book, index, colors }) => {
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(-10);
+  const translateY = useSharedValue(30);
+  const scale = useSharedValue(0.8);
+
+  // Créer un effet de stack "sens dessus dessous" - rotations alternées
+  const rotations = [5, 12, 8, -7, -10]; // Rotations variées pour effet désordonné
+  const horizontalOffsets = [0, 15, -10, 20, -15]; // Décalages horizontaux variés
+  const verticalOffsets = [0, -5, -10, -15, -20]; // Décalage vertical empilé
+
+  const rotation = rotations[index] || 0;
+  const horizontalOffset = horizontalOffsets[index] || 0;
+  const verticalOffset = verticalOffsets[index] || 0;
 
   useEffect(() => {
-    opacity.value = withDelay(index * 100, withTiming(1, { duration: 300 }));
-    translateY.value = withDelay(index * 100, withTiming(0, { duration: 300 }));
-  }, [opacity, translateY, index]);
+    opacity.value = withDelay(index * 80, withTiming(1, { duration: 400 }));
+    translateY.value = withDelay(index * 80, withTiming(0, { duration: 400 }));
+    scale.value = withDelay(index * 80, withTiming(1, { duration: 400 }));
+  }, [opacity, translateY, scale, index]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
       opacity: opacity.value,
-      transform: [{ translateY: translateY.value }],
+      transform: [
+        { translateY: translateY.value },
+        { scale: scale.value },
+        { rotate: `${rotation}deg` }, // Rotation incluse dans l'animation
+      ],
     };
   });
+
+  const coverWidth = 85; // Augmenté de 70 à 85
+  const coverHeight = 128; // Augmenté de 105 à 128
 
   return (
     <AnimatedExpoImage
       key={book.id}
       source={book.coverImage ? { uri: book.coverImage } : { uri: "" }}
       style={[
-        styles.coverImage,
-        { left: index * 25, zIndex: index, borderColor: colors.border },
+        {
+          width: coverWidth,
+          height: coverHeight,
+          borderRadius: 6,
+          borderWidth: 0.5, // Bordure plus fine
+          position: 'absolute' as const,
+          backgroundColor: '#fff',
+          left: '50%',
+          marginLeft: -(coverWidth / 2) + horizontalOffset, // Centrer et ajouter offset
+          top: 50 + verticalOffset,
+          zIndex: 5 - index,
+          borderColor: colors.border,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 8 + index * 3, // Ombre plus prononcée
+          },
+          shadowOpacity: 0.5 - index * 0.06, // Opacité augmentée
+          shadowRadius: 15 + index * 3, // Rayon plus large
+        },
         animatedStyle,
       ]}
       contentFit="cover"
@@ -64,26 +100,53 @@ interface MyLibraryHeaderProps {
 const MyLibraryHeader: React.FC<MyLibraryHeaderProps> = React.memo(
   ({ mosaicBooks, colors, typography, onPress, totalBooks }) => {
     const { t } = useTranslation();
+    const scaleAnim = useSharedValue(1);
+
+    const animatedPressableStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scaleAnim.value }],
+    }));
+
+    const handlePressIn = () => {
+      scaleAnim.value = withTiming(0.97, { duration: 100 });
+    };
+
+    const handlePressOut = () => {
+      scaleAnim.value = withTiming(1, { duration: 100 });
+    };
+
+    // Limiter à 5 couvertures maximum
+    const displayBooks = mosaicBooks.slice(0, 5);
 
     return (
-      <Pressable onPress={onPress} style={{ marginBottom: 16 }}>
-        <View style={[styles.myLibraryHeaderMenu, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <Animated.View style={[{ marginBottom: 24, alignItems: 'center' }, animatedPressableStyle]}>
+        <Pressable
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          style={styles.myLibraryHeaderMenu}
+        >
           <View style={styles.stackContainer}>
-            {mosaicBooks.map((book, index) => (
+            {displayBooks.map((book, index) => (
               <AnimatedCover key={book.id} book={book} index={index} colors={colors} />
             ))}
           </View>
-          <Text style={[typography.h3, { marginTop: 16, color: colors.text }]}>{t("collection.myLibrary.title")}</Text>
-          <Text style={[typography.caption, { color: colors.secondaryText }]}>{totalBooks} {t("collection.books")}</Text>
-        </View>
-      </Pressable>
+          <View style={styles.textContainer}>
+            <Text style={[typography.h2, { color: colors.text, textAlign: 'center' }]} numberOfLines={1}>
+              {t("collection.myLibrary.title")}
+            </Text>
+            <Text style={[typography.caption, { color: colors.secondaryText, marginTop: 2, textAlign: 'center' }]}>
+              {totalBooks} {t("collection.books")}
+            </Text>
+          </View>
+        </Pressable>
+      </Animated.View>
     );
   },
   (prevProps, nextProps) => {
     return (
       prevProps.mosaicBooks.length === nextProps.mosaicBooks.length &&
-      prevProps.mosaicBooks.every((book, index) => 
-        book.id === nextProps.mosaicBooks[index].id && 
+      prevProps.mosaicBooks.every((book, index) =>
+        book.id === nextProps.mosaicBooks[index].id &&
         book.coverImage === nextProps.mosaicBooks[index].coverImage
       ) &&
       prevProps.colors === nextProps.colors &&
@@ -120,6 +183,7 @@ export default function Collection() {
   }, []);
 
   const renderListHeader = useCallback(() => (
+    <>
     <MyLibraryHeader
       mosaicBooks={mosaicBooks}
       colors={colors}
@@ -127,6 +191,8 @@ export default function Collection() {
       onPress={() => router.push("/collection/my-library")}
       totalBooks={myLibrary.length}
     />
+    <View style={{ height: 1, backgroundColor: colors.border, marginBottom: 32 }} />
+    </>
   ), [mosaicBooks, colors, typography, router, myLibrary.length]);
 
   return (
@@ -151,22 +217,15 @@ export default function Collection() {
 
 const styles = StyleSheet.create({
   myLibraryHeaderMenu: {
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    alignItems: 'center',
   },
   stackContainer: {
-    width: 235,
-    height: 90,
+    width: 260,
+    height: 200,
     position: 'relative',
   },
-  coverImage: {
-    width: 60,
-    height: 90,
-    borderRadius: 4,
-    borderWidth: 0.75,
-    position: 'absolute',
+  textContainer: {
+    alignItems: 'center',
   },
   listContainer: {
     paddingTop: 16,

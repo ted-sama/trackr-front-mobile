@@ -140,6 +140,7 @@ export default function HeaderDiscover({
           onSubmitEditing={isEditable ? handleSubmitEditing : undefined}
           onPressNavigate={!isEditable ? handleNavigateToSearch : undefined}
           containerStyle={animatedSearchBarContainerStyle}
+          autoFocus={isEditable}
         />
         {isEditable && (
           <Animated.View style={[styles.cancelButtonContainer, animatedCancelButtonStyle]}>

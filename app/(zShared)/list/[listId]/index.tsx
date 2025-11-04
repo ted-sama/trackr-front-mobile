@@ -31,7 +31,201 @@ import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getPalette } from "@somesoap/react-native-image-palette";
 
-const AnimatedList = Animated.createAnimatedComponent(FlatList<Book>);
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<Book>);
+
+interface ListHeaderProps {
+  list: any;
+  insets: { top: number; bottom: number; left: number; right: number };
+  dominantColor: string | null;
+  gradientHeight: number;
+  gradientAnimatedStyle: any;
+  gradientElasticStyle: any;
+  onTitleLayout: (event: any) => void;
+  onOwnerPress: () => void;
+  isEditable: boolean;
+  onReorderPress: () => void;
+  onEditPress: () => void;
+  onDeletePress: () => void;
+  onActionsPress: () => void;
+  onSwitchLayout: () => void;
+  currentLayout: "grid" | "list";
+  colors: any;
+  typography: any;
+  t: any;
+}
+
+const ListHeader = React.memo(({
+  list,
+  insets,
+  dominantColor,
+  gradientHeight,
+  gradientAnimatedStyle,
+  gradientElasticStyle,
+  onTitleLayout,
+  onOwnerPress,
+  isEditable,
+  onReorderPress,
+  onEditPress,
+  onDeletePress,
+  onActionsPress,
+  onSwitchLayout,
+  currentLayout,
+  colors,
+  typography,
+  t,
+}: ListHeaderProps) => {
+  return (
+    <View>
+      {/* Gradient */}
+      {dominantColor && (
+        <Animated.View
+          style={[{
+            position: "absolute",
+            width: "110%",
+            height: gradientHeight,
+            alignSelf: "center",
+            marginHorizontal: -16,
+            marginTop: -insets.top,
+            zIndex: 0,
+          }, gradientAnimatedStyle, gradientElasticStyle]}
+        >
+          <LinearGradient
+            colors={[dominantColor, colors.background]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{ width: "100%", height: "100%" }}
+          />
+        </Animated.View>
+      )}
+      {/* Backdrop */}
+      <View
+        style={{
+          marginTop: -insets.top,
+          height: 275 + insets.top,
+          paddingTop: insets.top + 60,
+          zIndex: 1,
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            borderRadius: 24,
+            borderWidth: 2,
+            borderColor: colors.border,
+            overflow: "hidden",
+          }}
+        >
+          {list.backdropMode === "image" && list.backdropImage ? (
+            <Image
+              source={{ uri: list.backdropImage }}
+              style={{ width: "100%", height: "100%" }}
+              contentFit="cover"
+            />
+          ) : (
+            <View
+              style={{
+                width: "100%",
+                height: "100%",
+                backgroundColor: list.backdropColor || colors.accent,
+              }}
+            />
+          )}
+        </View>
+      </View>
+      <View
+        style={{
+          marginTop: 16,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Pressable onPress={onOwnerPress}>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+          >
+            <Avatar image={list.owner.avatar || ""} size={28} />
+            <Text
+              style={[
+                typography.username,
+                { color: colors.secondaryText },
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {list.owner.displayName}
+            </Text>
+            {list.owner.plan === "plus" && (
+              <PlusBadge />
+            )}
+          </View>
+        </Pressable>
+      </View>
+      {isEditable && (
+        <View style={{ marginTop: 16 }}>
+          <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
+            <PillButton
+              title={t("list.reorder")}
+              onPress={onReorderPress}
+              icon={<Ionicons name="swap-vertical" size={16} color={colors.secondaryText} />}
+            />
+            <PillButton
+              title={t("list.edit")}
+              onPress={onEditPress}
+              icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
+            />
+            <PillButton
+              title={t("list.delete")}
+              onPress={onDeletePress}
+              style="destructive"
+              icon={<Ionicons name="trash-outline" size={16} color={colors.error} />}
+            />
+          </View>
+        </View>
+      )}
+      <View
+        style={styles.header}
+        onLayout={onTitleLayout}
+      >
+        <Text
+          style={[
+            typography.h1,
+            { color: colors.text, maxWidth: "80%" },
+          ]}
+          accessibilityRole="header"
+          accessibilityLabel={list.name}
+          numberOfLines={1}
+        >
+          {list.name}
+        </Text>
+        <View style={styles.actionsContainer}>
+          <Pressable onPress={onActionsPress}>
+            <Ellipsis size={32} color={colors.icon} strokeWidth={2} />
+          </Pressable>
+          <SwitchLayoutButton
+            onPress={onSwitchLayout}
+            currentView={currentLayout}
+          />
+        </View>
+      </View>
+      {list.description && (
+        <View style={{ marginBottom: 32 }}>
+          <ExpandableDescription
+            text={list.description}
+            textStyle={{ color: colors.secondaryText }}
+          />
+        </View>
+      )}
+      {list.tags && (
+        <View style={styles.badgeContainer}>
+          <BadgeSlider data={list.tags} />
+        </View>
+      )}
+    </View>
+  );
+});
+
+ListHeader.displayName = 'ListHeader';
 
 export default function ListFullScreen() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
@@ -44,7 +238,6 @@ export default function ListFullScreen() {
     scrollY.value = event.contentOffset.y;
   });
   const [titleY, setTitleY] = useState<number>(0);
-  const scrollRef = useRef<FlatList<Book> | null>(null);
   const listActionsBottomSheetRef = useRef<BottomSheetModal>(null);
   const currentLayout = useUIStore(state => state.listLayout);
   const setLayout = useUIStore(state => state.setListLayout);
@@ -252,177 +445,54 @@ export default function ListFullScreen() {
         onBack={handleBack}
       />
       {list && (
-        <AnimatedList
-          ref={scrollRef}
+        <AnimatedFlatList
           data={list.books.items || []}
-          key={currentLayout}
           keyExtractor={(item) => item.id.toString()}
+          key={currentLayout}
+          numColumns={currentLayout === "grid" ? 3 : 1}
           contentContainerStyle={{
             paddingHorizontal: 16,
             paddingTop: insets.top,
             paddingBottom: 64,
             flexGrow: 1,
           }}
-          numColumns={currentLayout === "grid" ? 3 : 1}
+          columnWrapperStyle={currentLayout === "grid" ? { gap: 4 } : undefined}
           onScroll={scrollHandler}
+          scrollEventThrottle={16}
+          showsVerticalScrollIndicator={true}
           ListHeaderComponent={
-            <View>
-              {/* Gradient */}
-              {dominantColor && (
-                <Animated.View
-                  style={[{
-                    position: "absolute",
-                    width: "110%",
-                    height: gradientHeight,
-                    alignSelf: "center",
-                    marginHorizontal: -16,
-                    marginTop: -insets.top,
-                    zIndex: 0,
-                  }, gradientAnimatedStyle, gradientElasticStyle]}
-                >
-                  <LinearGradient
-                    colors={[dominantColor, colors.background]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 0, y: 1 }}
-                    style={{ width: "100%", height: "100%" }}
-                  />
-                </Animated.View>
-              )}
-              {/* Backdrop */}
-              <View
-                style={{
-                  marginTop: -insets.top,
-                  height: 275 + insets.top,
-                  paddingTop: insets.top + 60,
-                  zIndex: 1,
-                }}
-              >
-                <View
-                  style={{
-                    flex: 1,
-                    borderRadius: 24,
-                    borderWidth: 2,
-                    borderColor: colors.border,
-                    overflow: "hidden",
-                  }}
-                >
-                  {list.backdropMode === "image" && list.backdropImage ? (
-                    <Image
-                      source={{ uri: list.backdropImage }}
-                      style={{ width: "100%", height: "100%" }}
-                      contentFit="cover"
-                    />
-                  ) : (
-                    <View
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        backgroundColor: list.backdropColor || colors.accent,
-                      }}
-                    />
-                  )}
-                </View>
-              </View>
-              <View
-                style={{
-                  marginTop: 16,
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Pressable onPress={() => router.push(`/profile/${list.owner.username}`)}>
-                  <View
-                    style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-                  >
-                    <Avatar image={list.owner.avatar || ""} size={28} />
-                    <Text
-                      style={[
-                        typography.username,
-                        { color: colors.secondaryText },
-                      ]}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {list.owner.displayName}
-                    </Text>
-                    {list.owner.plan === "plus" && (
-                      <PlusBadge />
-                    )}
-                  </View>
-                </Pressable>
-              </View>
-              {isEditable(list.id) && (
-                <View style={{ marginTop: 16 }}>
-                  <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
-                    <PillButton
-                      title={t("list.reorder")}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        router.push(`/list/${listId}/reorder`);
-                      }}
-                      icon={<Ionicons name="swap-vertical" size={16} color={colors.secondaryText} />}
-                    />
-                    <PillButton
-                      title={t("list.edit")}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        router.push(`/list/${listId}/edit`);
-                      }}
-                      icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
-                    />
-                    <PillButton
-                      title={t("list.delete")}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        handleDeleteList();
-                      }}
-                      style="destructive"
-                      icon={<Ionicons name="trash-outline" size={16} color={colors.error} />}
-                    />
-                  </View>
-                </View>
-              )}
-              <View
-                style={styles.header}
-                onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
-              >
-                <Text
-                  style={[
-                    typography.h1,
-                    { color: colors.text, maxWidth: "80%" },
-                  ]}
-                  accessibilityRole="header"
-                  accessibilityLabel={list.name}
-                  numberOfLines={1}
-                >
-                  {list.name}
-                </Text>
-                <View style={styles.actionsContainer}>
-                  <Pressable onPress={() => handlePresentModalPress("actions")}>
-                    <Ellipsis size={32} color={colors.icon} strokeWidth={2} />
-                  </Pressable>
-                  <SwitchLayoutButton
-                    onPress={switchLayout}
-                    currentView={currentLayout}
-                  />
-                </View>
-              </View>
-              {list.description && (
-                <View style={{ marginBottom: 32 }}>
-                  <ExpandableDescription
-                    text={list.description}
-                    textStyle={{ color: colors.secondaryText }}
-                  />
-                </View>
-              )}
-              {list.tags && (
-                <View style={styles.badgeContainer}>
-                  <BadgeSlider data={list.tags} />
-                </View>
-              )}
-            </View>
+            <ListHeader
+              list={list}
+              insets={insets}
+              dominantColor={dominantColor}
+              gradientHeight={gradientHeight}
+              gradientAnimatedStyle={gradientAnimatedStyle}
+              gradientElasticStyle={gradientElasticStyle}
+              onTitleLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
+              onOwnerPress={() => router.push(`/profile/${list.owner.username}`)}
+              isEditable={isEditable(list.id)}
+              onReorderPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push(`/list/${listId}/reorder`);
+              }}
+              onEditPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push(`/list/${listId}/edit`);
+              }}
+              onDeletePress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                handleDeleteList();
+              }}
+              onActionsPress={() => handlePresentModalPress("actions")}
+              onSwitchLayout={switchLayout}
+              currentLayout={currentLayout}
+              colors={colors}
+              typography={typography}
+              t={t}
+            />
           }
+          stickyHeaderIndices={[]}
+          ListHeaderComponentStyle={{ marginBottom: 0 }}
           renderItem={({ item }) =>
             currentLayout === "grid" ? (
               <View style={{ width: "33%" }}>
@@ -458,26 +528,21 @@ export default function ListFullScreen() {
               : () => <View style={{ height: 12 }} />
           }
           ListEmptyComponent={
-            list.books.items.length === 0 ? (
+            (list.books.items || []).length === 0 ? (
               <Text
-                style={
-                  [
-                    typography.body,
-                  {color: colors.secondaryText,
-                  textAlign: "center",
-                  marginTop: 32,}
+                style={[
+                  typography.body,
+                  {
+                    color: colors.secondaryText,
+                    textAlign: "center",
+                    marginTop: 32,
+                  }
                 ]}
               >
                 Aucun livre trouvé dans cette liste.
               </Text>
             ) : null
           }
-          columnWrapperStyle={currentLayout === "grid" ? { gap: 4 } : undefined}
-          onEndReached={() => {}}
-          onEndReachedThreshold={0.2}
-          ListFooterComponent={null}
-          showsVerticalScrollIndicator={true}
-          accessibilityRole="list"
         />
       )}
       {list && (

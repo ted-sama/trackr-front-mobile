@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TextInput, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Platform, NativeSyntheticEvent, TextInputSubmitEditingEventData } from 'react-native';
+import { View, TextInput, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Platform, NativeSyntheticEvent, TextInputSubmitEditingEventData, StyleProp, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated from 'react-native-reanimated';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -11,7 +11,8 @@ interface SearchBarProps {
   placeholder?: string;
   isEditable?: boolean;
   onPressNavigate?: () => void;
-  containerStyle?: Animated.AnimateStyle<any>;
+  containerStyle?: StyleProp<ViewStyle>;
+  autoFocus?: boolean;
 }
 
 const SearchBar = ({
@@ -22,6 +23,7 @@ const SearchBar = ({
   isEditable = false,
   onPressNavigate,
   containerStyle,
+  autoFocus = false,
 }: SearchBarProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
@@ -56,7 +58,7 @@ const SearchBar = ({
           placeholderTextColor={colors.secondaryText}
           value={value}
           onChangeText={isEditable ? onChangeText : undefined}
-          autoFocus={isEditable}
+          autoFocus={autoFocus}
           autoCapitalize="none"
           autoCorrect={false}
           editable={isEditable}

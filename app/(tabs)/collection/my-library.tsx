@@ -5,8 +5,8 @@ import {
   FlatList,
   Platform,
   StyleSheet,
-  ScrollView,
   Pressable,
+  Keyboard,
 } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
@@ -38,8 +38,127 @@ import {
 import SortBottomSheet, { SortOption } from "@/components/SortBottomSheet";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import * as Haptics from "expo-haptics";
+import SearchBar from "@/components/discover/SearchBar";
 
-const AnimatedList = Animated.createAnimatedComponent(FlatList<Book>);
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<Book>);
+
+interface LibraryHeaderProps {
+  onLayout: (event: any) => void;
+  booksCount: number;
+  statusOptions: {
+    key: ReadingStatus;
+    label: string;
+    icon: React.ReactNode;
+  }[];
+  selectedStatuses: ReadingStatus[];
+  onToggleStatus: (status: ReadingStatus) => void;
+  onOpenSort: () => void;
+  onSwitchLayout: () => void;
+  currentLayout: "grid" | "list";
+  searchQuery: string;
+  onSearchChange: (text: string) => void;
+  colors: any;
+  typography: any;
+  t: any;
+}
+
+const LibraryHeader = React.memo(({
+  onLayout,
+  booksCount,
+  statusOptions,
+  selectedStatuses,
+  onToggleStatus,
+  onOpenSort,
+  onSwitchLayout,
+  currentLayout,
+  searchQuery,
+  onSearchChange,
+  colors,
+  typography,
+  t,
+}: LibraryHeaderProps) => {
+  return (
+    <View>
+      <SearchBar
+        value={searchQuery}
+        onChangeText={onSearchChange}
+        placeholder={t("collection.myLibrary.searchPlaceholder")}
+        isEditable={true}
+        containerStyle={{ marginBottom: 16 }}
+        autoFocus={false}
+      />
+      <View
+        style={styles.header}
+        onLayout={onLayout}
+      >
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: 2,
+          }}
+        >
+          <Text
+            style={[
+              typography.h1,
+              { color: colors.text, maxWidth: "80%" },
+            ]}
+            accessibilityRole="header"
+            accessibilityLabel="Library"
+            numberOfLines={1}
+          >
+            {t("collection.myLibrary.title")}
+          </Text>
+          <Text
+            style={[typography.caption, { color: colors.secondaryText }]}
+          >
+            {booksCount} {t("common.book")}
+            {booksCount > 1 ? "s" : ""}
+          </Text>
+        </View>
+        <View
+          style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+        >
+          <Pressable
+            onPress={onOpenSort}
+            style={{
+              width: 32,
+              height: 32,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <ArrowUpDown size={22} color={colors.icon} />
+          </Pressable>
+          <SwitchLayoutButton
+            onPress={onSwitchLayout}
+            currentView={currentLayout}
+          />
+        </View>
+      </View>
+      <FlatList
+        horizontal
+        data={statusOptions}
+        keyExtractor={(item) => item.key}
+        renderItem={({ item: status }) => (
+          <PillButton
+            title={status.label}
+            icon={status.icon}
+            toggleable={true}
+            selected={selectedStatuses.includes(status.key)}
+            onPress={() => onToggleStatus(status.key)}
+          />
+        )}
+        showsHorizontalScrollIndicator={false}
+        style={{ marginHorizontal: -16 }}
+        contentContainerStyle={styles.statusFilters}
+      />
+    </View>
+  );
+});
+
+LibraryHeader.displayName = 'LibraryHeader';
 
 export default function MyLibrary() {
   const router = useRouter();
@@ -52,11 +171,11 @@ export default function MyLibrary() {
     scrollY.value = event.contentOffset.y;
   });
   const [titleY, setTitleY] = useState<number>(0);
-  const scrollRef = useRef<FlatList<Book> | null>(null);
   const sortSheetRef = useRef<BottomSheetModal>(null);
   const currentLayout = useUIStore((state) => state.myLibraryLayout);
   const setLayout = useUIStore((state) => state.setMyLibraryLayout);
   const [selectedStatuses, setSelectedStatuses] = useState<ReadingStatus[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortOption, setSortOption] = useState<SortOption>({
     type: "date",
     order: "desc",
@@ -83,7 +202,16 @@ export default function MyLibrary() {
           selectedStatuses.includes(
             book.trackingStatus?.status as ReadingStatus
           )
-      );
+      )
+      .filter((book) => {
+        if (!searchQuery.trim()) return true;
+        const query = searchQuery.toLowerCase();
+        const titleMatch = book.title?.toLowerCase().includes(query);
+        const authorMatch = book.authors?.some((author) =>
+          author.name?.toLowerCase().includes(query)
+        );
+        return titleMatch || authorMatch;
+      });
 
     // Apply sorting
     const sorted = [...filtered].sort((a, b) => {
@@ -122,7 +250,7 @@ export default function MyLibrary() {
     });
 
     return sorted;
-  }, [trackedBooks, selectedStatuses, sortOption]);
+  }, [trackedBooks, selectedStatuses, sortOption, searchQuery]);
 
   const switchLayout = () => {
     const newLayout = currentLayout === "grid" ? "list" : "grid";
@@ -148,6 +276,26 @@ export default function MyLibrary() {
     setSortOption(newSortOption);
   };
 
+  // Calculate status counts efficiently in a single pass
+  const statusCounts = React.useMemo(() => {
+    const counts: Record<ReadingStatus, number> = {
+      reading: 0,
+      plan_to_read: 0,
+      completed: 0,
+      on_hold: 0,
+      dropped: 0,
+    };
+
+    books.forEach((book) => {
+      const status = book.trackingStatus?.status;
+      if (status && status in counts) {
+        counts[status as ReadingStatus]++;
+      }
+    });
+
+    return counts;
+  }, [books]);
+
   const statusOptions: {
     key: ReadingStatus;
     label: string;
@@ -155,33 +303,36 @@ export default function MyLibrary() {
   }[] = [
     {
       key: "reading",
-      label: `${t("status.reading")} • ${books.filter((book) => book.trackingStatus?.status === "reading").length}`,
+      label: `${t("status.reading")} • ${statusCounts.reading}`,
       icon: <BookOpenIcon size={16} strokeWidth={1.75} color={colors.icon} />,
     },
     {
       key: "plan_to_read",
-      label: `${t("status.planToRead")} • ${books.filter((book) => book.trackingStatus?.status === "plan_to_read").length}`,
+      label: `${t("status.planToRead")} • ${statusCounts.plan_to_read}`,
       icon: <Clock3 size={16} strokeWidth={1.75} color={colors.icon} />,
     },
     {
       key: "completed",
-      label: `${t("status.completed")} • ${books.filter((book) => book.trackingStatus?.status === "completed").length}`,
+      label: `${t("status.completed")} • ${statusCounts.completed}`,
       icon: <BookCheck size={16} strokeWidth={1.75} color={colors.icon} />,
     },
     {
       key: "on_hold",
-      label: `${t("status.onHold")} • ${books.filter((book) => book.trackingStatus?.status === "on_hold").length}`,
+      label: `${t("status.onHold")} • ${statusCounts.on_hold}`,
       icon: <Pause size={16} strokeWidth={1.75} color={colors.icon} />,
     },
     {
       key: "dropped",
-      label: `${t("status.dropped")} • ${books.filter((book) => book.trackingStatus?.status === "dropped").length}`,
+      label: `${t("status.dropped")} • ${statusCounts.dropped}`,
       icon: <Square size={16} strokeWidth={1.75} color={colors.icon} />,
     },
   ];
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <Pressable
+      style={{ flex: 1, backgroundColor: colors.background }}
+      onPress={() => Keyboard.dismiss()}
+    >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedHeader
         title={t("collection.myLibrary.title")}
@@ -189,90 +340,43 @@ export default function MyLibrary() {
         collapseThreshold={titleY > 0 ? titleY : undefined}
         onBack={handleBack}
       />
-      <AnimatedList
-        ref={scrollRef}
+      <AnimatedFlatList
         data={books}
-        key={currentLayout}
         keyExtractor={(item) => String(item.id)}
+        key={currentLayout}
+        numColumns={currentLayout === "grid" ? 3 : 1}
         contentContainerStyle={{
           marginTop: insets.top,
           paddingHorizontal: 16,
           paddingBottom: 64,
           flexGrow: 1,
         }}
-        numColumns={currentLayout === "grid" ? 3 : 1}
+        columnWrapperStyle={currentLayout === "grid" ? { gap: 4 } : undefined}
         onScroll={scrollHandler}
+        scrollEventThrottle={16}
+        onScrollBeginDrag={() => Keyboard.dismiss()}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={true}
         ListHeaderComponent={
-          <View>
-            <View
-              style={styles.header}
-              onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
-            >
-              <View
-                style={{
-                  flex: 1,
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  gap: 8,
-                }}
-              >
-                <Text
-                  style={[
-                    typography.h1,
-                    { color: colors.text, maxWidth: "80%" },
-                  ]}
-                  accessibilityRole="header"
-                  accessibilityLabel="Library"
-                  numberOfLines={1}
-                >
-                  {t("collection.myLibrary.title")}
-                </Text>
-                <Text
-                  style={[typography.body, { color: colors.secondaryText }]}
-                >
-                  {books.length} {t("common.book")}
-                  {books.length > 1 ? "s" : ""}
-                </Text>
-              </View>
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
-              >
-                <Pressable
-                  onPress={handleOpenSortSheet}
-                  style={{
-                    width: 32,
-                    height: 32,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <ArrowUpDown size={22} color={colors.icon} />
-                </Pressable>
-                <SwitchLayoutButton
-                  onPress={switchLayout}
-                  currentView={currentLayout}
-                />
-              </View>
-            </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ marginHorizontal: -16 }}
-              contentContainerStyle={styles.statusFilters}
-            >
-              {statusOptions.map((status) => (
-                <PillButton
-                  key={status.key}
-                  title={status.label}
-                  icon={status.icon}
-                  toggleable={true}
-                  selected={selectedStatuses.includes(status.key)}
-                  onPress={() => toggleStatus(status.key)}
-                />
-              ))}
-            </ScrollView>
-          </View>
+          <LibraryHeader
+            onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
+            booksCount={books.length}
+            statusOptions={statusOptions}
+            selectedStatuses={selectedStatuses}
+            onToggleStatus={toggleStatus}
+            onOpenSort={handleOpenSortSheet}
+            onSwitchLayout={switchLayout}
+            currentLayout={currentLayout}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            colors={colors}
+            typography={typography}
+            t={t}
+          />
         }
+        stickyHeaderIndices={[]}
+        ListHeaderComponentStyle={{ marginBottom: 0 }}
         renderItem={({ item }) =>
           currentLayout === "grid" ? (
             <View style={{ width: "33%" }}>
@@ -324,19 +428,13 @@ export default function MyLibrary() {
             </Text>
           ) : null
         }
-        columnWrapperStyle={currentLayout === "grid" ? { gap: 4 } : undefined}
-        onEndReached={() => {}}
-        onEndReachedThreshold={0.2}
-        ListFooterComponent={null}
-        showsVerticalScrollIndicator={true}
-        accessibilityRole="list"
       />
       <SortBottomSheet
         ref={sortSheetRef}
         onSortChange={handleSortChange}
         currentSort={sortOption}
       />
-    </View>
+    </Pressable>
   );
 }
 
@@ -345,7 +443,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: Platform.OS === "android" ? 70 : 70,
     marginBottom: 16,
   },
   statusFilters: {

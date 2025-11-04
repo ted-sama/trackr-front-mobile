@@ -65,6 +65,7 @@ export function HeaderCollection({
             onChangeText={onSearchTextChange}
             onSubmitEditing={onSubmitSearch}
             containerStyle={{ flex: 1 }}
+            autoFocus={true}
           />
           <TouchableOpacity onPress={handleCancelSearch} style={styles.cancelButton}>
             <Text style={[typography.h3, { color: colors.primary }]}>{t("discover.cancel")}</Text>
