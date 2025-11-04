@@ -450,9 +450,9 @@ export default function ListFullScreen() {
           keyExtractor={(item) => item.id.toString()}
           key={currentLayout}
           numColumns={currentLayout === "grid" ? 3 : 1}
+          style={{ paddingTop: insets.top }}
           contentContainerStyle={{
             paddingHorizontal: 16,
-            paddingTop: insets.top,
             paddingBottom: 64,
             flexGrow: 1,
           }}

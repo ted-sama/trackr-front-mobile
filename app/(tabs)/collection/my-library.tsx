@@ -84,7 +84,7 @@ const LibraryHeader = React.memo(({
         onChangeText={onSearchChange}
         placeholder={t("collection.myLibrary.searchPlaceholder")}
         isEditable={true}
-        containerStyle={{ marginBottom: 16 }}
+        containerStyle={{ marginTop: 70, marginBottom: 16 }}
         autoFocus={false}
       />
       <View
@@ -345,8 +345,8 @@ export default function MyLibrary() {
         keyExtractor={(item) => String(item.id)}
         key={currentLayout}
         numColumns={currentLayout === "grid" ? 3 : 1}
+        style={{ marginTop: insets.top }}
         contentContainerStyle={{
-          marginTop: insets.top,
           paddingHorizontal: 16,
           paddingBottom: 64,
           flexGrow: 1,
