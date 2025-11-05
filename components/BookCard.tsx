@@ -41,6 +41,7 @@ interface BookCardProps {
   showUserRating?: boolean;
   showTrackingStatus?: boolean;
   showTrackingButton?: boolean;
+  showTrackingChapter?: boolean;
   rank?: number;
   currentListId?: string;
   isFromListPage?: boolean;
@@ -51,7 +52,7 @@ const CARD_WIDTH = width * 0.33;
 const COMPACT_CARD_WIDTH = width * 0.29;
 const COMPACT_SMALL_CARD_WIDTH = width * 0.25;
 
-const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showUserRating = false, showTrackingStatus = false, showTrackingButton = true, rank, currentListId, isFromListPage }: BookCardProps) => {
+const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showUserRating = false, showTrackingStatus = false, showTrackingButton = true, showTrackingChapter = false, rank, currentListId, isFromListPage }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const { isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
@@ -186,7 +187,7 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
               </View>
             )}
             {/* Chapter badge on cover */}
-            {trackingStatus && trackingStatus.currentChapter && (
+            { showTrackingChapter && trackingStatus && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
               <View style={styles.chapterBadgeContainer}>
                 <Badge
                   text={`Ch. ${trackingStatus.currentChapter.toString()}`}

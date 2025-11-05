@@ -391,6 +391,7 @@ export default function MyLibrary() {
                 showTrackingStatus={true}
                 showTrackingButton={false}
                 showRating={false}
+                showTrackingChapter={true}
               />
             </View>
           ) : (
@@ -404,6 +405,7 @@ export default function MyLibrary() {
               showTrackingStatus={true}
               showTrackingButton={false}
               showRating={false}
+              showTrackingChapter={true}
             />
           )
         }

@@ -25,13 +25,14 @@ interface BookListElementProps {
   showAuthor?: boolean;
   showRating?: boolean;
   showUserRating?: boolean;
+  showTrackingChapter?: boolean;
   rank?: number;
   currentListId?: string;
   isFromListPage?: boolean;
   compact?: boolean;
 }
 
-const BookListElement = ({ book, onPress, showAuthor = true, showRating = false, showUserRating = false, showTrackingButton = false, showTrackingStatus = false, rank, currentListId, isFromListPage, compact = false }: BookListElementProps) => {
+const BookListElement = ({ book, onPress, showAuthor = true, showRating = false, showUserRating = false, showTrackingButton = false, showTrackingStatus = false, showTrackingChapter = false, rank, currentListId, isFromListPage, compact = false }: BookListElementProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
   const { isBottomSheetVisible, openBookActions } = useBottomSheet();
@@ -115,7 +116,7 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
                   icon={trackingStatusValues[trackingStatus.status as ReadingStatus].icon}
                   borderColor={colors.badgeBorder}
                 />
-                {trackingStatus.currentChapter && (
+                {showTrackingChapter && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
                   <Badge
                     text={`Ch. ${trackingStatus.currentChapter.toString()}`}
                     color={colors.badgeText}
@@ -140,7 +141,7 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
           {showTrackingButton && (
             <TrackingIconButton isTracking={isTracking} onPress={handleTrackingToggle} />
           )}
-          {compact && showTrackingStatus && trackingStatus && trackingStatus.currentChapter && (
+          {compact && showTrackingChapter && trackingStatus && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
             <Badge
               text={`Ch. ${trackingStatus.currentChapter.toString()}`}
               color={colors.badgeText}

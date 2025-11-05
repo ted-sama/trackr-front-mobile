@@ -123,7 +123,7 @@ export default function Index() {
           {lastRead.length > 0 ? (
             <FlatList
               data={lastRead}
-              renderItem={({ item }) => <BookListElement book={item} compact showTrackingStatus onPress={() => {router.push(`/book/${item.id}`)}} />}
+              renderItem={({ item }) => <BookListElement book={item} compact showTrackingStatus showTrackingChapter onPress={() => {router.push(`/book/${item.id}`)}} />}
               ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
               scrollEnabled={false}
             />

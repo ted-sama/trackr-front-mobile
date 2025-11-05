@@ -308,7 +308,7 @@ export default function UserProfileScreen() {
               </Text>
               {user?.plan === "plus" && <PlusBadge />}
             </View>
-            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{user?.username} #{user?.createdAt}</Text>
+            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{user?.username}</Text>
             <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.memberSince")} {dayjs.utc(user?.createdAt).format("DD/MM/YYYY")}</Text>
           </View>
         </View>
