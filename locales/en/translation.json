@@ -1,7 +1,7 @@
 {
     "common": {
         "book": "book",
-        "search": "Search books..."
+        "search": "Search books"
     },
     "save": "Save",
     "create": "Create",
@@ -92,7 +92,7 @@
         "myLibrary": {
             "title": "My library",
             "noBooks": "No books found in your library.",
-            "searchPlaceholder": "Search books...",
+            "searchPlaceholder": "Search books",
             "sort": {
                 "title": "Sort by",
                 "rating_desc": "Best rated",

@@ -15,6 +15,9 @@ import Avatar from "@/components/ui/Avatar";
 import { ChevronRight } from "lucide-react-native";
 import { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import Animated from "react-native-reanimated";
+import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
+import MaskedView from "@react-native-masked-view/masked-view";
 
 export default function Index() {
   const { t } = useTranslation();
@@ -56,18 +59,61 @@ export default function Index() {
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-      <View style={[styles.header, { paddingTop: 24 + insets.top, paddingHorizontal: 16 }]}>
-        <Pressable onPress={() => router.push("/me")}>
-          <Avatar image={currentUser?.avatar || ""} size={32} />
-        </Pressable>
-        <Text
-          style={[typography.h1, { color: colors.text }]}
-          numberOfLines={1}
-          ellipsizeMode="tail"
+
+      {/* Blurred header with gradient fade */}
+      <View style={[styles.headerContainer, { height: 80 + insets.top }]}>
+        <MaskedView
+          style={StyleSheet.absoluteFillObject}
+          maskElement={
+            <LinearGradient
+              colors={[
+                'rgba(0, 0, 0, 1)',
+                'rgba(0, 0, 0, 1)',
+                'rgba(0, 0, 0, 0.98)',
+                'rgba(0, 0, 0, 0.95)',
+                'rgba(0, 0, 0, 0.9)',
+                'rgba(0, 0, 0, 0.82)',
+                'rgba(0, 0, 0, 0.7)',
+                'rgba(0, 0, 0, 0.55)',
+                'rgba(0, 0, 0, 0.4)',
+                'rgba(0, 0, 0, 0.25)',
+                'rgba(0, 0, 0, 0.12)',
+                'rgba(0, 0, 0, 0.05)',
+                'rgba(0, 0, 0, 0.02)',
+                'rgba(0, 0, 0, 0)',
+              ]}
+              locations={[0, 0.4, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.94, 0.97, 1]}
+              dither={true}
+              style={{ flex: 1 }}
+            />
+          }
         >
-          {t("home.greeting", { name: currentUser?.displayName })}
-        </Text>
+          <BlurView
+            intensity={8}
+            tint={currentTheme === "dark" ? "dark" : "light"}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View
+            style={[
+              StyleSheet.absoluteFillObject,
+              {
+                backgroundColor:
+                  currentTheme === "dark"
+                    ? "rgba(0,0,0,0.3)"
+                    : "rgba(255,255,255,0.1)",
+              },
+            ]}
+          />
+        </MaskedView>
+
+        {/* Header content */}
+        <View style={[styles.header, { paddingTop: 24 + insets.top, paddingHorizontal: 16 }]}>
+          <Pressable onPress={() => router.push("/me")}>
+            <Avatar image={currentUser?.avatar || ""} size={32} borderWidth={1} borderColor={colors.border} />
+          </Pressable>
+        </View>
       </View>
+
       <ScrollView
         style={{ flex: 1 }}
       >
@@ -113,17 +159,26 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 98,
+    overflow: "hidden",
+  },
   header: {
     flexDirection: "row",
     gap: 16,
     alignItems: "center",
     paddingBottom: 16,
+    zIndex: 99,
   },
   container: {
     flex: 1,
   },
   content: {
-    paddingTop: 12,
+    paddingTop: 90,
     paddingHorizontal: 16,
     paddingBottom: 78,
   },

@@ -6,6 +6,9 @@ import { useTheme } from '@/contexts/ThemeContext';
 import SearchBar from '@/components/discover/SearchBar';
 import { useTypography } from '@/hooks/useTypography';
 import { useTranslation } from 'react-i18next';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import MaskedView from '@react-native-masked-view/masked-view';
 
 interface HeaderCollectionProps {
   searchText: string;
@@ -43,55 +46,116 @@ export function HeaderCollection({
   return (
     <View
       style={[
-        styles.header,
+        styles.headerContainer,
         {
-          paddingTop: insets.top,
-          height: 72 + insets.top,
-          backgroundColor: colors.background,
-          borderBottomColor: colors.tabBarBorder,
+          height: 80 + insets.top,
         },
       ]}
     >
       <StatusBar
         barStyle={currentTheme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={colors.background}
+        backgroundColor="transparent"
       />
-      {isSearchActive ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <SearchBar
-            placeholder={t("collection.searchPlaceholder")}
-            isEditable
-            value={searchText}
-            onChangeText={onSearchTextChange}
-            onSubmitEditing={onSubmitSearch}
-            containerStyle={{ flex: 1 }}
-            autoFocus={true}
+
+      {/* Blurred header with gradient fade */}
+      <MaskedView
+        style={StyleSheet.absoluteFillObject}
+        maskElement={
+          <LinearGradient
+            colors={[
+              'rgba(0, 0, 0, 1)',
+              'rgba(0, 0, 0, 1)',
+              'rgba(0, 0, 0, 0.98)',
+              'rgba(0, 0, 0, 0.95)',
+              'rgba(0, 0, 0, 0.9)',
+              'rgba(0, 0, 0, 0.82)',
+              'rgba(0, 0, 0, 0.7)',
+              'rgba(0, 0, 0, 0.55)',
+              'rgba(0, 0, 0, 0.4)',
+              'rgba(0, 0, 0, 0.25)',
+              'rgba(0, 0, 0, 0.12)',
+              'rgba(0, 0, 0, 0.05)',
+              'rgba(0, 0, 0, 0.02)',
+              'rgba(0, 0, 0, 0)',
+            ]}
+            locations={[0, 0.4, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.94, 0.97, 1]}
+            dither={true}
+            style={{ flex: 1 }}
           />
-          <TouchableOpacity onPress={handleCancelSearch} style={styles.cancelButton}>
-            <Text style={[typography.h3, { color: colors.primary }]}>{t("discover.cancel")}</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View style={styles.titleRow}>
-          <Text style={[typography.h1, { color: colors.text, flex: 1 }]} numberOfLines={1}>
-            Collection
-          </Text>
-          <TouchableOpacity onPress={handleSearchIconPress} style={styles.searchIconButton}>
-            <Ionicons name="search" size={24} color={colors.primary} />
-          </TouchableOpacity>
-        </View>
-      )}
+        }
+      >
+        <BlurView
+          intensity={8}
+          tint={currentTheme === "dark" ? "dark" : "light"}
+          style={StyleSheet.absoluteFillObject}
+        />
+        <View
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              backgroundColor:
+                currentTheme === "dark"
+                  ? "rgba(0,0,0,0.3)"
+                  : "rgba(255,255,255,0.1)",
+            },
+          ]}
+        />
+      </MaskedView>
+
+      {/* Header content */}
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: insets.top,
+          },
+        ]}
+      >
+        {isSearchActive ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <SearchBar
+              placeholder={t("collection.searchPlaceholder")}
+              isEditable
+              value={searchText}
+              onChangeText={onSearchTextChange}
+              onSubmitEditing={onSubmitSearch}
+              containerStyle={{ flex: 1 }}
+              autoFocus={true}
+            />
+            <TouchableOpacity onPress={handleCancelSearch} style={styles.cancelButton}>
+              <Text style={[typography.h3, { color: colors.primary }]}>{t("discover.cancel")}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.titleRow}>
+            <Text style={[typography.h1, { color: colors.text, flex: 1 }]} numberOfLines={1}>
+              Collection
+            </Text>
+            <TouchableOpacity onPress={handleSearchIconPress} style={styles.searchIconButton}>
+              <Ionicons name="search" size={24} color={colors.primary} />
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 98,
+    overflow: 'hidden',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: paddingHorizontal,
     paddingBottom: 10,
-    borderBottomWidth: 1,
+    zIndex: 99,
   },
   titleRow: {
     flex: 1,

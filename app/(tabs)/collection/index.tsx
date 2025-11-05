@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { View, StyleSheet, Text, Pressable, FlatList } from "react-native";
 import { Image as ExpoImage } from "expo-image";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } from 'react-native-reanimated';
 import CollectionListElement from "@/components/CollectionListElement";
 import { useRouter } from "expo-router";
@@ -162,6 +162,7 @@ export default function Collection() {
   const router = useRouter();
   const typography = useTypography();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [searchText, setSearchText] = useState("");
   const debouncedQuery = useStableTrimmedQuery(searchText);
   // Subscribe to trackedBooks state directly so the component re-renders when it changes
@@ -196,21 +197,19 @@ export default function Collection() {
   ), [mosaicBooks, colors, typography, router, myLibrary.length]);
 
   return (
-    <SafeAreaView edges={["right", "left", "bottom"]} style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["right", "left"]}>
       <CollectionHeader
         searchText={searchText}
         onSearchTextChange={handleSearchTextChange}
       />
-      <View>
-        <FlatList
-          data={lists}
-          ListHeaderComponent={renderListHeader}
-          renderItem={({ item }) => <CollectionListElement list={item} onPress={() => {router.push(`/list/${item.id}`)}} />}
-          keyExtractor={(item) => item.id}
-          ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-          contentContainerStyle={styles.listContainer}
-        />
-      </View>
+      <FlatList
+        data={lists}
+        ListHeaderComponent={renderListHeader}
+        renderItem={({ item }) => <CollectionListElement list={item} onPress={() => {router.push(`/list/${item.id}`)}} />}
+        keyExtractor={(item) => item.id}
+        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+        contentContainerStyle={[styles.listContainer, { paddingTop: 80 }]}
+      />
     </SafeAreaView>
   );
 }
@@ -228,7 +227,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   listContainer: {
-    paddingTop: 16,
     paddingBottom: 128,
     paddingHorizontal: 16,
   },

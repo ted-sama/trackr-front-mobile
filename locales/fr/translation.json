@@ -1,7 +1,7 @@
 {
     "common": {
         "book": "livre",
-        "search": "Rechercher des livres..."
+        "search": "Rechercher des livres"
     },
     "save": "Enregistrer",
     "create": "Créer",
@@ -92,7 +92,7 @@
         "myLibrary": {
             "title": "Ma bibliothèque",
             "noBooks": "Aucun livre trouvé dans votre bibliothèque.",
-            "searchPlaceholder": "Rechercher des livres...",
+            "searchPlaceholder": "Rechercher des livres",
             "sort": {
                 "title": "Trier par",
                 "rating_desc": "Mieux notés",
