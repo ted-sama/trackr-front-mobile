@@ -111,7 +111,7 @@ export default function ListOrder() {
   if (!list) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-        <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+        <StatusBar />
         <View
           style={[
             styles.header,
@@ -148,7 +148,7 @@ export default function ListOrder() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={0}
     >
-      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+      <StatusBar />
 
       <View
         style={{

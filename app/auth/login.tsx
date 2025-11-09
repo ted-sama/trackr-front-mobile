@@ -87,7 +87,7 @@ export default function Login() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar />
       <Text style={[typography.h1, styles.title, { color: colors.text }]}>
         {t("auth.login.title")}
       </Text>

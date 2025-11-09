@@ -268,7 +268,7 @@ export default function ActivityPage() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+      <StatusBar />
       
       <AnimatedHeader
         title={t("activity.title")}

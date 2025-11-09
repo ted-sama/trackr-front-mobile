@@ -61,7 +61,7 @@ export default function CategoryFull() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+      <StatusBar />
       <AnimatedHeader
         title={category?.title || "Catégorie"}
         scrollY={scrollY}

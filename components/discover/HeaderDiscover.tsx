@@ -127,7 +127,6 @@ export default function HeaderDiscover({
       ]}
     >
       <StatusBar
-        barStyle={currentTheme === "dark" ? "light-content" : "dark-content"}
         backgroundColor={colors.background}
       />
       

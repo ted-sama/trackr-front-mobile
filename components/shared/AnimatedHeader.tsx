@@ -6,6 +6,8 @@ import { BlurView } from 'expo-blur';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
+import { LinearGradient } from 'expo-linear-gradient';
+import MaskedView from '@react-native-masked-view/masked-view';
 
 interface AnimatedHeaderProps {
   title: string;
@@ -50,54 +52,59 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
     return { opacity };
   });
 
-  const backButtonBgStyle = useAnimatedStyle(() => {
-    if (isStatic) {
-      return { opacity: 0 };
-    }
-    const opacity = interpolate(
-      scrollY.value,
-      [0, collapseThreshold - 10],
-      [1, 0],
-      Extrapolate.CLAMP
-    );
-    return { opacity };
-  });
-
   return (
-    <View style={[styles.container, { height: 60 + insets.top }]}> 
-      <Animated.View
-        style={[
-          StyleSheet.absoluteFillObject,
-          styles.background,
-          headerContainerStyle,
-          { borderBottomColor: colors.tabBarBorder, borderBottomWidth: 1 },
-        ]}
-      >
-        <BlurView
-          intensity={80}
-          tint={currentTheme === 'dark' ? 'dark' : 'light'}
+    <View style={[styles.container, { height: 80 + insets.top }]}>
+      <Animated.View style={[StyleSheet.absoluteFillObject, headerContainerStyle]}>
+        <MaskedView
           style={StyleSheet.absoluteFillObject}
-          // experimentalBlurMethod='dimezisBlurView'
-        />
-        <View
-          style={[
-            StyleSheet.absoluteFillObject,
-            { backgroundColor: currentTheme === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.1)' }
-          ]}
-        />
+          maskElement={
+            <LinearGradient
+              colors={[
+                'rgba(0, 0, 0, 1)',
+                'rgba(0, 0, 0, 1)',
+                'rgba(0, 0, 0, 0.98)',
+                'rgba(0, 0, 0, 0.95)',
+                'rgba(0, 0, 0, 0.9)',
+                'rgba(0, 0, 0, 0.82)',
+                'rgba(0, 0, 0, 0.7)',
+                'rgba(0, 0, 0, 0.55)',
+                'rgba(0, 0, 0, 0.4)',
+                'rgba(0, 0, 0, 0.25)',
+                'rgba(0, 0, 0, 0.12)',
+                'rgba(0, 0, 0, 0.05)',
+                'rgba(0, 0, 0, 0.02)',
+                'rgba(0, 0, 0, 0)',
+              ]}
+              locations={[0, 0.4, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.94, 0.97, 1]}
+              dither={true}
+              style={{ flex: 1 }}
+            />
+          }
+        >
+          <BlurView
+            intensity={20}
+            tint='dark'
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View
+            style={[
+              StyleSheet.absoluteFillObject,
+              { backgroundColor: currentTheme === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.1)' }
+            ]}
+          />
+        </MaskedView>
       </Animated.View>
       <View style={[styles.content, { paddingTop: insets.top }]}> 
         {onBack && (
           <Pressable onPress={onBack} style={styles.backButton}>
-          <Animated.View
-            style={[
-              StyleSheet.absoluteFillObject,
-              styles.backButtonBg,
-              { backgroundColor: colors.backButtonBackground },
-              backButtonBgStyle,
-            ]}
-          />
-          <Ionicons name="arrow-back" size={22} color={colors.icon} />
+            <View
+              style={[
+                StyleSheet.absoluteFillObject,
+                styles.backButtonBg,
+                { backgroundColor: colors.backButtonBackground },
+              ]}
+            />
+            <Ionicons name="arrow-back" size={22} color={colors.icon} />
           </Pressable>
         )}
         <Animated.Text
@@ -108,15 +115,14 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
           {title}
         </Animated.Text>
         {/* width: 80, -- 36*2 (buttons) + 8 (gap) */}
-        <View style={[styles.rightContainer, { width: closeRightButton ? 80 : 36 }]}> 
+        <View style={[styles.rightContainer, { width: closeRightButton ? 80 : 36 }]}>
           {closeRightButton ? (
             <View style={styles.closeRightButton}>
-              <Animated.View
+              <View
                 style={[
                   StyleSheet.absoluteFillObject,
                   styles.backButtonBg,
                   { backgroundColor: colors.backButtonBackground },
-                  backButtonBgStyle,
                 ]}
               />
               {closeRightButton}
@@ -124,12 +130,11 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
           ) : null}
           {rightButton ? (
             <View style={styles.rightButton}>
-              <Animated.View
+              <View
                 style={[
                   StyleSheet.absoluteFillObject,
                   styles.backButtonBg,
                   { backgroundColor: colors.backButtonBackground },
-                  backButtonBgStyle,
                 ]}
               />
               {rightButton}

@@ -245,7 +245,7 @@ export default function ProfileEditModal() {
   if (!currentUser) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-        <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+        <StatusBar />
         <View style={styles.loadingContainer}>
           <Text style={[typography.body, { color: colors.secondaryText }]}>
             Chargement...
@@ -261,7 +261,7 @@ export default function ProfileEditModal() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={0}
     >
-      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+      <StatusBar />
       <View
         style={{
           paddingTop: insets.top + 16,

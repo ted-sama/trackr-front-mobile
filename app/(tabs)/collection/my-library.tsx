@@ -1,12 +1,10 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
   FlatList,
-  Platform,
   StyleSheet,
   Pressable,
-  Keyboard,
 } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
@@ -38,12 +36,13 @@ import {
 import SortBottomSheet, { SortOption } from "@/components/SortBottomSheet";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import * as Haptics from "expo-haptics";
-import SearchBar from "@/components/discover/SearchBar";
+import SearchBar from "@/components/ui/SearchBar";
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<Book>);
 
 interface LibraryHeaderProps {
-  onLayout: (event: any) => void;
+  insets: { top: number; bottom: number; left: number; right: number };
+  onTitleLayout: (event: any) => void;
   booksCount: number;
   statusOptions: {
     key: ReadingStatus;
@@ -63,7 +62,8 @@ interface LibraryHeaderProps {
 }
 
 const LibraryHeader = React.memo(({
-  onLayout,
+  insets,
+  onTitleLayout,
   booksCount,
   statusOptions,
   selectedStatuses,
@@ -78,57 +78,38 @@ const LibraryHeader = React.memo(({
   t,
 }: LibraryHeaderProps) => {
   return (
-    <View>
+    <View
+      style={{
+        marginTop: -insets.top,
+        paddingTop: insets.top + 80,
+      }}
+    >
+      {/* Search Bar */}
       <SearchBar
+        placeholder={t("collection.myLibrary.searchPlaceholder")}
         value={searchQuery}
         onChangeText={onSearchChange}
-        placeholder={t("collection.myLibrary.searchPlaceholder")}
-        isEditable={true}
-        containerStyle={{ marginTop: 70, marginBottom: 16 }}
-        autoFocus={false}
+        containerStyle={{ marginBottom: 16 }}
       />
-      <View
-        style={styles.header}
-        onLayout={onLayout}
-      >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: "column",
-            alignItems: "flex-start",
-            gap: 2,
-          }}
-        >
+
+      {/* Title and actions */}
+      <View style={styles.header} onLayout={onTitleLayout}>
+        <View style={styles.titleContainer}>
           <Text
-            style={[
-              typography.h1,
-              { color: colors.text, maxWidth: "80%" },
-            ]}
+            style={[typography.h1, { color: colors.text, maxWidth: "80%" }]}
             accessibilityRole="header"
             accessibilityLabel="Library"
             numberOfLines={1}
           >
             {t("collection.myLibrary.title")}
           </Text>
-          <Text
-            style={[typography.caption, { color: colors.secondaryText }]}
-          >
+          <Text style={[typography.caption, { color: colors.secondaryText }]}>
             {booksCount} {t("common.book")}
             {booksCount > 1 ? "s" : ""}
           </Text>
         </View>
-        <View
-          style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
-        >
-          <Pressable
-            onPress={onOpenSort}
-            style={{
-              width: 32,
-              height: 32,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
+        <View style={styles.actions}>
+          <Pressable onPress={onOpenSort} style={styles.actionButton}>
             <ArrowUpDown size={22} color={colors.icon} />
           </Pressable>
           <SwitchLayoutButton
@@ -137,6 +118,8 @@ const LibraryHeader = React.memo(({
           />
         </View>
       </View>
+
+      {/* Status filters */}
       <FlatList
         horizontal
         data={statusOptions}
@@ -158,7 +141,7 @@ const LibraryHeader = React.memo(({
   );
 });
 
-LibraryHeader.displayName = 'LibraryHeader';
+LibraryHeader.displayName = "LibraryHeader";
 
 export default function MyLibrary() {
   const router = useRouter();
@@ -187,10 +170,6 @@ export default function MyLibrary() {
 
   // Subscribe to trackedBooks state directly so the component re-renders when it changes
   const trackedBooks = useTrackedBooksStore((state) => state.trackedBooks);
-  const addTrackedBook = useTrackedBooksStore((state) => state.addTrackedBook);
-  const removeTrackedBookFromStore = useTrackedBooksStore(
-    (state) => state.removeTrackedBook
-  );
 
   const books = React.useMemo(() => {
     const booksArray = Object.values(trackedBooks);
@@ -329,10 +308,7 @@ export default function MyLibrary() {
   ];
 
   return (
-    <Pressable
-      style={{ flex: 1, backgroundColor: colors.background }}
-      onPress={() => Keyboard.dismiss()}
-    >
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedHeader
         title={t("collection.myLibrary.title")}
@@ -345,7 +321,7 @@ export default function MyLibrary() {
         keyExtractor={(item) => String(item.id)}
         key={currentLayout}
         numColumns={currentLayout === "grid" ? 3 : 1}
-        style={{ marginTop: insets.top }}
+        style={{ paddingTop: insets.top }}
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingBottom: 64,
@@ -354,13 +330,11 @@ export default function MyLibrary() {
         columnWrapperStyle={currentLayout === "grid" ? { gap: 4 } : undefined}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        onScrollBeginDrag={() => Keyboard.dismiss()}
-        keyboardDismissMode="on-drag"
-        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={true}
         ListHeaderComponent={
           <LibraryHeader
-            onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
+            insets={insets}
+            onTitleLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
             booksCount={books.length}
             statusOptions={statusOptions}
             selectedStatuses={selectedStatuses}
@@ -436,7 +410,7 @@ export default function MyLibrary() {
         onSortChange={handleSortChange}
         currentSort={sortOption}
       />
-    </Pressable>
+    </View>
   );
 }
 
@@ -446,6 +420,23 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
+  },
+  titleContainer: {
+    flex: 1,
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 2,
+  },
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  actionButton: {
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
   },
   statusFilters: {
     flexDirection: "row",

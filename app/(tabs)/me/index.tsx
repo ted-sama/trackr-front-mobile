@@ -111,7 +111,7 @@ export default function Profile() {
   if (isLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+        <StatusBar />
         <ScrollView contentContainerStyle={{ paddingBottom: 64 }}>
           {/* Backdrop skeleton */}
           <View style={{ width: "110%", height: 275, marginHorizontal: -16 }}>
@@ -187,7 +187,7 @@ export default function Profile() {
   // no-op
   return (
     <View style={{ flex: 1 }}>
-      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+      <StatusBar />
       {dominantColor && (
         <Animated.View
           style={[{

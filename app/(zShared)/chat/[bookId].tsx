@@ -333,7 +333,7 @@ export default function ChatScreen() {
                           {messageText}
                         </Markdown>
                         {messageSources.length > 0 && (
-                          <View style={{ marginTop: 8 }}>
+                          <View style={{ marginTop: 8, marginBottom: 8 }}>
                             <Sources sources={messageSources} />
                           </View>
                         )}
@@ -361,6 +361,7 @@ export default function ChatScreen() {
                   style={StyleSheet.absoluteFill}
                 />
               }
+              pointerEvents="none"
             >
               <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.background }]} />
             </MaskedView>
@@ -384,6 +385,7 @@ export default function ChatScreen() {
                 }}
                 placeholder={t("chat.messagePlaceholder")}
                 placeholderTextColor={colors.secondaryText}
+                autoCorrect={false}
                 multiline
                 maxLength={1000}
               />

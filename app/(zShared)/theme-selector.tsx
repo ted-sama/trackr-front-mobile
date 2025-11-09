@@ -97,7 +97,7 @@ export default function ThemeSelector() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar />
       
       <AnimatedHeader
         title={t('settings.appearance.theme')}
