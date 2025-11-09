@@ -102,7 +102,7 @@ const ListHeader = React.memo(({
         style={{
           marginTop: -insets.top,
           height: 275 + insets.top,
-          paddingTop: insets.top + 60,
+          paddingTop: insets.top + 70,
           zIndex: 1,
         }}
       >

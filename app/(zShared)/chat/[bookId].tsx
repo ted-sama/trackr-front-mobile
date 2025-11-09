@@ -33,8 +33,10 @@ export default function ChatScreen() {
     const [input, setInput] = useState<string>('');
     const [inputHeight, setInputHeight] = useState(48);
     const [dominantColor, setDominantColor] = useState<string | null>(null);
+    const [isUserScrolling, setIsUserScrolling] = useState(false);
     const keyboardHeight = useSharedValue(30);
     const scrollViewRef = useRef<DefaultScrollView>(null);
+    const previousMessagesLength = useRef(0);
     const { token } = useAuth();
     const { messages, error, sendMessage, status } = useChat({
         transport: new DefaultChatTransport({
@@ -72,9 +74,13 @@ export default function ChatScreen() {
         }
     }, [dominantColor]);
 
+    // Auto-scroll seulement quand un nouveau message est ajouté, pas pendant le streaming
     useEffect(() => {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, [messages]);
+      if (messages.length > previousMessagesLength.current && !isUserScrolling) {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }
+      previousMessagesLength.current = messages.length;
+    }, [messages.length, isUserScrolling]);
 
     useEffect(() => {
       const keyboardWillShow = Keyboard.addListener(
@@ -106,6 +112,7 @@ export default function ChatScreen() {
           text: input,
         });
         setInput('');
+        setIsUserScrolling(false); // Réinitialiser pour auto-scroll après l'envoi
       }
     };
 
@@ -113,6 +120,12 @@ export default function ChatScreen() {
       sendMessage({
         text: question,
       });
+      setIsUserScrolling(false); // Réinitialiser pour auto-scroll après l'envoi
+    };
+
+    const handleScroll = () => {
+      // Détecter que l'utilisateur est en train de scroller manuellement
+      setIsUserScrolling(true);
     };
 
   const gradientHeight = 250;
@@ -270,7 +283,7 @@ export default function ChatScreen() {
         )}
 
         <AnimatedHeader
-          title="Lens"
+          title={"Chat  ·  " + book?.title}
           scrollY={useSharedValue(0)}
           collapseThreshold={0}
           onBack={() => router.back()}
@@ -282,6 +295,8 @@ export default function ChatScreen() {
             style={styles.messagesContainer}
             contentContainerStyle={styles.messagesContent}
             keyboardShouldPersistTaps="handled"
+            onScroll={handleScroll}
+            scrollEventThrottle={400}
           >
             {messages.length > 0 && (
               messages.map((m) => {
