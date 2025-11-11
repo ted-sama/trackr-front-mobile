@@ -108,7 +108,7 @@ export default function Settings() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar />
+      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       
       <AnimatedHeader
         title={t('settings.title')}

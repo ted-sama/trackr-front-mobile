@@ -361,7 +361,7 @@ export default function ListFullScreen() {
   if (isLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <StatusBar />
+        <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
         <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
           {/* Backdrop skeleton */}
           <View style={{ width: "110%", height: 275, marginHorizontal: -16, marginBottom: 16 }}>
@@ -437,7 +437,7 @@ export default function ListFullScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <StatusBar />
+      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedHeader
         title={list?.name || "Liste"}
         scrollY={scrollY}

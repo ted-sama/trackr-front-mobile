@@ -356,7 +356,7 @@ export default function BookScreen() {
         style={[styles.container, { backgroundColor: colors.background }]}
         edges={["right", "left"]}
       >
-        <StatusBar />
+        <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
         <DefaultScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
           {/* Skeleton for cover image */}
           <View style={[styles.shadowContainer, { marginTop: 72 }]}>
@@ -557,7 +557,7 @@ export default function BookScreen() {
           />
         </>
       )}
-      <StatusBar />
+      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedScrollView
         contentContainerStyle={{ paddingHorizontal: 16 }}
         onScroll={scrollHandler}

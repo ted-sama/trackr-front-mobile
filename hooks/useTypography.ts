@@ -103,7 +103,7 @@ export function useTypography(): Typography {
       letterSpacing: -0.3,
     },
     categoryTitle: {
-      fontFamily: 'Manrope_700Bold',
+      fontFamily: 'Manrope_800ExtraBold',
       fontSize: 17,
       lineHeight: 24,
       letterSpacing: -0.3,

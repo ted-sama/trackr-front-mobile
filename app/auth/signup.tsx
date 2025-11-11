@@ -135,7 +135,7 @@ export default function Signup() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar />
+      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

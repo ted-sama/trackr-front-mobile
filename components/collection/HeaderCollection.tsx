@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Dimensions, StatusBar } from 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
-import SearchBar from '@/components/discover/SearchBar';
+import SearchBar from '@/components/ui/SearchBar';
 import { useTypography } from '@/hooks/useTypography';
 import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
@@ -115,12 +115,9 @@ export function HeaderCollection({
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <SearchBar
               placeholder={t("collection.searchPlaceholder")}
-              isEditable
               value={searchText}
               onChangeText={onSearchTextChange}
-              onSubmitEditing={onSubmitSearch}
               containerStyle={{ flex: 1 }}
-              autoFocus={true}
             />
             <TouchableOpacity onPress={handleCancelSearch} style={styles.cancelButton}>
               <Text style={[typography.h3, { color: colors.primary }]}>{t("discover.cancel")}</Text>

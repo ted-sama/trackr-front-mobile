@@ -174,7 +174,6 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
                   width: '100%',
                   height: '100%',
                 },
-                { borderWidth: 1, borderColor: colors.border },
               ]}
               onLoad={handleImageLoad}
               onError={handleImageError}

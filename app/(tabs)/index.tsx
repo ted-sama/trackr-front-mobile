@@ -58,9 +58,7 @@ export default function Index() {
       edges={["right", "left"]}
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      <StatusBar />
-
-      
+      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
 
       {/* Blurred header with gradient fade */}
       <View style={[styles.headerContainer, { height: 80 + insets.top }]}>

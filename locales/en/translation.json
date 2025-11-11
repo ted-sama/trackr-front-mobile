@@ -1,7 +1,9 @@
 {
     "common": {
         "book": "book",
-        "search": "Search books"
+        "list": "list",
+        "search": "Search books",
+        "error": "Error"
     },
     "save": "Save",
     "create": "Create",
@@ -80,7 +82,9 @@
         "lists": {
             "title": "Lists",
             "header": "Popular lists",
-            "description": "Discover the lists created by the community"
+            "description": "Discover the lists created by the community",
+            "empty": "No lists found",
+            "emptyDescription": "There are no public lists to display yet."
         },
         "search": {
             "empty": "Start your search by typing above.",
@@ -104,6 +108,13 @@
                 "date_desc": "Recently added",
                 "date_asc": "Oldest added"
             }
+        },
+        "allLists": {
+            "title": "All lists",
+            "searchPlaceholder": "Search lists",
+            "noLists": "No lists available",
+            "noResults": "No lists found for your search",
+            "errorLoading": "Unable to load lists"
         },
         "searchPlaceholder": "Search in collection",
         "cancel": "Cancel",

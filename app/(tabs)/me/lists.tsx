@@ -104,7 +104,7 @@ export default function UserListsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar />
+      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       
       <AnimatedHeader
         title={t("profile.listsScreen.title", { username: currentUser?.username })}

@@ -78,7 +78,7 @@ export default function LanguageSelector() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar />
+      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       
       <AnimatedHeader
         title={t('settings.language.title')}

@@ -13,10 +13,7 @@ export default function DiscoverLayout() {
       }}
     >
       <Stack.Screen name="index" />
-      <Stack.Screen
-        name="search"
-        options={{ animation: "fade", animationDuration: 200, gestureEnabled: false }}
-      />
+      <Stack.Screen name="all-lists" />
     </Stack>
   );
 }
