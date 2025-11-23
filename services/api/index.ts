@@ -4,8 +4,8 @@ import * as SecureStore from 'expo-secure-store';
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export const api: AxiosInstance = axios.create({
-  baseURL: "https://api.trackrr.app",
-  // baseURL: "https://4ba4dc90505f.ngrok-free.app",
+  // baseURL: "https://api.trackrr.app",
+  baseURL: "https://f9e6f65bf66d.ngrok-free.app",
   headers: {
     'Content-Type': 'application/json',
   },

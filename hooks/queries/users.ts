@@ -7,6 +7,7 @@ import { PaginatedResponse } from '@/types/api';
 import { List } from '@/types/list';
 import { User } from '@/types/user';
 import { ActivityLog } from '@/types/activityLog';
+import { UserStats } from '@/types/stats';
 import { queryKeys } from './keys';
 
 function invalidateUserQueries(qc: QueryClient, userId?: string) {
@@ -230,5 +231,13 @@ export function useUserActivity(username?: string) {
     },
     enabled: isMe || Boolean(username),
     staleTime: 30_000,
+  });
+}
+
+export function useMeStats() {
+  return useQuery({
+    queryKey: queryKeys.userStats,
+    queryFn: async () => (await api.get<UserStats>('/me/stats')).data,
+    staleTime: 60_000,
   });
 }

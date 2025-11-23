@@ -150,6 +150,18 @@
             "noLists": "Aucune liste"
         }
     },
+    "stats": {
+        "title": "Statistiques",
+        "overview": "Vue d’ensemble",
+        "activity": "Activité de lecture",
+        "genres": "Genres les plus lus",
+        "ratings": "Répartition des notes",
+        "series": "Longueur des séries",
+        "currentProgress": "Progression en cours",
+        "heatmap": "Moments où tu lis le plus",
+        "funnel": "Entonnoir de lecture",
+        "authors": "Auteurs les plus lus"
+    },
     "settings": {
         "title": "Paramètres",
         "account": {

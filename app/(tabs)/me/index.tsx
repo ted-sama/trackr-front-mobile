@@ -213,9 +213,11 @@ export default function Profile() {
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
         closeRightButton={
-          <Pressable onPress={() => {
-            router.push(`/activity/${currentUser?.username}`);
-          }}>
+          <Pressable
+            onPress={() => {
+              router.push(`/stats`);
+            }}
+          >
             <Notebook size={22} color={colors.icon} />
           </Pressable>
         }

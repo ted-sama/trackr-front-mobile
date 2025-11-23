@@ -8,6 +8,7 @@ export default function SharedLayout() {
       <Stack.Screen name="list/[listId]" />
       <Stack.Screen name="profile/[userId]" />
       <Stack.Screen name="activity/[username]" />
+      <Stack.Screen name="stats" />
       <Stack.Screen name="settings" />
     </Stack>
   );

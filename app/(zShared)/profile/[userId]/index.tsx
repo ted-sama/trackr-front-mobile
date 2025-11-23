@@ -226,11 +226,15 @@ export default function UserProfileScreen() {
         collapseThreshold={titleY > 0 ? titleY : undefined}
         onBack={() => router.back()}
         rightButton={
-          <Pressable onPress={() => {
-            router.push(`/activity/${user?.username}`);
-          }}>
-            <Notebook size={22} color={colors.icon} />
-          </Pressable>
+          isMe ? (
+            <Pressable
+              onPress={() => {
+                router.push(`/stats`);
+              }}
+            >
+              <Notebook size={22} color={colors.icon} />
+            </Pressable>
+          ) : undefined
         }
       />
       <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} contentContainerStyle={{ paddingTop: insets.top, paddingBottom: 64 }}>

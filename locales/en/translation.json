@@ -150,6 +150,18 @@
             "noLists": "No lists"
         }
     },
+    "stats": {
+        "title": "Statistics",
+        "overview": "Overview",
+        "activity": "Reading activity",
+        "genres": "Top genres",
+        "ratings": "Rating distribution",
+        "series": "Series length",
+        "currentProgress": "Current progress",
+        "heatmap": "When you read the most",
+        "funnel": "Reading funnel",
+        "authors": "Top authors"
+    },
     "settings": {
         "title": "Settings",
         "account": {
