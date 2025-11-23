@@ -52,16 +52,15 @@ export function SeriesChart({
           xKey={"label"}
           yKeys={["value"]}
           axisOptions={{
-            tickCount: 5,
+            tickCount: {
+              x: distributionData.length,
+              y: Math.max(...distributionData.map((p) => p.value || 0)) * 1.4,
+            },
             labelColor: colors.secondaryText,
             font,
           }}
-          viewport={{
-            y: [
-              0,
-              Math.max(1, ...distributionData.map((p) => p.value || 0)) * 1.4,
-            ],
-          }}
+          domain={{ y: [0, Math.max(...distributionData.map((p) => p.value || 0)) * 1.4] }}
+          domainPadding={{ left: 30, right: 30 }}
         >
           {({ points, chartBounds }) => (
             <Bar
@@ -69,63 +68,18 @@ export function SeriesChart({
               points={points.value}
               barWidth={22}
               roundedCorners={{
-                topLeft: 18,
-                topRight: 18,
+                topLeft: 4,
+                topRight: 4,
               }}
               color={hexToRgba(colors.accent, 0.9)}
+              labels={{
+                position: "top",
+                font: font,
+                color: colors.text,
+              }}
             />
           )}
         </CartesianChart>
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginTop: 4,
-          paddingHorizontal: 8,
-        }}
-      >
-        <Text
-          style={[
-            typography.bodyCaption,
-            {
-              color: colors.secondaryText,
-              fontSize: 10,
-            },
-          ]}
-        >
-          Longueur →
-        </Text>
-        <View
-          style={{
-            flexDirection: "row",
-            gap: 12,
-          }}
-        >
-          {distributionData.map((d) => (
-            <Text
-              key={d.label}
-              style={[
-                typography.bodyCaption,
-                { color: colors.secondaryText, fontSize: 11 },
-              ]}
-            >
-              {d.label}: {d.value}
-            </Text>
-          ))}
-        </View>
-        <Text
-          style={[
-            typography.bodyCaption,
-            {
-              color: colors.secondaryText,
-              fontSize: 10,
-            },
-          ]}
-        >
-          ↑ Séries
-        </Text>
       </View>
       <View style={styles.seriesProgressList}>
         <Text

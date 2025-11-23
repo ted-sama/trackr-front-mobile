@@ -2,7 +2,8 @@ import React, { useMemo } from "react";
 import { View, Text } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { CartesianChart, Line } from "victory-native";
+import { CartesianChart, Bar } from "victory-native";
+import { hexToRgba } from "@/utils/colors";
 import { StatsSection } from "./StatsSection";
 import type { SkFont } from "@shopify/react-native-skia";
 
@@ -47,18 +48,29 @@ export function RatingChart({ data, title, font }: RatingChartProps) {
           xKey={"label"}
           yKeys={["value"]}
           axisOptions={{
-            tickCount: 4,
+            tickCount: {
+              x: data.length,
+              y: Math.max(...data.map((p) => p.value)) * 1.2,
+            },
             labelColor: colors.secondaryText,
             font,
           }}
-          viewport={{ y: [0, Math.max(...data.map((p) => p.value)) * 1.4] }}
+          domainPadding={{ left: 30, right: 30 }}
+          domain={{ y: [0, Math.max(...data.map((p) => p.value)) * 1.2] }}
         >
-          {({ points }) => (
-            <Line
+          {({ points, chartBounds }) => (
+            <Bar
+              chartBounds={chartBounds}
               points={points.value}
-              color={colors.accent}
-              strokeWidth={3}
+              barWidth={16}
+              roundedCorners={{ topLeft: 4, topRight: 4 }}
+              color={hexToRgba(colors.accent, 0.9)}
               animate={{ type: "timing", duration: 600 }}
+              labels={{
+                position: "top",
+                font: font,
+                color: colors.text,
+              }}
             />
           )}
         </CartesianChart>
@@ -66,22 +78,11 @@ export function RatingChart({ data, title, font }: RatingChartProps) {
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "space-between",
+          justifyContent: "center",
           alignItems: "center",
           marginTop: 4,
         }}
       >
-        <Text
-          style={[
-            typography.bodyCaption,
-            {
-              color: colors.secondaryText,
-              fontSize: 10,
-            },
-          ]}
-        >
-          Note ★ →
-        </Text>
         <Text
           style={[
             typography.bodyCaption,
@@ -92,17 +93,6 @@ export function RatingChart({ data, title, font }: RatingChartProps) {
           ]}
         >
           {totalRatings} séries notées
-        </Text>
-        <Text
-          style={[
-            typography.bodyCaption,
-            {
-              color: colors.secondaryText,
-              fontSize: 10,
-            },
-          ]}
-        >
-          ↑ Nombre
         </Text>
       </View>
     </StatsSection>
