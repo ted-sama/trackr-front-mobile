@@ -2,28 +2,52 @@ import React, { useMemo } from "react";
 import { View, Text } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { CartesianChart, Bar } from "victory-native";
-import { hexToRgba } from "@/utils/colors";
+import { Pie, PolarChart } from "victory-native";
 import { StatsSection } from "./StatsSection";
-import type { SkFont } from "@shopify/react-native-skia";
+
+// Palette de couleurs pour les différents genres
+const GENRE_COLORS = [
+  "#6366f1", // indigo
+  "#8b5cf6", // violet
+  "#ec4899", // pink
+  "#f43f5e", // rose
+  "#f97316", // orange
+  "#eab308", // yellow
+  "#22c55e", // green
+];
 
 interface SimplePoint extends Record<string, unknown> {
   label: string;
   value: number;
 }
 
+interface PieDataPoint extends Record<string, unknown> {
+  label: string;
+  value: number;
+  color: string;
+}
+
 interface GenreChartProps {
   data: SimplePoint[];
   title: string;
-  font: SkFont | null;
 }
 
-export function GenreChart({ data, title, font }: GenreChartProps) {
+export function GenreChart({ data, title }: GenreChartProps) {
   const { colors } = useTheme();
   const typography = useTypography();
 
   const totalGenres = useMemo(
     () => data.reduce((sum, g) => sum + g.value, 0),
+    [data]
+  );
+
+  const pieData: PieDataPoint[] = useMemo(
+    () =>
+      data.map((item, index) => ({
+        label: item.label,
+        value: item.value,
+        color: GENRE_COLORS[index % GENRE_COLORS.length],
+      })),
     [data]
   );
 
@@ -40,80 +64,70 @@ export function GenreChart({ data, title, font }: GenreChartProps) {
           },
         ]}
       >
-        Nombre de séries par genre (top 7)
+        Répartition par genre (top 7)
       </Text>
-      <View style={{ height: 240 }}>
-        <CartesianChart<SimplePoint, "label", "value">
-          data={data}
-          xKey={"label"}
-          yKeys={["value"]}
-          axisOptions={{
-            labelColor: colors.secondaryText,
-            font,
-          }}
-          viewport={{ y: [0, Math.max(...data.map((p) => p.value)) * 1.2] }}
-          domain={{ y: [0, Math.max(...data.map((p) => p.value)) * 1.2] }}
-          domainPadding={
-            {
-              left: 35,
-              right: 0,
-              top: 0,
-              bottom: 0,
-            }
-          }
+      <View style={{ height: 220 }}>
+        <PolarChart
+          data={pieData}
+          labelKey="label"
+          valueKey="value"
+          colorKey="color"
         >
-          {({ points, chartBounds }) => (
-            <Bar
-              chartBounds={chartBounds}
-              points={points.value}
-              barWidth={12}
-              roundedCorners={{ topLeft: 4, topRight: 4 }}
-              color={hexToRgba(colors.accent, 0.9)}
-            />
-          )}
-        </CartesianChart>
+          <Pie.Chart innerRadius="40%">
+            {() => (
+              <>
+                <Pie.Slice />
+                <Pie.SliceAngularInset
+                  angularInset={{
+                    angularStrokeWidth: 2,
+                    angularStrokeColor: colors.background,
+                  }}
+                />
+              </>
+            )}
+          </Pie.Chart>
+        </PolarChart>
       </View>
+      {/* Légende */}
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginTop: 4,
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap: 8,
+          marginTop: 12,
         }}
       >
-        <Text
-          style={[
-            typography.bodyCaption,
-            {
-              color: colors.secondaryText,
-              fontSize: 10,
-            },
-          ]}
-        >
-          Genre →
-        </Text>
-        <Text
-          style={[
-            typography.bodyCaption,
-            {
-              color: colors.secondaryText,
-              textAlign: "center",
-            },
-          ]}
-        >
-          {totalGenres} séries au total
-        </Text>
-        <Text
-          style={[
-            typography.bodyCaption,
-            {
-              color: colors.secondaryText,
-              fontSize: 10,
-            },
-          ]}
-        >
-          ↑ Séries
-        </Text>
+        {pieData.map((item) => (
+          <View
+            key={item.label}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <View
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                backgroundColor: item.color,
+              }}
+            />
+            <Text
+              style={[
+                typography.bodyCaption,
+                {
+                  color: colors.secondaryText,
+                  fontSize: 11,
+                },
+              ]}
+            >
+              {item.label} ({item.value})
+            </Text>
+          </View>
+        ))}
       </View>
     </StatsSection>
   );
