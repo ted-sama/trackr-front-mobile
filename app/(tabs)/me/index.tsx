@@ -31,7 +31,7 @@ import Animated, {
 } from "react-native-reanimated";
 import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Notebook, Settings } from "lucide-react-native";
+import { ChartNoAxesCombined, Notebook, Settings } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -215,13 +215,20 @@ export default function Profile() {
         closeRightButton={
           <Pressable
             onPress={() => {
-              router.push(`/stats`);
+              router.push(`/activity/${currentUser?.username}`);
             }}
           >
             <Notebook size={22} color={colors.icon} />
           </Pressable>
         }
         rightButton={
+          <Pressable onPress={() => {
+            router.push(`/stats`);
+          }}>
+            <ChartNoAxesCombined size={22} color={colors.icon} />
+          </Pressable>
+        }
+        farRightButton={
           <Pressable onPress={() => {
             router.push(`/settings`);
           }}>

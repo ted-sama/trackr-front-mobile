@@ -16,12 +16,13 @@ interface AnimatedHeaderProps {
   onBack?: () => void;
   closeRightButton?: React.ReactNode;
   rightButton?: React.ReactNode;
+  farRightButton?: React.ReactNode;
   static?: boolean; // When true, displays header in final state without animation
 }
 
 const DEFAULT_THRESHOLD = 320;
 
-export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, closeRightButton, rightButton, static: isStatic = false }: AnimatedHeaderProps) {
+export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, closeRightButton, rightButton, farRightButton, static: isStatic = false }: AnimatedHeaderProps) {
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -114,8 +115,8 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
         >
           {title}
         </Animated.Text>
-        {/* width: 80, -- 36*2 (buttons) + 8 (gap) */}
-        <View style={[styles.rightContainer, { width: closeRightButton ? 80 : 36 }]}>
+        {/* width calculation: 36 per button + 8 gap between buttons */}
+        <View style={[styles.rightContainer, { width: farRightButton ? (closeRightButton ? 124 : 80) : (closeRightButton ? 80 : 36) }]}>
           {closeRightButton ? (
             <View style={styles.closeRightButton}>
               <View
@@ -142,6 +143,18 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
           ) : (
             <View style={{ width: 36 }} />
           )}
+          {farRightButton ? (
+            <View style={styles.rightButton}>
+              <View
+                style={[
+                  StyleSheet.absoluteFillObject,
+                  styles.backButtonBg,
+                  { backgroundColor: colors.backButtonBackground },
+                ]}
+              />
+              {farRightButton}
+            </View>
+          ) : null}
         </View>
       </View>
     </View>
