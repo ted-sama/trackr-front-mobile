@@ -2,7 +2,7 @@ import React, { useMemo, useEffect } from "react";
 import { View, Text } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { CartesianChart, Line } from "victory-native";
+import { CartesianChart, Line, Scatter } from "victory-native";
 import { hexToRgba } from "@/utils/colors";
 import { StatsSection } from "./StatsSection";
 import type { SkFont } from "@shopify/react-native-skia";
@@ -77,13 +77,21 @@ export function ActivityChart({ data, title, font }: ActivityChartProps) {
           }}
         >
           {({ points }) => (
-            <Line
-              points={points.value}
-              color={hexToRgba(colors.accent, 0.9)}
-              strokeWidth={2}
-              curveType="natural"
-              animate={{ type: "timing", duration: 650 }}
-            />
+            <>
+              <Line
+                points={points.value}
+                color={hexToRgba(colors.accent, 0.9)}
+                strokeWidth={2}
+                curveType="natural"
+                animate={{ type: "timing", duration: 650 }}
+              />
+              <Scatter
+                points={points.value}
+                color={hexToRgba(colors.primary, 0.9)}
+                radius={4}
+                animate={{ type: "timing", duration: 650 }}
+              />
+            </>
           )}
         </CartesianChart>
       </View>

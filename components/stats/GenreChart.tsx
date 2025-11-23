@@ -48,18 +48,26 @@ export function GenreChart({ data, title, font }: GenreChartProps) {
           xKey={"label"}
           yKeys={["value"]}
           axisOptions={{
-            tickCount: 5,
             labelColor: colors.secondaryText,
             font,
           }}
           viewport={{ y: [0, Math.max(...data.map((p) => p.value)) * 1.2] }}
+          domain={{ y: [0, Math.max(...data.map((p) => p.value)) * 1.2] }}
+          domainPadding={
+            {
+              left: 35,
+              right: 0,
+              top: 0,
+              bottom: 0,
+            }
+          }
         >
           {({ points, chartBounds }) => (
             <Bar
               chartBounds={chartBounds}
               points={points.value}
-              barWidth={18}
-              roundedCorners={{ topLeft: 12, topRight: 12 }}
+              barWidth={12}
+              roundedCorners={{ topLeft: 4, topRight: 4 }}
               color={hexToRgba(colors.accent, 0.9)}
             />
           )}
@@ -110,4 +118,5 @@ export function GenreChart({ data, title, font }: GenreChartProps) {
     </StatsSection>
   );
 }
+
 
