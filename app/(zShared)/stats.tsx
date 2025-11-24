@@ -187,17 +187,6 @@ export default function StatsScreen() {
           <Text style={[typography.h1, { color: colors.text }]}>
             {t("stats.title")}
           </Text>
-          <Text
-            style={[
-              typography.body,
-              {
-                color: colors.secondaryText,
-                marginTop: 4,
-              },
-            ]}
-          >
-            {t("stats.overview.title")}
-          </Text>
         </View>
 
         <View style={{ gap: 24 }}>

@@ -208,7 +208,7 @@ export default function Collection() {
         renderItem={({ item }) => <CollectionListElement list={item} onPress={() => {router.push(`/list/${item.id}`)}} />}
         keyExtractor={(item) => item.id}
         ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-        contentContainerStyle={[styles.listContainer, { paddingTop: 80 }]}
+        contentContainerStyle={[styles.listContainer, { paddingTop: 120 }]}
       />
     </SafeAreaView>
   );

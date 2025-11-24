@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 120, // Space for the header
+    paddingTop: 140, // Space for the header
   },
   section: {
     marginBottom: 32,
