@@ -103,16 +103,12 @@ export default function StatsScreen() {
         .sort((a, b) => parseFloat(b.label) - parseFloat(a.label))
     : [];
 
-  const activityData = [
-    { label: "2025-10", value: 100 },
-    { label: "2025-11", value: 400 },
-    { label: "2025-12", value: 234 },
-    { label: "2026-01", value: 345 },
-    { label: "2026-02", value: 456 },
-    { label: "2026-03", value: 567 },
-  ]
-
-    console.log(activityData);
+  const activityData = stats
+    ? stats.activity.chaptersReadHistory.map((d) => ({
+        label: d.x,
+        value: Number(d.y),
+      }))
+    : [];
 
   const seriesDistributionData = stats
     ? stats.series.distribution.map((d) => ({
