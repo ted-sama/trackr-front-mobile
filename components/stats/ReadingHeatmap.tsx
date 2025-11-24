@@ -5,6 +5,7 @@ import { useTypography } from "@/hooks/useTypography";
 import { hexToRgba } from "@/utils/colors";
 import { StatsSection } from "./StatsSection";
 import type { HeatmapDataPoint } from "@/types/stats";
+import { useTranslation } from "react-i18next";
 
 interface ReadingHeatmapProps {
   data: HeatmapDataPoint[];
@@ -14,6 +15,7 @@ interface ReadingHeatmapProps {
 export function ReadingHeatmap({ data, title }: ReadingHeatmapProps) {
   const { colors } = useTheme();
   const typography = useTypography();
+  const { t } = useTranslation();
 
   const heatmapMatrix = React.useMemo(() => {
     const byDay: { [day: number]: { [hour: number]: number } } = {};
@@ -44,7 +46,7 @@ export function ReadingHeatmap({ data, title }: ReadingHeatmapProps) {
           },
         ]}
       >
-        Heures de lecture par jour de la semaine (0h–23h)
+        {t("stats.heatmap.chartTitle")}
       </Text>
       <View style={styles.heatmapContainer}>
         {days.map((dayLabel, dayIndex) => (
@@ -92,17 +94,17 @@ export function ReadingHeatmap({ data, title }: ReadingHeatmapProps) {
         <Text
           style={[typography.bodyCaption, { color: colors.secondaryText }]}
         >
-          0h
+          {t("stats.heatmap.12am")}
         </Text>
         <Text
           style={[typography.bodyCaption, { color: colors.secondaryText }]}
         >
-          12h
+          {t("stats.heatmap.12pm")}
         </Text>
         <Text
           style={[typography.bodyCaption, { color: colors.secondaryText }]}
         >
-          23h
+          {t("stats.heatmap.11pm")}
         </Text>
       </View>
       <View
@@ -125,7 +127,7 @@ export function ReadingHeatmap({ data, title }: ReadingHeatmapProps) {
         <Text
           style={[typography.bodyCaption, { color: colors.secondaryText }]}
         >
-          Moins
+          {t("stats.heatmap.less")}
         </Text>
         <View style={{ flexDirection: "row", gap: 2 }}>
           {[0.3, 0.5, 0.7, 1].map((intensity, idx) => (
@@ -143,7 +145,7 @@ export function ReadingHeatmap({ data, title }: ReadingHeatmapProps) {
         <Text
           style={[typography.bodyCaption, { color: colors.secondaryText }]}
         >
-          Plus
+          {t("stats.heatmap.more")}
         </Text>
       </View>
     </StatsSection>

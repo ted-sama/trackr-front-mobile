@@ -2,14 +2,12 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { hexToRgba } from "@/utils/colors";
 import { StatsSection } from "./StatsSection";
 
 interface OverviewCard {
   key: string;
   label: string;
   title: string;
-  subtitle: string;
 }
 
 interface OverviewCardsProps {
@@ -29,15 +27,11 @@ export function OverviewCards({ cards, title }: OverviewCardsProps) {
             key={card.key}
             style={[
               styles.overviewCard,
-              {
-                backgroundColor: hexToRgba(colors.accent, 0.06),
-                borderColor: hexToRgba(colors.accent, 0.18),
-              },
             ]}
           >
             <Text
               style={[
-                typography.caption,
+                typography.bodyCaption,
                 { color: colors.secondaryText, marginBottom: 4 },
               ]}
               numberOfLines={1}
@@ -52,12 +46,6 @@ export function OverviewCards({ cards, title }: OverviewCardsProps) {
               numberOfLines={1}
             >
               {card.title}
-            </Text>
-            <Text
-              style={[typography.bodyCaption, { color: colors.secondaryText }]}
-              numberOfLines={1}
-            >
-              {card.subtitle}
             </Text>
           </View>
         ))}
@@ -75,9 +63,7 @@ const styles = StyleSheet.create({
   overviewCard: {
     flex: 1,
     minWidth: "30%",
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
+    padding: 2,
   },
 });
 

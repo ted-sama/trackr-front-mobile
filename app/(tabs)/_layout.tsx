@@ -13,28 +13,28 @@ export default function TabLayout() {
   const { t } = useTranslation();
   const supportsLiquidGlass = Platform.OS === 'ios' && isLiquidGlassAvailable();
 
-  if (supportsLiquidGlass) {
-    return (
-      <NativeTabs tintColor={colors.accent}>
-        <NativeTabs.Trigger name="index">
-          <Icon sf="house.fill" />
-          <Label>{t('home.title')}</Label>
-        </NativeTabs.Trigger>
-        <NativeTabs.Trigger name="discover">
-          <Icon sf="safari" />
-          <Label>{t('discover.title')}</Label>
-        </NativeTabs.Trigger>
-        <NativeTabs.Trigger name="collection">
-          <Icon sf="books.vertical.fill" />
-          <Label>{t('collection.title')}</Label>
-        </NativeTabs.Trigger>
-        <NativeTabs.Trigger name="me">
-          <Icon sf="person.crop.circle" />
-          <Label>{t('profile.title')}</Label>
-        </NativeTabs.Trigger>
-      </NativeTabs>
-    );
-  }
+  // if (supportsLiquidGlass) {
+  //   return (
+  //     <NativeTabs tintColor={colors.accent}>
+  //       <NativeTabs.Trigger name="index">
+  //         <Icon sf="house.fill" />
+  //         <Label>{t('home.title')}</Label>
+  //       </NativeTabs.Trigger>
+  //       <NativeTabs.Trigger name="discover">
+  //         <Icon sf="safari" />
+  //         <Label>{t('discover.title')}</Label>
+  //       </NativeTabs.Trigger>
+  //       <NativeTabs.Trigger name="collection">
+  //         <Icon sf="books.vertical.fill" />
+  //         <Label>{t('collection.title')}</Label>
+  //       </NativeTabs.Trigger>
+  //       <NativeTabs.Trigger name="me">
+  //         <Icon sf="person.crop.circle" />
+  //         <Label>{t('profile.title')}</Label>
+  //       </NativeTabs.Trigger>
+  //     </NativeTabs>
+  //   );
+  // }
 
   return (
     <Tabs

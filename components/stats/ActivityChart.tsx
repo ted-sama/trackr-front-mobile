@@ -6,6 +6,7 @@ import { CartesianChart, Line, Scatter } from "victory-native";
 import { hexToRgba } from "@/utils/colors";
 import { StatsSection } from "./StatsSection";
 import type { SkFont } from "@shopify/react-native-skia";
+import { useTranslation } from "react-i18next";
 
 interface SimplePoint extends Record<string, unknown> {
   label: string;
@@ -21,6 +22,7 @@ interface ActivityChartProps {
 export function ActivityChart({ data, title, font }: ActivityChartProps) {
   const { colors } = useTheme();
   const typography = useTypography();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Add a default point if data is not empty for visualization smoothing
@@ -49,7 +51,7 @@ export function ActivityChart({ data, title, font }: ActivityChartProps) {
           },
         ]}
       >
-        Nombre de chapitres lus par mois
+        {t("stats.activity.chartTitle")}
       </Text>
       <View style={{ height: 240 }}>
         <CartesianChart<SimplePoint, "label", "value">
@@ -112,7 +114,7 @@ export function ActivityChart({ data, title, font }: ActivityChartProps) {
             },
           ]}
         >
-          {totalChapters} chapitres au total
+          {t("stats.activity.total", { count: totalChapters })}
         </Text>
       </View>
     </StatsSection>

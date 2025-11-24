@@ -5,7 +5,7 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export const api: AxiosInstance = axios.create({
   // baseURL: "https://api.trackrr.app",
-  baseURL: "https://f9e6f65bf66d.ngrok-free.app",
+  baseURL: "https://80f79d18fbab.ngrok-free.app",
   headers: {
     'Content-Type': 'application/json',
   },

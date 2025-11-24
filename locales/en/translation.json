@@ -152,15 +152,57 @@
     },
     "stats": {
         "title": "Statistics",
-        "overview": "Overview",
-        "activity": "Reading activity",
-        "genres": "Top genres",
-        "ratings": "Rating distribution",
-        "series": "Series length",
-        "currentProgress": "Current progress",
-        "heatmap": "When you read the most",
-        "funnel": "Reading funnel",
-        "authors": "Top authors"
+        "overview": {
+            "title": "Overview",
+            "followed": "In library",
+            "chapters": "Chapters read",
+            "streak": "Longest streak",
+            "weeks": "weeks",
+            "completed": "Completed",
+            "reading": "Reading",
+            "rating": "Average rating"
+        },
+        "activity": {
+            "title": "Reading activity",
+            "chartTitle": "Number of chapters read per month",
+            "total": "{{count}} chapters total"
+        },
+        "genres": {
+            "title": "Top genres",
+            "chartTitle": "Top 12 genres you like to read"
+        },
+        "ratings": {
+            "title": "Rating distribution",
+            "chartTitle": "Distribution of ratings",
+            "total": "{{count}} ratings total"
+        },
+        "series": {
+            "title": "Series length",
+            "chartTitle": "Distribution of series lengths (excluding current series)",
+            "oneshot": "One-shot",
+            "short": "Short (2-49)",
+            "medium": "Medium (50-500)",
+            "long": "Long (501+)"
+        },
+        "heatmap": {
+            "title": "Reading moments",
+            "chartTitle": "Hours of reading by day of the week (12am-11pm)",
+            "12pm": "12pm",
+            "12am": "12am",
+            "11pm": "11pm",
+            "less": "Less",
+            "more": "More"
+        },
+        "funnel": {
+            "title": "Reading status",
+            "total": "{{count}} series followed total"
+        },
+        "authors": {
+            "title": "Most read authors",
+            "chartTitle": "Top 5 authors you like to read",
+            "series": "{{count}} series",
+            "serie": "{{count}} serie"
+        }
     },
     "settings": {
         "title": "Settings",

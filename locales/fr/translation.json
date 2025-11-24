@@ -152,15 +152,57 @@
     },
     "stats": {
         "title": "Statistiques",
-        "overview": "Vue d’ensemble",
-        "activity": "Activité de lecture",
-        "genres": "Genres les plus lus",
-        "ratings": "Répartition des notes",
-        "series": "Longueur des séries",
-        "currentProgress": "Progression en cours",
-        "heatmap": "Moments où tu lis le plus",
-        "funnel": "Entonnoir de lecture",
-        "authors": "Auteurs les plus lus"
+        "overview": {
+            "title": "Vue d’ensemble",
+            "followed": "En bibliothèque",
+            "chapters": "Chapitres lus",
+            "streak": "Plus longue série",
+            "weeks": "sem.",
+            "completed": "Complétés",
+            "reading": "En lecture",
+            "rating": "Moyenne des notes"
+        },
+        "activity": {
+            "title": "Activité de lecture",
+            "chartTitle": "Nombre de chapitres lus par mois",
+            "total": "{{count}} chapitres au total"
+        },
+        "genres": {
+            "title": "Genres les plus lus",
+            "chartTitle": "Top 12 des genres que vous aimez lire"
+        },
+        "ratings": {
+            "title": "Répartition des notes",
+            "chartTitle": "Distribution des notes",
+            "total": "{{count}} notes au total"
+        },
+        "series": {
+            "title": "Longueur des séries",
+            "chartTitle": "Distribution des longueurs de séries (hors series en cours)",
+            "oneshot": "One-shot",
+            "short": "Court (2-49)",
+            "medium": "Moyen (50-500)",
+            "long": "Long (501+)"
+        },
+        "heatmap": {
+            "title": "Moments de lecture",
+            "chartTitle": "Heures de lecture par jour de la semaine (0h-23h)",
+            "12am": "0h",
+            "12pm": "12h",
+            "11pm": "23h",
+            "less": "Moins",
+            "more": "Plus"
+        },
+        "funnel": {
+            "title": "Statuts de lecture",
+            "total": "{{count}} séries suivies au total"
+        },
+        "authors": {
+            "title": "Auteurs les plus lus",
+            "chartTitle": "Top 5 des auteurs que vous aimez lire",
+            "series": "{{count}} séries",
+            "serie": "{{count}} série"
+        }
     },
     "settings": {
         "title": "Paramètres",

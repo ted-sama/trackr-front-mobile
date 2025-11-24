@@ -6,6 +6,7 @@ import { CartesianChart, Bar } from "victory-native";
 import { hexToRgba } from "@/utils/colors";
 import { StatsSection } from "./StatsSection";
 import type { SkFont } from "@shopify/react-native-skia";
+import { useTranslation } from "react-i18next";
 
 interface SimplePoint extends Record<string, unknown> {
   label: string;
@@ -21,7 +22,7 @@ interface RatingChartProps {
 export function RatingChart({ data, title, font }: RatingChartProps) {
   const { colors } = useTheme();
   const typography = useTypography();
-
+  const { t } = useTranslation();
   const totalRatings = useMemo(
     () => data.reduce((sum, r) => sum + r.value, 0),
     [data]
@@ -40,7 +41,7 @@ export function RatingChart({ data, title, font }: RatingChartProps) {
           },
         ]}
       >
-        Distribution des notes attribuées (étoiles)
+        {t("stats.ratings.chartTitle")}
       </Text>
       <View style={{ height: 220 }}>
         <CartesianChart<SimplePoint, "label", "value">
@@ -92,7 +93,7 @@ export function RatingChart({ data, title, font }: RatingChartProps) {
             },
           ]}
         >
-          {totalRatings} séries notées
+          {t("stats.ratings.total", { count: totalRatings })}
         </Text>
       </View>
     </StatsSection>

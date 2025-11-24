@@ -200,26 +200,6 @@ export default function UserProfileScreen() {
   return (
     <View style={{ flex: 1 }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-      {dominantColor && (
-        <Animated.View
-          style={[{
-            position: "absolute",
-            width: "110%",
-            height: gradientHeight,
-            alignSelf: "center",
-            marginHorizontal: -16,
-            marginTop: 0,
-            zIndex: -99,
-          }, gradientAnimatedStyle, gradientElasticStyle]}
-        >
-          <LinearGradient
-            colors={[dominantColor, colors.background]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={{ width: "100%", height: "100%" }}
-          />
-        </Animated.View>
-      )}
       <AnimatedHeader
         title={user?.username || t("profile.title")}
         scrollY={scrollY}
@@ -237,8 +217,29 @@ export default function UserProfileScreen() {
           ) : undefined
         }
       />
-      <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} contentContainerStyle={{ paddingTop: insets.top, paddingBottom: 64 }}>
+      <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} style={{ paddingTop: insets.top }} contentContainerStyle={{ paddingBottom: 64 }}>
         <View style={{ paddingHorizontal: 16 }}>
+          {/* Gradient */}
+          {dominantColor && (
+            <Animated.View
+              style={[{
+                position: "absolute",
+                width: "110%",
+                height: gradientHeight,
+                alignSelf: "center",
+                marginHorizontal: -16,
+                marginTop: -insets.top,
+                zIndex: 0,
+              }, gradientAnimatedStyle, gradientElasticStyle]}
+            >
+              <LinearGradient
+                colors={[dominantColor, colors.background]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={{ width: "100%", height: "100%" }}
+              />
+            </Animated.View>
+          )}
           {/* Backdrop */}
           <View
             style={{

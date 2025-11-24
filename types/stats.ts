@@ -19,10 +19,10 @@ export interface SeriesProgress {
 export interface StatsOverview {
   totalFollowed: number;
   totalChaptersRead: number;
-  totalVolumesRead: number;
+  longestStreak: number;
   completedCount: number;
   readingCount: number;
-  avgScoreCompleted: number;
+  avgRating: string;
 }
 
 export interface StatsDistributions {

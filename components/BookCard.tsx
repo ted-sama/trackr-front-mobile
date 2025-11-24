@@ -34,7 +34,7 @@ import StarRating from "./ui/StarRating";
 interface BookCardProps {
   book: Book;
   onPress?: (book: Book) => void;
-  size?: 'default' | 'compact' | 'compact-small';
+  size?: 'default' | 'compact' | 'compact-small' | 'compact-xs';
   showTitle?: boolean;
   showAuthor?: boolean;
   showRating?: boolean;
@@ -51,6 +51,11 @@ const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.33;
 const COMPACT_CARD_WIDTH = width * 0.29;
 const COMPACT_SMALL_CARD_WIDTH = width * 0.25;
+// Calculate width for 4 items per row with FlatList numColumns
+// FlatList handles the layout, so we calculate based on available width after padding
+// Available width = screen width - ScrollView padding (32px) - StatsSection padding (32px) = width - 64
+// Each item width = (available width - total gaps) / 4 = (width - 64 - 24) / 4
+const COMPACT_XS_CARD_WIDTH = (width - 64 - 24) / 4;
 
 const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showUserRating = false, showTrackingStatus = false, showTrackingButton = true, showTrackingChapter = false, rank, currentListId, isFromListPage }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -143,6 +148,9 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
             size === 'compact-small' && {
               width: COMPACT_SMALL_CARD_WIDTH,
             },
+            size === 'compact-xs' && {
+              width: COMPACT_XS_CARD_WIDTH,
+            },
           ]}
         >
           <View
@@ -154,6 +162,9 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
               },
               size === 'compact-small' && {
                 height: COMPACT_SMALL_CARD_WIDTH * 1.5,
+              },
+              size === 'compact-xs' && {
+                height: COMPACT_XS_CARD_WIDTH * 1.5,
               },
             ]}
           >
@@ -171,6 +182,10 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
                   height: '100%',
                 },
                 size === 'compact-small' && {
+                  width: '100%',
+                  height: '100%',
+                },
+                size === 'compact-xs' && {
                   width: '100%',
                   height: '100%',
                 },
@@ -230,6 +245,7 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
                 { color: colors.text },
                 size === 'compact' && { fontSize: 13, marginBottom: 2 },
                 size === 'compact-small' && { fontSize: 12, marginBottom: 2 },
+                size === 'compact-xs' && { fontSize: 11, marginBottom: 2 },
               ]}
               numberOfLines={1}
             >
@@ -244,6 +260,7 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
                   { color: colors.secondaryText },
                   size === 'compact' && { fontSize: 12, marginBottom: 2 },
                   size === 'compact-small' && { fontSize: 11, marginBottom: 2 },
+                  size === 'compact-xs' && { fontSize: 10, marginBottom: 2 },
                 ]}
                 numberOfLines={1}
               >
@@ -259,6 +276,7 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
                     typography.caption,
                     { color: colors.secondaryText },
                     size === 'compact-small' && { fontSize: 11 },
+                    size === 'compact-xs' && { fontSize: 10 },
                   ]}
                 >
                   {book.rating || "N/A"}
@@ -280,7 +298,7 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
               <View style={styles.userRatingContainer}>
                 <StarRating
                   rating={trackingStatus.rating}
-                  size={size === 'compact-small' ? 10 : 12}
+                  size={size === 'compact-xs' ? 9 : size === 'compact-small' ? 10 : 12}
                   color={colors.secondaryText}
                 />
               </View>

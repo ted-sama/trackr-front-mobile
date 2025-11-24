@@ -55,55 +55,44 @@ export default function StatsScreen() {
     const authorsData = [];
   }
 
-  const avgScore =
-    typeof stats?.overview.avgScoreCompleted === "number"
-      ? stats.overview.avgScoreCompleted
-      : Number(stats?.overview.avgScoreCompleted ?? 0);
-
   const overviewCards = stats
     ? [
         {
           key: "totalFollowed",
-          label: t("stats.overview"),
+          label: t("stats.overview.followed"),
           title: `${stats.overview.totalFollowed}`,
-          subtitle: t("profile.lists"),
         },
         {
           key: "chapters",
-          label: t("book.chapter"),
+          label: t("stats.overview.chapters"),
           title: `${stats.overview.totalChaptersRead}`,
-          subtitle: t("stats.activity"),
         },
         {
-          key: "volumes",
-          label: "Volumes",
-          title: `${stats.overview.totalVolumesRead}`,
-          subtitle: t("activity.title"),
+          key: "streak",
+          label: t("stats.overview.streak"),
+          title: `${stats.overview.longestStreak} ${t("stats.overview.weeks")}`,
         },
         {
           key: "completed",
-          label: t("status.completed", "Completed"),
+          label: t("stats.overview.completed"),
           title: `${stats.overview.completedCount}`,
-          subtitle: t("profile.favorites"),
         },
         {
           key: "reading",
-          label: t("status.reading", "Reading"),
+          label: t("stats.overview.reading"),
           title: `${stats.overview.readingCount}`,
-          subtitle: t("stats.funnel"),
         },
         {
-          key: "avgScore",
-          label: t("book.rating"),
-          title: avgScore ? avgScore.toFixed(1) : "–",
-          subtitle: "moyenne",
+          key: "avgRating",
+          label: t("stats.overview.rating"),
+          title: stats.overview.avgRating ? stats.overview.avgRating : "–",
         },
       ]
     : [];
 
   const genreData = stats
     ? stats.distributions.genres
-        .slice(0, 7)
+        .slice(0, 12)
         .map((g) => ({ label: g.x, value: Number(g.y) }))
         .sort((a, b) => b.value - a.value)
     : [];
@@ -127,7 +116,7 @@ export default function StatsScreen() {
 
   const seriesDistributionData = stats
     ? stats.series.distribution.map((d) => ({
-        label: d.x,
+        label: t(`stats.series.${d.x}`),
         value: Number(d.y),
       }))
     : [];
@@ -211,40 +200,40 @@ export default function StatsScreen() {
               },
             ]}
           >
-            {t("stats.overview")}
+            {t("stats.overview.title")}
           </Text>
         </View>
 
         <View style={{ gap: 24 }}>
-          <OverviewCards cards={overviewCards} title={t("stats.overview")} />
+          <OverviewCards cards={overviewCards} title={t("stats.overview.title")} />
           <ActivityChart
             data={activityData}
-            title={t("stats.activity")}
+            title={t("stats.activity.title")}
             font={font}
           />
-          <GenreChart data={genreData} title={t("stats.genres")} font={font} />
+          <GenreChart data={genreData} title={t("stats.genres.title")} />
           <RatingChart
             data={ratingData}
-            title={t("stats.ratings")}
+            title={t("stats.ratings.title")}
             font={font}
           />
           <ReadingHeatmap
             data={stats?.preferences.heatmap ?? []}
-            title={t("stats.heatmap")}
+            title={t("stats.heatmap.title")}
           />
           <SeriesChart
             distributionData={seriesDistributionData}
             currentProgress={stats?.series.currentProgress ?? []}
-            title={t("stats.series")}
+            title={t("stats.series.title")}
             font={font}
           />
           {stats?.funnel.counts && (
             <FunnelChart
               counts={stats.funnel.counts}
-              title={t("stats.funnel")}
+              title={t("stats.funnel.title")}
             />
           )}
-          <AuthorsChart data={authorsData} title={t("stats.authors")} />
+          <AuthorsChart data={authorsData} title={t("stats.authors.title")} />
         </View>
       </AnimatedScrollView>
     </View>

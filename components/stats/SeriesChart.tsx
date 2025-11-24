@@ -44,12 +44,25 @@ export function SeriesChart({
           },
         ]}
       >
-        Répartition par longueur de série
+        {t("stats.series.chartTitle")}
       </Text>
       <View style={{ height: 210 }}>
         <CartesianChart<SimplePoint, "label", "value">
-          data={distributionData}
-          xKey={"label"}
+          data={distributionData.map((point) => ({
+            ...point,
+            // Map known label values to translation keys
+            label:
+              point.label === "oneshot"
+                ? t("stats.series.oneshot")
+                : point.label === "short"
+                ? t("stats.series.short")
+                : point.label === "medium"
+                ? t("stats.series.medium")
+                : point.label === "long"
+                ? t("stats.series.long")
+                : point.label,
+          }))}
+          xKey="label"
           yKeys={["value"]}
           axisOptions={{
             tickCount: {
@@ -81,14 +94,14 @@ export function SeriesChart({
           )}
         </CartesianChart>
       </View>
-      <View style={styles.seriesProgressList}>
+      {/* <View style={styles.seriesProgressList}>
         <Text
           style={[
             typography.caption,
             { color: colors.secondaryText, marginBottom: 8 },
           ]}
         >
-          {t("stats.currentProgress")} — séries en cours
+          {t("stats.currentProgress")} — {t("stats.series.currentProgress")}
         </Text>
         {currentProgress.length > 0 ? (
           currentProgress.map((serie) => (
@@ -133,7 +146,7 @@ export function SeriesChart({
             Aucune série en cours
           </Text>
         )}
-      </View>
+      </View> */}
     </StatsSection>
   );
 }

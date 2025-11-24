@@ -31,22 +31,22 @@ export function FunnelChart({ counts, title }: FunnelChartProps) {
   const funnelData = useMemo(
     () => [
       {
-        label: t("status.reading", "Reading"),
+        label: t("status.reading"),
         value: counts.reading,
         color: colors.reading,
       },
       {
-        label: t("status.completed", "Completed"),
+        label: t("status.completed"),
         value: counts.completed,
         color: colors.completed,
       },
       {
-        label: t("status.onHold", "On hold"),
+        label: t("status.onHold"),
         value: counts.on_hold,
         color: colors.onHold,
       },
       {
-        label: t("status.dropped", "Dropped"),
+        label: t("status.dropped"),
         value: counts.dropped,
         color: colors.dropped,
       },
@@ -56,17 +56,6 @@ export function FunnelChart({ counts, title }: FunnelChartProps) {
 
   return (
     <StatsSection title={title}>
-      <Text
-        style={[
-          typography.bodyCaption,
-          {
-            color: colors.secondaryText,
-            marginBottom: 12,
-          },
-        ]}
-      >
-        Répartition de vos séries par statut
-      </Text>
       <View style={styles.funnelContainer}>
         {funnelData.map((item) => {
           const ratio = total > 0 ? (item.value / total) * 100 : 0;
@@ -97,7 +86,7 @@ export function FunnelChart({ counts, title }: FunnelChartProps) {
               <Text
                 style={[
                   typography.caption,
-                  { color: colors.secondaryText, marginLeft: 8 },
+                  { color: colors.secondaryText, marginLeft: 8, width: 50, textAlign: "right" },
                 ]}
               >
                 {item.value} ({ratio.toFixed(0)}%)
@@ -116,7 +105,7 @@ export function FunnelChart({ counts, title }: FunnelChartProps) {
           },
         ]}
       >
-        {total} séries suivies au total
+        {t("stats.funnel.total", { count: total })}
       </Text>
     </StatsSection>
   );

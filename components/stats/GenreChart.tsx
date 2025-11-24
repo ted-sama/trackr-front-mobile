@@ -4,6 +4,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { Pie, PolarChart } from "victory-native";
 import { StatsSection } from "./StatsSection";
+import { useTranslation } from "react-i18next";
 
 // Palette de couleurs pour les différents genres
 const GENRE_COLORS = [
@@ -14,6 +15,11 @@ const GENRE_COLORS = [
   "#f97316", // orange
   "#eab308", // yellow
   "#22c55e", // green
+  "#0ea5e9", // sky
+  "#06b6d4", // cyan
+  "#10b981", // emerald
+  "#ef4444", // red
+  "#e11d48", // fuchsia
 ];
 
 interface SimplePoint extends Record<string, unknown> {
@@ -35,7 +41,7 @@ interface GenreChartProps {
 export function GenreChart({ data, title }: GenreChartProps) {
   const { colors } = useTheme();
   const typography = useTypography();
-
+  const { t } = useTranslation();
   const totalGenres = useMemo(
     () => data.reduce((sum, g) => sum + g.value, 0),
     [data]
@@ -64,7 +70,7 @@ export function GenreChart({ data, title }: GenreChartProps) {
           },
         ]}
       >
-        Répartition par genre (top 7)
+        {t("stats.genres.chartTitle")}
       </Text>
       <View style={{ height: 220 }}>
         <PolarChart
