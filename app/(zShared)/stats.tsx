@@ -22,6 +22,7 @@ import { ReadingHeatmap } from "@/components/stats/ReadingHeatmap";
 import { FunnelChart } from "@/components/stats/FunnelChart";
 import { SeriesChart } from "@/components/stats/SeriesChart";
 import { AuthorsChart } from "@/components/stats/AuthorsChart";
+import { TypesChart } from "@/components/stats/TypesChart";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(
   Animated.ScrollView
@@ -124,6 +125,13 @@ export default function StatsScreen() {
       }))
     : [];
 
+  const typesData = stats
+    ? stats.distributions.types.map((t) => ({
+        label: t.x,
+        value: Number(t.y),
+      }))
+    : [];
+
 
 
 
@@ -219,6 +227,7 @@ export default function StatsScreen() {
             />
           )}
           <AuthorsChart data={authorsData} title={t("stats.authors.title")} />
+          <TypesChart data={typesData} title={t("stats.types.title")} />
         </View>
       </AnimatedScrollView>
     </View>

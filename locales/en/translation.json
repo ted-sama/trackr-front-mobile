@@ -202,6 +202,12 @@
             "chartTitle": "Top 5 authors you like to read",
             "series": "{{count}} series",
             "serie": "{{count}} serie"
+        },
+        "types": {
+            "title": "Book types",
+            "chartTitle": "Distribution of book types you like to read",
+            "series": "{{count}} series",
+            "serie": "{{count}} serie"
         }
     },
     "settings": {

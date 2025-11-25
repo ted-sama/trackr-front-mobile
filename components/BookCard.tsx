@@ -51,11 +51,11 @@ const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.33;
 const COMPACT_CARD_WIDTH = width * 0.29;
 const COMPACT_SMALL_CARD_WIDTH = width * 0.25;
-// Calculate width for 4 items per row with FlatList numColumns
+// Calculate width for 5 items per row with FlatList numColumns
 // FlatList handles the layout, so we calculate based on available width after padding
 // Available width = screen width - ScrollView padding (32px) - StatsSection padding (32px) = width - 64
-// Each item width = (available width - total gaps) / 4 = (width - 64 - 24) / 4
-const COMPACT_XS_CARD_WIDTH = (width - 64 - 24) / 4;
+// Each item width = (available width - total gaps) / 5 = (width - 64 - 32) / 5 (4 gaps of 8px each = 32px)
+const COMPACT_XS_CARD_WIDTH = (width - 64 - 32) / 5;
 
 const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showUserRating = false, showTrackingStatus = false, showTrackingButton = true, showTrackingChapter = false, rank, currentListId, isFromListPage }: BookCardProps) => {
   const [isLoading, setIsLoading] = useState(true);

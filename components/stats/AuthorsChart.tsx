@@ -116,7 +116,7 @@ export function AuthorsChart({ data, title }: AuthorsChartProps) {
                 <FlatList
                   data={authorBooks}
                   keyExtractor={(item) => String(item.id)}
-                  numColumns={4}
+                  numColumns={5}
                   scrollEnabled={false}
                   columnWrapperStyle={styles.booksRow}
                   contentContainerStyle={styles.booksGrid}
