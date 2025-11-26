@@ -1,13 +1,15 @@
 import { useMutation, useQuery, useQueryClient, useInfiniteQuery, QueryClient } from '@tanstack/react-query';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { api } from '@/services/api';
-import { Book } from '@/types/book';
+import { Book, TrackedBookWithMeta } from '@/types/book';
 import { useUserStore } from '@/stores/userStore';
 import { PaginatedResponse } from '@/types/api';
 import { List } from '@/types/list';
 import { User } from '@/types/user';
 import { ActivityLog } from '@/types/activityLog';
 import { UserStats } from '@/types/stats';
+import { TrackedBook } from '@/types/tracked-book';
+import { BookTracking, ReadingStatus } from '@/types/reading-status';
 import { queryKeys } from './keys';
 
 function invalidateUserQueries(qc: QueryClient, userId?: string) {
@@ -236,8 +238,64 @@ export function useUserActivity(username?: string) {
 
 export function useMeStats() {
   return useQuery({
-    queryKey: queryKeys.userStats,
+    queryKey: queryKeys.userStats(),
     queryFn: async () => (await api.get<UserStats>('/me/stats')).data,
+    staleTime: 60_000,
+  });
+}
+
+export function useUserStats(username?: string) {
+  const { currentUser } = useUserStore();
+  const isMe = !username || username === currentUser?.username;
+  const endpoint = isMe ? '/me/stats' : `/users/${username}/stats`;
+
+  return useQuery({
+    queryKey: queryKeys.userStats(isMe ? undefined : username),
+    queryFn: async () => (await api.get<UserStats>(endpoint)).data,
+    enabled: isMe || Boolean(username),
+    staleTime: 60_000,
+  });
+}
+
+export function useUserBooks(username?: string) {
+  const { currentUser } = useUserStore();
+  const isMe = !username || username === currentUser?.username;
+  const endpoint = isMe ? '/me/books' : `/users/${username}/books`;
+
+  return useQuery({
+    queryKey: queryKeys.userBooks(isMe ? undefined : username),
+    queryFn: async () => {
+      const { data } = await api.get<PaginatedResponse<TrackedBook>>(endpoint, {
+        params: { offset: 0, limit: 1000 }
+      });
+
+      // Transform TrackedBook[] to TrackedBookWithMeta[]
+      const transformedBooks: TrackedBookWithMeta[] = data.data.map((trackedBook) => {
+        const bookData = trackedBook.book;
+
+        const trackingStatus: BookTracking = {
+          status: trackedBook.status as ReadingStatus,
+          currentChapter: trackedBook.currentChapter,
+          currentVolume: trackedBook.currentVolume,
+          rating: trackedBook.rating,
+          startDate: trackedBook.startDate ? new Date(trackedBook.startDate) : null,
+          finishDate: trackedBook.finishDate ? new Date(trackedBook.finishDate) : null,
+          notes: trackedBook.notes,
+          lastReadAt: trackedBook.lastReadAt ? new Date(trackedBook.lastReadAt) : null,
+          createdAt: trackedBook.createdAt ? new Date(trackedBook.createdAt) : null,
+          updatedAt: trackedBook.updatedAt ? new Date(trackedBook.updatedAt) : null,
+        };
+
+        return {
+          ...bookData,
+          tracking: true,
+          trackingStatus,
+        };
+      });
+
+      return transformedBooks;
+    },
+    enabled: isMe || Boolean(username),
     staleTime: 60_000,
   });
 }

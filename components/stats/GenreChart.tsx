@@ -60,7 +60,7 @@ export function GenreChart({ data, title }: GenreChartProps) {
   if (!data.length) return null;
 
   return (
-    <StatsSection title={title}>
+    <StatsSection title={title} plusBadge={true}>
       <Text
         style={[
           typography.bodyCaption,

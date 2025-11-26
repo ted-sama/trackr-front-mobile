@@ -151,7 +151,7 @@
         }
     },
     "stats": {
-        "title": "Statistiques",
+        "title": "Stats de {{name}}",
         "overview": {
             "title": "Vue d’ensemble",
             "followed": "En bibliothèque",
@@ -195,7 +195,7 @@
         },
         "funnel": {
             "title": "Statuts de lecture",
-            "total": "{{count}} séries suivies au total"
+            "total": "{{count}} séries lues au total"
         },
         "authors": {
             "title": "Auteurs les plus lus",

@@ -4,15 +4,17 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { LinearGradient } from "expo-linear-gradient";
 import { hexToRgba } from "@/utils/colors";
+import PlusBadge from "@/components/ui/PlusBadge";
 
 interface StatsSectionProps {
   title: string;
   subtitle?: string;
+  plusBadge?: boolean;
   style?: ViewStyle;
   children: React.ReactNode;
 }
 
-export function StatsSection({ title, subtitle, style, children }: StatsSectionProps) {
+export function StatsSection({ title, subtitle, plusBadge = false, style, children }: StatsSectionProps) {
   const { colors } = useTheme();
   const typography = useTypography();
 
@@ -30,6 +32,7 @@ export function StatsSection({ title, subtitle, style, children }: StatsSectionP
             <Text style={[typography.caption, { color: colors.text }]} numberOfLines={1}>
               {title}
             </Text>
+            {plusBadge && <PlusBadge />}
           </LinearGradient>
           {subtitle ? (
             <Text

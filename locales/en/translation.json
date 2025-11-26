@@ -151,7 +151,7 @@
         }
     },
     "stats": {
-        "title": "Statistics",
+        "title": "{{name}}'s stats",
         "overview": {
             "title": "Overview",
             "followed": "In library",
@@ -195,7 +195,7 @@
         },
         "funnel": {
             "title": "Reading status",
-            "total": "{{count}} series followed total"
+            "total": "{{count}} series read total"
         },
         "authors": {
             "title": "Most read authors",

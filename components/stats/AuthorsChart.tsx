@@ -7,6 +7,7 @@ import { hexToRgba } from "@/utils/colors";
 import { StatsSection } from "./StatsSection";
 import { useTranslation } from "react-i18next";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
+import { useUserBooks } from "@/hooks/queries/users";
 import BookCard from "@/components/BookCard";
 import { Book, TrackedBookWithMeta } from "@/types/book";
 
@@ -18,14 +19,16 @@ interface AuthorData {
 interface AuthorsChartProps {
   data: AuthorData[];
   title: string;
+  username?: string;
 }
 
-export function AuthorsChart({ data, title }: AuthorsChartProps) {
+export function AuthorsChart({ data, title, username }: AuthorsChartProps) {
   const { colors } = useTheme();
   const typography = useTypography();
   const { t } = useTranslation();
   const router = useRouter();
   const { getTrackedBooks } = useTrackedBooksStore();
+  const { data: userBooks } = useUserBooks(username);
 
   const topAuthors = useMemo(
     () => data.sort((a, b) => b.value - a.value).slice(0, 6),
@@ -39,10 +42,11 @@ export function AuthorsChart({ data, title }: AuthorsChartProps) {
 
   // Group books by author
   const booksByAuthor = useMemo(() => {
-    const trackedBooks = getTrackedBooks();
+    // Use API data for other users, local store for current user
+    const books: TrackedBookWithMeta[] = username && userBooks ? userBooks : getTrackedBooks();
     const grouped: Record<string, TrackedBookWithMeta[]> = {};
 
-    trackedBooks.forEach((book) => {
+    books.forEach((book) => {
       if (book.authors && book.authors.length > 0) {
         book.authors.forEach((author) => {
           if (!grouped[author.name]) {
@@ -54,7 +58,7 @@ export function AuthorsChart({ data, title }: AuthorsChartProps) {
     });
 
     return grouped;
-  }, [getTrackedBooks]);
+  }, [username, userBooks, getTrackedBooks]);
 
   const handleBookPress = (book: Book) => {
     router.push(`/book/${book.id}`);
@@ -63,7 +67,7 @@ export function AuthorsChart({ data, title }: AuthorsChartProps) {
   if (!topAuthors.length) return null;
 
   return (
-    <StatsSection title={title}>
+    <StatsSection title={title} plusBadge={true}>
       <Text
         style={[
           typography.bodyCaption,

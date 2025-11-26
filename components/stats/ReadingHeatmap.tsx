@@ -36,7 +36,7 @@ export function ReadingHeatmap({ data, title }: ReadingHeatmapProps) {
   if (!data.length) return null;
 
   return (
-    <StatsSection title={title}>
+    <StatsSection title={title} plusBadge={true}>
       <Text
         style={[
           typography.bodyCaption,

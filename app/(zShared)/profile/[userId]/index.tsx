@@ -32,7 +32,7 @@ import Animated, {
 } from "react-native-reanimated";
 import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Notebook } from "lucide-react-native";
+import { Notebook, ChartNoAxesCombined } from "lucide-react-native";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import dayjs from "dayjs";
@@ -201,20 +201,35 @@ export default function UserProfileScreen() {
     <View style={{ flex: 1 }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedHeader
-        title={user?.username || t("profile.title")}
+        title={user?.displayName || t("profile.title")}
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
         onBack={() => router.back()}
+        closeRightButton={
+          <Pressable
+            onPress={() => {
+              if (isMe) {
+                router.push(`/activity/${currentUser?.username}`);
+              } else {
+                router.push(`/activity/${user?.username}`);
+              }
+            }}
+          >
+            <Notebook size={22} color={colors.icon} />
+          </Pressable>
+        }
         rightButton={
-          isMe ? (
-            <Pressable
-              onPress={() => {
+          <Pressable
+            onPress={() => {
+              if (isMe) {
                 router.push(`/stats`);
-              }}
-            >
-              <Notebook size={22} color={colors.icon} />
-            </Pressable>
-          ) : undefined
+              } else {
+                router.push(`/stats?username=${user?.username}`);
+              }
+            }}
+          >
+            <ChartNoAxesCombined size={22} color={colors.icon} />
+          </Pressable>
         }
       />
       <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} style={{ paddingTop: insets.top }} contentContainerStyle={{ paddingBottom: 64 }}>

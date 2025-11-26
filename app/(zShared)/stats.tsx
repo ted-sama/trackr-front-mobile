@@ -7,11 +7,11 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
-import { useMeStats } from "@/hooks/queries/users";
+import { useMeStats, useUser, useUserStats } from "@/hooks/queries/users";
 import { useFont } from "@shopify/react-native-skia";
 import { Manrope_500Medium } from "@expo-google-fonts/manrope";
 import { OverviewCards } from "@/components/stats/OverviewCards";
@@ -23,6 +23,7 @@ import { FunnelChart } from "@/components/stats/FunnelChart";
 import { SeriesChart } from "@/components/stats/SeriesChart";
 import { AuthorsChart } from "@/components/stats/AuthorsChart";
 import { TypesChart } from "@/components/stats/TypesChart";
+import { useUserStore } from "@/stores/userStore";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(
   Animated.ScrollView
@@ -37,8 +38,12 @@ export default function StatsScreen() {
   const scrollY = useSharedValue(0);
   const [titleY, setTitleY] = useState<number>(0);
   const font = useFont(Manrope_500Medium, 11);
+  const { username } = useLocalSearchParams<{ username?: string }>();
+  const { currentUser } = useUserStore();
 
-  const { data: stats, isLoading, isError } = useMeStats();
+  const isMe = !username || username === currentUser?.username;
+  const { data: user } = isMe ? { data: currentUser } : useUser(username || '');
+  const { data: stats, isLoading, isError } = isMe ? useMeStats() : useUserStats(username);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -132,10 +137,14 @@ export default function StatsScreen() {
       }))
     : [];
 
-
-
-
-
+  const funnelCounts = stats
+    ? stats.funnel.counts
+    : {
+        reading: 0,
+        completed: 0,
+        on_hold: 0,
+        dropped: 0,
+      };
 
   if (isLoading) {
     return (
@@ -172,7 +181,7 @@ export default function StatsScreen() {
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
 
       <AnimatedHeader
-        title={t("stats.title")}
+        title={t("stats.title", {name: user?.displayName})}
         scrollY={scrollY}
         onBack={() => router.back()}
         collapseThreshold={titleY > 0 ? titleY : undefined}
@@ -193,41 +202,43 @@ export default function StatsScreen() {
           onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
         >
           <Text style={[typography.h1, { color: colors.text }]}>
-            {t("stats.title")}
+            {t("stats.title", {name: user?.displayName})}
           </Text>
         </View>
 
         <View style={{ gap: 24 }}>
           <OverviewCards cards={overviewCards} title={t("stats.overview.title")} />
-          <ActivityChart
-            data={activityData}
-            title={t("stats.activity.title")}
-            font={font}
+          <FunnelChart
+            counts={funnelCounts}
+            title={t("stats.funnel.title")}
           />
-          <GenreChart data={genreData} title={t("stats.genres.title")} />
-          <RatingChart
-            data={ratingData}
-            title={t("stats.ratings.title")}
-            font={font}
-          />
-          <ReadingHeatmap
-            data={stats?.preferences.heatmap ?? []}
-            title={t("stats.heatmap.title")}
-          />
-          <SeriesChart
-            distributionData={seriesDistributionData}
-            currentProgress={stats?.series.currentProgress ?? []}
-            title={t("stats.series.title")}
-            font={font}
-          />
-          {stats?.funnel.counts && (
-            <FunnelChart
-              counts={stats.funnel.counts}
-              title={t("stats.funnel.title")}
-            />
+          {user?.plan === "plus" && (
+            <View style={{ gap: 24 }}>
+              <GenreChart data={genreData} title={t("stats.genres.title")} />
+              <TypesChart data={typesData} title={t("stats.types.title")} />
+              <ActivityChart
+                data={activityData}
+                title={t("stats.activity.title")}
+                font={font}
+              />
+              <RatingChart
+                data={ratingData}
+                title={t("stats.ratings.title")}
+                font={font}
+              />
+              <ReadingHeatmap
+                data={stats?.preferences.heatmap ?? []}
+                title={t("stats.heatmap.title")}
+              />
+              <SeriesChart
+                distributionData={seriesDistributionData}
+                currentProgress={stats?.series.currentProgress ?? []}
+                title={t("stats.series.title")}
+                font={font}
+              />
+              <AuthorsChart data={authorsData} title={t("stats.authors.title")} username={isMe ? undefined : username} />
+            </View>
           )}
-          <AuthorsChart data={authorsData} title={t("stats.authors.title")} />
-          <TypesChart data={typesData} title={t("stats.types.title")} />
         </View>
       </AnimatedScrollView>
     </View>

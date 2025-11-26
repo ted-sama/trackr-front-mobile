@@ -41,7 +41,7 @@ export function ActivityChart({ data, title, font }: ActivityChartProps) {
   if (!data.length) return null;
 
   return (
-    <StatsSection title={title}>
+    <StatsSection title={title} plusBadge={true}>
       <Text
         style={[
           typography.bodyCaption,

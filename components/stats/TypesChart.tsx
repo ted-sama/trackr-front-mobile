@@ -56,7 +56,7 @@ export function TypesChart({ data, title }: TypesChartProps) {
   if (!data.length) return null;
 
   return (
-    <StatsSection title={title}>
+    <StatsSection title={title} plusBadge={true}>
       <Text
         style={[
           typography.bodyCaption,

@@ -189,7 +189,7 @@ export default function Profile() {
     <View style={{ flex: 1 }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedHeader
-        title={currentUser?.username || t("profile.title")}
+        title={currentUser?.displayName || t("profile.title")}
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
         closeRightButton={

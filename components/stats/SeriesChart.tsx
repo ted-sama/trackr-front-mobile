@@ -34,7 +34,7 @@ export function SeriesChart({
   if (!distributionData.length) return null;
 
   return (
-    <StatsSection title={title}>
+    <StatsSection title={title} plusBadge={true}>
       <Text
         style={[
           typography.bodyCaption,

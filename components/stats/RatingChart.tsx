@@ -31,7 +31,7 @@ export function RatingChart({ data, title, font }: RatingChartProps) {
   if (!data.length) return null;
 
   return (
-    <StatsSection title={title}>
+    <StatsSection title={title} plusBadge={true}>
       <Text
         style={[
           typography.bodyCaption,
