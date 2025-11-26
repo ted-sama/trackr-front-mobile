@@ -21,8 +21,8 @@ interface ExpandableSearchBarProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder: string;
-  selectedFilter: 'books' | 'lists';
-  onFilterChange: (filter: 'books' | 'lists') => void;
+  selectedFilter: 'books' | 'lists' | 'users';
+  onFilterChange: (filter: 'books' | 'lists' | 'users') => void;
 }
 
 const COLLAPSED_HEIGHT = 52;
@@ -87,9 +87,10 @@ export function ExpandableSearchBar({
     };
   });
 
-  const filters: Array<{ key: 'books' | 'lists'; label: string }> = [
+  const filters: Array<{ key: 'books' | 'lists' | 'users'; label: string }> = [
     { key: 'books', label: 'Livres' },
     { key: 'lists', label: 'Listes' },
+    { key: 'users', label: 'Utilisateurs' },
   ];
 
   return (

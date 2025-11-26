@@ -5,16 +5,18 @@ import { router } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import BookListElement from '@/components/BookListElement';
 import CollectionListElement from '@/components/CollectionListElement';
+import UserListElement from '@/components/UserListElement';
 import { useTypography } from '@/hooks/useTypography';
 import { useSearch } from '@/hooks/queries/search';
 import { Book } from '@/types/book';
 import { List } from '@/types/list';
+import { User } from '@/types/user';
 import SkeletonLoader from '@/components/skeleton-loader/SkeletonLoader';
 import { LegendList } from '@legendapp/list';
 
 interface SearchResultsProps {
   searchQuery: string;
-  activeFilter: 'books' | 'lists';
+  activeFilter: 'books' | 'lists' | 'users';
 }
 
 export function SearchResults({ searchQuery, activeFilter }: SearchResultsProps) {
@@ -32,8 +34,8 @@ export function SearchResults({ searchQuery, activeFilter }: SearchResultsProps)
 
   const hasResults = flatResults.length > 0;
 
-  const renderItem = ({ item }: { item: Book | List }) => {
-    // Type guard to distinguish Book from List
+  const renderItem = ({ item }: { item: Book | List | User }) => {
+    // Type guard to distinguish Book from List from User
     if ('authors' in item) {
       // It's a Book
       return (
@@ -45,13 +47,21 @@ export function SearchResults({ searchQuery, activeFilter }: SearchResultsProps)
           onPress={() => router.push(`/book/${item.id}`)}
         />
       );
-    } else {
+    } else if ('books' in item || 'isPublic' in item) {
       // It's a List
       return (
         <CollectionListElement
           list={item as List}
           onPress={() => router.push(`/list/${item.id}`)}
           showDescription={true}
+        />
+      );
+    } else {
+      // It's a User
+      return (
+        <UserListElement
+          user={item as User}
+          onPress={() => router.push(`/profile/${(item as User).username}`)}
         />
       );
     }
@@ -108,7 +118,7 @@ export function SearchResults({ searchQuery, activeFilter }: SearchResultsProps)
 
 const styles = StyleSheet.create({
   listContainer: {
-    paddingVertical: 16,
+    paddingTop: 64,
     paddingHorizontal: 16,
   },
   emptyContainer: {

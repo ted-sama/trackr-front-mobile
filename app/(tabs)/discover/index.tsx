@@ -15,7 +15,7 @@ import CategorySlider from "@/components/CategorySlider";
 import CollectionListElement from "@/components/CollectionListElement";
 import { useTranslation } from "react-i18next";
 
-type FilterType = 'books' | 'lists';
+type FilterType = 'books' | 'lists' | 'users';
 
 const MAX_LISTS_PREVIEW = 3;
 

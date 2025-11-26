@@ -2,6 +2,7 @@
     "common": {
         "book": "book",
         "list": "list",
+        "lists": "lists",
         "search": "Search books",
         "error": "Error"
     },
@@ -85,6 +86,9 @@
             "description": "Discover the lists created by the community",
             "empty": "No lists found",
             "emptyDescription": "There are no public lists to display yet."
+        },
+        "users": {
+            "title": "Users"
         },
         "search": {
             "empty": "Start your search by typing above.",

@@ -165,6 +165,7 @@ export default function Collection() {
   const insets = useSafeAreaInsets();
   const [searchText, setSearchText] = useState("");
   const debouncedQuery = useStableTrimmedQuery(searchText);
+  const { t } = useTranslation();
   // Subscribe to trackedBooks state directly so the component re-renders when it changes
   const trackedBooks = useTrackedBooksStore((state) => state.trackedBooks);
   const isLoading = useTrackedBooksStore((state) => state.isLoading);
@@ -193,6 +194,9 @@ export default function Collection() {
       totalBooks={myLibrary.length}
     />
     <View style={{ height: 1, backgroundColor: colors.border, marginBottom: 32 }} />
+    <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: 16 }]}>
+      {lists.length} {lists.length > 1 ? t("common.lists") : t("common.list")}
+    </Text>
     </>
   ), [mosaicBooks, colors, typography, router, myLibrary.length]);
 

@@ -3,13 +3,14 @@ import { api } from '@/services/api';
 import { PaginatedResponse } from '@/types/api';
 import { Book } from '@/types/book';
 import { List } from '@/types/list';
+import { User } from '@/types/user';
 import { queryKeys } from './keys';
 
-type Scope = 'books' | 'lists';
+type Scope = 'books' | 'lists' | 'users';
 
-async function fetchSearch(scope: Scope, q: string, page: number): Promise<PaginatedResponse<Book | List>> {
-  const endpoint = scope === 'books' ? '/books/search' : '/lists/search';
-  const { data } = await api.get<PaginatedResponse<Book | List>>(endpoint, {
+async function fetchSearch(scope: Scope, q: string, page: number): Promise<PaginatedResponse<Book | List | User>> {
+  const endpoint = scope === 'books' ? '/books/search' : scope === 'lists' ? '/lists/search' : '/users/search';
+  const { data } = await api.get<PaginatedResponse<Book | List | User>>(endpoint, {
     params: { q, page, limit: 20 },
   });
   return data;

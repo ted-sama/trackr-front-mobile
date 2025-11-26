@@ -13,8 +13,8 @@ interface DiscoverAnimatedHeaderProps {
   scrollY: SharedValue<number>;
   searchQuery: string;
   onSearchChange: (text: string) => void;
-  selectedFilter: 'books' | 'lists';
-  onFilterChange: (filter: 'books' | 'lists') => void;
+  selectedFilter: 'books' | 'lists' | 'users';
+  onFilterChange: (filter: 'books' | 'lists' | 'users') => void;
   collapseThreshold?: number;
 }
 
