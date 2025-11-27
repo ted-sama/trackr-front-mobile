@@ -17,7 +17,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { toast } from "sonner-native";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import BadgeSlider from "@/components/BadgeSlider";
-import { useList, useDeleteList } from "@/hooks/queries/lists";
+import { useList, useDeleteList, useLikeList, useUnlikeList, useSaveList, useUnsaveList } from "@/hooks/queries/lists";
+import { Heart, Bookmark } from "lucide-react-native";
 import { useUserStore } from "@/stores/userStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Ellipsis } from "lucide-react-native";
@@ -43,11 +44,14 @@ interface ListHeaderProps {
   onTitleLayout: (event: any) => void;
   onOwnerPress: () => void;
   isEditable: boolean;
+  isOwnList: boolean;
   onReorderPress: () => void;
   onEditPress: () => void;
   onDeletePress: () => void;
   onActionsPress: () => void;
   onSwitchLayout: () => void;
+  onLikePress: () => void;
+  onSavePress: () => void;
   currentLayout: "grid" | "list";
   colors: any;
   typography: any;
@@ -64,11 +68,14 @@ const ListHeader = React.memo(({
   onTitleLayout,
   onOwnerPress,
   isEditable,
+  isOwnList,
   onReorderPress,
   onEditPress,
   onDeletePress,
   onActionsPress,
   onSwitchLayout,
+  onLikePress,
+  onSavePress,
   currentLayout,
   colors,
   typography,
@@ -160,6 +167,19 @@ const ListHeader = React.memo(({
             )}
           </View>
         </Pressable>
+        {list.likesCount > 0 && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <Ionicons name="heart" size={16} color={colors.accent} />
+            <Text
+              style={[
+                typography.caption,
+                { color: colors.secondaryText, fontWeight: "600" },
+              ]}
+            >
+              {list.likesCount}
+            </Text>
+          </View>
+        )}
       </View>
       {isEditable && (
         <View style={{ marginTop: 16 }}>
@@ -179,6 +199,37 @@ const ListHeader = React.memo(({
               onPress={onDeletePress}
               style="destructive"
               icon={<Ionicons name="trash-outline" size={16} color={colors.error} />}
+            />
+          </View>
+        </View>
+      )}
+      {/* Like and Save buttons - directly on page for testing */}
+      {list.isPublic && !isOwnList && (
+        <View style={{ marginTop: 16 }}>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <PillButton
+              title={list.isLikedByMe ? t("list.unlike") : t("list.like")}
+              onPress={onLikePress}
+              icon={
+                <Heart
+                  size={16}
+                  strokeWidth={2.5}
+                  color={list.isLikedByMe ? colors.accent : colors.secondaryText}
+                  fill={list.isLikedByMe ? colors.accent : "transparent"}
+                />
+              }
+            />
+            <PillButton
+              title={list.isSavedByMe ? t("list.unsave") : t("list.save")}
+              onPress={onSavePress}
+              icon={
+                <Bookmark
+                  size={16}
+                  strokeWidth={2.5}
+                  color={list.isSavedByMe ? colors.accent : colors.secondaryText}
+                  fill={list.isSavedByMe ? colors.accent : "transparent"}
+                />
+              }
             />
           </View>
         </View>
@@ -245,8 +296,13 @@ export default function ListFullScreen() {
 
   const { data: list, refetch, isLoading } = useList(listId);
   const { mutateAsync: deleteListFromStore } = useDeleteList();
+  const { mutateAsync: likeList } = useLikeList();
+  const { mutateAsync: unlikeList } = useUnlikeList();
+  const { mutateAsync: saveList } = useSaveList();
+  const { mutateAsync: unsaveList } = useUnsaveList();
   const { currentUser } = useUserStore();
   const isEditable = (listId: string) => Boolean(list && currentUser && list.owner?.id === currentUser.id);
+  const isOwnList = Boolean(list && currentUser && list.owner?.id === currentUser.id);
 
   // Dominant color for gradient
   const [dominantColor, setDominantColor] = useState<string | null>(null);
@@ -347,6 +403,46 @@ export default function ListFullScreen() {
   };
 
   // Local button animation handlers removed; handled inside PillButton
+
+  // Like handler - directly on page
+  const handleLike = async () => {
+    if (!list) return;
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      if (list.isLikedByMe) {
+        await unlikeList(list.id);
+        toast.success(t("toast.listUnliked"));
+      } else {
+        await likeList(list.id);
+        toast.success(t("toast.listLiked"));
+      }
+      // Force refetch to update UI
+      await refetch();
+    } catch (error) {
+      console.error("Error liking/unliking list:", error);
+      toast.error(t("toast.errorLikingList"));
+    }
+  };
+
+  // Save handler - directly on page
+  const handleSave = async () => {
+    if (!list) return;
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      if (list.isSavedByMe) {
+        await unsaveList(list.id);
+        toast.success(t("toast.listUnsaved"));
+      } else {
+        await saveList(list.id);
+        toast.success(t("toast.listSaved"));
+      }
+      // Force refetch to update UI
+      await refetch();
+    } catch (error) {
+      console.error("Error saving/unsaving list:", error);
+      toast.error(t("toast.errorSavingList"));
+    }
+  };
 
   const switchLayout = () => {
     setLayout(currentLayout === "grid" ? "list" : "grid");
@@ -471,6 +567,7 @@ export default function ListFullScreen() {
               onTitleLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
               onOwnerPress={() => router.push(`/profile/${list.owner.username}`)}
               isEditable={isEditable(list.id)}
+              isOwnList={isOwnList}
               onReorderPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push(`/list/${listId}/reorder`);
@@ -485,6 +582,8 @@ export default function ListFullScreen() {
               }}
               onActionsPress={() => handlePresentModalPress("actions")}
               onSwitchLayout={switchLayout}
+              onLikePress={handleLike}
+              onSavePress={handleSave}
               currentLayout={currentLayout}
               colors={colors}
               typography={typography}

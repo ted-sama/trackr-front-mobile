@@ -17,7 +17,7 @@ import Avatar from "@/components/ui/Avatar";
 import PlusBadge from "@/components/ui/PlusBadge";
 import { router } from "expo-router";
 import BookCard from "@/components/BookCard";
-import { useUserLists, useUserTop } from "@/hooks/queries/users";
+import { useUserCreatedLists, useUserTop } from "@/hooks/queries/users";
 import CollectionListElement from "@/components/CollectionListElement";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import { useState, useEffect } from "react";
@@ -44,7 +44,7 @@ dayjs.extend(utc);
 export default function Profile() {
   const { currentUser } = useUserStore();
   const { data: topBooks, isLoading } = useUserTop();
-  const { data: userListsPages } = useUserLists();
+  const { data: userListsPages } = useUserCreatedLists(currentUser?.username);
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const scrollY = useSharedValue(0);

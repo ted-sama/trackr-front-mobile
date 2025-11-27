@@ -92,6 +92,38 @@ export function useUserLists(userId?: string, search?: string) {
   });
 }
 
+export function useUserCreatedLists(username?: string, search?: string) {
+  const { currentUser } = useUserStore();
+  const targetUsername = username || currentUser?.username;
+  const endpoint = `/users/${targetUsername}/lists`;
+
+  return useInfiniteQuery({
+    queryKey: [...queryKeys.userCreatedLists(targetUsername), search ?? ''],
+    queryFn: async ({ pageParam }) => {
+      const page = pageParam ?? 1;
+      const params: Record<string, string | number | undefined> = {
+        page,
+        limit: PER_PAGE,
+        q: search,
+      };
+      const { data } = await api.get<PaginatedResponse<List>>(endpoint, {
+        params,
+      });
+      return data;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPageData) => {
+      const {
+        currentPage,
+        lastPage,
+      } = lastPageData.meta;
+      return currentPage < lastPage ? currentPage + 1 : undefined;
+    },
+    enabled: Boolean(targetUsername),
+    staleTime: 60_000,
+  });
+}
+
 // --- Mutations for updating current user ---
 
 async function updateMeRequest(updated: Partial<User>): Promise<User> {

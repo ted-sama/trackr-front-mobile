@@ -180,6 +180,19 @@ export default function CollectionListElement({
               >
                 {list.isPublic ? t("listItem.public") : t("listItem.private")}
               </Text>
+              {list.likesCount > 0 && (
+                <>
+                  {separator()}
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                    <Ionicons name="heart" size={12} color={colors.secondaryText} />
+                    <Text
+                      style={[typography.caption, { color: colors.secondaryText }]}
+                    >
+                      {list.likesCount}
+                    </Text>
+                  </View>
+                </>
+              )}
             </View>
           )}
           {showDescription && (

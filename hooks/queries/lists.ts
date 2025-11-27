@@ -59,6 +59,22 @@ async function deleteList(listId: string): Promise<void> {
   await api.delete(`/lists/${listId}`);
 }
 
+async function likeList(listId: string): Promise<void> {
+  await api.post(`/lists/${listId}/like`);
+}
+
+async function unlikeList(listId: string): Promise<void> {
+  await api.delete(`/lists/${listId}/like`);
+}
+
+async function saveList(listId: string): Promise<void> {
+  await api.post(`/lists/${listId}/save`);
+}
+
+async function unsaveList(listId: string): Promise<void> {
+  await api.delete(`/lists/${listId}/save`);
+}
+
 export function useLists() {
   return useQuery({ queryKey: queryKeys.lists, queryFn: fetchLists });
 }
@@ -190,6 +206,172 @@ export function useDeleteList() {
       if (ownerId) {
         qc.invalidateQueries({ queryKey: queryKeys.userLists(ownerId) });
       }
+    },
+  });
+}
+
+export function useLikeList() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (listId: string) => likeList(listId),
+    onMutate: async (listId) => {
+      // Cancel ALL queries to prevent any in-flight request from overwriting our update
+      await qc.cancelQueries({ queryKey: queryKeys.list(listId) });
+      await qc.cancelQueries({ queryKey: queryKeys.lists });
+      await qc.cancelQueries({ queryKey: queryKeys.myListsBase });
+
+      // Get previous data for rollback
+      const previousList = qc.getQueryData<List>(queryKeys.list(listId));
+
+      // Optimistic update
+      if (previousList) {
+        const updatedList = {
+          ...previousList,
+          isLikedByMe: true,
+          likesCount: previousList.likesCount + 1,
+        };
+        qc.setQueryData<List>(queryKeys.list(listId), updatedList);
+      }
+
+      return { previousList };
+    },
+    onError: (_err, listId, context) => {
+      // Rollback on error
+      if (context?.previousList) {
+        qc.setQueryData(queryKeys.list(listId), context.previousList);
+      }
+    },
+    onSuccess: async (_data, listId) => {
+      // Force refetch the specific list query to ensure all observers get updated
+      await qc.refetchQueries({ queryKey: queryKeys.list(listId), exact: true });
+      // Invalidate collection queries
+      qc.invalidateQueries({ queryKey: queryKeys.lists });
+      qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
+      qc.invalidateQueries({ queryKey: queryKeys.userLists() });
+    },
+  });
+}
+
+export function useUnlikeList() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (listId: string) => unlikeList(listId),
+    onMutate: async (listId) => {
+      // Cancel ALL queries to prevent any in-flight request from overwriting our update
+      await qc.cancelQueries({ queryKey: queryKeys.list(listId) });
+      await qc.cancelQueries({ queryKey: queryKeys.lists });
+      await qc.cancelQueries({ queryKey: queryKeys.myListsBase });
+
+      // Get previous data for rollback
+      const previousList = qc.getQueryData<List>(queryKeys.list(listId));
+
+      // Optimistic update
+      if (previousList) {
+        const updatedList = {
+          ...previousList,
+          isLikedByMe: false,
+          likesCount: Math.max(0, previousList.likesCount - 1),
+        };
+        qc.setQueryData<List>(queryKeys.list(listId), updatedList);
+      }
+
+      return { previousList };
+    },
+    onError: (_err, listId, context) => {
+      // Rollback on error
+      if (context?.previousList) {
+        qc.setQueryData(queryKeys.list(listId), context.previousList);
+      }
+    },
+    onSuccess: async (_data, listId) => {
+      // Force refetch the specific list query to ensure all observers get updated
+      await qc.refetchQueries({ queryKey: queryKeys.list(listId), exact: true });
+      // Invalidate collection queries
+      qc.invalidateQueries({ queryKey: queryKeys.lists });
+      qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
+      qc.invalidateQueries({ queryKey: queryKeys.userLists() });
+    },
+  });
+}
+
+export function useSaveList() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (listId: string) => saveList(listId),
+    onMutate: async (listId) => {
+      // Cancel ALL queries to prevent any in-flight request from overwriting our update
+      await qc.cancelQueries({ queryKey: queryKeys.list(listId) });
+      await qc.cancelQueries({ queryKey: queryKeys.lists });
+      await qc.cancelQueries({ queryKey: queryKeys.myListsBase });
+
+      // Get previous data for rollback
+      const previousList = qc.getQueryData<List>(queryKeys.list(listId));
+
+      // Optimistic update
+      if (previousList) {
+        const updatedList = {
+          ...previousList,
+          isSavedByMe: true,
+        };
+        qc.setQueryData<List>(queryKeys.list(listId), updatedList);
+      }
+
+      return { previousList };
+    },
+    onError: (_err, listId, context) => {
+      // Rollback on error
+      if (context?.previousList) {
+        qc.setQueryData(queryKeys.list(listId), context.previousList);
+      }
+    },
+    onSuccess: async (_data, listId) => {
+      // Force refetch the specific list query to ensure all observers get updated
+      await qc.refetchQueries({ queryKey: queryKeys.list(listId), exact: true });
+      // Invalidate collection queries
+      qc.invalidateQueries({ queryKey: queryKeys.lists });
+      qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
+      qc.invalidateQueries({ queryKey: queryKeys.userLists() });
+    },
+  });
+}
+
+export function useUnsaveList() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (listId: string) => unsaveList(listId),
+    onMutate: async (listId) => {
+      // Cancel ALL queries to prevent any in-flight request from overwriting our update
+      await qc.cancelQueries({ queryKey: queryKeys.list(listId) });
+      await qc.cancelQueries({ queryKey: queryKeys.lists });
+      await qc.cancelQueries({ queryKey: queryKeys.myListsBase });
+
+      // Get previous data for rollback
+      const previousList = qc.getQueryData<List>(queryKeys.list(listId));
+
+      // Optimistic update
+      if (previousList) {
+        const updatedList = {
+          ...previousList,
+          isSavedByMe: false,
+        };
+        qc.setQueryData<List>(queryKeys.list(listId), updatedList);
+      }
+
+      return { previousList };
+    },
+    onError: (_err, listId, context) => {
+      // Rollback on error
+      if (context?.previousList) {
+        qc.setQueryData(queryKeys.list(listId), context.previousList);
+      }
+    },
+    onSuccess: async (_data, listId) => {
+      // Force refetch the specific list query to ensure all observers get updated
+      await qc.refetchQueries({ queryKey: queryKeys.list(listId), exact: true });
+      // Invalidate collection queries
+      qc.invalidateQueries({ queryKey: queryKeys.lists });
+      qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
+      qc.invalidateQueries({ queryKey: queryKeys.userLists() });
     },
   });
 }

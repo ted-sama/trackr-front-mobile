@@ -11,7 +11,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import CollectionListElement from '@/components/CollectionListElement';
-import { useUserLists, useUser } from '@/hooks/queries/users';
+import { useUserCreatedLists, useUser } from '@/hooks/queries/users';
 import { List } from '@/types/list';
 import { useTranslation } from 'react-i18next';
 
@@ -31,7 +31,7 @@ export default function UserListsScreen() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useUserLists(userId);
+  } = useUserCreatedLists(user?.username);
   const [titleY, setTitleY] = useState<number>(0);
   const lists = useMemo(() => {
     return data?.pages.flatMap(page => page.data) ?? [];
@@ -107,7 +107,7 @@ export default function UserListsScreen() {
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       
       <AnimatedHeader
-        title={t("profile.listsScreen.title", { username: user?.username })}
+        title={t("profile.listsScreen.title", { username: user?.displayName })}
         scrollY={scrollY}
         onBack={handleBack}
         collapseThreshold={titleY > 0 ? titleY : undefined}

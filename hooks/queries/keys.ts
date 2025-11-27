@@ -15,6 +15,7 @@ export const queryKeys = {
   myLists: (q?: string) => ['my-lists', q ?? ''] as const,
   list: (id: string) => ['list', id] as const,
   userLists: (userId?: string) => ['user', 'lists', userId ?? 'me'] as const,
+  userCreatedLists: (username?: string) => ['user', 'created-lists', username ?? 'me'] as const,
 
   userStats: (username?: string) => ['user', 'stats', username ?? 'me'] as const,
   userBooks: (username?: string) => ['user', 'books', username ?? 'me'] as const,

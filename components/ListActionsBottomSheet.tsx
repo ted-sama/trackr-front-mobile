@@ -13,10 +13,15 @@ import Animated, {
   EntryAnimationsValues,
   ExitAnimationsValues,
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { List } from "@/types/list";
-import { ShareIcon, Flag } from "lucide-react-native";
+import { ShareIcon, Flag, Heart, Bookmark } from "lucide-react-native";
+import { useLikeList, useUnlikeList, useSaveList, useUnsaveList, useList } from "@/hooks/queries/lists";
+import { useUserStore } from "@/stores/userStore";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner-native";
 
 export interface ListActionsBottomSheetProps {
   list: List;
@@ -57,9 +62,22 @@ function morphOut(values: ExitAnimationsValues) {
 }
 
 const ListActionsBottomSheet = forwardRef<BottomSheetModal, ListActionsBottomSheetProps>(
-  ({ list, snapPoints, index, onDismiss, backdropDismiss }, ref) => {
+  ({ list: listProp, snapPoints, index, onDismiss, backdropDismiss }, ref) => {
     const { colors } = useTheme();
     const typography = useTypography();
+    const { t } = useTranslation();
+    const currentUser = useUserStore((state) => state.currentUser);
+
+    // Use the live data from React Query cache instead of the prop
+    const { data: liveList, refetch } = useList(listProp.id);
+    const list = liveList ?? listProp;
+
+    const isOwnList = currentUser?.id === list.owner?.id;
+
+    const { mutateAsync: like } = useLikeList();
+    const { mutateAsync: unlike } = useUnlikeList();
+    const { mutateAsync: save } = useSaveList();
+    const { mutateAsync: unsave } = useUnsaveList();
 
     const renderBackdrop = useCallback(
       (props: BottomSheetBackdropProps) => (
@@ -109,21 +127,97 @@ const ListActionsBottomSheet = forwardRef<BottomSheetModal, ListActionsBottomShe
       );
     };
 
+    const handleLike = async () => {
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        if (list.isLikedByMe) {
+          await unlike(list.id);
+          toast.success(t("toast.listUnliked"));
+        } else {
+          await like(list.id);
+          toast.success(t("toast.listLiked"));
+        }
+        // Force refetch to ensure UI updates
+        await refetch();
+      } catch (error) {
+        console.error("Error liking/unliking list:", error);
+        toast.error(list.isLikedByMe ? t("toast.errorLikingList") : t("toast.errorUnlikingList"));
+      }
+    };
+
+    const handleSave = async () => {
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        if (list.isSavedByMe) {
+          await unsave(list.id);
+          toast.success(t("toast.listUnsaved"));
+        } else {
+          await save(list.id);
+          toast.success(t("toast.listSaved"));
+        }
+        // Force refetch to ensure UI updates
+        await refetch();
+      } catch (error) {
+        console.error("Error saving/unsaving list:", error);
+        toast.error(list.isSavedByMe ? t("toast.errorSavingListToCollection") : t("toast.errorUnsavingList"));
+      }
+    };
+
     const separator = () => (
       <Text style={{ fontWeight: "900", marginHorizontal: 4, color: colors.secondaryText }}>·</Text>
     );
 
     const actions = [
+      // Like/Unlike action - only for public lists that are not owned by current user
+      ...(list.isPublic && !isOwnList
+        ? [
+            {
+              label: list.isLikedByMe ? t("list.unlike") : t("list.like"),
+              icon: (
+                <Heart
+                  size={16}
+                  strokeWidth={2.75}
+                  color={list.isLikedByMe ? colors.primary : colors.text}
+                  fill={list.isLikedByMe ? colors.primary : "transparent"}
+                />
+              ),
+              onPress: handleLike,
+            },
+          ]
+        : []),
+      // Save/Unsave action - only for public lists that are not owned by current user
+      ...(list.isPublic && !isOwnList
+        ? [
+            {
+              label: list.isSavedByMe ? t("list.unsave") : t("list.save"),
+              icon: (
+                <Bookmark
+                  size={16}
+                  strokeWidth={2.75}
+                  color={list.isSavedByMe ? colors.primary : colors.text}
+                  fill={list.isSavedByMe ? colors.primary : "transparent"}
+                />
+              ),
+              onPress: handleSave,
+            },
+          ]
+        : []),
+      // Share action - always available
       {
         label: "Partager",
         icon: <ShareIcon size={16} strokeWidth={2.75} color={colors.text} />,
         onPress: handleShare,
       },
-      {
-        label: "Signaler",
-        icon: <Flag size={16} strokeWidth={2.75} color={colors.text} />,
-        onPress: handleReport,
-      },
+      // Report action - only for lists not owned by current user
+      ...(!isOwnList
+        ? [
+            {
+              label: "Signaler",
+              icon: <Flag size={16} strokeWidth={2.75} color={colors.text} />,
+              onPress: handleReport,
+            },
+          ]
+        : []),
     ];
 
     return (

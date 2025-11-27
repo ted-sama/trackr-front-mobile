@@ -16,6 +16,9 @@ export interface List {
     total: number;
     items: Book[];
   };
+  likesCount: number;
+  isLikedByMe: boolean;
+  isSavedByMe: boolean;
   createdAt: Date;
   updatedAt: Date;
 } 
