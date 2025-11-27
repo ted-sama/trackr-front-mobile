@@ -143,8 +143,8 @@ const ListHeader = React.memo(({
         style={{
           marginTop: 16,
           flexDirection: "row",
-          justifyContent: "space-between",
           alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
         <Pressable onPress={onOwnerPress}>
@@ -167,19 +167,138 @@ const ListHeader = React.memo(({
             )}
           </View>
         </Pressable>
-        {list.likesCount > 0 && (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-            <Ionicons name="heart" size={16} color={colors.accent} />
-            <Text
-              style={[
-                typography.caption,
-                { color: colors.secondaryText, fontWeight: "600" },
-              ]}
-            >
-              {list.likesCount}
-            </Text>
-          </View>
-        )}
+        {/* Like and Save counters - right aligned */}
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          {list.isPublic && !isOwnList ? (
+            <>
+              <Pressable
+                onPress={onLikePress}
+                style={({ pressed }) => [
+                  {
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 4,
+                    paddingHorizontal: 10,
+                    paddingVertical: 6,
+                    borderRadius: 16,
+                    backgroundColor: colors.card,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}
+              >
+                <Heart
+                  size={14}
+                  strokeWidth={2}
+                  color={list.isLikedByMe ? colors.accent : colors.icon}
+                  fill={list.isLikedByMe ? colors.accent : "transparent"}
+                />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: list.isLikedByMe ? colors.accent : colors.secondaryText,
+                    fontWeight: "600",
+                  }}
+                >
+                  {list.likesCount || 0}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={onSavePress}
+                style={({ pressed }) => [
+                  {
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 4,
+                    paddingHorizontal: 10,
+                    paddingVertical: 6,
+                    borderRadius: 16,
+                    backgroundColor: colors.card,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}
+              >
+                <Bookmark
+                  size={14}
+                  strokeWidth={2}
+                  color={list.isSavedByMe ? colors.accent : colors.icon}
+                  fill={list.isSavedByMe ? colors.accent : "transparent"}
+                />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: list.isSavedByMe ? colors.accent : colors.secondaryText,
+                    fontWeight: "600",
+                  }}
+                >
+                  {list.savesCount || 0}
+                </Text>
+              </Pressable>
+            </>
+          ) : isEditable ? (
+            <>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 4,
+                  paddingHorizontal: 10,
+                  paddingVertical: 6,
+                  borderRadius: 16,
+                  backgroundColor: colors.card,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                }}
+              >
+                <Heart
+                  size={14}
+                  strokeWidth={2}
+                  color={colors.icon}
+                />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: colors.secondaryText,
+                    fontWeight: "600",
+                  }}
+                >
+                  {list.likesCount || 0}
+                </Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 4,
+                  paddingHorizontal: 10,
+                  paddingVertical: 6,
+                  borderRadius: 16,
+                  backgroundColor: colors.card,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                }}
+              >
+                <Bookmark
+                  size={14}
+                  strokeWidth={2}
+                  color={colors.icon}
+                />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: colors.secondaryText,
+                    fontWeight: "600",
+                  }}
+                >
+                  {list.savesCount || 0}
+                </Text>
+              </View>
+            </>
+          ) : null}
+        </View>
       </View>
       {isEditable && (
         <View style={{ marginTop: 16 }}>
@@ -199,37 +318,6 @@ const ListHeader = React.memo(({
               onPress={onDeletePress}
               style="destructive"
               icon={<Ionicons name="trash-outline" size={16} color={colors.error} />}
-            />
-          </View>
-        </View>
-      )}
-      {/* Like and Save buttons - directly on page for testing */}
-      {list.isPublic && !isOwnList && (
-        <View style={{ marginTop: 16 }}>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <PillButton
-              title={list.isLikedByMe ? t("list.unlike") : t("list.like")}
-              onPress={onLikePress}
-              icon={
-                <Heart
-                  size={16}
-                  strokeWidth={2.5}
-                  color={list.isLikedByMe ? colors.accent : colors.secondaryText}
-                  fill={list.isLikedByMe ? colors.accent : "transparent"}
-                />
-              }
-            />
-            <PillButton
-              title={list.isSavedByMe ? t("list.unsave") : t("list.save")}
-              onPress={onSavePress}
-              icon={
-                <Bookmark
-                  size={16}
-                  strokeWidth={2.5}
-                  color={list.isSavedByMe ? colors.accent : colors.secondaryText}
-                  fill={list.isSavedByMe ? colors.accent : "transparent"}
-                />
-              }
             />
           </View>
         </View>
