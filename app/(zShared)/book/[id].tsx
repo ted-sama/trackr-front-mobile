@@ -625,7 +625,7 @@ export default function BookScreen() {
                   style={[typography.caption, { color: colors.secondaryText }]}
                   numberOfLines={1}
                 >
-                  {book?.type}
+                  {t("common.bookTypes." + book?.type)}
                 </Text>
                 {separator()}
                 <Text
