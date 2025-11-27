@@ -126,7 +126,7 @@ export function TypesChart({ data, title }: TypesChartProps) {
                 },
               ]}
             >
-              {item.label} ({item.value})
+              {t("common.bookTypes." + item.label)} ({item.value})
             </Text>
           </View>
         ))}

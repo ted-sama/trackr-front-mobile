@@ -43,6 +43,7 @@ export function SearchResults({ searchQuery, activeFilter }: SearchResultsProps)
           book={item as Book}
           showAuthor
           showRating
+          showBookType
           showTrackingButton
           onPress={() => router.push(`/book/${item.id}`)}
         />

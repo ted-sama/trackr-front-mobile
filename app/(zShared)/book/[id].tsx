@@ -638,7 +638,9 @@ export default function BookScreen() {
                   <>
                     {separator()}
                     <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                      {book?.chapters} chapitres
+                      {book?.type === "comic"
+                        ? `${book?.chapters} ${book?.chapters === 1 ? t("common.issue") : t("common.issues")}`
+                        : `${book?.chapters} ${book?.chapters === 1 ? t("common.chapter") : t("common.chapters")}`}
                     </Text>
                   </>
                 )}
@@ -684,7 +686,7 @@ export default function BookScreen() {
                 <View style={{ flex: 1, marginBottom: 6, flexDirection: "row", alignItems: "center", gap: 4 }}>
                   <Sparkles size={16} fill={colors.secondaryText} color={colors.secondaryText} />
                   <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                    Traduit par IA
+                    {t("book.translatedByIA")}
                   </Text> 
                 </View>
               )}

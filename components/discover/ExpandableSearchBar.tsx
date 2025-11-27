@@ -16,6 +16,7 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
+import { useTranslation } from 'react-i18next';
 
 interface ExpandableSearchBarProps {
   value: string;
@@ -38,6 +39,7 @@ export function ExpandableSearchBar({
 }: ExpandableSearchBarProps) {
   const { colors } = useTheme();
   const typography = useTypography();
+  const { t } = useTranslation();
   const height = useSharedValue(COLLAPSED_HEIGHT);
   const filterOpacity = useSharedValue(0);
   const filterTranslateY = useSharedValue(-10);
@@ -88,9 +90,9 @@ export function ExpandableSearchBar({
   });
 
   const filters: Array<{ key: 'books' | 'lists' | 'users'; label: string }> = [
-    { key: 'books', label: 'Livres' },
-    { key: 'lists', label: 'Listes' },
-    { key: 'users', label: 'Utilisateurs' },
+    { key: 'books', label: t('discover.filters.books') },
+    { key: 'lists', label: t('discover.filters.lists') },
+    { key: 'users', label: t('discover.filters.users') },
   ];
 
   return (

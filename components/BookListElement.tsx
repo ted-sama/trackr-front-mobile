@@ -22,6 +22,7 @@ interface BookListElementProps {
   onPress?: () => void;
   showTrackingButton?: boolean;
   showTrackingStatus?: boolean;
+  showBookType?: boolean;
   showAuthor?: boolean;
   showRating?: boolean;
   showUserRating?: boolean;
@@ -32,7 +33,7 @@ interface BookListElementProps {
   compact?: boolean;
 }
 
-const BookListElement = ({ book, onPress, showAuthor = true, showRating = false, showUserRating = false, showTrackingButton = false, showTrackingStatus = false, showTrackingChapter = false, rank, currentListId, isFromListPage, compact = false }: BookListElementProps) => {
+const BookListElement = ({ book, onPress, showAuthor = true, showRating = false, showUserRating = false, showTrackingButton = false, showTrackingStatus = false, showTrackingChapter = false, showBookType = false, rank, currentListId, isFromListPage, compact = false }: BookListElementProps) => {
   const { colors } = useTheme();
   const typography = useTypography();
   const { isBottomSheetVisible, openBookActions } = useBottomSheet();
@@ -92,6 +93,9 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
             <Text style={[styles.title, typography.h3, { color: colors.text, marginBottom: compact ? 2 : 4 }]} numberOfLines={2} ellipsizeMode="tail">{book.title}</Text>
             {book.authors && showAuthor && (
               <Text style={[styles.author, typography.caption, { color: colors.secondaryText, marginBottom: compact ? 1 : 2 }]} numberOfLines={1} ellipsizeMode="tail">{book.authors?.map((author) => author.name).join(", ")}</Text>
+            )}
+            {showBookType && (
+              <Text style={[styles.bookType, typography.caption, { color: colors.secondaryText, marginBottom: compact ? 1 : 2 }]} numberOfLines={1} ellipsizeMode="tail">{t("common.bookTypes." + book.type)}</Text>
             )}
             {showRating && (
               <View style={styles.ratingContainer}>
@@ -192,6 +196,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   author: {
+    marginBottom: 2,
+  },
+  bookType: {
     marginBottom: 2,
   },
   badgeContainer: {
