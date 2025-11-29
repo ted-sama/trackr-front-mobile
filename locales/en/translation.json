@@ -267,6 +267,7 @@
             "hiatus": "hiatus"
         },
         "rating": "rating",
+        "tracking": "tracking",
         "chapter": "Chapter",
         "issue": "Issue",
         "lastChapterRead": "Last chapter read",

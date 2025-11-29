@@ -11,6 +11,7 @@ export interface Book {
   authors?: Author[];
   rating?: number;
   ratingCount: number;
+  trackingCount: number;
   releaseYear?: number;
   endYear?: number;
   volumes?: number;

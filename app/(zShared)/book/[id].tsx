@@ -729,6 +729,13 @@ export default function BookScreen() {
                     : t("book.rating")
                   : t("book.rating")}
               </Text>
+              {separator()}
+              <Text
+                style={[typography.caption, { color: colors.secondaryText }]}
+              >
+                {book?.trackingCount}{" "}
+                {book?.trackingCount && book?.trackingCount > 1 ? t("book.tracking") + "s" : t("book.tracking")}
+              </Text>
             </View>
             <View style={styles.socialsContainer}>
               <Pressable
