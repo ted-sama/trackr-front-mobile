@@ -618,7 +618,9 @@ export default function BookScreen() {
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                {book?.authors?.map((author) => author.name).join(", ")}
+                {book?.type === "comic"
+                  ? book?.publishers?.map((pub) => pub.name).join(", ")
+                  : book?.authors?.map((author) => author.name).join(", ")}
               </Text>
               <View style={[styles.infosContainer]}>
                 <Text
@@ -794,7 +796,7 @@ export default function BookScreen() {
             {booksBySameAuthor && booksBySameAuthor.books.length > 0 && (
             <View>
               <Text style={[typography.categoryTitle, { color: colors.text }]}>
-                Livres par le même auteur
+                {book?.type === "comic" ? t("book.byTheSamePublisher") : t("book.byTheSameAuthor")}
               </Text>
                 <View style={{ marginHorizontal: -16 }}>
                   <CategorySlider
@@ -850,6 +852,7 @@ export default function BookScreen() {
             exiting={FadeOut.duration(150)}
           >
             <TrackingTabBar
+              bookType={book?.type ?? "manga"}
               status={bookTracking.status}
               currentChapter={bookTracking.currentChapter}
               onBookmarkPress={() => handlePresentChapterModalPress()}

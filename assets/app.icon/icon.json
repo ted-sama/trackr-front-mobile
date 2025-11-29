@@ -6,41 +6,20 @@
     {
       "layers" : [
         {
-          "fill-specializations" : [
-            {
-              "value" : {
-                "linear-gradient" : [
-                  "extended-gray:1.00000,1.00000",
-                  "display-p3:0.94195,0.69706,1.00000,1.00000"
-                ]
-              }
-            },
-            {
-              "appearance" : "dark",
-              "value" : {
-                "linear-gradient" : [
-                  "display-p3:0.39618,0.38220,0.88232,1.00000",
-                  "display-p3:0.71758,0.34999,0.88232,1.00000"
-                ]
-              }
-            }
-          ],
-          "image-name" : "trackrr-logo.png",
-          "name" : "trackrr-logo",
-          "opacity-specializations" : [
-            {
-              "value" : 1
-            },
-            {
-              "appearance" : "dark",
-              "value" : 1
-            }
-          ],
+          "blend-mode" : "normal",
+          "fill" : {
+            "linear-gradient" : [
+              "display-p3:0.84789,0.80307,1.00000,1.00000",
+              "extended-gray:1.00000,1.00000"
+            ]
+          },
+          "image-name" : "trackr_logo.png",
+          "name" : "trackr_logo",
           "position" : {
-            "scale" : 1,
+            "scale" : 0.38,
             "translation-in-points" : [
               0,
-              -25
+              0
             ]
           }
         }

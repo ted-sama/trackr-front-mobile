@@ -9,6 +9,7 @@ import { Clock3, BookOpenIcon, BookCheck, Pause, Square, BookMarked, BookmarkPlu
 import { useTranslation } from "react-i18next";
 
 interface TrackingTabBarProps {
+  bookType: string;  
   status: string;
   currentChapter?: number | null;
   markLastChapterAsReadDisabled: boolean;
@@ -18,6 +19,7 @@ interface TrackingTabBarProps {
 }
 
 export function TrackingTabBar({
+  bookType,
   status,
   currentChapter,
   markLastChapterAsReadDisabled,
@@ -72,11 +74,11 @@ export function TrackingTabBar({
             <View style={styles.statusContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 {trackingStatusValues[status as ReadingStatus].icon}
-                <Text style={[typography.trackingTabBarText, { color: colors.text }]} numberOfLines={1} accessibilityLabel={`Statut de suivi : ${status}`}>{trackingStatusValues[status as ReadingStatus].text}</Text>
+                <Text style={[typography.trackingTabBarText, { color: colors.text }]} numberOfLines={1} accessibilityLabel={`Tracking status : ${status}`}>{trackingStatusValues[status as ReadingStatus].text}</Text>
               </View>
               {currentChapter && (
                 <View>
-                  <Text style={[typography.trackingTabBarText2, { color: colors.icon }]} numberOfLines={1} accessibilityLabel={`Chapitre : ${currentChapter}`}>{t("book.chapter")} {currentChapter}</Text>
+                  <Text style={[typography.trackingTabBarText2, { color: colors.icon }]} numberOfLines={1} accessibilityLabel={`Chapter : ${currentChapter}`}>{bookType === 'comic' ? `${t("book.issue")} ${currentChapter.toString()}` : `${t("book.chapter")} ${currentChapter.toString()}`}</Text>
                 </View>
               )}
             </View>

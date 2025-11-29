@@ -205,7 +205,7 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
             { showTrackingChapter && trackingStatus && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
               <View style={styles.chapterBadgeContainer}>
                 <Badge
-                  text={`Ch. ${trackingStatus.currentChapter.toString()}`}
+                  text={book.type === 'comic' ? `#${trackingStatus.currentChapter.toString()}` : `Ch. ${trackingStatus.currentChapter.toString()}`}
                   color={colors.badgeText}
                   backgroundColor={colors.badgeBackground}
                   borderColor={colors.badgeBorder}
@@ -264,7 +264,10 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
                 ]}
                 numberOfLines={1}
               >
-                {book.authors?.map((author) => author.name).join(", ")}
+                {book.type === 'comic'
+                  ? book.publishers?.map((pub) => pub.name).join(", ")
+                  : book.authors?.map((author) => author.name).join(", ")
+                }
               </Text>
             )}
             {showRating && (

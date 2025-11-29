@@ -165,7 +165,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
         >
             <BottomSheetView style={styles.bottomSheetContent}>
                 <View style={styles.titleContainer}>
-                    <Text style={[typography.categoryTitle, { color: colors.text }]}>{t("book.lastChapterRead")}</Text>
+                    <Text style={[typography.categoryTitle, { color: colors.text }]}>{book.type === 'comic' ? t("book.lastIssueRead") : t("book.lastChapterRead")}</Text>
                     <Text style={[typography.caption, { color: colors.secondaryText, textAlign: 'center' }]} numberOfLines={2}>{book.title}</Text>
                 </View>
                 <View style={styles.chapterActionsContainer}>
@@ -174,7 +174,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
                     </AnimatedPressable>
                     <View style={styles.chapterContainer}>
                         <View style={styles.chapterInputContainer}>
-                            <Text style={[typography.categoryTitle, { color: colors.accent }]}>Ch.</Text>
+                            <Text style={[typography.categoryTitle, { color: colors.accent }]}>{book.type === 'comic' ? "#" : "Ch. "}</Text>
                             <BottomSheetTextInput
                                 style={[typography.categoryTitle, { color: colors.accent }]}
                                 inputMode='numeric'
@@ -185,7 +185,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
                             />
                         </View>
                         <Text style={[typography.slashSeparator, { color: colors.text }]}>/</Text>
-                        <Text style={[typography.categoryTitle, { color: colors.text }]}>Ch. {book.chapters?.toString() ?? '?'}</Text>
+                        <Text style={[typography.categoryTitle, { color: colors.text }]}>{book.type === 'comic' ? "#" : "Ch. "}{book.chapters?.toString() ?? '?'}</Text>
                     </View>
                     <AnimatedPressable
                         style={[
@@ -229,11 +229,11 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
                         <View style={{ flex: 1, alignItems: 'flex-end' }}>
                             {book.chapters === undefined || book.chapters === null ? (
                                 <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                                    {t("book.chaptersLeft", { chapters: "?" })}
+                                    {book.type === 'comic' ? t("book.issuesLeft", { issues: "?" }) : t("book.chaptersLeft", { chapters: "?" })}
                                 </Text>
                             ) : book.chapters > Number(chapter) ? (
                                 <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                                    {t("book.chaptersLeft", { chapters: (book.chapters - Number(chapter)).toString() })}
+                                    {book.type === 'comic' ? t("book.issuesLeft", { issues: (book.chapters - Number(chapter)).toString() }) : t("book.chaptersLeft", { chapters: (book.chapters - Number(chapter)).toString() })}
                                 </Text>
                             ) : (
                                 <Animated.Text style={[typography.caption, animatedTextStyle]}>

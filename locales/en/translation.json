@@ -268,12 +268,17 @@
         },
         "rating": "rating",
         "chapter": "Chapter",
+        "issue": "Issue",
         "lastChapterRead": "Last chapter read",
+        "lastIssueRead": "Last issue read",
         "lastReadOn": "Last read {{time}}",
         "chaptersLeft": "{{chapters}} chapter(s) left",
+        "issuesLeft": "{{issues}} issue(s) left",
         "youRatedIt": "You rated this book",
         "rateIt": "Track this book and rate it",
-        "inYourFavorites": "In your favorites"
+        "inYourFavorites": "In your favorites",
+        "byTheSamePublisher": "Books by the same publisher",
+        "byTheSameAuthor": "Books by the same author"
     },
     "chat": {
         "sources": "Used sources",

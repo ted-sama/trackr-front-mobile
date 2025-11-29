@@ -91,8 +91,13 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
               </Text>
             )}
             <Text style={[styles.title, typography.h3, { color: colors.text, marginBottom: compact ? 2 : 4 }]} numberOfLines={2} ellipsizeMode="tail">{book.title}</Text>
-            {book.authors && showAuthor && (
-              <Text style={[styles.author, typography.caption, { color: colors.secondaryText, marginBottom: compact ? 1 : 2 }]} numberOfLines={1} ellipsizeMode="tail">{book.authors?.map((author) => author.name).join(", ")}</Text>
+            {showAuthor && (book.type === 'comic' ? book.publishers : book.authors) && (
+              <Text style={[styles.author, typography.caption, { color: colors.secondaryText, marginBottom: compact ? 1 : 2 }]} numberOfLines={1} ellipsizeMode="tail">
+                {book.type === 'comic'
+                  ? book.publishers?.map((pub) => pub.name).join(", ")
+                  : book.authors?.map((author) => author.name).join(", ")
+                }
+              </Text>
             )}
             {showBookType && (
               <Text style={[styles.bookType, typography.caption, { color: colors.secondaryText, marginBottom: compact ? 1 : 2 }]} numberOfLines={1} ellipsizeMode="tail">{t("common.bookTypes." + book.type)}</Text>
@@ -122,7 +127,7 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
                 />
                 {showTrackingChapter && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
                   <Badge
-                    text={`Ch. ${trackingStatus.currentChapter.toString()}`}
+                    text={book.type === 'comic' ? `#${trackingStatus.currentChapter.toString()}` : `Ch. ${trackingStatus.currentChapter.toString()}`}
                     color={colors.badgeText}
                     backgroundColor={colors.badgeBackground}
                     borderColor={colors.badgeBorder}
@@ -147,7 +152,7 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
           )}
           {compact && showTrackingChapter && trackingStatus && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
             <Badge
-              text={`Ch. ${trackingStatus.currentChapter.toString()}`}
+              text={book.type === 'comic' ? `#${trackingStatus.currentChapter.toString()}` : `Ch. ${trackingStatus.currentChapter.toString()}`}
               color={colors.badgeText}
               backgroundColor={colors.badgeBackground}
               borderColor={colors.badgeBorder}

@@ -1,4 +1,5 @@
 import { Author } from "./author";
+import { Publisher } from "./publisher";
 import { BookTracking } from "./reading-status";
 
 /**
@@ -22,10 +23,11 @@ export interface Book {
   status: string;
   createdAt?: Date;
   updatedAt?: Date;
+  publishers?: Publisher[];
   itemNumber?: number;
   alternativeTitles?: string[];
   dataSource?: string;
-  externalId?: string;
+  externalId?: number;
   nsfw?: boolean;
 }
 

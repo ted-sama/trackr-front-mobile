@@ -51,7 +51,6 @@ import {
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import {
-  useMyLists,
   useAddBookToList,
   useRemoveBookFromList,
   useCreateList,
@@ -60,6 +59,7 @@ import {
   useAddBookToFavorites,
   useRemoveBookFromFavorites,
   useUserTop,
+  useUserCreatedLists,
 } from "@/hooks/queries/users";
 import { hexToRgba } from "@/utils/colors";
 import { toast } from "sonner-native";
@@ -68,6 +68,7 @@ import Button from "./ui/Button";
 import SecondaryButton from "./ui/SecondaryButton";
 import RatingSlider from "./ui/RatingSlider";
 import { handleErrorCodes } from "@/utils/handleErrorCodes";
+import { useUserStore } from "@/stores/userStore";
 
 export interface BookActionsBottomSheetProps {
   book: Book;
@@ -152,6 +153,7 @@ const BookActionsBottomSheet = forwardRef<
     const { t } = useTranslation();
     const { colors } = useTheme();
     const typography = useTypography();
+    const { currentUser } = useUserStore();
     const {
       isBookTracked,
       getTrackedBookStatus,
@@ -159,7 +161,7 @@ const BookActionsBottomSheet = forwardRef<
       removeTrackedBook,
       addTrackedBook,
     } = useTrackedBooksStore();
-    const { data: myListsData } = useMyLists();
+    const { data: myListsData } = useUserCreatedLists();
     const { mutateAsync: addBookToList } = useAddBookToList();
     const { mutateAsync: removeBookFromList } = useRemoveBookFromList();
     const { mutateAsync: createList } = useCreateList();
@@ -499,7 +501,7 @@ const BookActionsBottomSheet = forwardRef<
                       ]}
                       numberOfLines={1}
                     >
-                      {book.authors?.map((author) => author.name).join(", ")}
+                      {book.type === 'comic' ? book.publishers?.map((publisher) => publisher.name).join(", ") : book.authors?.map((author) => author.name).join(", ")}
                     </Text>
                     <View style={[styles.ratingContainer, { marginTop: 4 }]}>
                       <Ionicons
