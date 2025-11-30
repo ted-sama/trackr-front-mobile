@@ -6,7 +6,6 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  Pressable,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
@@ -192,29 +191,12 @@ export default function Profile() {
         title={currentUser?.displayName || t("profile.title")}
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
-        closeRightButton={
-          <Pressable
-            onPress={() => {
-              router.push(`/activity/${currentUser?.username}`);
-            }}
-          >
-            <Notebook size={22} color={colors.icon} />
-          </Pressable>
-        }
-        rightButton={
-          <Pressable onPress={() => {
-            router.push(`/stats`);
-          }}>
-            <ChartNoAxesCombined size={22} color={colors.icon} />
-          </Pressable>
-        }
-        farRightButton={
-          <Pressable onPress={() => {
-            router.push(`/settings`);
-          }}>
-            <Settings size={22} color={colors.icon} />
-          </Pressable>
-        }
+        closeRightButtonIcon={<Notebook size={22} color={colors.icon} />}
+        onCloseRightButtonPress={() => router.push(`/activity/${currentUser?.username}`)}
+        rightButtonIcon={<ChartNoAxesCombined size={22} color={colors.icon} />}
+        onRightButtonPress={() => router.push(`/stats`)}
+        farRightButtonIcon={<Settings size={22} color={colors.icon} />}
+        onFarRightButtonPress={() => router.push(`/settings`)}
       />
       <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} style={{ paddingTop: insets.top }} contentContainerStyle={{ paddingBottom: 64 }}>
         <View style={{ paddingHorizontal: 16 }}>

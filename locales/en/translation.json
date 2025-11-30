@@ -240,6 +240,10 @@
             "profile": "Edit profile",
             "logout": "Logout"
         },
+        "subscription": {
+            "title": "Subscription",
+            "plan": "Current plan"
+        },
         "appearance": {
             "title": "Appearance",
             "theme": "Theme"
@@ -414,6 +418,42 @@
             "statusUpdated": "{{user}} changed status of <bold>{{title}}</bold> to {{status}}",
             "chapterUpdated": "{{user}} read chapter {{chapter}} of <bold>{{title}}</bold>",
             "ratingUpdated": "{{user}} rated <bold>{{title}}</bold>"
+        }
+    },
+    "subscription": {
+        "title": "Subscription",
+        "trackrPlus": "Trackr Plus",
+        "freePlan": "Free",
+        "premiumFeatures": "All premium features unlocked",
+        "basicFeatures": "Basic features",
+        "status": "Status",
+        "active": "Active",
+        "cancelled": "Cancelled",
+        "renewsOn": "Renews on",
+        "expiresOn": "Expires on",
+        "noExpiration": "No expiration",
+        "trialActive": "Free trial active",
+        "upgradeToPro": "Upgrade to Trackr Plus",
+        "manageSubscription": "Manage subscription",
+        "restorePurchases": "Restore purchases",
+        "upgradeSuccess": "Welcome to Trackr Plus!",
+        "restoreSuccess": "Purchases restored successfully",
+        "restoreFailed": "No purchases to restore",
+        "whatYouGet": "What you get with Trackr Plus",
+        "loadingOfferings": "Loading subscription options...",
+        "noOfferingsAvailable": "No subscription options available",
+        "errorLoadingOfferings": "Failed to load subscription options",
+        "features": {
+            "customBackdrops": "Custom backdrops",
+            "customBackdropsDesc": "Personalize your profile and lists with custom backdrop images, with more options coming soon",
+            "aiChat": "AI-powered chat",
+            "aiChatDesc": "Extend your chat usage limits for more summaries, analysis, and insights about your books",
+            "advancedStats": "Advanced statistics",
+            "advancedStatsDesc": "Deep insights into your reading habits",
+            "exclusiveBadges": "Exclusive badges",
+            "exclusiveBadgesDesc": "Show off your Trackr Plus status",
+            "supportDev": "Support development",
+            "supportDevDesc": "Help me build new features and improve Trackr"
         }
     }
 }

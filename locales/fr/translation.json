@@ -240,6 +240,10 @@
             "profile": "Modifier le profil",
             "logout": "Se déconnecter"
         },
+        "subscription": {
+            "title": "Abonnement",
+            "plan": "Plan actuel"
+        },
         "appearance": {
             "title": "Apparence",
             "theme": "Thème"
@@ -415,6 +419,42 @@
             "statusUpdated": "{{user}} a changé le statut de <bold>{{title}}</bold> à {{status}}",
             "chapterUpdated": "{{user}} a lu le chapitre {{chapter}} de <bold>{{title}}</bold>",
             "ratingUpdated": "{{user}} a noté <bold>{{title}}</bold>"
+        }
+    },
+    "subscription": {
+        "title": "Abonnement",
+        "trackrPlus": "Trackr Plus",
+        "freePlan": "Gratuit",
+        "premiumFeatures": "Toutes les fonctionnalités premium débloquées",
+        "basicFeatures": "Fonctionnalités de base",
+        "status": "Statut",
+        "active": "Actif",
+        "cancelled": "Annulé",
+        "renewsOn": "Renouvellement le",
+        "expiresOn": "Expire le",
+        "noExpiration": "Pas d'expiration",
+        "trialActive": "Essai gratuit en cours",
+        "upgradeToPro": "Passer à Trackr Plus",
+        "manageSubscription": "Gérer l'abonnement",
+        "restorePurchases": "Restaurer les achats",
+        "upgradeSuccess": "Bienvenue sur Trackr Plus !",
+        "restoreSuccess": "Achats restaurés avec succès",
+        "restoreFailed": "Aucun achat à restaurer",
+        "whatYouGet": "Ce que vous obtenez avec Trackr Plus",
+        "loadingOfferings": "Chargement des options d'abonnement...",
+        "noOfferingsAvailable": "Aucune option d'abonnement disponible",
+        "errorLoadingOfferings": "Échec du chargement des options d'abonnement",
+        "features": {
+            "customBackdrops": "Bannières personnalisées",
+            "customBackdropsDesc": "Personnalisez votre profil et vos listes avec des images de bannière, avec plus d'options à venir",
+            "aiChat": "Chat IA",
+            "aiChatDesc": "Etendez vos limites d'utilisation du chat pour plus de résumés, analyses et informations sur vos livres",
+            "advancedStats": "Statistiques avancées",
+            "advancedStatsDesc": "Analyses approfondies de vos habitudes de lecture",
+            "exclusiveBadges": "Badges exclusifs",
+            "exclusiveBadgesDesc": "Affichez votre statut Trackr Plus",
+            "supportDev": "Soutenez le développement",
+            "supportDevDesc": "Aidez-moi à créer de nouvelles fonctionnalités et à améliorer Trackr"
         }
     }
 }

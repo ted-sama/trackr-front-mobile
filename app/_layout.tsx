@@ -22,6 +22,7 @@ import {
 import * as SplashScreen from "expo-splash-screen";
 import { DropdownProvider } from "@/contexts/DropdownContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { SubscriptionProvider, useSubscription } from "@/contexts/SubscriptionContext";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { useUserStore } from "@/stores/userStore";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
@@ -38,15 +39,17 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-            <DropdownProvider>
-              <BottomSheetProvider>
-                <BottomSheetModalProvider>
-                  <RootLayoutContent />
-                </BottomSheetModalProvider>
-              </BottomSheetProvider>
-            </DropdownProvider>
-          </ThemeProvider>
+          <SubscriptionProvider>
+            <ThemeProvider>
+              <DropdownProvider>
+                <BottomSheetProvider>
+                  <BottomSheetModalProvider>
+                    <RootLayoutContent />
+                  </BottomSheetModalProvider>
+                </BottomSheetProvider>
+              </DropdownProvider>
+            </ThemeProvider>
+          </SubscriptionProvider>
         </QueryClientProvider>
       </AuthProvider>
     </GestureHandlerRootView>
@@ -57,10 +60,12 @@ export default function RootLayout() {
 function RootLayoutContent() {
   const { colors } = useTheme();
   const { isAuthenticated } = useAuth();
+  const { loginUser, logoutUser } = useSubscription();
   const fetchMyLibraryBooks = useTrackedBooksStore(
     (state) => state.fetchMyLibraryBooks
   );
   const fetchCurrentUser = useUserStore((state) => state.fetchCurrentUser);
+  const currentUser = useUserStore((state) => state.currentUser);
   const isLibraryLoading = useTrackedBooksStore((state) => state.isLoading);
   const libraryError = useTrackedBooksStore((state) => state.error);
   const {
@@ -95,6 +100,17 @@ function RootLayoutContent() {
       fetchCurrentUser();
     }
   }, [isAuthenticated]);
+
+  // Sync RevenueCat user with app authentication
+  useEffect(() => {
+    if (isAuthenticated && currentUser?.id) {
+      // Log in user to RevenueCat when authenticated
+      loginUser(currentUser.id);
+    } else if (!isAuthenticated) {
+      // Log out user from RevenueCat when not authenticated
+      logoutUser();
+    }
+  }, [isAuthenticated, currentUser?.id]);
 
   // Present or dismiss global bottom sheet when visibility changes
   useEffect(() => {

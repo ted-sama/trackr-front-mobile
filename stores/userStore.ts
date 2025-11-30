@@ -10,6 +10,7 @@ export interface UserState {
   fetchCurrentUser: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<void>;
   setUser: (user: User | null) => void;
+  updatePlan: (plan: 'free' | 'plus') => void;
   logout: () => void;
 }
 
@@ -59,6 +60,18 @@ export const useUserStore = create<UserState>((set, get) => ({
       isAuthenticated: user !== null,
       error: null,
     });
+  },
+
+  updatePlan: (plan: 'free' | 'plus') => {
+    const currentUser = get().currentUser;
+    if (currentUser) {
+      set({
+        currentUser: {
+          ...currentUser,
+          plan,
+        },
+      });
+    }
   },
 
   logout: () => {

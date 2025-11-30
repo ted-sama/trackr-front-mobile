@@ -10,6 +10,14 @@ export default function SharedLayout() {
       <Stack.Screen name="activity/[username]" />
       <Stack.Screen name="stats" />
       <Stack.Screen name="settings" />
+      <Stack.Screen name="subscription" />
+      <Stack.Screen 
+        name="paywall" 
+        options={{
+          presentation: 'modal',
+          gestureEnabled: true,
+        }}
+      />
     </Stack>
   );
 }

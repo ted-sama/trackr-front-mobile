@@ -877,9 +877,8 @@ export default function BookScreen() {
         scrollY={scrollY}
         collapseThreshold={HEADER_THRESHOLD}
         onBack={() => router.back()}
-        rightButton={<Pressable onPress={() => router.push(`/chat/${book?.id}`)}>
-          <Circle size={24} fill={dominantColor ?? colors.background} color={dominantColor ?? colors.background} />
-        </Pressable>}
+        rightButtonIcon={<MessageCircle size={24} fill={dominantColor ?? colors.background} color={dominantColor ?? colors.background} style={{ opacity: 0.85 }} />}
+        onRightButtonPress={() => router.push(`/chat/${book?.id}`)}
       />
     </SafeAreaView>
   );

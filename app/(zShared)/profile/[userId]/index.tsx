@@ -8,7 +8,6 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  Pressable,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
@@ -205,32 +204,22 @@ export default function UserProfileScreen() {
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
         onBack={() => router.back()}
-        closeRightButton={
-          <Pressable
-            onPress={() => {
-              if (isMe) {
-                router.push(`/activity/${currentUser?.username}`);
-              } else {
-                router.push(`/activity/${user?.username}`);
-              }
-            }}
-          >
-            <Notebook size={22} color={colors.icon} />
-          </Pressable>
-        }
-        rightButton={
-          <Pressable
-            onPress={() => {
-              if (isMe) {
-                router.push(`/stats`);
-              } else {
-                router.push(`/stats?username=${user?.username}`);
-              }
-            }}
-          >
-            <ChartNoAxesCombined size={22} color={colors.icon} />
-          </Pressable>
-        }
+        closeRightButtonIcon={<Notebook size={22} color={colors.icon} />}
+        onCloseRightButtonPress={() => {
+          if (isMe) {
+            router.push(`/activity/${currentUser?.username}`);
+          } else {
+            router.push(`/activity/${user?.username}`);
+          }
+        }}
+        rightButtonIcon={<ChartNoAxesCombined size={22} color={colors.icon} />}
+        onRightButtonPress={() => {
+          if (isMe) {
+            router.push(`/stats`);
+          } else {
+            router.push(`/stats?username=${user?.username}`);
+          }
+        }}
       />
       <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} style={{ paddingTop: insets.top }} contentContainerStyle={{ paddingBottom: 64 }}>
         <View style={{ paddingHorizontal: 16 }}>

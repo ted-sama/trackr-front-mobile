@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Pressable, StyleSheet } from 'react-native';
-import Animated, { SharedValue, useAnimatedStyle, interpolate, Extrapolate } from 'react-native-reanimated';
+import { View, Pressable, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import Animated, { SharedValue, useAnimatedStyle, interpolate, Extrapolate, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -9,20 +9,51 @@ import { useTypography } from '@/hooks/useTypography';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+interface ScalePressableProps {
+  onPress?: () => void;
+  style?: StyleProp<ViewStyle>;
+  children: React.ReactNode;
+}
+
+function ScalePressable({ onPress, style, children }: ScalePressableProps) {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={() => { scale.value = withTiming(0.92, { duration: 220 }); }}
+      onPressOut={() => { scale.value = withTiming(1, { duration: 220 }); }}
+      style={[style, animatedStyle]}
+      {...(onPress && { pointerEvents: 'box-only' })}
+    >
+      {children}
+    </AnimatedPressable>
+  );
+}
+
 interface AnimatedHeaderProps {
   title: string;
   scrollY: SharedValue<number>;
   collapseThreshold?: number;
   onBack?: () => void;
-  closeRightButton?: React.ReactNode;
-  rightButton?: React.ReactNode;
-  farRightButton?: React.ReactNode;
+  closeRightButtonIcon?: React.ReactNode;
+  onCloseRightButtonPress?: () => void;
+  rightButtonIcon?: React.ReactNode;
+  onRightButtonPress?: () => void;
+  farRightButtonIcon?: React.ReactNode;
+  onFarRightButtonPress?: () => void;
   static?: boolean; // When true, displays header in final state without animation
 }
 
 const DEFAULT_THRESHOLD = 320;
 
-export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, closeRightButton, rightButton, farRightButton, static: isStatic = false }: AnimatedHeaderProps) {
+export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, closeRightButtonIcon, onCloseRightButtonPress, rightButtonIcon, onRightButtonPress, farRightButtonIcon, onFarRightButtonPress, static: isStatic = false }: AnimatedHeaderProps) {
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -97,7 +128,7 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
       </Animated.View>
       <View style={[styles.content, { paddingTop: insets.top }]}> 
         {onBack && (
-          <Pressable onPress={onBack} style={styles.backButton}>
+          <ScalePressable onPress={onBack} style={styles.backButton}>
             <View
               style={[
                 StyleSheet.absoluteFillObject,
@@ -106,7 +137,7 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
               ]}
             />
             <Ionicons name="arrow-back" size={22} color={colors.icon} />
-          </Pressable>
+          </ScalePressable>
         )}
         <Animated.Text
           style={[typography.h3, styles.title, { color: colors.text }, headerTitleStyle]}
@@ -115,10 +146,10 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
         >
           {title}
         </Animated.Text>
-        {/* width calculation: 36 per button + 8 gap between buttons */}
-        <View style={[styles.rightContainer, { width: farRightButton ? (closeRightButton ? 124 : 80) : (closeRightButton ? 80 : 36) }]}>
-          {closeRightButton ? (
-            <View style={styles.closeRightButton}>
+        {/* width calculation: 42 per button + 8 gap between buttons */}
+        <View style={[styles.rightContainer, { width: farRightButtonIcon ? (closeRightButtonIcon ? 142 : 92) : (closeRightButtonIcon ? 92 : 42) }]}>
+          {closeRightButtonIcon ? (
+            <ScalePressable onPress={onCloseRightButtonPress} style={styles.closeRightButton}>
               <View
                 style={[
                   StyleSheet.absoluteFillObject,
@@ -126,11 +157,11 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
                   { backgroundColor: colors.backButtonBackground },
                 ]}
               />
-              {closeRightButton}
-            </View>
+              {closeRightButtonIcon}
+            </ScalePressable>
           ) : null}
-          {rightButton ? (
-            <View style={styles.rightButton}>
+          {rightButtonIcon ? (
+            <ScalePressable onPress={onRightButtonPress} style={styles.rightButton}>
               <View
                 style={[
                   StyleSheet.absoluteFillObject,
@@ -138,13 +169,13 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
                   { backgroundColor: colors.backButtonBackground },
                 ]}
               />
-              {rightButton}
-            </View>
+              {rightButtonIcon}
+            </ScalePressable>
           ) : (
-            <View style={{ width: 36 }} />
+            <View style={{ width: 42 }} />
           )}
-          {farRightButton ? (
-            <View style={styles.rightButton}>
+          {farRightButtonIcon ? (
+            <ScalePressable onPress={onFarRightButtonPress} style={styles.rightButton}>
               <View
                 style={[
                   StyleSheet.absoluteFillObject,
@@ -152,8 +183,8 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
                   { backgroundColor: colors.backButtonBackground },
                 ]}
               />
-              {farRightButton}
-            </View>
+              {farRightButtonIcon}
+            </ScalePressable>
           ) : null}
         </View>
       </View>
@@ -184,15 +215,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   backButton: {
-    padding: 8,
+    padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    minWidth: 38,
-    minHeight: 38,
+    minWidth: 42,
+    minHeight: 42,
     overflow: 'hidden',
   },
   backButtonBg: {
-    borderRadius: 25,
+    borderRadius: 21,
   },
   title: {
     flex: 1,
@@ -204,19 +235,19 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   closeRightButton: {
-    padding: 8,
+    padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    minWidth: 38,
-    minHeight: 38,
+    minWidth: 42,
+    minHeight: 42,
     overflow: 'hidden',
   },
   rightButton: {
-    padding: 8,
+    padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    minWidth: 38,
-    minHeight: 38,
+    minWidth: 42,
+    minHeight: 42,
     overflow: 'hidden',
   },
 }); 

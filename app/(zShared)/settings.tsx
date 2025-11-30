@@ -7,6 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import Constants from 'expo-constants';
@@ -82,6 +83,7 @@ export default function Settings() {
   const typography = useTypography();
   const router = useRouter();
   const { logout, isAuthenticated } = useAuth();
+  const { isTrackrPlus } = useSubscription();
   const scrollY = useSharedValue(0);
   const [titleY, setTitleY] = useState<number>(0);
   const scrollHandler = useAnimatedScrollHandler((event) => {
@@ -144,6 +146,17 @@ export default function Settings() {
               onPress={logout}
               showChevron={false}
               danger
+            />
+          </SettingsSection>
+        )}
+
+        {isAuthenticated && (
+          <SettingsSection title={t('settings.subscription.title')}>
+            <SettingsItem
+              icon={isTrackrPlus ? 'star' : 'star-outline'}
+              label={t('settings.subscription.plan')}
+              value={isTrackrPlus ? t('subscription.trackrPlus') : t('subscription.freePlan')}
+              onPress={() => router.push('/(zShared)/subscription')}
             />
           </SettingsSection>
         )}
