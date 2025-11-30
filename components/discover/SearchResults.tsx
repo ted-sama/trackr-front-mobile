@@ -120,6 +120,7 @@ export function SearchResults({ searchQuery, activeFilter }: SearchResultsProps)
 const styles = StyleSheet.create({
   listContainer: {
     paddingTop: 64,
+    paddingBottom: 32,
     paddingHorizontal: 16,
   },
   emptyContainer: {

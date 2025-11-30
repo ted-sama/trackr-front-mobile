@@ -11,6 +11,7 @@ import {
   Pressable,
   ScrollView as DefaultScrollView,
   FlatList,
+  Linking,
 } from "react-native";
 import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
@@ -43,7 +44,7 @@ import Badge from "@/components/ui/Badge";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import { toast } from "sonner-native";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
-import { Ellipsis, Minus, Plus, ChartPie, Sparkles, MessageCircle, Heart, Circle } from "lucide-react-native";
+import { Ellipsis, Minus, Plus, ChartPie, Sparkles, MessageCircle, Heart, Circle, ExternalLink } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
 import * as Haptics from "expo-haptics";
@@ -58,6 +59,35 @@ import { useTranslation } from "react-i18next";
 import { useUserTop } from "@/hooks/queries/users";
 // Constants for animation
 const HEADER_THRESHOLD = 320; // Threshold for header animation
+const DEFAULT_COVER_COLOR = '#6B7280'; // Grey color for missing covers
+
+// Helper functions for external links
+const getExternalUrl = (dataSource: string | undefined, externalId: number | undefined): string | null => {
+  if (!externalId) return null;
+  switch (dataSource) {
+    case 'myanimelist':
+      return `https://myanimelist.net/manga/${externalId}`;
+    case 'anilist':
+      return `https://anilist.co/manga/${externalId}`;
+    case 'gcd':
+      return `https://www.comics.org/series/${externalId}/`;
+    default:
+      return null;
+  }
+};
+
+const getExternalLabel = (dataSource: string | undefined): string | null => {
+  switch (dataSource) {
+    case 'myanimelist':
+      return 'MAL';
+    case 'anilist':
+      return 'AniList';
+    case 'gcd':
+      return 'GCD';
+    default:
+      return null;
+  }
+};
 
 // Rename ScrollView to AnimatedScrollView for Animated API usage
 const AnimatedScrollView = Animated.createAnimatedComponent(DefaultScrollView);
@@ -260,11 +290,16 @@ export default function BookScreen() {
   }, [id]);
 
 
+  const hasCover = Boolean(book?.coverImage);
+
   useEffect(() => {
     if (book?.coverImage) {
       getPalette(book.coverImage).then(palette => setDominantColor(palette.vibrant));
+    } else if (book) {
+      // Use grey color when no cover image
+      setDominantColor(DEFAULT_COVER_COLOR);
     }
-  }, [book?.coverImage]);
+  }, [book?.coverImage, book]);
 
   // Compute gradient color
   const gradientTopColor = (() => {
@@ -585,10 +620,16 @@ export default function BookScreen() {
       )}
         <View style={[styles.shadowContainer, { marginTop: gradientTopColor ? -gradientHeight + 72 : 72 }]}>
           <View style={styles.imageContainer}>
-            <Image
-              source={{ uri: book?.coverImage }}
-              style={styles.imageContent}
-            />
+            {hasCover ? (
+              <Image
+                source={{ uri: book?.coverImage }}
+                style={styles.imageContent}
+              />
+            ) : (
+              <View style={[styles.imageContent, styles.noCoverContainer, { backgroundColor: DEFAULT_COVER_COLOR }]}>
+                <Ionicons name="book-outline" size={48} color="rgba(255,255,255,0.5)" />
+              </View>
+            )}
           </View>
         </View>
         <View style={styles.detailsContainer}>
@@ -794,27 +835,53 @@ export default function BookScreen() {
             </View>
           </View>
           {/* Recommendations */}
-          <View
-            style={[
-              styles.recommendationsContainer,
-              { borderColor: colors.border },
-            ]}
-          >
-            {booksBySameAuthor && booksBySameAuthor.books.length > 0 && (
-            <View>
+          {booksBySameAuthor && booksBySameAuthor.books.length > 0 && (
+            <View
+              style={[
+                styles.recommendationsContainer,
+                { borderColor: colors.border },
+              ]}
+            >
               <Text style={[typography.categoryTitle, { color: colors.text }]}>
                 {book?.type === "comic" ? t("book.byTheSamePublisher") : t("book.byTheSameAuthor")}
               </Text>
-                <View style={{ marginHorizontal: -16 }}>
-                  <CategorySlider
-                    category={booksBySameAuthor}
-                    isBottomSheetVisible={false}
-                    header={false}
-                  />
-                </View>
+              <View style={{ marginHorizontal: -16 }}>
+                <CategorySlider
+                  category={booksBySameAuthor}
+                  isBottomSheetVisible={false}
+                  header={false}
+                />
               </View>
-            )}
-          </View>
+            </View>
+          )}
+          {/* External Link */}
+          {book?.dataSource && book?.externalId && getExternalUrl(book.dataSource, book.externalId) && (
+            <View
+              style={[
+                styles.externalLinkContainer,
+                { borderColor: colors.border },
+              ]}
+            >
+              <Text style={[typography.caption, { color: colors.secondaryText }]}>
+                {t("book.openIn")}
+              </Text>
+              <Pressable
+                onPress={() => {
+                  const url = getExternalUrl(book.dataSource, book.externalId);
+                  if (url) Linking.openURL(url);
+                }}
+                style={[
+                  styles.externalLinkButton,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                ]}
+              >
+                <Text style={[typography.socialButton, { color: colors.text }]}>
+                  {getExternalLabel(book.dataSource)}
+                </Text>
+                <ExternalLink size={14} color={colors.secondaryText} />
+              </Pressable>
+            </View>
+          )}
         </View>
       </AnimatedScrollView>
 
@@ -918,6 +985,10 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     resizeMode: "cover",
   },
+  noCoverContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
   title: {
     marginRight: 32,
     marginBottom: 12,
@@ -1016,6 +1087,23 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     marginTop: 24,
     paddingTop: 24,
+  },
+  externalLinkContainer: {
+    borderTopWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 24,
+    paddingTop: 24,
+  },
+  externalLinkButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    borderWidth: 1,
   },
   gradientMask: {
     ...StyleSheet.absoluteFillObject,

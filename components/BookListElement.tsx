@@ -17,6 +17,8 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { toast } from "sonner-native";
 import { useTranslation } from "react-i18next";
 
+const DEFAULT_COVER_COLOR = '#6B7280'; // Grey color for missing covers
+
 interface BookListElementProps {
   book: Book;
   onPress?: () => void;
@@ -34,6 +36,7 @@ interface BookListElementProps {
 }
 
 const BookListElement = ({ book, onPress, showAuthor = true, showRating = false, showUserRating = false, showTrackingButton = false, showTrackingStatus = false, showTrackingChapter = false, showBookType = false, rank, currentListId, isFromListPage, compact = false }: BookListElementProps) => {
+  const hasCover = Boolean(book.coverImage);
   const { colors } = useTheme();
   const typography = useTypography();
   const { isBottomSheetVisible, openBookActions } = useBottomSheet();
@@ -83,7 +86,13 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
           style={styles.container}
         >
           <View style={styles.detailsGroup}>
-            <Image source={{ uri: book.coverImage }} style={[styles.image, compact && styles.imageCompact]} />
+            {hasCover ? (
+              <Image source={{ uri: book.coverImage }} style={[styles.image, compact && styles.imageCompact]} />
+            ) : (
+              <View style={[styles.image, compact && styles.imageCompact, styles.noCoverContainer, { backgroundColor: DEFAULT_COVER_COLOR }]}>
+                <Ionicons name="book-outline" size={compact ? 16 : 24} color="rgba(255,255,255,0.5)" />
+              </View>
+            )}
           <View style={[styles.infoContainer, compact && styles.infoContainerCompact]}>
             {rank && (
               <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: compact ? 2 : 4 }]}>
@@ -189,6 +198,10 @@ const styles = StyleSheet.create({
   imageCompact: {
     width: 40,
     height: 60,
+  },
+  noCoverContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   infoContainer: {
     marginHorizontal: 16,

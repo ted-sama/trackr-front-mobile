@@ -27,7 +27,7 @@ export interface Book {
   publishers?: Publisher[];
   itemNumber?: number;
   alternativeTitles?: string[];
-  dataSource?: string;
+  dataSource?: "myanimelist" | "anilist" | "gcd";
   externalId?: number;
   nsfw?: boolean;
 }

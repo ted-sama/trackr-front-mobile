@@ -57,8 +57,11 @@ const COMPACT_SMALL_CARD_WIDTH = width * 0.25;
 // Each item width = (available width - total gaps) / 5 = (width - 64 - 32) / 5 (4 gaps of 8px each = 32px)
 const COMPACT_XS_CARD_WIDTH = (width - 64 - 32) / 5;
 
+const DEFAULT_COVER_COLOR = '#6B7280'; // Grey color for missing covers
+
 const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showUserRating = false, showTrackingStatus = false, showTrackingButton = true, showTrackingChapter = false, rank, currentListId, isFromListPage }: BookCardProps) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const hasCover = Boolean(book.coverImage);
+  const [isLoading, setIsLoading] = useState(hasCover);
   const [hasError, setHasError] = useState(false);
   const { isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
   const isTracking = isBookTracked(book.id);
@@ -168,31 +171,46 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
               },
             ]}
           >
-            {isLoading && (
+            {isLoading && hasCover && (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color={colors.accent} />
               </View>
             )}
-            <Image
-              source={{ uri: book.coverImage }}
-              style={[
-                styles.mangaCover,
-                size === 'compact' && {
-                  width: '100%',
-                  height: '100%',
-                },
-                size === 'compact-small' && {
-                  width: '100%',
-                  height: '100%',
-                },
-                size === 'compact-xs' && {
-                  width: '100%',
-                  height: '100%',
-                },
-              ]}
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-            />
+            {hasCover ? (
+              <Image
+                source={{ uri: book.coverImage }}
+                style={[
+                  styles.mangaCover,
+                  size === 'compact' && {
+                    width: '100%',
+                    height: '100%',
+                  },
+                  size === 'compact-small' && {
+                    width: '100%',
+                    height: '100%',
+                  },
+                  size === 'compact-xs' && {
+                    width: '100%',
+                    height: '100%',
+                  },
+                ]}
+                onLoad={handleImageLoad}
+                onError={handleImageError}
+              />
+            ) : (
+              <View
+                style={[
+                  styles.noCoverContainer,
+                  { backgroundColor: DEFAULT_COVER_COLOR },
+                ]}
+              >
+                <Ionicons
+                  name="book-outline"
+                  size={size === 'compact-xs' ? 20 : size === 'compact-small' ? 24 : 32}
+                  color="rgba(255,255,255,0.5)"
+                />
+              </View>
+            )}
             {!isLoading && !hasError && showTrackingButton && (
               <View style={styles.trackButton}>
                 <TrackingIconButton 
@@ -212,7 +230,7 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
                 />
               </View>
             )}
-            {hasError && (
+            {hasError && hasCover && (
               <View
                 style={[
                   styles.errorContainer,
@@ -364,6 +382,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noCoverContainer: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 6,
     justifyContent: "center",
     alignItems: "center",
   },

@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { useRouter } from 'expo-router';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
-import { useSharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 
 interface ThemeOptionProps {
@@ -66,7 +66,12 @@ export default function ThemeSelector() {
   const typography = useTypography();
   const router = useRouter();
   const scrollY = useSharedValue(0);
+  const [titleY, setTitleY] = useState<number>(0);
   const { t } = useTranslation();
+
+  const scrollHandler = useAnimatedScrollHandler((event) => {
+    scrollY.value = event.contentOffset.y;
+  });
 
   const themeOptions = [
     {
@@ -103,15 +108,24 @@ export default function ThemeSelector() {
         title={t('settings.appearance.theme')}
         scrollY={scrollY}
         onBack={() => router.back()}
+        collapseThreshold={titleY > 0 ? titleY : undefined}
       />
 
-      <ScrollView 
+      <Animated.ScrollView 
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         contentContainerStyle={{ 
-          marginTop: insets.top + 70, 
+          marginTop: insets.top, 
           paddingBottom: 64, 
           paddingHorizontal: 16 
         }}
       >
+        <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
+          <Text style={[typography.h1, { color: colors.text }]}>
+            {t('settings.appearance.theme')}
+          </Text>
+        </View>
+
         <View style={styles.optionsContainer}>
           {themeOptions.map((option) => (
             <ThemeOption
@@ -125,7 +139,7 @@ export default function ThemeSelector() {
             />
           ))}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }
@@ -133,6 +147,10 @@ export default function ThemeSelector() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    marginTop: 70,
+    marginBottom: 24,
   },
   optionsContainer: {
     gap: 12,

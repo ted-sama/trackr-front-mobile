@@ -13,6 +13,7 @@ import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native
 import Constants from 'expo-constants';
 import i18n from '@/i18n';
 import { Ionicons } from '@expo/vector-icons';
+import { useUIStore, ALL_BOOK_TYPES } from '@/stores/uiStore';
 
 interface SettingsItemProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -84,6 +85,7 @@ export default function Settings() {
   const router = useRouter();
   const { logout, isAuthenticated } = useAuth();
   const { isTrackrPlus } = useSubscription();
+  const searchTypes = useUIStore((state) => state.searchTypes);
   const scrollY = useSharedValue(0);
   const [titleY, setTitleY] = useState<number>(0);
   const scrollHandler = useAnimatedScrollHandler((event) => {
@@ -106,6 +108,13 @@ export default function Settings() {
 
   const getCurrentLanguage = () => {
     return i18n.language === 'fr' ? t('languages.french') : t('languages.english');
+  };
+
+  const getSearchTypesValue = () => {
+    if (searchTypes.length === ALL_BOOK_TYPES.length) {
+      return t('settings.search.allTypes');
+    }
+    return t('settings.search.typesCount', { count: searchTypes.length, total: ALL_BOOK_TYPES.length });
   };
 
   return (
@@ -181,6 +190,17 @@ export default function Settings() {
             onPress={() => {
               // Navigation vers l'écran de sélection de langue
               router.push('/(zShared)/language-selector');
+            }}
+          />
+        </SettingsSection>
+
+        <SettingsSection title={t('settings.search.title')}>
+          <SettingsItem
+            icon="filter-outline"
+            label={t('settings.search.types')}
+            value={getSearchTypesValue()}
+            onPress={() => {
+              router.push('/(zShared)/search-types-selector');
             }}
           />
         </SettingsSection>

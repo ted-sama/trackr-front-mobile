@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { useRouter } from 'expo-router';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
-import { useSharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import i18n, { saveLanguagePreference } from '@/i18n';
 
@@ -54,9 +54,15 @@ function LanguageOption({ label, nativeLabel, isSelected, onPress }: LanguageOpt
 export default function LanguageSelector() {
   const { colors, currentTheme } = useTheme();
   const insets = useSafeAreaInsets();
+  const typography = useTypography();
   const router = useRouter();
   const scrollY = useSharedValue(0);
+  const [titleY, setTitleY] = useState<number>(0);
   const { t } = useTranslation();
+
+  const scrollHandler = useAnimatedScrollHandler((event) => {
+    scrollY.value = event.contentOffset.y;
+  });
 
   const languageOptions = [
     {
@@ -84,15 +90,24 @@ export default function LanguageSelector() {
         title={t('settings.language.title')}
         scrollY={scrollY}
         onBack={() => router.back()}
+        collapseThreshold={titleY > 0 ? titleY : undefined}
       />
 
-      <ScrollView 
+      <Animated.ScrollView 
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         contentContainerStyle={{ 
-          marginTop: insets.top + 70, 
+          marginTop: insets.top, 
           paddingBottom: 64, 
           paddingHorizontal: 16 
         }}
       >
+        <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
+          <Text style={[typography.h1, { color: colors.text }]}>
+            {t('settings.language.title')}
+          </Text>
+        </View>
+
         <View style={styles.optionsContainer}>
           {languageOptions.map((option) => (
             <LanguageOption
@@ -105,7 +120,7 @@ export default function LanguageSelector() {
             />
           ))}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }
@@ -113,6 +128,10 @@ export default function LanguageSelector() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    marginTop: 70,
+    marginBottom: 24,
   },
   optionsContainer: {
     gap: 12,

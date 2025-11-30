@@ -20,7 +20,8 @@ export const queryKeys = {
   userStats: (username?: string) => ['user', 'stats', username ?? 'me'] as const,
   userBooks: (username?: string) => ['user', 'books', username ?? 'me'] as const,
 
-  search: (scope: 'books' | 'lists', q: string) => ['search', scope, q] as const,
+  search: (scope: 'books' | 'lists' | 'users', q: string, types?: string[]) => 
+    types ? ['search', scope, q, types] as const : ['search', scope, q] as const,
 };
 
 

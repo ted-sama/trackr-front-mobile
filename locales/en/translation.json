@@ -252,6 +252,15 @@
             "title": "Language",
             "current": "Current language"
         },
+        "search": {
+            "title": "Search",
+            "types": "Active book types",
+            "allTypes": "All types",
+            "typesCount": "{{count}}/{{total}} types",
+            "typesDescription": "Select the types of books you want to see in your search results.",
+            "typesInfo": "{{count}} of {{total}} types enabled",
+            "resetTypes": "Reset to all types"
+        },
         "about": {
             "title": "About",
             "version": "Version",
@@ -283,7 +292,8 @@
         "rateIt": "Track this book and rate it",
         "inYourFavorites": "In your favorites",
         "byTheSamePublisher": "Books by the same publisher",
-        "byTheSameAuthor": "Books by the same author"
+        "byTheSameAuthor": "Books by the same author",
+        "openIn": "Open in"
     },
     "chat": {
         "sources": "Used sources",

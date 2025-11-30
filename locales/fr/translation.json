@@ -252,6 +252,15 @@
             "title": "Langue",
             "current": "Langue actuelle"
         },
+        "search": {
+            "title": "Recherche",
+            "types": "Types de livres actifs",
+            "allTypes": "Tous les types",
+            "typesCount": "{{count}}/{{total}} types",
+            "typesDescription": "Sélectionnez les types de livres que vous souhaitez voir dans vos résultats de recherche.",
+            "typesInfo": "{{count}} sur {{total}} types activés",
+            "resetTypes": "Réinitialiser tous les types"
+        },
         "about": {
             "title": "À propos",
             "version": "Version",
@@ -283,7 +292,8 @@
         "rateIt": "Suivez ce livre et notez-le",
         "inYourFavorites": "Dans vos favoris",
         "byTheSamePublisher": "Livres par le même éditeur",
-        "byTheSameAuthor": "Livres par le même auteur"
+        "byTheSameAuthor": "Livres par le même auteur",
+        "openIn": "Ouvrir dans"
     },
     "chat": {
         "sources": "Sources utilisées",
