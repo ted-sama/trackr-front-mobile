@@ -373,6 +373,7 @@
         "errorAddingToTracking": "Impossible d'ajouter le livre à la bibliothèque",
         "addedToList": "Livre ajouté à la liste",
         "removedFromList": "Livre retiré de la liste",
+        "listsUpdated": "Listes mises à jour",
         "incrementChapter": "Chapitre {{number}} marqué comme lu",
         "backdropReserved": "L'illustration de bannière est réservée au plan Plus",
         "listNameRequired": "Le nom de la liste est requis",
@@ -398,7 +399,10 @@
         "comingSoon": "En cours de développement",
         "errorTrackingToggle": "Impossible de retirer ou d'ajouter le livre",
         "errorSavingLists": "Impossible de sauvegarder les listes",
-        "errorLoadingLists": "Impossible de charger les listes"
+        "errorLoadingLists": "Impossible de charger les listes",
+        "listCreated": "Liste créée avec succès",
+        "errorCreatingList": "Impossible de créer la liste",
+        "errorDeletingList": "Impossible de supprimer la liste"
     },
     "errors": {
         "AUTH_EMAIL_ALREADY_USED": "Un compte avec cet email existe déjà",

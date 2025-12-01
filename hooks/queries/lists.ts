@@ -43,7 +43,7 @@ async function reorderBooksRequest(listId: string, positions: string[]): Promise
 }
 
 async function createList(name: string): Promise<List> {
-  const { data } = await api.post<List>('/lists', { name });
+  const { data } = await api.post<List>('/lists', { name, isPublic: false });
   return data;
 }
 
@@ -150,9 +150,14 @@ export function useCreateList() {
       qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
       qc.invalidateQueries({ queryKey: queryKeys.lists });
       qc.invalidateQueries({ queryKey: queryKeys.userLists() });
+      qc.invalidateQueries({ queryKey: queryKeys.userCreatedLists() });
       const ownerId = newList.owner?.id ?? useUserStore.getState().currentUser?.id;
+      const ownerUsername = newList.owner?.username ?? useUserStore.getState().currentUser?.username;
       if (ownerId) {
         qc.invalidateQueries({ queryKey: queryKeys.userLists(ownerId) });
+      }
+      if (ownerUsername) {
+        qc.invalidateQueries({ queryKey: queryKeys.userCreatedLists(ownerUsername) });
       }
     },
   });
@@ -166,10 +171,15 @@ export function useAddBookToList() {
       qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
       qc.invalidateQueries({ queryKey: queryKeys.list(vars.listId) });
       qc.invalidateQueries({ queryKey: queryKeys.userLists() });
+      qc.invalidateQueries({ queryKey: queryKeys.userCreatedLists() });
       const cachedList = qc.getQueryData<List>(queryKeys.list(vars.listId));
       const ownerId = cachedList?.owner?.id ?? useUserStore.getState().currentUser?.id;
+      const ownerUsername = cachedList?.owner?.username ?? useUserStore.getState().currentUser?.username;
       if (ownerId) {
         qc.invalidateQueries({ queryKey: queryKeys.userLists(ownerId) });
+      }
+      if (ownerUsername) {
+        qc.invalidateQueries({ queryKey: queryKeys.userCreatedLists(ownerUsername) });
       }
     },
   });
@@ -183,10 +193,15 @@ export function useRemoveBookFromList() {
       qc.invalidateQueries({ queryKey: queryKeys.myListsBase });
       qc.invalidateQueries({ queryKey: queryKeys.list(vars.listId) });
       qc.invalidateQueries({ queryKey: queryKeys.userLists() });
+      qc.invalidateQueries({ queryKey: queryKeys.userCreatedLists() });
       const cachedList = qc.getQueryData<List>(queryKeys.list(vars.listId));
       const ownerId = cachedList?.owner?.id ?? useUserStore.getState().currentUser?.id;
+      const ownerUsername = cachedList?.owner?.username ?? useUserStore.getState().currentUser?.username;
       if (ownerId) {
         qc.invalidateQueries({ queryKey: queryKeys.userLists(ownerId) });
+      }
+      if (ownerUsername) {
+        qc.invalidateQueries({ queryKey: queryKeys.userCreatedLists(ownerUsername) });
       }
     },
   });

@@ -94,11 +94,14 @@ export function useUserLists(userId?: string, search?: string) {
 
 export function useUserCreatedLists(username?: string, search?: string) {
   const { currentUser } = useUserStore();
+  const isMe = !username || username === currentUser?.username;
   const targetUsername = username || currentUser?.username;
-  const endpoint = `/users/${targetUsername}/lists`;
+  // For current user, use /me/lists to get all lists (including private ones)
+  // For other users, use /users/${username}/lists (which only returns public lists)
+  const endpoint = isMe ? '/me/lists' : `/users/${targetUsername}/lists`;
 
   return useInfiniteQuery({
-    queryKey: [...queryKeys.userCreatedLists(targetUsername), search ?? ''],
+    queryKey: [...queryKeys.userCreatedLists(isMe ? undefined : targetUsername), search ?? ''],
     queryFn: async ({ pageParam }) => {
       const page = pageParam ?? 1;
       const params: Record<string, string | number | undefined> = {
@@ -109,6 +112,16 @@ export function useUserCreatedLists(username?: string, search?: string) {
       const { data } = await api.get<PaginatedResponse<List>>(endpoint, {
         params,
       });
+      
+      // For current user, filter to only show lists created by them (exclude saved lists from others)
+      if (isMe && currentUser?.id) {
+        const filteredData = data.data.filter((list) => list.owner.id === currentUser.id);
+        return {
+          ...data,
+          data: filteredData,
+        };
+      }
+      
       return data;
     },
     initialPageParam: 1,
@@ -119,7 +132,7 @@ export function useUserCreatedLists(username?: string, search?: string) {
       } = lastPageData.meta;
       return currentPage < lastPage ? currentPage + 1 : undefined;
     },
-    enabled: Boolean(targetUsername),
+    enabled: isMe ? Boolean(currentUser?.id) : Boolean(targetUsername),
     staleTime: 60_000,
   });
 }

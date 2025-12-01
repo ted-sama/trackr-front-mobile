@@ -247,10 +247,12 @@ const BookActionsBottomSheet = forwardRef<
     const handleCreateList = async () => {
       try {
         await createList(newListName);
+        toast.success(t("toast.listCreated"));
         setNewListName("");
         setCurrentView(VIEW_LIST_EDITOR);
       } catch (error) {
         console.error("Error creating list:", error);
+        toast.error(t("toast.errorCreatingList"));
       }
     };
 
@@ -685,6 +687,15 @@ const BookActionsBottomSheet = forwardRef<
                         removeBookFromList({ listId, bookId: book.id })
                       )
                     );
+
+                    // Show appropriate toast based on what was done
+                    if (listsToAdd.length > 0 && listsToRemove.length > 0) {
+                      toast.success(t("toast.listsUpdated"));
+                    } else if (listsToAdd.length > 0) {
+                      toast.success(t("toast.addedToList"));
+                    } else if (listsToRemove.length > 0) {
+                      toast.success(t("toast.removedFromList"));
+                    }
 
                     closeSheet();
                   } catch (error) {

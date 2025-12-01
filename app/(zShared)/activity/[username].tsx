@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
+  ListRenderItem,
 } from "react-native";
 import { useTranslation, Trans } from "react-i18next";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -219,6 +220,7 @@ export default function ActivityPage() {
   const insets = useSafeAreaInsets();
   const scrollY = useSharedValue(0);
   const [titleY, setTitleY] = useState<number>(0);
+  const [refreshing, setRefreshing] = useState(false);
   const { currentUser } = useUserStore();
   
   const isMe = useMemo(() => {
@@ -236,7 +238,6 @@ export default function ActivityPage() {
     hasNextPage, 
     isFetchingNextPage,
     refetch,
-    isRefetching,
   } = useUserActivity(username);
 
   const scrollHandler = useAnimatedScrollHandler({
@@ -249,22 +250,64 @@ export default function ActivityPage() {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
-  const handleRefresh = useCallback(() => {
-    refetch();
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setRefreshing(false);
+    }
   }, [refetch]);
 
-  const handleScroll = useCallback((event: any) => {
-    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-    const paddingToBottom = 100;
-    
-    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
-      if (hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const AnimatedScrollView = Animated.createAnimatedComponent(Animated.ScrollView);
+  const renderItem: ListRenderItem<ActivityLog> = useCallback(({ item }) => (
+    <ActivityItem 
+      activity={item} 
+      isMe={isMe}
+      userDisplayName={user?.displayName}
+    />
+  ), [isMe, user?.displayName]);
+
+  const keyExtractor = useCallback((item: ActivityLog) => item.id, []);
+
+  const ListHeader = useMemo(() => (
+    <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
+      <Text style={[typography.h1, { color: colors.text }]}>{t("activity.title")}</Text>
+    </View>
+  ), [typography.h1, colors.text, t]);
+
+  const ListFooter = useMemo(() => {
+    if (isFetchingNextPage) {
+      return (
+        <View style={styles.loadingFooter}>
+          <ActivityIndicator size="small" color={colors.accent} />
+        </View>
+      );
+    }
+    return null;
+  }, [isFetchingNextPage, colors.accent]);
+
+  const ListEmpty = useMemo(() => {
+    if (isLoading) {
+      return (
+        <View style={styles.emptyContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+        </View>
+      );
+    }
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>
+          {t("activity.empty")}
+        </Text>
+      </View>
+    );
+  }, [isLoading, colors.accent, colors.secondaryText, typography.body, t]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -277,57 +320,37 @@ export default function ActivityPage() {
         collapseThreshold={titleY > 0 ? titleY : undefined}
       />
 
-      <AnimatedScrollView
+      <Animated.FlatList
+        data={activities}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
         onScroll={scrollHandler}
-        onMomentumScrollEnd={handleScroll}
         scrollEventThrottle={16}
         contentContainerStyle={{ 
           marginTop: insets.top, 
           paddingBottom: 64, 
-          paddingHorizontal: 16 
+          paddingHorizontal: 16,
+          flexGrow: 1,
         }}
         showsVerticalScrollIndicator={false}
+        ListHeaderComponent={ListHeader}
+        ListFooterComponent={ListFooter}
+        ListEmptyComponent={ListEmpty}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.3}
         refreshControl={
           <RefreshControl
-            refreshing={isRefetching}
+            refreshing={refreshing}
             onRefresh={handleRefresh}
             tintColor={colors.accent}
             colors={[colors.accent]}
+            progressViewOffset={insets.top}
           />
         }
-      >
-        <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
-          <Text style={[typography.h1, { color: colors.text }]}>{t("activity.title")}</Text>
-        </View>
-
-        {isLoading ? (
-          <View style={styles.emptyContainer}>
-            <ActivityIndicator size="large" color={colors.accent} />
-          </View>
-        ) : activities.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>
-              {t("activity.empty")}
-            </Text>
-          </View>
-        ) : (
-          <>
-            {activities.map((activity) => (
-              <ActivityItem 
-                key={activity.id} 
-                activity={activity} 
-                isMe={isMe}
-                userDisplayName={user?.displayName}
-              />
-            ))}
-            {isFetchingNextPage && (
-              <View style={styles.loadingFooter}>
-                <ActivityIndicator size="small" color={colors.accent} />
-              </View>
-            )}
-          </>
-        )}
-      </AnimatedScrollView>
+        maintainVisibleContentPosition={{
+          minIndexForVisible: 0,
+        }}
+      />
     </View>
   );
 }
