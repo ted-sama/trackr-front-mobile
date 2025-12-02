@@ -223,7 +223,7 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
             { showTrackingChapter && trackingStatus && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
               <View style={styles.chapterBadgeContainer}>
                 <Badge
-                  text={book.type === 'comic' ? `#${trackingStatus.currentChapter.toString()}` : `Ch. ${trackingStatus.currentChapter.toString()}`}
+                  text={`#${trackingStatus.currentChapter.toString()}`}
                   color={colors.badgeText}
                   backgroundColor={colors.badgeBackground}
                   borderColor={colors.badgeBorder}

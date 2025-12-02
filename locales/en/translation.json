@@ -377,6 +377,7 @@
         "backdropReserved": "The backdrop image is reserved for the Plus plan",
         "listNameRequired": "The list name is required",
         "listUpdated": "List updated",
+        "listDeleted": "List deleted",
         "errorUpdatingList": "Unable to update list",
         "errorSavingList": "Unable to save list",
         "listLiked": "List liked",

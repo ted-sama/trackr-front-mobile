@@ -1,12 +1,14 @@
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { View, StyleSheet, Text, Pressable, FlatList } from "react-native";
 import { Image as ExpoImage } from "expo-image";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } from 'react-native-reanimated';
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import CollectionListElement from "@/components/CollectionListElement";
 import { useRouter } from "expo-router";
 import CollectionHeader from "@/components/collection/HeaderCollection";
+import CreateListBottomSheet from "@/components/CreateListBottomSheet";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { Book } from "@/types/book";
 import { useTypography } from "@/hooks/useTypography";
@@ -179,9 +181,14 @@ export default function Collection() {
   const mosaicBooks = useMemo(() => myLibrary.slice(0, 10), [myLibrary]);
   const { data: myLists } = useMyLists(debouncedQuery);
   const lists = (myLists?.pages.flatMap((p: any) => p.data) ?? []) as any[];
+  const createListBottomSheetRef = useRef<BottomSheetModal>(null);
   
   const handleSearchTextChange = useCallback((text: string) => {
     setSearchText(text);
+  }, []);
+
+  const handleAddList = useCallback(() => {
+    createListBottomSheetRef.current?.present();
   }, []);
 
   const renderListHeader = useCallback(() => (
@@ -205,6 +212,7 @@ export default function Collection() {
       <CollectionHeader
         searchText={searchText}
         onSearchTextChange={handleSearchTextChange}
+        onAddPress={handleAddList}
       />
       <FlatList
         data={lists}
@@ -214,6 +222,7 @@ export default function Collection() {
         ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
         contentContainerStyle={[styles.listContainer, { paddingTop: 120 }]}
       />
+      <CreateListBottomSheet ref={createListBottomSheetRef} />
     </SafeAreaView>
   );
 }

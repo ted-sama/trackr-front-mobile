@@ -280,7 +280,7 @@
             "hiatus": "en pause"
         },
         "rating": "note",
-        "tracking": "suivent",
+        "tracking": "suivi",
         "chapter": "Chapitre",
         "issue": "Numéro",
         "lastChapterRead": "Dernier chapitre lu",
@@ -378,6 +378,7 @@
         "backdropReserved": "L'illustration de bannière est réservée au plan Plus",
         "listNameRequired": "Le nom de la liste est requis",
         "listUpdated": "Liste mise à jour",
+        "listDeleted": "Liste supprimée",
         "errorUpdatingList": "Impossible de mettre à jour la liste",
         "errorSavingList": "Impossible de sauvegarder la liste",
         "listLiked": "Liste likée",

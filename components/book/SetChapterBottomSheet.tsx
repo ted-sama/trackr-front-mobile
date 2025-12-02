@@ -174,7 +174,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
                     </AnimatedPressable>
                     <View style={styles.chapterContainer}>
                         <View style={styles.chapterInputContainer}>
-                            <Text style={[typography.categoryTitle, { color: colors.accent }]}>{book.type === 'comic' ? "#" : "Ch. "}</Text>
+                            <Text style={[typography.categoryTitle, { color: colors.accent }]}>{"#"}</Text>
                             <BottomSheetTextInput
                                 style={[typography.categoryTitle, { color: colors.accent }]}
                                 inputMode='numeric'
@@ -185,7 +185,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
                             />
                         </View>
                         <Text style={[typography.slashSeparator, { color: colors.text }]}>/</Text>
-                        <Text style={[typography.categoryTitle, { color: colors.text }]}>{book.type === 'comic' ? "#" : "Ch. "}{book.chapters?.toString() ?? '?'}</Text>
+                        <Text style={[typography.categoryTitle, { color: colors.text }]}>{"#"}{book.chapters?.toString() ?? '?'}</Text>
                     </View>
                     <AnimatedPressable
                         style={[

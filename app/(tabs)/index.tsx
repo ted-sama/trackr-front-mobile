@@ -107,7 +107,7 @@ export default function Index() {
         </MaskedView>
 
         {/* Header content */}
-        <View style={[styles.header, { paddingTop: 24 + insets.top, paddingHorizontal: 16 }]}>
+        <View style={[styles.header, { paddingTop: 12 + insets.top, paddingHorizontal: 16 }]}>
           <Pressable onPress={() => router.push("/me")}>
             <Avatar image={currentUser?.avatar || ""} size={32} borderWidth={1} borderColor={colors.border} />
           </Pressable>

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, StatusBar, Pressable, StyleProp, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -9,11 +9,41 @@ import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+interface ScalePressableProps {
+  onPress?: () => void;
+  style?: StyleProp<ViewStyle>;
+  children: React.ReactNode;
+}
+
+function ScalePressable({ onPress, style, children }: ScalePressableProps) {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={() => { scale.value = withTiming(0.92, { duration: 220 }); }}
+      onPressOut={() => { scale.value = withTiming(1, { duration: 220 }); }}
+      style={[style, animatedStyle]}
+      {...(onPress && { pointerEvents: 'box-only' })}
+    >
+      {children}
+    </AnimatedPressable>
+  );
+}
 
 interface HeaderCollectionProps {
   searchText: string;
   onSearchTextChange: (text: string) => void;
   onSubmitSearch?: () => void;
+  onAddPress?: () => void;
 }
 
 const screenWidth = Dimensions.get('window').width;
@@ -25,13 +55,13 @@ export function HeaderCollection({
   searchText,
   onSearchTextChange,
   onSubmitSearch,
+  onAddPress,
 }: HeaderCollectionProps) {
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const { t } = useTranslation();
-  const initialWidth = screenWidth - paddingHorizontal * 2;
 
   const handleSearchIconPress = useCallback(() => {
     setIsSearchActive(true);
@@ -107,7 +137,7 @@ export function HeaderCollection({
         style={[
           styles.header,
           {
-            paddingTop: insets.top,
+            paddingTop: 12 + insets.top,
           },
         ]}
       >
@@ -128,9 +158,28 @@ export function HeaderCollection({
             <Text style={[typography.h1, { color: colors.text, flex: 1 }]} numberOfLines={1}>
               Collection
             </Text>
-            <TouchableOpacity onPress={handleSearchIconPress} style={styles.searchIconButton}>
-              <Ionicons name="search" size={24} color={colors.primary} />
-            </TouchableOpacity>
+            <View style={styles.buttonsContainer}>
+              <ScalePressable onPress={onAddPress} style={styles.circleButton}>
+                <View
+                  style={[
+                    StyleSheet.absoluteFillObject,
+                    styles.circleButtonBg,
+                    { backgroundColor: colors.backButtonBackground },
+                  ]}
+                />
+                <Ionicons name="add" size={22} color={colors.icon} />
+              </ScalePressable>
+              <ScalePressable onPress={handleSearchIconPress} style={styles.circleButton}>
+                <View
+                  style={[
+                    StyleSheet.absoluteFillObject,
+                    styles.circleButtonBg,
+                    { backgroundColor: colors.backButtonBackground },
+                  ]}
+                />
+                <Ionicons name="search" size={20} color={colors.icon} />
+              </ScalePressable>
+            </View>
           </View>
         )}
       </View>
@@ -159,9 +208,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  searchIconButton: {
-    marginLeft: 12,
-    padding: 8,
+  buttonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  circleButton: {
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 42,
+    minHeight: 42,
+    overflow: 'hidden',
+  },
+  circleButtonBg: {
+    borderRadius: 21,
   },
   cancelButton: {
     marginLeft: 10,

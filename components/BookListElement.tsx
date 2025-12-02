@@ -136,7 +136,7 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
                 />
                 {showTrackingChapter && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
                   <Badge
-                    text={book.type === 'comic' ? `#${trackingStatus.currentChapter.toString()}` : `Ch. ${trackingStatus.currentChapter.toString()}`}
+                    text={`#${trackingStatus.currentChapter.toString()}`}
                     color={colors.badgeText}
                     backgroundColor={colors.badgeBackground}
                     borderColor={colors.badgeBorder}
@@ -161,7 +161,7 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
           )}
           {compact && showTrackingChapter && trackingStatus && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
             <Badge
-              text={book.type === 'comic' ? `#${trackingStatus.currentChapter.toString()}` : `Ch. ${trackingStatus.currentChapter.toString()}`}
+              text={`#${trackingStatus.currentChapter.toString()}`}
               color={colors.badgeText}
               backgroundColor={colors.badgeBackground}
               borderColor={colors.badgeBorder}
