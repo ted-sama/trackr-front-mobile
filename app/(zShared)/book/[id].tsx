@@ -46,7 +46,13 @@ import { toast } from "sonner-native";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { Ellipsis, Minus, Plus, ChartPie, Sparkles, MessageCircle, Heart, Circle, ExternalLink } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
+import {
+  BookActionsBottomSheet,
+  StatusEditorBottomSheet,
+  RatingEditorBottomSheet,
+  ListEditorBottomSheet,
+} from "@/components/book-actions";
+import CreateListBottomSheet from "@/components/CreateListBottomSheet";
 import * as Haptics from "expo-haptics";
 import { TrackingTabBar } from "@/components/book/TrackingTabBar";
 import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
@@ -98,9 +104,6 @@ export default function BookScreen() {
   const router = useRouter();
   const { colors, currentTheme } = useTheme();
   const [dominantColor, setDominantColor] = useState<string | null>(null);
-  const [bottomSheetView, setBottomSheetView] = useState<
-    "actions" | "status_editor" | "rating_editor"
-  >("actions");
   const { data: book, isLoading, error } = useBook(id as string);
   const { data: booksBySameAuthor } = useBooksBySameAuthorCategory(id as string);
   const { data: favoriteBooks } = useUserTop();
@@ -115,8 +118,12 @@ export default function BookScreen() {
   const bookTracking = book ? getTrackedBookStatus(book.id) : null;
   const isInFavorites = favoriteBooks?.some((favoriteBook) => favoriteBook.id === book?.id);
 
-  // Bottom sheet ref
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  // Bottom sheet refs
+  const actionsSheetRef = useRef<BottomSheetModal>(null);
+  const statusEditorSheetRef = useRef<BottomSheetModal>(null);
+  const ratingEditorSheetRef = useRef<BottomSheetModal>(null);
+  const listEditorSheetRef = useRef<BottomSheetModal>(null);
+  const listCreatorSheetRef = useRef<BottomSheetModal>(null);
   const setChapterBottomSheetRef = useRef<BottomSheetModal>(null);
   // Confetti celebration ref
   const confettiRef = useRef<ConfettiCelebrationMethods>(null);
@@ -256,15 +263,31 @@ export default function BookScreen() {
     },
   });
 
-  // Présenter le bottom sheet d'actions
-  const handlePresentModalPress = useCallback(
-    (view: "actions" | "status_editor" | "rating_editor") => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      setBottomSheetView(view);
-      bottomSheetModalRef.current?.present();
-    },
-    []
-  );
+  // Present bottom sheets
+  const handlePresentActionsSheet = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    actionsSheetRef.current?.present();
+  }, []);
+
+  const handlePresentStatusEditorSheet = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    statusEditorSheetRef.current?.present();
+  }, []);
+
+  const handlePresentRatingEditorSheet = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ratingEditorSheetRef.current?.present();
+  }, []);
+
+  const handlePresentListEditorSheet = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    listEditorSheetRef.current?.present();
+  }, []);
+
+  const handlePresentListCreatorSheet = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    listCreatorSheetRef.current?.present();
+  }, []);
 
   const handlePresentChapterModalPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -403,9 +426,9 @@ export default function BookScreen() {
 
   const handleRatingCardPress = () => {
     if (bookTracking) {
-      handlePresentModalPress("rating_editor");
+      handlePresentRatingEditorSheet();
     } else {
-      handlePresentModalPress("actions");
+      handlePresentActionsSheet();
     }
   };
 
@@ -599,15 +622,32 @@ export default function BookScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
       edges={["right", "left"]}
     >
-      {/* Bottom Sheet Modal */}
+      {/* Bottom Sheet Modals */}
       {book && (
         <>
           <BookActionsBottomSheet
+            ref={actionsSheetRef}
             book={book}
-            ref={bottomSheetModalRef}
-            view={bottomSheetView}
-            backdropDismiss
+            onEditStatusPress={handlePresentStatusEditorSheet}
+            onRatePress={handlePresentRatingEditorSheet}
+            onAddToListPress={handlePresentListEditorSheet}
+          />
+          <StatusEditorBottomSheet
+            ref={statusEditorSheetRef}
+            book={book}
             onBookCompleted={handleBookCompleted}
+          />
+          <RatingEditorBottomSheet
+            ref={ratingEditorSheetRef}
+            book={book}
+          />
+          <ListEditorBottomSheet
+            ref={listEditorSheetRef}
+            book={book}
+            onCreateListPress={handlePresentListCreatorSheet}
+          />
+          <CreateListBottomSheet
+            ref={listCreatorSheetRef}
           />
           <SetChapterBottomSheet
             book={book}
@@ -724,7 +764,7 @@ export default function BookScreen() {
                 )}
             </View>
             <View style={styles.actionsContainer}>
-              <Pressable onPress={() => handlePresentModalPress("actions")}>
+              <Pressable onPress={handlePresentActionsSheet}>
                 <Ellipsis size={32} color={colors.icon} strokeWidth={2} />
               </Pressable>
               <TrackingIconButton
@@ -958,7 +998,7 @@ export default function BookScreen() {
               onBookmarkPress={() => handlePresentChapterModalPress()}
               onMarkLastChapterAsReadPress={() => incrementCurrentChapter()}
               markLastChapterAsReadDisabled={bookTracking.currentChapter !== null && bookTracking.currentChapter === book?.chapters}
-              onStatusPress={() => handlePresentModalPress("status_editor")}
+              onStatusPress={handlePresentStatusEditorSheet}
             />  
           </Animated.View>
         </>

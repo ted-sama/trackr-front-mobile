@@ -25,7 +25,13 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { SubscriptionProvider, useSubscription } from "@/contexts/SubscriptionContext";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { useUserStore } from "@/stores/userStore";
-import BookActionsBottomSheet from "@/components/BookActionsBottomSheet";
+import {
+  BookActionsBottomSheet,
+  StatusEditorBottomSheet,
+  RatingEditorBottomSheet,
+  ListEditorBottomSheet,
+} from "@/components/book-actions";
+import CreateListBottomSheet from "@/components/CreateListBottomSheet";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
@@ -71,12 +77,22 @@ function RootLayoutContent() {
   const {
     isBottomSheetVisible,
     selectedBook,
-    view,
-    closeBookActions,
+    sheetType,
+    closeBottomSheet,
     currentListId,
     isFromListPage,
+    openStatusEditor,
+    openRatingEditor,
+    openListEditor,
+    openListCreator,
   } = useBottomSheet();
-  const globalBottomSheetRef = useRef<BottomSheetModal>(null);
+
+  // Refs for each bottom sheet
+  const actionsSheetRef = useRef<BottomSheetModal>(null);
+  const statusEditorSheetRef = useRef<BottomSheetModal>(null);
+  const ratingEditorSheetRef = useRef<BottomSheetModal>(null);
+  const listEditorSheetRef = useRef<BottomSheetModal>(null);
+  const listCreatorSheetRef = useRef<BottomSheetModal>(null);
 
   const [fontsLoaded] = useFonts({
     Manrope_200ExtraLight,
@@ -112,14 +128,35 @@ function RootLayoutContent() {
     }
   }, [isAuthenticated, currentUser?.id]);
 
-  // Present or dismiss global bottom sheet when visibility changes
+  // Present or dismiss the appropriate bottom sheet when visibility/type changes
   useEffect(() => {
-    if (isBottomSheetVisible) {
-      globalBottomSheetRef.current?.present();
+    if (isBottomSheetVisible && selectedBook) {
+      switch (sheetType) {
+        case 'actions':
+          actionsSheetRef.current?.present();
+          break;
+        case 'status_editor':
+          statusEditorSheetRef.current?.present();
+          break;
+        case 'rating_editor':
+          ratingEditorSheetRef.current?.present();
+          break;
+        case 'list_editor':
+          listEditorSheetRef.current?.present();
+          break;
+        case 'list_creator':
+          listCreatorSheetRef.current?.present();
+          break;
+      }
     } else {
-      globalBottomSheetRef.current?.dismiss();
+      // Dismiss all sheets
+      actionsSheetRef.current?.dismiss();
+      statusEditorSheetRef.current?.dismiss();
+      ratingEditorSheetRef.current?.dismiss();
+      listEditorSheetRef.current?.dismiss();
+      listCreatorSheetRef.current?.dismiss();
     }
-  }, [isBottomSheetVisible]);
+  }, [isBottomSheetVisible, sheetType, selectedBook]);
 
   if (!fontsLoaded) {
     return null;
@@ -142,18 +179,43 @@ function RootLayoutContent() {
           <Stack.Screen name="category-full" />
         </Stack.Protected>
       </Stack>
-      {/* Global Book Actions BottomSheet */}
+
+      {/* Global Bottom Sheets */}
       {selectedBook && (
-        <BookActionsBottomSheet
-          ref={globalBottomSheetRef}
-          book={selectedBook}
-          view={view}
-          currentListId={currentListId}
-          isFromListPage={isFromListPage}
-          onDismiss={closeBookActions}
-          backdropDismiss
-        />
+        <>
+          <BookActionsBottomSheet
+            ref={actionsSheetRef}
+            book={selectedBook}
+            currentListId={currentListId}
+            isFromListPage={isFromListPage}
+            onDismiss={closeBottomSheet}
+            onEditStatusPress={() => openStatusEditor(selectedBook)}
+            onRatePress={() => openRatingEditor(selectedBook)}
+            onAddToListPress={() => openListEditor(selectedBook)}
+          />
+          <StatusEditorBottomSheet
+            ref={statusEditorSheetRef}
+            book={selectedBook}
+            onDismiss={closeBottomSheet}
+          />
+          <RatingEditorBottomSheet
+            ref={ratingEditorSheetRef}
+            book={selectedBook}
+            onDismiss={closeBottomSheet}
+          />
+          <ListEditorBottomSheet
+            ref={listEditorSheetRef}
+            book={selectedBook}
+            onDismiss={closeBottomSheet}
+            onCreateListPress={() => openListCreator(selectedBook)}
+          />
+          <CreateListBottomSheet
+            ref={listCreatorSheetRef}
+            onDismiss={closeBottomSheet}
+          />
+        </>
       )}
+
       <Toaster
         visibleToasts={1}
         toastOptions={{

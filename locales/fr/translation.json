@@ -348,6 +348,8 @@
         "changeCover": "Changer de couverture",
         "share": "Partager",
         "rate": "Noter",
+        "rateBook": "Noter ce livre",
+        "saveRating": "Sauvegarder la note",
         "removeFromTracking": "Retirer de ma bibliothèque",
         "removeFromFavorites": "Retirer des favoris",
         "removeFromList": "Retirer de la liste",

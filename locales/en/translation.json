@@ -351,6 +351,8 @@
         "changeCover": "Change cover",
         "share": "Share",
         "rate": "Rate",
+        "rateBook": "Rate this book",
+        "saveRating": "Save rating",
         "removeFromTracking": "Remove from library",
         "removeFromFavorites": "Remove from favorites",
         "removeFromList": "Remove from list",
