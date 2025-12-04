@@ -24,6 +24,7 @@ interface SetChapterBottomSheetProps {
     index?: number;
     onDismiss?: () => void;
     backdropDismiss?: boolean;
+    onBookCompleted?: () => void;
 }
 
 interface AnimatedPressableProps {
@@ -71,7 +72,7 @@ const AnimatedPressable: React.FC<AnimatedPressableProps> = ({ style, onPress, d
     );
 };
 
-const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheetProps>(({ book, snapPoints, index, onDismiss, backdropDismiss }, ref) => {
+const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheetProps>(({ book, snapPoints, index, onDismiss, backdropDismiss, onBookCompleted }, ref) => {
     const { getTrackedBookStatus, updateTrackedBook } = useTrackedBooksStore();
     const bookTracking = getTrackedBookStatus(book.id);
 
@@ -131,8 +132,31 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
 
     const handleSave = async () => {
         if (isTracking) {
-            await updateTrackedBook(book.id, { currentChapter: Number(chapter) });
+            const chapterNumber = Number(chapter);
+            const hasKnownChapterCount = book.chapters !== null && book.chapters !== undefined;
+            const isCompleting = hasKnownChapterCount && chapterNumber >= book.chapters!;
+            const wasAlreadyCompleted = bookTracking?.status === 'completed';
+            const isGoingBackFromCompleted = wasAlreadyCompleted && hasKnownChapterCount && chapterNumber < book.chapters!;
+            
+            // Build update data with status changes
+            const updateData: { currentChapter: number; status?: 'completed' | 'reading' } = { currentChapter: chapterNumber };
+            
+            if (isCompleting) {
+                // If reaching max chapters, set status to "completed"
+                updateData.status = 'completed';
+            } else if (isGoingBackFromCompleted) {
+                // If going back from completed, set status to "reading"
+                updateData.status = 'reading';
+            }
+            
+            await updateTrackedBook(book.id, updateData);
             setChapter(chapter);
+            
+            // Trigger celebration only if this action completes the book (wasn't already completed)
+            if (isCompleting && !wasAlreadyCompleted) {
+                onBookCompleted?.();
+            }
+            
             if (ref && typeof ref === 'object' && 'current' in ref) {
                 ref.current?.dismiss();
             }

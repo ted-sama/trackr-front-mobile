@@ -57,6 +57,7 @@ import { useLocalization } from "@/hooks/useLocalization";
 import { getLocalizedDescription } from "@/utils/description";
 import { useTranslation } from "react-i18next";
 import { useUserTop } from "@/hooks/queries/users";
+import ConfettiCelebration, { ConfettiCelebrationMethods } from "@/components/ui/ConfettiCelebration";
 // Constants for animation
 const HEADER_THRESHOLD = 320; // Threshold for header animation
 const DEFAULT_COVER_COLOR = '#6B7280'; // Grey color for missing covers
@@ -117,6 +118,8 @@ export default function BookScreen() {
   // Bottom sheet ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const setChapterBottomSheetRef = useRef<BottomSheetModal>(null);
+  // Confetti celebration ref
+  const confettiRef = useRef<ConfettiCelebrationMethods>(null);
   // Animation setup for button
   const translateY = useSharedValue(150); // Initial off-screen position
   const scale = useSharedValue(0.1); // Initial small scale
@@ -268,19 +271,40 @@ export default function BookScreen() {
     setChapterBottomSheetRef.current?.present();
   }, []);
 
-  const incrementCurrentChapter = () => {
-    if (bookTracking && book) {
-      updateTrackedBook(book.id, { currentChapter: bookTracking.currentChapter ? bookTracking.currentChapter + 1 : 1 });
-      toast(t("toast.incrementChapter", { number: bookTracking.currentChapter ? bookTracking.currentChapter + 1 : 1 }));
-    }
-  };
-
   const {
     addTrackedBook: addTrackedBookToStore,
     removeTrackedBook: removeTrackedBookFromStore,
     isBookTracked,
     updateTrackedBook,
   } = useTrackedBooksStore();
+
+  // Callback when book is completed - triggers celebration
+  const handleBookCompleted = useCallback(() => {
+    confettiRef.current?.celebrate();
+    toast.success(t("toast.bookCompleted"));
+  }, [t]);
+
+  const incrementCurrentChapter = useCallback(() => {
+    if (bookTracking && book) {
+      const newChapter = bookTracking.currentChapter ? bookTracking.currentChapter + 1 : 1;
+      const isCompleting = book.chapters !== null && book.chapters !== undefined && newChapter >= book.chapters;
+      const wasAlreadyCompleted = bookTracking.status === 'completed';
+      
+      // Build update data - also set status to completed if reaching last chapter
+      const updateData: { currentChapter: number; status?: 'completed' } = { currentChapter: newChapter };
+      if (isCompleting) {
+        updateData.status = 'completed';
+      }
+      
+      updateTrackedBook(book.id, updateData);
+      toast(t("toast.incrementChapter", { number: newChapter }));
+      
+      // Trigger celebration if completing
+      if (isCompleting && !wasAlreadyCompleted) {
+        handleBookCompleted();
+      }
+    }
+  }, [bookTracking, book, updateTrackedBook, t, handleBookCompleted]);
 
   // State to control button rendering for animation
   const [isButtonRendered, setIsButtonRendered] = useState(false);
@@ -583,12 +607,14 @@ export default function BookScreen() {
             ref={bottomSheetModalRef}
             view={bottomSheetView}
             backdropDismiss
+            onBookCompleted={handleBookCompleted}
           />
           <SetChapterBottomSheet
             book={book}
             ref={setChapterBottomSheetRef}
             key={bookTracking?.currentChapter}
             backdropDismiss
+            onBookCompleted={handleBookCompleted}
           />
         </>
       )}
@@ -947,6 +973,9 @@ export default function BookScreen() {
         rightButtonIcon={<MessageCircle size={24} fill={dominantColor ?? colors.background} color={dominantColor ?? colors.background} style={{ opacity: 0.85 }} />}
         onRightButtonPress={() => router.push(`/chat/${book?.id}`)}
       />
+
+      {/* Confetti celebration overlay */}
+      <ConfettiCelebration ref={confettiRef} />
     </SafeAreaView>
   );
 }

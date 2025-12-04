@@ -30,7 +30,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { Book } from "@/types/book";
-import { ReadingStatus } from "@/types/reading-status";
+import { BookTracking, ReadingStatus } from "@/types/reading-status";
 // import { List } from "@/types/list";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -84,6 +84,7 @@ export interface BookActionsBottomSheetProps {
     | "list_creator";
   currentListId?: string;
   isFromListPage?: boolean;
+  onBookCompleted?: () => void;
 }
 
 const VIEW_ACTIONS = "actions";
@@ -147,6 +148,7 @@ const BookActionsBottomSheet = forwardRef<
       view = VIEW_ACTIONS,
       currentListId,
       isFromListPage,
+      onBookCompleted,
     },
     ref
   ) => {
@@ -364,7 +366,20 @@ const BookActionsBottomSheet = forwardRef<
     const updateStatus = async (status: ReadingStatus) => {
       try {
         setTempStatus(status);
-        await updateTrackedBook(book.id, { status });
+        
+        // If setting to "completed" and book has a known chapter count, also set currentChapter
+        const updateData: Partial<BookTracking> = { status };
+        if (status === "completed" && book.chapters !== null && book.chapters !== undefined) {
+          updateData.currentChapter = book.chapters;
+        }
+        
+        await updateTrackedBook(book.id, updateData);
+        
+        // Trigger celebration animation if completing
+        if (status === "completed") {
+          onBookCompleted?.();
+        }
+        
         // Optional: Add a small delay to ensure UI updates properly
         setTimeout(() => {
           closeSheet();

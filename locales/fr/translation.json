@@ -403,7 +403,8 @@
         "errorLoadingLists": "Impossible de charger les listes",
         "listCreated": "Liste créée avec succès",
         "errorCreatingList": "Impossible de créer la liste",
-        "errorDeletingList": "Impossible de supprimer la liste"
+        "errorDeletingList": "Impossible de supprimer la liste",
+        "bookCompleted": "Félicitations ! Vous avez terminé ce livre !"
     },
     "errors": {
         "AUTH_EMAIL_ALREADY_USED": "Un compte avec cet email existe déjà",

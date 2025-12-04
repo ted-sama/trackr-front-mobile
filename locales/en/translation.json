@@ -402,7 +402,8 @@
         "errorLoadingLists": "Unable to load lists",
         "listCreated": "List created successfully",
         "errorCreatingList": "Unable to create list",
-        "errorDeletingList": "Unable to delete list"
+        "errorDeletingList": "Unable to delete list",
+        "bookCompleted": "Congratulations! You've finished this book!"
     },
     "errors": {
         "AUTH_EMAIL_ALREADY_USED": "An account with this email already exists",

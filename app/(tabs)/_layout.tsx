@@ -40,12 +40,14 @@ export default function TabLayout() {
     <Tabs
       detachInactiveScreens={false}
       screenOptions={{
+        tabBarShowLabel: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: currentTheme === 'dark' ? '#888' : '#999',
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopColor: colors.tabBarBorder,
           borderTopWidth: 1,
+          paddingTop: 10,
         },
         tabBarLabelStyle: {
           fontSize: 12,
