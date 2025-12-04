@@ -652,7 +652,7 @@ export default function ListFullScreen() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedHeader
-        title={list?.name || "Liste"}
+        title={list?.name || ""}
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
         onBack={handleBack}

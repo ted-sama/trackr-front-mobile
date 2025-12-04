@@ -146,8 +146,8 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
         >
           {title}
         </Animated.Text>
-        {/* width calculation: 42 per button + 8 gap between buttons */}
-        <View style={[styles.rightContainer, { width: farRightButtonIcon ? (closeRightButtonIcon ? 142 : 92) : (closeRightButtonIcon ? 92 : 42) }]}>
+        {/* width calculation: 44 per button + 8 gap between buttons */}
+        <View style={[styles.rightContainer, { width: farRightButtonIcon ? (closeRightButtonIcon ? 148 : 96) : (closeRightButtonIcon ? 96 : 44) }]}>
           {closeRightButtonIcon ? (
             <ScalePressable onPress={onCloseRightButtonPress} style={styles.closeRightButton}>
               <View
@@ -172,7 +172,7 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
               {rightButtonIcon}
             </ScalePressable>
           ) : (
-            <View style={{ width: 42 }} />
+            <View style={{ width: 44 }} />
           )}
           {farRightButtonIcon ? (
             <ScalePressable onPress={onFarRightButtonPress} style={styles.rightButton}>
@@ -218,12 +218,12 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    minWidth: 42,
-    minHeight: 42,
+    minWidth: 44,
+    minHeight: 44,
     overflow: 'hidden',
   },
   backButtonBg: {
-    borderRadius: 21,
+    borderRadius: '50%',
   },
   title: {
     flex: 1,
@@ -238,16 +238,16 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    minWidth: 42,
-    minHeight: 42,
+    minWidth: 44,
+    minHeight: 44,
     overflow: 'hidden',
   },
   rightButton: {
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    minWidth: 42,
-    minHeight: 42,
+    minWidth: 44,
+    minHeight: 44,
     overflow: 'hidden',
   },
 }); 

@@ -217,12 +217,12 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    minWidth: 42,
-    minHeight: 42,
+    minWidth: 44,
+    minHeight: 44,
     overflow: 'hidden',
   },
   circleButtonBg: {
-    borderRadius: 21,
+    borderRadius: '50%',
   },
   cancelButton: {
     marginLeft: 10,

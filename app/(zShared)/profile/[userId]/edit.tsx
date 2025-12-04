@@ -531,9 +531,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: '50%',
     justifyContent: "center",
     alignItems: "center",
   },

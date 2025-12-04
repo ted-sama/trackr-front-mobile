@@ -59,6 +59,9 @@ export default function TabLayout() {
             duration: 120,
           },
         },
+        sceneStyle: {
+          backgroundColor: colors.background,
+        },
         headerShown: false,
         tabBarBackground: () => (
           <View style={{ backgroundColor: colors.background, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
