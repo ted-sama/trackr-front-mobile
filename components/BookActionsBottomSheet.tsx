@@ -206,7 +206,6 @@ const BookActionsBottomSheet = forwardRef<
       resetSheetState();
       const sheetRef = typeof ref === "object" ? ref?.current : null;
       if (sheetRef) {
-        // @ts-expect-error bottom sheet ref
         sheetRef.dismiss();
       }
     }, [ref, resetSheetState]);
@@ -762,6 +761,8 @@ const BookActionsBottomSheet = forwardRef<
                     onChangeText={setNewListName}
                     placeholderTextColor={colors.secondaryText}
                     clearButtonMode="always"
+                    autoCapitalize="none"
+                    autoCorrect={false}
                     style={[
                       { color: colors.text, fontSize: 16, paddingVertical: 8 },
                       typography.body,

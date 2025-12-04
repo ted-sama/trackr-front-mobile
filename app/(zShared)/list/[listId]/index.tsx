@@ -81,6 +81,33 @@ const ListHeader = React.memo(({
   typography,
   t,
 }: ListHeaderProps) => {
+  const likeScale = useSharedValue(1);
+  const saveScale = useSharedValue(1);
+
+  const likeAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: likeScale.value }],
+  }));
+
+  const saveAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: saveScale.value }],
+  }));
+
+  const handleLikePressIn = () => {
+    likeScale.value = withTiming(0.95, { duration: 100 });
+  };
+
+  const handleLikePressOut = () => {
+    likeScale.value = withTiming(1, { duration: 100 });
+  };
+
+  const handleSavePressIn = () => {
+    saveScale.value = withTiming(0.95, { duration: 100 });
+  };
+
+  const handleSavePressOut = () => {
+    saveScale.value = withTiming(1, { duration: 100 });
+  };
+
   return (
     <View>
       {/* Gradient */}
@@ -171,10 +198,12 @@ const ListHeader = React.memo(({
         <View style={{ flexDirection: "row", gap: 8 }}>
           {list.isPublic && !isOwnList ? (
             <>
-              <Pressable
-                onPress={onLikePress}
-                style={({ pressed }) => [
-                  {
+              <Animated.View style={likeAnimatedStyle}>
+                <Pressable
+                  onPress={onLikePress}
+                  onPressIn={handleLikePressIn}
+                  onPressOut={handleLikePressOut}
+                  style={{
                     flexDirection: "row",
                     alignItems: "center",
                     gap: 4,
@@ -184,30 +213,31 @@ const ListHeader = React.memo(({
                     backgroundColor: colors.card,
                     borderWidth: 1,
                     borderColor: colors.border,
-                    opacity: pressed ? 0.7 : 1,
-                  },
-                ]}
-              >
-                <Heart
-                  size={14}
-                  strokeWidth={2}
-                  color={list.isLikedByMe ? colors.accent : colors.icon}
-                  fill={list.isLikedByMe ? colors.accent : "transparent"}
-                />
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: list.isLikedByMe ? colors.accent : colors.secondaryText,
-                    fontWeight: "600",
                   }}
                 >
-                  {list.likesCount || 0}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={onSavePress}
-                style={({ pressed }) => [
-                  {
+                  <Heart
+                    size={14}
+                    strokeWidth={2}
+                    color={list.isLikedByMe ? colors.accent : colors.icon}
+                    fill={list.isLikedByMe ? colors.accent : "transparent"}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: list.isLikedByMe ? colors.accent : colors.secondaryText,
+                      fontWeight: "600",
+                    }}
+                  >
+                    {list.likesCount || 0}
+                  </Text>
+                </Pressable>
+              </Animated.View>
+              <Animated.View style={saveAnimatedStyle}>
+                <Pressable
+                  onPress={onSavePress}
+                  onPressIn={handleSavePressIn}
+                  onPressOut={handleSavePressOut}
+                  style={{
                     flexDirection: "row",
                     alignItems: "center",
                     gap: 4,
@@ -217,26 +247,25 @@ const ListHeader = React.memo(({
                     backgroundColor: colors.card,
                     borderWidth: 1,
                     borderColor: colors.border,
-                    opacity: pressed ? 0.7 : 1,
-                  },
-                ]}
-              >
-                <Bookmark
-                  size={14}
-                  strokeWidth={2}
-                  color={list.isSavedByMe ? colors.accent : colors.icon}
-                  fill={list.isSavedByMe ? colors.accent : "transparent"}
-                />
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: list.isSavedByMe ? colors.accent : colors.secondaryText,
-                    fontWeight: "600",
                   }}
                 >
-                  {list.savesCount || 0}
-                </Text>
-              </Pressable>
+                  <Bookmark
+                    size={14}
+                    strokeWidth={2}
+                    color={list.isSavedByMe ? colors.accent : colors.icon}
+                    fill={list.isSavedByMe ? colors.accent : "transparent"}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: list.isSavedByMe ? colors.accent : colors.secondaryText,
+                      fontWeight: "600",
+                    }}
+                  >
+                    {list.savesCount || 0}
+                  </Text>
+                </Pressable>
+              </Animated.View>
             </>
           ) : isEditable ? (
             <>

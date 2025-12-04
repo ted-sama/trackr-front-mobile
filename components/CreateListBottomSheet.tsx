@@ -114,6 +114,8 @@ const CreateListBottomSheet = forwardRef<
               onChangeText={setNewListName}
               placeholderTextColor={colors.secondaryText}
               clearButtonMode="always"
+              autoCapitalize="none"
+              autoCorrect={false}
               autoFocus
               style={[
                 { color: colors.text, fontSize: 16, paddingVertical: 8 },

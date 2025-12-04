@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,13 +29,13 @@ export default function SecondaryButton({ title, onPress, style, textStyle, disa
 
   const handlePressIn = () => {
     if (!disabled) {
-      scale.value = withSpring(0.95, { damping: 15, stiffness: 300 });
+      scale.value = withTiming(0.95, { duration: 100 });
     }
   };
 
   const handlePressOut = () => {
     if (!disabled) {
-      scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+      scale.value = withTiming(1, { duration: 100 });
     }
   };
 
