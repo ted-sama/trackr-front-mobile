@@ -41,8 +41,8 @@ export default function ChatScreen() {
     const { messages, error, sendMessage, status } = useChat({
         transport: new DefaultChatTransport({
             fetch: expoFetch as unknown as typeof globalThis.fetch,
-            api: `http://localhost:3333/chat/${bookId}`,
-            // api: `https://api.trackrr.app/chat/${bookId}`,
+            // api: `http://localhost:3333/chat/${bookId}`,
+            api: `https://api.trackrr.app/chat/${bookId}`,
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -116,19 +116,12 @@ export default function ChatScreen() {
       }
     };
 
-    const handlePredefinedQuestion = (question: string) => {
-      sendMessage({
-        text: question,
-      });
-      setIsUserScrolling(false); // Réinitialiser pour auto-scroll après l'envoi
-    };
-
     const handleScroll = () => {
       // Détecter que l'utilisateur est en train de scroller manuellement
       setIsUserScrolling(true);
     };
 
-  const gradientHeight = 250;
+  const gradientHeight = 10;
 
   const inputContainerStyle = useAnimatedStyle(() => {
     return {
@@ -382,7 +375,7 @@ export default function ChatScreen() {
             </MaskedView>
             {messages.length === 0 && (
               <PredefinedQuestions
-                onQuestionPress={handlePredefinedQuestion}
+                onQuestionPress={(question) => setInput(question)}
               />
             )}
             <View style={[styles.inputWrapper, { backgroundColor: colors.card, borderColor: colors.border }]}>

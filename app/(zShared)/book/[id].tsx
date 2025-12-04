@@ -1010,8 +1010,8 @@ export default function BookScreen() {
         scrollY={scrollY}
         collapseThreshold={HEADER_THRESHOLD}
         onBack={() => router.back()}
-        rightButtonIcon={<MessageCircle size={24} fill={dominantColor ?? colors.background} color={dominantColor ?? colors.background} style={{ opacity: 0.85 }} />}
-        onRightButtonPress={() => router.push(`/chat/${book?.id}`)}
+        rightButtonIcon={bookTracking ? <MessageCircle size={24} fill={dominantColor ?? colors.background} color={dominantColor ?? colors.background} style={{ opacity: 0.85 }} /> : undefined}
+        onRightButtonPress={bookTracking ? () => router.push(`/chat/${book?.id}`) : undefined}
       />
 
       {/* Confetti celebration overlay */}

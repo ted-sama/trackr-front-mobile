@@ -299,6 +299,7 @@
         "sources": "Used sources",
         "messagePlaceholder": "Ask a question",
         "predefinedQuestions": {
+            "title": "Try something like...",
             "summarizeLastChapter": "Summarize the last chapter read",
             "presentWork": "Introduce the work to me",
             "analyzeCurrentArc": "Analyze the current arc"
