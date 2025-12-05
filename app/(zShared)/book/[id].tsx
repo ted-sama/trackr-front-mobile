@@ -45,7 +45,7 @@ import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import { toast } from "sonner-native";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { Ellipsis, Minus, Plus, ChartPie, Sparkles, MessageCircle, Heart, Circle, ExternalLink } from "lucide-react-native";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import {
   BookActionsBottomSheet,
   StatusEditorBottomSheet,
@@ -119,12 +119,12 @@ export default function BookScreen() {
   const isInFavorites = favoriteBooks?.some((favoriteBook) => favoriteBook.id === book?.id);
 
   // Bottom sheet refs
-  const actionsSheetRef = useRef<BottomSheetModal>(null);
-  const statusEditorSheetRef = useRef<BottomSheetModal>(null);
-  const ratingEditorSheetRef = useRef<BottomSheetModal>(null);
-  const listEditorSheetRef = useRef<BottomSheetModal>(null);
-  const listCreatorSheetRef = useRef<BottomSheetModal>(null);
-  const setChapterBottomSheetRef = useRef<BottomSheetModal>(null);
+  const actionsSheetRef = useRef<TrueSheet>(null);
+  const statusEditorSheetRef = useRef<TrueSheet>(null);
+  const ratingEditorSheetRef = useRef<TrueSheet>(null);
+  const listEditorSheetRef = useRef<TrueSheet>(null);
+  const listCreatorSheetRef = useRef<TrueSheet>(null);
+  const setChapterBottomSheetRef = useRef<TrueSheet>(null);
   // Confetti celebration ref
   const confettiRef = useRef<ConfettiCelebrationMethods>(null);
   // Animation setup for button
@@ -653,7 +653,6 @@ export default function BookScreen() {
             book={book}
             ref={setChapterBottomSheetRef}
             key={bookTracking?.currentChapter}
-            backdropDismiss
             onBookCompleted={handleBookCompleted}
           />
         </>

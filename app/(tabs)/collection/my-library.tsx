@@ -34,7 +34,7 @@ import {
   ArrowUpDown,
 } from "lucide-react-native";
 import SortBottomSheet, { SortOption } from "@/components/SortBottomSheet";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import * as Haptics from "expo-haptics";
 import SearchBar from "@/components/ui/SearchBar";
 
@@ -154,7 +154,7 @@ export default function MyLibrary() {
     scrollY.value = event.contentOffset.y;
   });
   const [titleY, setTitleY] = useState<number>(0);
-  const sortSheetRef = useRef<BottomSheetModal>(null);
+  const sortSheetRef = useRef<TrueSheet>(null);
   const currentLayout = useUIStore((state) => state.myLibraryLayout);
   const setLayout = useUIStore((state) => state.setMyLibraryLayout);
   const [selectedStatuses, setSelectedStatuses] = useState<ReadingStatus[]>([]);

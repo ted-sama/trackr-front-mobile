@@ -1,12 +1,12 @@
 import React, { forwardRef, useCallback, useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
-import {
-  BottomSheetModal,
-  BottomSheetView,
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 import { Book } from "@/types/book";
 import { BookTracking, ReadingStatus } from "@/types/reading-status";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -27,8 +27,55 @@ export interface StatusEditorBottomSheetProps {
   onBookCompleted?: () => void;
 }
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+interface StatusButtonProps {
+  option: {
+    status: ReadingStatus;
+    label: string;
+    icon: React.ReactNode;
+  };
+  isSelected: boolean;
+  onPress: () => void;
+  typography: any;
+  colors: any;
+}
+
+const StatusButton = ({ option, isSelected, onPress, typography, colors }: StatusButtonProps) => {
+  const pressed = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    backgroundColor: `rgba(128, 128, 128, ${pressed.value * 0.15})`,
+  }));
+
+  return (
+    <AnimatedPressable
+      onPressIn={() => {
+        pressed.value = withTiming(1, { duration: 100 });
+      }}
+      onPressOut={() => {
+        pressed.value = withTiming(0, { duration: 200 });
+      }}
+      onPress={onPress}
+      disabled={isSelected}
+      style={[
+        styles.actionButton,
+        animatedStyle,
+        { opacity: isSelected ? 0.5 : 1 },
+      ]}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        {option.icon}
+        <Text style={[typography.h3, { color: colors.text }]}>
+          {option.label}
+        </Text>
+      </View>
+    </AnimatedPressable>
+  );
+};
+
 const StatusEditorBottomSheet = forwardRef<
-  BottomSheetModal,
+  TrueSheet,
   StatusEditorBottomSheetProps
 >(({ book, onDismiss, onStatusUpdated, onBookCompleted }, ref) => {
   const { t } = useTranslation();
@@ -84,18 +131,6 @@ const StatusEditorBottomSheet = forwardRef<
     }
   };
 
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        appearsOnIndex={0}
-        disappearsOnIndex={-1}
-        pressBehavior="close"
-      />
-    ),
-    []
-  );
-
   const statusOptions = [
     {
       status: "reading" as ReadingStatus,
@@ -125,20 +160,15 @@ const StatusEditorBottomSheet = forwardRef<
   ];
 
   return (
-    <BottomSheetModal
+    <TrueSheet
       ref={ref}
-      onDismiss={handleSheetDismiss}
-      backgroundStyle={{
-        backgroundColor: colors.background,
-        borderCurve: "continuous",
-        borderRadius: 30,
-      }}
-      handleComponent={null}
-      backdropComponent={renderBackdrop}
-      keyboardBlurBehavior="restore"
-      enableDynamicSizing
+      detents={["auto"]}
+      cornerRadius={30}
+      backgroundColor={colors.background}
+      grabber={false}
+      onDidDismiss={handleSheetDismiss}
     >
-      <BottomSheetView style={styles.bottomSheetContent}>
+      <View style={styles.bottomSheetContent}>
         <View style={styles.header}>
           <Text
             style={[
@@ -151,25 +181,18 @@ const StatusEditorBottomSheet = forwardRef<
         </View>
         <View style={styles.actionsContainer}>
           {statusOptions.map((option, idx) => (
-            <TouchableOpacity
+            <StatusButton
               key={idx}
-              style={[
-                styles.actionButton,
-                { backgroundColor: colors.actionButton },
-                { opacity: tempStatus === option.status ? 0.5 : 1 },
-              ]}
-              disabled={tempStatus === option.status}
+              option={option}
+              isSelected={tempStatus === option.status}
               onPress={() => updateStatus(option.status)}
-            >
-              {option.icon}
-              <Text style={[typography.caption, { color: colors.text }]}>
-                {option.label}
-              </Text>
-            </TouchableOpacity>
+              typography={typography}
+              colors={colors}
+            />
           ))}
         </View>
-      </BottomSheetView>
-    </BottomSheetModal>
+      </View>
+    </TrueSheet>
   );
 });
 
@@ -178,7 +201,6 @@ StatusEditorBottomSheet.displayName = "StatusEditorBottomSheet";
 const styles = StyleSheet.create({
   bottomSheetContent: {
     padding: 24,
-    paddingBottom: 64,
   },
   header: {
     flexDirection: "row",
@@ -188,16 +210,17 @@ const styles = StyleSheet.create({
   },
   actionsContainer: {
     flexDirection: "column",
-    gap: 10,
+    gap: 4,
   },
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    padding: 16,
+    justifyContent: "space-between",
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 16,
   },
 });
 
 export default StatusEditorBottomSheet;
-

@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import '@/i18n'
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import ThemeProvider, { useTheme } from "../contexts/ThemeContext";
 import {
   BottomSheetProvider,
@@ -32,7 +31,7 @@ import {
   ListEditorBottomSheet,
 } from "@/components/book-actions";
 import CreateListBottomSheet from "@/components/CreateListBottomSheet";
-import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 
@@ -49,9 +48,7 @@ export default function RootLayout() {
             <ThemeProvider>
               <DropdownProvider>
                 <BottomSheetProvider>
-                  <BottomSheetModalProvider>
-                    <RootLayoutContent />
-                  </BottomSheetModalProvider>
+                  <RootLayoutContent />
                 </BottomSheetProvider>
               </DropdownProvider>
             </ThemeProvider>
@@ -88,11 +85,11 @@ function RootLayoutContent() {
   } = useBottomSheet();
 
   // Refs for each bottom sheet
-  const actionsSheetRef = useRef<BottomSheetModal>(null);
-  const statusEditorSheetRef = useRef<BottomSheetModal>(null);
-  const ratingEditorSheetRef = useRef<BottomSheetModal>(null);
-  const listEditorSheetRef = useRef<BottomSheetModal>(null);
-  const listCreatorSheetRef = useRef<BottomSheetModal>(null);
+  const actionsSheetRef = useRef<TrueSheet>(null);
+  const statusEditorSheetRef = useRef<TrueSheet>(null);
+  const ratingEditorSheetRef = useRef<TrueSheet>(null);
+  const listEditorSheetRef = useRef<TrueSheet>(null);
+  const listCreatorSheetRef = useRef<TrueSheet>(null);
 
   const [fontsLoaded] = useFonts({
     Manrope_200ExtraLight,

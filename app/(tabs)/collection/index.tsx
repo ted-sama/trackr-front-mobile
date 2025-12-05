@@ -4,7 +4,7 @@ import { View, StyleSheet, Text, Pressable, FlatList } from "react-native";
 import { Image as ExpoImage } from "expo-image";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } from 'react-native-reanimated';
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import CollectionListElement from "@/components/CollectionListElement";
 import { useRouter } from "expo-router";
 import CollectionHeader from "@/components/collection/HeaderCollection";
@@ -181,7 +181,7 @@ export default function Collection() {
   const mosaicBooks = useMemo(() => myLibrary.slice(0, 10), [myLibrary]);
   const { data: myLists } = useMyLists(debouncedQuery);
   const lists = (myLists?.pages.flatMap((p: any) => p.data) ?? []) as any[];
-  const createListBottomSheetRef = useRef<BottomSheetModal>(null);
+  const createListBottomSheetRef = useRef<TrueSheet>(null);
   
   const handleSearchTextChange = useCallback((text: string) => {
     setSearchText(text);

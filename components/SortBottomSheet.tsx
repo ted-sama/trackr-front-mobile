@@ -1,13 +1,8 @@
 /* eslint-disable react/display-name */
-import React, { forwardRef, useCallback } from 'react';
+import React, { forwardRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import {
-  BottomSheetModal,
-  BottomSheetView,
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-} from '@gorhom/bottom-sheet';
+import { TrueSheet } from '@lodev09/react-native-true-sheet';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import {
@@ -32,7 +27,7 @@ export interface SortBottomSheetProps {
   currentSort?: SortOption;
 }
 
-const SortBottomSheet = forwardRef<BottomSheetModal, SortBottomSheetProps>(
+const SortBottomSheet = forwardRef<TrueSheet, SortBottomSheetProps>(
   ({ onSortChange, currentSort }, ref) => {
     const { t } = useTranslation();
     const { colors } = useTheme();
@@ -93,22 +88,9 @@ const SortBottomSheet = forwardRef<BottomSheetModal, SortBottomSheetProps>(
       onSortChange(sortOption);
       const sheetRef = typeof ref === 'object' ? ref?.current : null;
       if (sheetRef) {
-        // @ts-expect-error bottom sheet ref
         sheetRef.dismiss();
       }
     };
-
-    const renderBackdrop = useCallback(
-      (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop
-          {...props}
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-          pressBehavior="close"
-        />
-      ),
-      []
-    );
 
     const isSelected = (option: SortOption) => {
       return (
@@ -117,19 +99,14 @@ const SortBottomSheet = forwardRef<BottomSheetModal, SortBottomSheetProps>(
     };
 
     return (
-      <BottomSheetModal
+      <TrueSheet
         ref={ref}
-        snapPoints={['50%']}
-        index={0}
-        backgroundStyle={{
-          backgroundColor: colors.background,
-          borderCurve: 'continuous',
-          borderRadius: 30,
-        }}
-        handleComponent={null}
-        backdropComponent={renderBackdrop}
+        detents={["auto"]}
+        cornerRadius={30}
+        backgroundColor={colors.background}
+        grabber={false}
       >
-        <BottomSheetView style={styles.bottomSheetContent}>
+        <View style={styles.bottomSheetContent}>
           <View style={styles.header}>
             <Text style={[typography.h3, { color: colors.text }]}>
               {t('collection.myLibrary.sort.title')}
@@ -168,8 +145,8 @@ const SortBottomSheet = forwardRef<BottomSheetModal, SortBottomSheetProps>(
               </TouchableOpacity>
             ))}
           </View>
-        </BottomSheetView>
-      </BottomSheetModal>
+        </View>
+      </TrueSheet>
     );
   }
 );
@@ -177,7 +154,6 @@ const SortBottomSheet = forwardRef<BottomSheetModal, SortBottomSheetProps>(
 const styles = StyleSheet.create({
   bottomSheetContent: {
     padding: 24,
-    paddingBottom: 64,
   },
   header: {
     marginBottom: 24,

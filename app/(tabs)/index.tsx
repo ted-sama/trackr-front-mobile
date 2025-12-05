@@ -18,6 +18,7 @@ import Animated from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import MaskedView from "@react-native-masked-view/masked-view";
+import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 
 export default function Index() {
   const { t } = useTranslation();
@@ -27,8 +28,10 @@ export default function Index() {
   const typography = useTypography();
   // Subscribe to trackedBooks state directly so the component re-renders when it changes
   const trackedBooks = useTrackedBooksStore((state) => state.trackedBooks);
-  const { data: mostTracked } = useMostTrackedCategory();
-  const { data: topRated } = useTopRatedCategory();
+  const { data: mostTracked, isLoading: isLoadingMostTracked } = useMostTrackedCategory();
+  const { data: topRated, isLoading: isLoadingTopRated } = useTopRatedCategory();
+
+  const isLoading = isLoadingMostTracked || isLoadingTopRated;
   
   const lastRead = React.useMemo(() => {
     const booksArray = Object.values(trackedBooks).filter(book => book && book.id);
@@ -52,6 +55,127 @@ export default function Index() {
   const handlePressOut = () => {
     scale.value = withTiming(1, { duration: 220 });
   };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView
+        edges={["right", "left"]}
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+
+        {/* Blurred header with gradient fade */}
+        <View style={[styles.headerContainer, { height: 80 + insets.top }]}>
+          <MaskedView
+            style={StyleSheet.absoluteFillObject}
+            maskElement={
+              <LinearGradient
+                colors={[
+                  'rgba(0, 0, 0, 1)',
+                  'rgba(0, 0, 0, 1)',
+                  'rgba(0, 0, 0, 0.98)',
+                  'rgba(0, 0, 0, 0.95)',
+                  'rgba(0, 0, 0, 0.9)',
+                  'rgba(0, 0, 0, 0.82)',
+                  'rgba(0, 0, 0, 0.7)',
+                  'rgba(0, 0, 0, 0.55)',
+                  'rgba(0, 0, 0, 0.4)',
+                  'rgba(0, 0, 0, 0.25)',
+                  'rgba(0, 0, 0, 0.12)',
+                  'rgba(0, 0, 0, 0.05)',
+                  'rgba(0, 0, 0, 0.02)',
+                  'rgba(0, 0, 0, 0)',
+                ]}
+                locations={[0, 0.4, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.94, 0.97, 1]}
+                dither={true}
+                style={{ flex: 1 }}
+              />
+            }
+          >
+            <BlurView
+              intensity={8}
+              tint={currentTheme === "dark" ? "dark" : "light"}
+              style={StyleSheet.absoluteFillObject}
+            />
+            <View
+              style={[
+                StyleSheet.absoluteFillObject,
+                {
+                  backgroundColor:
+                    currentTheme === "dark"
+                      ? "rgba(0,0,0,0.3)"
+                      : "rgba(255,255,255,0.1)",
+                },
+              ]}
+            />
+          </MaskedView>
+
+          {/* Header content skeleton */}
+          <View style={[styles.header, { paddingTop: 12 + insets.top, paddingHorizontal: 16 }]}>
+            <SkeletonLoader width={32} height={32} style={{ borderRadius: 16 }} />
+          </View>
+        </View>
+
+        <ScrollView style={{ flex: 1 }}>
+          <View style={styles.content}>
+            {/* Last Read section skeleton */}
+            <View style={styles.lastReadContainer}>
+              <SkeletonLoader width={120} height={20} style={{ marginBottom: 16 }} />
+              {[1, 2, 3].map((item) => (
+                <View key={item} style={{ marginBottom: 16 }}>
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <SkeletonLoader width={40} height={60} style={{ borderRadius: 4 }} />
+                    <View style={{ flex: 1, justifyContent: "space-between" }}>
+                      <View>
+                        <SkeletonLoader width="80%" height={16} style={{ marginBottom: 4 }} />
+                        <SkeletonLoader width="60%" height={12} style={{ marginBottom: 4 }} />
+                        <View style={{ flexDirection: "row", gap: 4 }}>
+                          <SkeletonLoader width={60} height={20} style={{ borderRadius: 10 }} />
+                          <SkeletonLoader width={40} height={20} style={{ borderRadius: 10 }} />
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              ))}
+              <SkeletonLoader width={140} height={16} style={{ marginTop: 22, alignSelf: "center" }} />
+            </View>
+
+            {/* Category sliders skeleton */}
+            <View style={{ marginHorizontal: -16, marginTop: 20 }}>
+              <View style={{ marginHorizontal: 16, marginBottom: 12 }}>
+                <SkeletonLoader width={180} height={20} />
+              </View>
+              <View style={{ flexDirection: "row", paddingLeft: 16 }}>
+                {[1, 2, 3].map((item) => (
+                  <View key={item} style={{ marginRight: 12 }}>
+                    <SkeletonLoader width={110} height={165} style={{ borderRadius: 6, marginBottom: 8 }} />
+                    <SkeletonLoader width={100} height={14} style={{ marginBottom: 4 }} />
+                    <SkeletonLoader width={80} height={12} />
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <View style={{ marginHorizontal: -16, marginTop: 20 }}>
+              <View style={{ marginHorizontal: 16, marginBottom: 12 }}>
+                <SkeletonLoader width={180} height={20} />
+              </View>
+              <View style={{ flexDirection: "row", paddingLeft: 16 }}>
+                {[1, 2, 3].map((item) => (
+                  <View key={item} style={{ marginRight: 12 }}>
+                    <SkeletonLoader width={110} height={165} style={{ borderRadius: 6, marginBottom: 8 }} />
+                    <SkeletonLoader width={100} height={14} style={{ marginBottom: 4 }} />
+                    <SkeletonLoader width={80} height={12} />
+                  </View>
+                ))}
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView

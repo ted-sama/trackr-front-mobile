@@ -1,13 +1,13 @@
 import React, { forwardRef, useCallback, useMemo } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Image } from "expo-image";
-import {
-  BottomSheetModal,
-  BottomSheetView,
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 import { Book } from "@/types/book";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,11 +15,11 @@ import {
   PlusIcon,
   ShareIcon,
   StarIcon,
-  BookImageIcon,
   MinusIcon,
   BookOpenIcon,
   HeartIcon,
   HeartMinusIcon,
+  ChevronRight,
 } from "lucide-react-native";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
@@ -42,8 +42,52 @@ export interface BookActionsBottomSheetProps {
   onAddToListPress?: () => void;
 }
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+interface ActionButtonProps {
+  action: {
+    label: string;
+    icon: React.ReactNode;
+    seeMore?: boolean;
+    onPress?: () => void;
+  };
+  typography: any;
+  colors: any;
+}
+
+const ActionButton = ({ action, typography, colors }: ActionButtonProps) => {
+  const pressed = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    backgroundColor: `rgba(128, 128, 128, ${pressed.value * 0.15})`,
+  }));
+
+  return (
+    <AnimatedPressable
+      onPressIn={() => {
+        pressed.value = withTiming(1, { duration: 100 });
+      }}
+      onPressOut={() => {
+        pressed.value = withTiming(0, { duration: 200 });
+      }}
+      onPress={action.onPress}
+      style={[styles.actionButton, animatedStyle]}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        {action.icon}
+        <Text style={[typography.h3, { color: colors.text }]}>
+          {action.label}
+        </Text>
+      </View>
+      {action.seeMore && (
+        <ChevronRight size={16} strokeWidth={2.75} color={colors.text} />
+      )}
+    </AnimatedPressable>
+  );
+};
+
 const BookActionsBottomSheet = forwardRef<
-  BottomSheetModal,
+  TrueSheet,
   BookActionsBottomSheetProps
 >(
   (
@@ -143,28 +187,18 @@ const BookActionsBottomSheet = forwardRef<
       }
     };
 
-    const renderBackdrop = useCallback(
-      (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop
-          {...props}
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-          pressBehavior="close"
-        />
-      ),
-      []
-    );
-
     const actions = [
       {
         label: t("bookBottomSheet.addToTracking"),
         icon: <PlusIcon size={16} strokeWidth={2.75} color={colors.text} />,
+        seeMore: false,
         show: !isTracking,
         onPress: handleAddBookToTracking,
       },
       {
         label: t("bookBottomSheet.editStatus"),
         icon: <BookOpenIcon size={16} strokeWidth={2.75} color={colors.text} />,
+        seeMore: true,
         show: isTracking,
         onPress: () => {
           closeSheet();
@@ -174,6 +208,7 @@ const BookActionsBottomSheet = forwardRef<
       {
         label: t("bookBottomSheet.addToFavorites"),
         icon: <HeartIcon size={16} strokeWidth={2.75} color={colors.text} />,
+        seeMore: false,
         show: !isFavorited,
         onPress: handleAddBookToFavorites,
       },
@@ -182,12 +217,14 @@ const BookActionsBottomSheet = forwardRef<
         icon: (
           <HeartMinusIcon size={16} strokeWidth={2.75} color={colors.text} />
         ),
+        seeMore: false,
         show: isFavorited,
         onPress: handleRemoveBookFromFavorites,
       },
       {
         label: t("bookBottomSheet.removeFromTracking"),
         icon: <MinusIcon size={16} strokeWidth={2.75} color={colors.text} />,
+        seeMore: false,
         show: isTracking,
         onPress: handleRemoveBookFromTracking,
       },
@@ -197,6 +234,7 @@ const BookActionsBottomSheet = forwardRef<
             icon: (
               <MinusIcon size={16} strokeWidth={2.75} color={colors.text} />
             ),
+            seeMore: false,
             show: true,
             onPress: handleRemoveBookFromList,
           }
@@ -204,6 +242,7 @@ const BookActionsBottomSheet = forwardRef<
       {
         label: t("bookBottomSheet.addToList"),
         icon: <PlusIcon size={16} strokeWidth={2.75} color={colors.text} />,
+        seeMore: true,
         show: true,
         onPress: () => {
           closeSheet();
@@ -213,18 +252,12 @@ const BookActionsBottomSheet = forwardRef<
       {
         label: t("bookBottomSheet.rate"),
         icon: <StarIcon size={16} strokeWidth={2.75} color={colors.text} />,
+        seeMore: true,
         show: isTracking,
         onPress: () => {
           closeSheet();
           onRatePress?.();
         },
-      },
-      {
-        label: t("bookBottomSheet.changeCover"),
-        icon: (
-          <BookImageIcon size={16} strokeWidth={2.75} color={colors.text} />
-        ),
-        show: true,
       },
       {
         label: t("bookBottomSheet.share"),
@@ -234,20 +267,15 @@ const BookActionsBottomSheet = forwardRef<
     ];
 
     return (
-      <BottomSheetModal
+      <TrueSheet
         ref={ref}
-        onDismiss={handleSheetDismiss}
-        backgroundStyle={{
-          backgroundColor: colors.background,
-          borderCurve: "continuous",
-          borderRadius: 30,
-        }}
-        handleComponent={null}
-        backdropComponent={renderBackdrop}
-        keyboardBlurBehavior="restore"
-        enableDynamicSizing
+        detents={["auto"]}
+        cornerRadius={30}
+        backgroundColor={colors.background}
+        grabber={false}
+        onDidDismiss={handleSheetDismiss}
       >
-        <BottomSheetView style={styles.bottomSheetContent}>
+        <View style={styles.bottomSheetContent}>
           <View style={styles.bottomSheetHeader}>
             <Image
               source={{ uri: book.coverImage }}
@@ -282,24 +310,17 @@ const BookActionsBottomSheet = forwardRef<
           <View style={styles.bottomSheetActions}>
             {actions.filter(Boolean).map((action: any, idx) =>
               action.show ? (
-                <TouchableOpacity
+                <ActionButton
                   key={idx}
-                  style={[
-                    styles.actionButton,
-                    { backgroundColor: colors.actionButton },
-                  ]}
-                  onPress={action.onPress}
-                >
-                  {action.icon}
-                  <Text style={[typography.caption, { color: colors.text }]}>
-                    {action.label}
-                  </Text>
-                </TouchableOpacity>
+                  action={action}
+                  typography={typography}
+                  colors={colors}
+                />
               ) : null
             )}
           </View>
-        </BottomSheetView>
-      </BottomSheetModal>
+        </View>
+      </TrueSheet>
     );
   }
 );
@@ -309,7 +330,6 @@ BookActionsBottomSheet.displayName = "BookActionsBottomSheet";
 const styles = StyleSheet.create({
   bottomSheetContent: {
     padding: 24,
-    paddingBottom: 64,
   },
   bottomSheetHeader: {
     flexDirection: "row",
@@ -328,16 +348,17 @@ const styles = StyleSheet.create({
   },
   bottomSheetActions: {
     flexDirection: "column",
-    gap: 10,
+    gap: 4,
   },
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    padding: 16,
+    justifyContent: "space-between",
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 16,
   },
 });
 
 export default BookActionsBottomSheet;
-

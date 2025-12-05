@@ -7,12 +7,7 @@ import React, {
 } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { useTranslation } from "react-i18next";
-import {
-  BottomSheetModal,
-  BottomSheetView,
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { LinearGradient } from "expo-linear-gradient";
 import { Book } from "@/types/book";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -48,7 +43,7 @@ function haveSameIds(previous: string[], next: string[]) {
 }
 
 const ListEditorBottomSheet = forwardRef<
-  BottomSheetModal,
+  TrueSheet,
   ListEditorBottomSheetProps
 >(({ book, onDismiss, onListsUpdated, onCreateListPress }, ref) => {
   const { t } = useTranslation();
@@ -144,33 +139,16 @@ const ListEditorBottomSheet = forwardRef<
     }
   };
 
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        appearsOnIndex={0}
-        disappearsOnIndex={-1}
-        pressBehavior="close"
-      />
-    ),
-    []
-  );
-
   return (
-    <BottomSheetModal
+    <TrueSheet
       ref={ref}
-      onDismiss={handleSheetDismiss}
-      backgroundStyle={{
-        backgroundColor: colors.background,
-        borderCurve: "continuous",
-        borderRadius: 30,
-      }}
-      handleComponent={null}
-      backdropComponent={renderBackdrop}
-      keyboardBlurBehavior="restore"
-      enableDynamicSizing
+      detents={["auto"]}
+      cornerRadius={30}
+      backgroundColor={colors.background}
+      grabber={false}
+      onDidDismiss={handleSheetDismiss}
     >
-      <BottomSheetView style={styles.bottomSheetContent}>
+      <View style={styles.bottomSheetContent}>
         <View style={styles.header}>
           <Text
             style={[
@@ -241,8 +219,8 @@ const ListEditorBottomSheet = forwardRef<
           onPress={handleSave}
           style={{ marginTop: 36 }}
         />
-      </BottomSheetView>
-    </BottomSheetModal>
+      </View>
+    </TrueSheet>
   );
 });
 
@@ -251,7 +229,6 @@ ListEditorBottomSheet.displayName = "ListEditorBottomSheet";
 const styles = StyleSheet.create({
   bottomSheetContent: {
     padding: 24,
-    paddingBottom: 64,
   },
   header: {
     flexDirection: "row",
@@ -278,4 +255,3 @@ const styles = StyleSheet.create({
 });
 
 export default ListEditorBottomSheet;
-

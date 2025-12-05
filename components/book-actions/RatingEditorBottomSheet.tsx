@@ -1,12 +1,7 @@
 import React, { forwardRef, useCallback, useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
-import {
-  BottomSheetModal,
-  BottomSheetView,
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { Book } from "@/types/book";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
@@ -21,7 +16,7 @@ export interface RatingEditorBottomSheetProps {
 }
 
 const RatingEditorBottomSheet = forwardRef<
-  BottomSheetModal,
+  TrueSheet,
   RatingEditorBottomSheetProps
 >(({ book, onDismiss, onRatingUpdated }, ref) => {
   const { t } = useTranslation();
@@ -64,33 +59,16 @@ const RatingEditorBottomSheet = forwardRef<
     }
   };
 
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        appearsOnIndex={0}
-        disappearsOnIndex={-1}
-        pressBehavior="close"
-      />
-    ),
-    []
-  );
-
   return (
-    <BottomSheetModal
+    <TrueSheet
       ref={ref}
-      onDismiss={handleSheetDismiss}
-      backgroundStyle={{
-        backgroundColor: colors.background,
-        borderCurve: "continuous",
-        borderRadius: 30,
-      }}
-      handleComponent={null}
-      backdropComponent={renderBackdrop}
-      keyboardBlurBehavior="restore"
-      enableDynamicSizing
+      detents={["auto"]}
+      cornerRadius={30}
+      backgroundColor={colors.background}
+      grabber={false}
+      onDidDismiss={handleSheetDismiss}
     >
-      <BottomSheetView style={styles.bottomSheetContent}>
+      <View style={styles.bottomSheetContent}>
         <View style={styles.header}>
           <Text
             style={[
@@ -114,8 +92,8 @@ const RatingEditorBottomSheet = forwardRef<
           onPress={handleSaveRating}
           style={{ marginTop: 36 }}
         />
-      </BottomSheetView>
-    </BottomSheetModal>
+      </View>
+    </TrueSheet>
   );
 });
 
@@ -124,7 +102,6 @@ RatingEditorBottomSheet.displayName = "RatingEditorBottomSheet";
 const styles = StyleSheet.create({
   bottomSheetContent: {
     padding: 24,
-    paddingBottom: 64,
   },
   header: {
     flexDirection: "row",
@@ -141,4 +118,3 @@ const styles = StyleSheet.create({
 });
 
 export default RatingEditorBottomSheet;
-

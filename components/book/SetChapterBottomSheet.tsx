@@ -1,10 +1,10 @@
 /* eslint-disable react/display-name */
-import React, { forwardRef, useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import React, { forwardRef, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, interpolateColor, withTiming } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
-import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
+import { TrueSheet } from '@lodev09/react-native-true-sheet';
 import { useTypography } from '@/hooks/useTypography';
 import { Book } from '@/types/book';
 import { Plus, Minus } from 'lucide-react-native';
@@ -20,10 +20,7 @@ dayjs.extend(relativeTime);
 
 interface SetChapterBottomSheetProps {
     book: Book;
-    snapPoints?: string[];
-    index?: number;
     onDismiss?: () => void;
-    backdropDismiss?: boolean;
     onBookCompleted?: () => void;
 }
 
@@ -72,7 +69,7 @@ const AnimatedPressable: React.FC<AnimatedPressableProps> = ({ style, onPress, d
     );
 };
 
-const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheetProps>(({ book, snapPoints, index, onDismiss, backdropDismiss, onBookCompleted }, ref) => {
+const SetChapterBottomSheet = forwardRef<TrueSheet, SetChapterBottomSheetProps>(({ book, onDismiss, onBookCompleted }, ref) => {
     const { getTrackedBookStatus, updateTrackedBook } = useTrackedBooksStore();
     const bookTracking = getTrackedBookStatus(book.id);
 
@@ -163,31 +160,16 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
         }
     };
 
-    const renderBackdrop = useCallback((props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop
-          {...props}
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-          pressBehavior={backdropDismiss ? "close" : "none"}
-        />
-      ), [backdropDismiss]);
-
     return (
-        <BottomSheetModal
+        <TrueSheet
             ref={ref}
-            snapPoints={snapPoints}
-            index={index}
-            onDismiss={handleDismiss}
-            backgroundStyle={{
-                backgroundColor: colors.background,
-                borderCurve: "continuous",
-                borderRadius: 30,
-            }}
-            handleComponent={null}
-            handleIndicatorStyle={{ backgroundColor: colors.icon }}
-            backdropComponent={renderBackdrop}
+            detents={["auto"]}
+            cornerRadius={30}
+            backgroundColor={colors.background}
+            grabber={false}
+            onDidDismiss={handleDismiss}
         >
-            <BottomSheetView style={styles.bottomSheetContent}>
+            <View style={styles.bottomSheetContent}>
                 <View style={styles.titleContainer}>
                     <Text style={[typography.categoryTitle, { color: colors.text }]}>{book.type === 'comic' ? t("book.lastIssueRead") : t("book.lastChapterRead")}</Text>
                     <Text style={[typography.caption, { color: colors.secondaryText, textAlign: 'center' }]} numberOfLines={2}>{book.title}</Text>
@@ -199,7 +181,7 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
                     <View style={styles.chapterContainer}>
                         <View style={styles.chapterInputContainer}>
                             <Text style={[typography.categoryTitle, { color: colors.accent }]}>{"#"}</Text>
-                            <BottomSheetTextInput
+                            <TextInput
                                 style={[typography.categoryTitle, { color: colors.accent }]}
                                 inputMode='numeric'
                                 keyboardType='numeric'
@@ -267,25 +249,16 @@ const SetChapterBottomSheet = forwardRef<BottomSheetModal, SetChapterBottomSheet
                         </View>
                     </View>
                 <Button title={t("save")} onPress={handleSave} style={{ marginTop: 36 }} />
-            </BottomSheetView>
-        </BottomSheetModal>
+            </View>
+        </TrueSheet>
     );
 });
 
 export default SetChapterBottomSheet;
 
 const styles = StyleSheet.create({
-    backdrop: {
-        backgroundColor: 'transparent',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-    },
     bottomSheetContent: {
         padding: 24,
-        paddingBottom: 64,
     },
     titleContainer: {
         alignItems: 'center',
@@ -319,19 +292,5 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 2,
-    },
-    inputContainer: {
-        width: '100%',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderRadius: 16,
-        padding: 16,
-    },
-    input: {
-        flex: 1,
-        textAlign: 'center',
-        margin: 0,
-        padding: 0,
     },
 });

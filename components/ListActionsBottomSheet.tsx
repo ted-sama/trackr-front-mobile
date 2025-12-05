@@ -1,17 +1,11 @@
 /* eslint-disable react/display-name */
 import React, { forwardRef, useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Share, Alert } from "react-native";
-import {
-  BottomSheetModal,
-  BottomSheetView,
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
+import { View, Text, StyleSheet, Pressable, Share, Alert } from "react-native";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
   withTiming,
-  withSpring,
-  EntryAnimationsValues,
-  ExitAnimationsValues,
 } from "react-native-reanimated";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
@@ -23,44 +17,51 @@ import { useTranslation } from "react-i18next";
 
 export interface ListActionsBottomSheetProps {
   list: List;
-  snapPoints?: string[];
-  index?: number;
   onDismiss?: () => void;
-  backdropDismiss?: boolean;
 }
 
-// Custom morphing animations (same style as BookActionsBottomSheet)
-function morphIn(values: EntryAnimationsValues) {
-  "worklet";
-  const initialValues = {
-    opacity: 0,
-    transform: [{ scale: 0.8 }],
-    borderRadius: values.targetBorderRadius ?? 25,
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+interface ActionButtonProps {
+  action: {
+    label: string;
+    icon: React.ReactNode;
+    onPress?: () => void;
   };
-  const animations = {
-    opacity: withTiming(1, { duration: 300 }),
-    transform: [{ scale: withSpring(1, { damping: 500, stiffness: 900 }) }],
-    borderRadius: withTiming(0, { duration: 300 }),
-  };
-  return { initialValues, animations };
-}
-function morphOut(values: ExitAnimationsValues) {
-  "worklet";
-  const initialValues = {
-    opacity: 1,
-    transform: [{ scale: 1 }],
-    borderRadius: values.currentBorderRadius,
-  };
-  const animations = {
-    opacity: withTiming(0, { duration: 200 }),
-    transform: [{ scale: withSpring(0.8, { damping: 12, stiffness: 100 }) }],
-    borderRadius: withTiming(values.currentBorderRadius, { duration: 200 }),
-  };
-  return { initialValues, animations };
+  typography: any;
+  colors: any;
 }
 
-const ListActionsBottomSheet = forwardRef<BottomSheetModal, ListActionsBottomSheetProps>(
-  ({ list: listProp, snapPoints, index, onDismiss, backdropDismiss }, ref) => {
+const ActionButton = ({ action, typography, colors }: ActionButtonProps) => {
+  const pressed = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    backgroundColor: `rgba(128, 128, 128, ${pressed.value * 0.15})`,
+  }));
+
+  return (
+    <AnimatedPressable
+      onPressIn={() => {
+        pressed.value = withTiming(1, { duration: 100 });
+      }}
+      onPressOut={() => {
+        pressed.value = withTiming(0, { duration: 200 });
+      }}
+      onPress={action.onPress}
+      style={[styles.actionButton, animatedStyle]}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        {action.icon}
+        <Text style={[typography.h3, { color: colors.text }]}>
+          {action.label}
+        </Text>
+      </View>
+    </AnimatedPressable>
+  );
+};
+
+const ListActionsBottomSheet = forwardRef<TrueSheet, ListActionsBottomSheetProps>(
+  ({ list: listProp, onDismiss }, ref) => {
     const { colors } = useTheme();
     const typography = useTypography();
     const { t } = useTranslation();
@@ -71,18 +72,6 @@ const ListActionsBottomSheet = forwardRef<BottomSheetModal, ListActionsBottomShe
     const list = liveList ?? listProp;
 
     const isOwnList = currentUser?.id === list.owner?.id;
-
-    const renderBackdrop = useCallback(
-      (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop
-          {...props}
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-          pressBehavior={backdropDismiss ? "close" : "none"}
-        />
-      ),
-      [backdropDismiss]
-    );
 
     const handleDismiss = () => {
       if (onDismiss) onDismiss();
@@ -96,8 +85,8 @@ const ListActionsBottomSheet = forwardRef<BottomSheetModal, ListActionsBottomShe
     } catch {
         // no-op
       } finally {
-        // @ts-expect-error bottom sheet ref
-        ref?.current?.dismiss();
+        const sheetRef = typeof ref === "object" ? ref?.current : null;
+        sheetRef?.dismiss();
       }
     };
 
@@ -112,8 +101,8 @@ const ListActionsBottomSheet = forwardRef<BottomSheetModal, ListActionsBottomShe
             style: "destructive",
             onPress: () => {
               Alert.alert("Merci", "Votre signalement a été envoyé.");
-              // @ts-expect-error bottom sheet ref
-              ref?.current?.dismiss();
+              const sheetRef = typeof ref === "object" ? ref?.current : null;
+              sheetRef?.dismiss();
             },
           },
         ]
@@ -144,55 +133,45 @@ const ListActionsBottomSheet = forwardRef<BottomSheetModal, ListActionsBottomShe
     ];
 
     return (
-      <BottomSheetModal
+      <TrueSheet
         ref={ref}
-        snapPoints={snapPoints}
-        index={index}
-        onDismiss={handleDismiss}
-        backgroundStyle={{
-          backgroundColor: colors.background,
-          borderCurve: "continuous",
-          borderRadius: 30,
-        }}
-        handleComponent={null}
-        backdropComponent={renderBackdrop}
-        keyboardBlurBehavior="restore"
+        detents={["auto"]}
+        cornerRadius={30}
+        backgroundColor={colors.background}
+        grabber={false}
+        onDidDismiss={handleDismiss}
       >
-        <BottomSheetView style={styles.bottomSheetContent}>
-          <Animated.View entering={morphIn} exiting={morphOut}>
-            <View>
-              <View style={styles.bottomSheetHeader}>
-                <View style={{ flexShrink: 1 }}>
-                  <Text style={[typography.h3, { color: colors.text }]} numberOfLines={2}>
-                    {list.name}
+        <View style={styles.bottomSheetContent}>
+          <View>
+            <View style={styles.bottomSheetHeader}>
+              <View style={{ flexShrink: 1 }}>
+                <Text style={[typography.h3, { color: colors.text }]} numberOfLines={2}>
+                  {list.name}
+                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Text style={[typography.caption, { color: colors.secondaryText }]}>
+                    Par {list.owner.username}
                   </Text>
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                      Par {list.owner.username}
-                    </Text>
-                    {separator()}
-                    <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                      {list.books.total} {list.books.total > 1 ? "éléments" : "élément"}
-                    </Text>
-                  </View>
+                  {separator()}
+                  <Text style={[typography.caption, { color: colors.secondaryText }]}>
+                    {list.books.total} {list.books.total > 1 ? "éléments" : "élément"}
+                  </Text>
                 </View>
               </View>
-              <View style={styles.bottomSheetActions}>
-                {actions.map((action, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    style={[styles.actionButton, { backgroundColor: colors.actionButton }]}
-                    onPress={action.onPress}
-                  >
-                    {action.icon}
-                    <Text style={[typography.caption, { color: colors.text }]}>{action.label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
             </View>
-          </Animated.View>
-        </BottomSheetView>
-      </BottomSheetModal>
+            <View style={styles.bottomSheetActions}>
+              {actions.map((action, idx) => (
+                <ActionButton
+                  key={idx}
+                  action={action}
+                  typography={typography}
+                  colors={colors}
+                />
+              ))}
+            </View>
+          </View>
+        </View>
+      </TrueSheet>
     );
   }
 );
@@ -200,7 +179,6 @@ const ListActionsBottomSheet = forwardRef<BottomSheetModal, ListActionsBottomShe
 const styles = StyleSheet.create({
   bottomSheetContent: {
     padding: 24,
-    paddingBottom: 64,
   },
   bottomSheetHeader: {
     flexDirection: "row",
@@ -209,13 +187,15 @@ const styles = StyleSheet.create({
   },
   bottomSheetActions: {
     flexDirection: "column",
-    gap: 10,
+    gap: 4,
   },
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    padding: 16,
+    justifyContent: "space-between",
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 16,
   },
 });

@@ -22,7 +22,7 @@ import { Heart, Bookmark } from "lucide-react-native";
 import { useUserStore } from "@/stores/userStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Ellipsis } from "lucide-react-native";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import ListActionsBottomSheet from "@/components/ListActionsBottomSheet";
 import Avatar from "@/components/ui/Avatar";
 import PlusBadge from "@/components/ui/PlusBadge";
@@ -406,7 +406,7 @@ export default function ListFullScreen() {
     scrollY.value = event.contentOffset.y;
   });
   const [titleY, setTitleY] = useState<number>(0);
-  const listActionsBottomSheetRef = useRef<BottomSheetModal>(null);
+  const listActionsBottomSheetRef = useRef<TrueSheet>(null);
   const currentLayout = useUIStore(state => state.listLayout);
   const setLayout = useUIStore(state => state.setListLayout);
   const insets = useSafeAreaInsets();
@@ -765,8 +765,6 @@ export default function ListFullScreen() {
         <ListActionsBottomSheet
           ref={listActionsBottomSheetRef}
           list={list}
-          index={0}
-          backdropDismiss
         />
       )}
     </View>

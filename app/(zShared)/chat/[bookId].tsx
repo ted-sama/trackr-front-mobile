@@ -8,7 +8,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { useSharedValue, useAnimatedStyle, withTiming, withSpring } from "react-native-reanimated";
+import { useSharedValue, useAnimatedStyle, withTiming, withSpring, withRepeat, withSequence } from "react-native-reanimated";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,6 +23,70 @@ import { Circle } from "lucide-react-native";
 import { PredefinedQuestions } from "@/components/chat/PredefinedQuestions";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(DefaultScrollView);
+
+// Composant pour les trois points animés
+const TypingIndicator = ({ color }: { color?: string }) => {
+  const { colors } = useTheme();
+
+  const dot1Opacity = useSharedValue(0.3);
+  const dot2Opacity = useSharedValue(0.3);
+  const dot3Opacity = useSharedValue(0.3);
+
+  useEffect(() => {
+    dot1Opacity.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 400 }),
+        withTiming(0.3, { duration: 400 })
+      ),
+      -1,
+      false
+    );
+
+    setTimeout(() => {
+      dot2Opacity.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 400 }),
+          withTiming(0.3, { duration: 400 })
+        ),
+        -1,
+        false
+      );
+    }, 133);
+
+    setTimeout(() => {
+      dot3Opacity.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 400 }),
+          withTiming(0.3, { duration: 400 })
+        ),
+        -1,
+        false
+      );
+    }, 266);
+  }, []);
+
+  const dot1Style = useAnimatedStyle(() => ({
+    opacity: dot1Opacity.value,
+  }));
+
+  const dot2Style = useAnimatedStyle(() => ({
+    opacity: dot2Opacity.value,
+  }));
+
+  const dot3Style = useAnimatedStyle(() => ({
+    opacity: dot3Opacity.value,
+  }));
+
+  const dotColor = color || colors.secondaryText;
+
+  return (
+    <View style={styles.typingIndicator}>
+      <Animated.View style={[styles.typingDot, { backgroundColor: dotColor }, dot1Style]} />
+      <Animated.View style={[styles.typingDot, { backgroundColor: dotColor }, dot2Style]} />
+      <Animated.View style={[styles.typingDot, { backgroundColor: dotColor }, dot3Style]} />
+    </View>
+  );
+};
 
 export default function ChatScreen() {
     const { colors } = useTheme();
@@ -41,8 +105,8 @@ export default function ChatScreen() {
     const { messages, error, sendMessage, status } = useChat({
         transport: new DefaultChatTransport({
             fetch: expoFetch as unknown as typeof globalThis.fetch,
-            // api: `http://localhost:3333/chat/${bookId}`,
-            api: `https://api.trackrr.app/chat/${bookId}`,
+            api: `http://localhost:3333/chat/${bookId}`,
+            // api: `https://api.trackrr.app/chat/${bookId}`,
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -351,6 +415,18 @@ export default function ChatScreen() {
                 );
               })
             )}
+            {status === 'submitted' && (
+              <View style={[styles.messageRow, styles.aiMessageRow]}>
+                <View style={styles.aiMessageContent}>
+                  {dominantColor && (
+                    <View style={styles.aiHeader}>
+                      <Circle size={22} color={dominantColor} fill={dominantColor} />
+                    </View>
+                  )}
+                  <TypingIndicator color={dominantColor || undefined} />
+                </View>
+              </View>
+            )}
           </AnimatedScrollView>
 
           <Animated.View style={[styles.inputContainer, inputContainerStyle]}>
@@ -496,6 +572,17 @@ const styles = StyleSheet.create({
   },
   messageText: {
     lineHeight: 20,
+  },
+  typingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+  },
+  typingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   inputContainer: {
     position: 'absolute',

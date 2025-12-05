@@ -73,17 +73,18 @@ export function SearchResults({ searchQuery, activeFilter }: SearchResultsProps)
       <View style={styles.listContainer}>
         {[1, 2, 3, 4, 5].map((item) => (
           <View key={item} style={{ marginBottom: 12 }}>
-            <View style={{ flexDirection: "row", gap: 12 }}>
-              <SkeletonLoader width={60} height={90} style={{ borderRadius: 4 }} />
-              <View style={{ flex: 1, justifyContent: "space-between" }}>
-                <View>
-                  <SkeletonLoader width="80%" height={18} style={{ marginBottom: 6 }} />
-                  <SkeletonLoader width="60%" height={14} style={{ marginBottom: 4 }} />
-                  <SkeletonLoader width="40%" height={14} />
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <View style={{ flexDirection: "row", alignItems: "center", flexShrink: 1 }}>
+                <SkeletonLoader width={60} height={90} style={{ borderRadius: 4 }} />
+                <View style={{ marginHorizontal: 16, flexShrink: 1 }}>
+                  <SkeletonLoader width={120} height={16} style={{ marginBottom: 4 }} />
+                  <SkeletonLoader width={80} height={12} style={{ marginBottom: 2 }} />
+                  <SkeletonLoader width={60} height={12} />
                 </View>
-                <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
-                  <SkeletonLoader width={24} height={24} style={{ borderRadius: 12 }} />
-                </View>
+              </View>
+              <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                <SkeletonLoader width={24} height={24} style={{ borderRadius: 12 }} />
+                <SkeletonLoader width={22} height={22} style={{ borderRadius: 11 }} />
               </View>
             </View>
           </View>
