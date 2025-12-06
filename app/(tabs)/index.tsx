@@ -1,38 +1,36 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import { View, Text, StyleSheet, FlatList, ScrollView, Pressable } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { router } from "expo-router";
-import { useUserStore } from "@/stores/userStore";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import BookListElement from "@/components/BookListElement";
 import CategorySlider from "@/components/CategorySlider";
 import { useMostTrackedCategory, useTopRatedCategory } from "@/hooks/queries/categories";
-import Avatar from "@/components/ui/Avatar";
 import { ChevronRight } from "lucide-react-native";
-import { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import { useAnimatedStyle, useSharedValue, withTiming, useAnimatedScrollHandler } from "react-native-reanimated";
 import Animated from "react-native-reanimated";
-import { BlurView } from "expo-blur";
-import { LinearGradient } from "expo-linear-gradient";
-import MaskedView from "@react-native-masked-view/masked-view";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
+import { HomeAnimatedHeader } from "@/components/home/HomeAnimatedHeader";
+
+const AnimatedScrollView = Animated.createAnimatedComponent(Animated.ScrollView);
 
 export default function Index() {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
-  const { currentUser } = useUserStore();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
+  const scrollY = useSharedValue(0);
+
   // Subscribe to trackedBooks state directly so the component re-renders when it changes
   const trackedBooks = useTrackedBooksStore((state) => state.trackedBooks);
   const { data: mostTracked, isLoading: isLoadingMostTracked } = useMostTrackedCategory();
   const { data: topRated, isLoading: isLoadingTopRated } = useTopRatedCategory();
 
   const isLoading = isLoadingMostTracked || isLoadingTopRated;
-  
+
   const lastRead = React.useMemo(() => {
     const booksArray = Object.values(trackedBooks).filter(book => book && book.id);
     return booksArray.filter(book => book.trackingStatus?.currentChapter && book.trackingStatus?.lastReadAt !== null).sort((a, b) => {
@@ -56,6 +54,12 @@ export default function Index() {
     scale.value = withTiming(1, { duration: 220 });
   };
 
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
   if (isLoading) {
     return (
       <SafeAreaView
@@ -63,60 +67,12 @@ export default function Index() {
         style={[styles.container, { backgroundColor: colors.background }]}
       >
         <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-
-        {/* Blurred header with gradient fade */}
-        <View style={[styles.headerContainer, { height: 80 + insets.top }]}>
-          <MaskedView
-            style={StyleSheet.absoluteFillObject}
-            maskElement={
-              <LinearGradient
-                colors={[
-                  'rgba(0, 0, 0, 1)',
-                  'rgba(0, 0, 0, 1)',
-                  'rgba(0, 0, 0, 0.98)',
-                  'rgba(0, 0, 0, 0.95)',
-                  'rgba(0, 0, 0, 0.9)',
-                  'rgba(0, 0, 0, 0.82)',
-                  'rgba(0, 0, 0, 0.7)',
-                  'rgba(0, 0, 0, 0.55)',
-                  'rgba(0, 0, 0, 0.4)',
-                  'rgba(0, 0, 0, 0.25)',
-                  'rgba(0, 0, 0, 0.12)',
-                  'rgba(0, 0, 0, 0.05)',
-                  'rgba(0, 0, 0, 0.02)',
-                  'rgba(0, 0, 0, 0)',
-                ]}
-                locations={[0, 0.4, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.94, 0.97, 1]}
-                dither={true}
-                style={{ flex: 1 }}
-              />
-            }
-          >
-            <BlurView
-              intensity={8}
-              tint={currentTheme === "dark" ? "dark" : "light"}
-              style={StyleSheet.absoluteFillObject}
-            />
-            <View
-              style={[
-                StyleSheet.absoluteFillObject,
-                {
-                  backgroundColor:
-                    currentTheme === "dark"
-                      ? "rgba(0,0,0,0.3)"
-                      : "rgba(255,255,255,0.1)",
-                },
-              ]}
-            />
-          </MaskedView>
-
-          {/* Header content skeleton */}
-          <View style={[styles.header, { paddingTop: 12 + insets.top, paddingHorizontal: 16 }]}>
-            <SkeletonLoader width={32} height={32} style={{ borderRadius: 16 }} />
-          </View>
-        </View>
-
-        <ScrollView style={{ flex: 1 }}>
+        <HomeAnimatedHeader scrollY={scrollY} />
+        <AnimatedScrollView
+          style={{ flex: 1 }}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
+        >
           <View style={styles.content}>
             {/* Last Read section skeleton */}
             <View style={styles.lastReadContainer}>
@@ -172,7 +128,7 @@ export default function Index() {
               </View>
             </View>
           </View>
-        </ScrollView>
+        </AnimatedScrollView>
       </SafeAreaView>
     );
   }
@@ -183,63 +139,11 @@ export default function Index() {
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-
-      {/* Blurred header with gradient fade */}
-      <View style={[styles.headerContainer, { height: 80 + insets.top }]}>
-        <MaskedView
-          style={StyleSheet.absoluteFillObject}
-          maskElement={
-            <LinearGradient
-              colors={[
-                'rgba(0, 0, 0, 1)',
-                'rgba(0, 0, 0, 1)',
-                'rgba(0, 0, 0, 0.98)',
-                'rgba(0, 0, 0, 0.95)',
-                'rgba(0, 0, 0, 0.9)',
-                'rgba(0, 0, 0, 0.82)',
-                'rgba(0, 0, 0, 0.7)',
-                'rgba(0, 0, 0, 0.55)',
-                'rgba(0, 0, 0, 0.4)',
-                'rgba(0, 0, 0, 0.25)',
-                'rgba(0, 0, 0, 0.12)',
-                'rgba(0, 0, 0, 0.05)',
-                'rgba(0, 0, 0, 0.02)',
-                'rgba(0, 0, 0, 0)',
-              ]}
-              locations={[0, 0.4, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.94, 0.97, 1]}
-              dither={true}
-              style={{ flex: 1 }}
-            />
-          }
-        >
-          <BlurView
-            intensity={8}
-            tint={currentTheme === "dark" ? "dark" : "light"}
-            style={StyleSheet.absoluteFillObject}
-          />
-          <View
-            style={[
-              StyleSheet.absoluteFillObject,
-              {
-                backgroundColor:
-                  currentTheme === "dark"
-                    ? "rgba(0,0,0,0.3)"
-                    : "rgba(255,255,255,0.1)",
-              },
-            ]}
-          />
-        </MaskedView>
-
-        {/* Header content */}
-        <View style={[styles.header, { paddingTop: 12 + insets.top, paddingHorizontal: 16 }]}>
-          <Pressable onPress={() => router.push("/me")}>
-            <Avatar image={currentUser?.avatar || ""} size={32} borderWidth={1} borderColor={colors.border} />
-          </Pressable>
-        </View>
-      </View>
-
-      <ScrollView
+      <HomeAnimatedHeader scrollY={scrollY} />
+      <AnimatedScrollView
         style={{ flex: 1 }}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
       >
       <View style={styles.content}>
         <View style={styles.lastReadContainer}>
@@ -277,32 +181,17 @@ export default function Index() {
           )}
           </View>
         </View>
-      </ScrollView>
+      </AnimatedScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 98,
-    overflow: "hidden",
-  },
-  header: {
-    flexDirection: "row",
-    gap: 16,
-    alignItems: "center",
-    paddingBottom: 16,
-    zIndex: 99,
-  },
   container: {
     flex: 1,
   },
   content: {
-    paddingTop: 160,
+    paddingTop: 120,
     paddingHorizontal: 16,
     paddingBottom: 78,
   },
@@ -310,12 +199,4 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     marginBottom: 20,
   },
-  bluredStatusBar: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    width: "100%",
-    zIndex: 1000,
-  }
 });

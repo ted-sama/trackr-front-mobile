@@ -23,7 +23,8 @@ import {
 import { useUserStore } from '@/stores/userStore';
 
 // RevenueCat API Keys
-const REVENUECAT_API_KEY = 'test_otUyOYODvVzwlGNibUdnnrhWEPi';
+// const REVENUECAT_API_KEY = 'test_otUyOYODvVzwlGNibUdnnrhWEPi'; // Test API Key
+const REVENUECAT_API_KEY = 'appl_dPEKcJFhYjVaExTXthPDKuAysrp'; // Production API Key
 
 // Default subscription status
 const defaultSubscriptionStatus: SubscriptionStatus = {

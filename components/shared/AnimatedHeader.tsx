@@ -86,32 +86,33 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
 
   return (
     <View style={[styles.container, { height: 80 + insets.top }]}>
-      <Animated.View style={[StyleSheet.absoluteFillObject, headerContainerStyle]}>
+      <Animated.View style={[StyleSheet.absoluteFillObject, headerContainerStyle, { paddingBottom: -40 }]}>
         <MaskedView
-          style={StyleSheet.absoluteFillObject}
+          style={[StyleSheet.absoluteFillObject, { height: '140%' }]}
           maskElement={
             <LinearGradient
               colors={[
-                'rgba(0, 0, 0, 1)',
-                'rgba(0, 0, 0, 1)',
+                'black',
+                'black',
+                'black',
                 'rgba(0, 0, 0, 0.98)',
                 'rgba(0, 0, 0, 0.95)',
                 'rgba(0, 0, 0, 0.9)',
-                'rgba(0, 0, 0, 0.82)',
-                'rgba(0, 0, 0, 0.7)',
-                'rgba(0, 0, 0, 0.55)',
-                'rgba(0, 0, 0, 0.4)',
-                'rgba(0, 0, 0, 0.25)',
-                'rgba(0, 0, 0, 0.12)',
-                'rgba(0, 0, 0, 0.05)',
+                'rgba(0, 0, 0, 0.85)',
+                'rgba(0, 0, 0, 0.75)',
+                'rgba(0, 0, 0, 0.6)',
+                'rgba(0, 0, 0, 0.45)',
+                'rgba(0, 0, 0, 0.3)',
+                'rgba(0, 0, 0, 0.18)',
+                'rgba(0, 0, 0, 0.08)',
                 'rgba(0, 0, 0, 0.02)',
-                'rgba(0, 0, 0, 0)',
+                'transparent',
               ]}
-              locations={[0, 0.4, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.94, 0.97, 1]}
-              dither={true}
+              locations={[0, 0.25, 0.4, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.94, 0.97, 1]}
               style={{ flex: 1 }}
             />
           }
+          pointerEvents="none"
         >
           <BlurView
             intensity={20}
@@ -121,7 +122,7 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
           <View
             style={[
               StyleSheet.absoluteFillObject,
-              { backgroundColor: currentTheme === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.1)' }
+              { backgroundColor: currentTheme === 'dark' ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.65)' }
             ]}
           />
         </MaskedView>

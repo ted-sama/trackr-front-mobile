@@ -1,40 +1,37 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Pressable, Text } from 'react-native';
 import Animated, { SharedValue, useAnimatedStyle, interpolate, Extrapolate } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { useTheme } from '@/contexts/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
-import { ExpandableSearchBar } from './ExpandableSearchBar';
+import Avatar from '@/components/ui/Avatar';
+import { useUserStore } from '@/stores/userStore';
+import { router } from 'expo-router';
+import { useTypography } from '@/hooks/useTypography';
 import { useTranslation } from 'react-i18next';
 
-interface DiscoverAnimatedHeaderProps {
+interface HomeAnimatedHeaderProps {
   scrollY: SharedValue<number>;
-  searchQuery: string;
-  onSearchChange: (text: string) => void;
-  selectedFilter: 'books' | 'lists' | 'users';
-  onFilterChange: (filter: 'books' | 'lists' | 'users') => void;
   collapseThreshold?: number;
 }
 
 const DEFAULT_THRESHOLD = 60;
-const SEARCH_BAR_MAX_HEIGHT = 100;
+const HEADER_HEIGHT = 56;
 const VERTICAL_SPACING = 12;
 
-export function DiscoverAnimatedHeader({
+export function HomeAnimatedHeader({
   scrollY,
-  searchQuery,
-  onSearchChange,
-  selectedFilter,
-  onFilterChange,
   collapseThreshold = DEFAULT_THRESHOLD,
-}: DiscoverAnimatedHeaderProps) {
+}: HomeAnimatedHeaderProps) {
   const insets = useSafeAreaInsets();
-  const { currentTheme } = useTheme();
+  const { currentTheme, colors } = useTheme();
+  const { currentUser } = useUserStore();
+  const typography = useTypography();
   const { t } = useTranslation();
 
-  const totalHeight = insets.top + SEARCH_BAR_MAX_HEIGHT + VERTICAL_SPACING;
+  const totalHeight = insets.top + HEADER_HEIGHT + VERTICAL_SPACING;
 
   const headerContainerStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
@@ -93,13 +90,14 @@ export function DiscoverAnimatedHeader({
 
       {/* Content */}
       <View style={[styles.content, { paddingTop: insets.top + VERTICAL_SPACING }]}>
-        <ExpandableSearchBar
-          placeholder={t('discover.searchPlaceholder')}
-          value={searchQuery}
-          onChangeText={onSearchChange}
-          selectedFilter={selectedFilter}
-          onFilterChange={onFilterChange}
-        />
+        <Pressable onPress={() => router.push("/me")}>
+          <Avatar
+            image={currentUser?.avatar || ""}
+            size={36}
+            borderWidth={1}
+            borderColor={colors.border}
+          />
+        </Pressable>
       </View>
     </View>
   );
@@ -116,5 +114,11 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  title: {
+    flex: 1,
   },
 });
