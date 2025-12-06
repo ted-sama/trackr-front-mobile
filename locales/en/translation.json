@@ -31,6 +31,8 @@
             "passwordPlaceholder": "Enter your password",
             "forgotPassword": "Forgot password?",
             "loginButton": "Sign in",
+            "orContinueWith": "or continue with",
+            "googleButton": "Continue with Google",
             "noAccount": "Don't have an account?",
             "createAccount": "Create account",
             "alreadyLoggedIn": "You are already logged in"
@@ -118,7 +120,9 @@
         "title": "Collection",
         "myLibrary": {
             "title": "My library",
-            "noBooks": "No books found in your library.",
+            "noBooks": "No books found in your library",
+            "startReading": "Save a first book to your library",
+            "noLists": "Create your lists or save lists from other users",
             "searchPlaceholder": "Search books",
             "sort": {
                 "title": "Sort by",

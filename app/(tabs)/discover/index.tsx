@@ -48,7 +48,7 @@ function BookCategoriesSection() {
   }
 
   return (
-    <View style={styles.categoriesContainer}>
+    <View>
       {(categories || []).map((category) => (
         <CategorySlider
           key={category.id}
@@ -244,9 +244,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  categoriesContainer: {
-    paddingBottom: 20,
   },
   listsContent: {
     paddingBottom: 128,

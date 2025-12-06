@@ -127,11 +127,19 @@ const MyLibraryHeader: React.FC<MyLibraryHeaderProps> = React.memo(
           onPressOut={handlePressOut}
           style={styles.myLibraryHeaderMenu}
         >
-          <View style={styles.stackContainer}>
-            {displayBooks.map((book, index) => (
-              <AnimatedCover key={book.id} book={book} index={index} colors={colors} />
-            ))}
-          </View>
+          {displayBooks.length > 0 ? (
+            <View style={styles.stackContainer}>
+              {displayBooks.map((book, index) => (
+                <AnimatedCover key={book.id} book={book} index={index} colors={colors} />
+              ))}
+            </View>
+          ) : (
+            <View style={[styles.stackContainer, { justifyContent: 'center' }]}>
+              <Text style={[typography.caption, { color: colors.secondaryText, textAlign: 'center' }]}>
+                {t("collection.myLibrary.startReading")}
+              </Text>
+            </View>
+          )}
           <View style={styles.textContainer}>
             <Text style={[typography.h2, { color: colors.text, textAlign: 'center' }]} numberOfLines={1}>
               {t("collection.myLibrary.title")}
@@ -221,6 +229,13 @@ export default function Collection() {
         keyExtractor={(item) => item.id}
         ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
         contentContainerStyle={[styles.listContainer, { paddingTop: 120 }]}
+        ListEmptyComponent={() => (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 16 }}>
+            <Text style={[typography.caption, { color: colors.secondaryText, textAlign: 'center' }]}>
+              {t("collection.myLibrary.noLists")}
+            </Text>
+          </View>
+        )}
       />
       <CreateListBottomSheet ref={createListBottomSheetRef} />
     </SafeAreaView>
