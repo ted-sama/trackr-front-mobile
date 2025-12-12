@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
-import React, { forwardRef, useCallback } from "react";
-import { View, Text, StyleSheet, Pressable, Share, Alert } from "react-native";
+import React, { forwardRef, useCallback, useRef } from "react";
+import { View, Text, StyleSheet, Pressable, Share } from "react-native";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import Animated, {
   useSharedValue,
@@ -14,6 +14,7 @@ import { ShareIcon, Flag } from "lucide-react-native";
 import { useList } from "@/hooks/queries/lists";
 import { useUserStore } from "@/stores/userStore";
 import { useTranslation } from "react-i18next";
+import ReportBottomSheet from "./ReportBottomSheet";
 
 export interface ListActionsBottomSheetProps {
   list: List;
@@ -66,6 +67,7 @@ const ListActionsBottomSheet = forwardRef<TrueSheet, ListActionsBottomSheetProps
     const typography = useTypography();
     const { t } = useTranslation();
     const currentUser = useUserStore((state) => state.currentUser);
+    const reportSheetRef = useRef<TrueSheet>(null);
 
     // Use the live data from React Query cache instead of the prop
     const { data: liveList } = useList(listProp.id);
@@ -80,9 +82,14 @@ const ListActionsBottomSheet = forwardRef<TrueSheet, ListActionsBottomSheetProps
     const handleShare = async () => {
       try {
         const owner = list.owner?.username || "";
-        const message = `Découvre la liste "${list.name}" (${list.books?.total ?? 0} éléments) par ${owner}`;
+        const message = t("list.shareMessage", {
+          name: list.name,
+          count: list.books?.total ?? 0,
+          username: owner,
+          defaultValue: `Check out the list "${list.name}" (${list.books?.total ?? 0} items) by ${owner}`,
+        });
         await Share.share({ message });
-    } catch {
+      } catch {
         // no-op
       } finally {
         const sheetRef = typeof ref === "object" ? ref?.current : null;
@@ -90,23 +97,13 @@ const ListActionsBottomSheet = forwardRef<TrueSheet, ListActionsBottomSheetProps
       }
     };
 
-    const handleReport = async () => {
-      Alert.alert(
-        "Signaler la liste",
-        `Voulez-vous signaler la liste "${list.name}" ?`,
-        [
-          { text: "Annuler", style: "cancel" },
-          {
-            text: "Signaler",
-            style: "destructive",
-            onPress: () => {
-              Alert.alert("Merci", "Votre signalement a été envoyé.");
-              const sheetRef = typeof ref === "object" ? ref?.current : null;
-              sheetRef?.dismiss();
-            },
-          },
-        ]
-      );
+    const handleReport = () => {
+      const sheetRef = typeof ref === "object" ? ref?.current : null;
+      sheetRef?.dismiss();
+      // Small delay to allow the current sheet to close before opening the report sheet
+      setTimeout(() => {
+        reportSheetRef.current?.present();
+      }, 300);
     };
 
     const separator = () => (
@@ -116,7 +113,7 @@ const ListActionsBottomSheet = forwardRef<TrueSheet, ListActionsBottomSheetProps
     const actions = [
       // Share action - always available
       {
-        label: "Partager",
+        label: t("list.share"),
         icon: <ShareIcon size={16} strokeWidth={2.75} color={colors.text} />,
         onPress: handleShare,
       },
@@ -124,7 +121,7 @@ const ListActionsBottomSheet = forwardRef<TrueSheet, ListActionsBottomSheetProps
       ...(!isOwnList
         ? [
             {
-              label: "Signaler",
+              label: t("list.report"),
               icon: <Flag size={16} strokeWidth={2.75} color={colors.text} />,
               onPress: handleReport,
             },
@@ -133,45 +130,55 @@ const ListActionsBottomSheet = forwardRef<TrueSheet, ListActionsBottomSheetProps
     ];
 
     return (
-      <TrueSheet
-        ref={ref}
-        detents={["auto"]}
-        cornerRadius={30}
-        backgroundColor={colors.background}
-        grabber={false}
-        onDidDismiss={handleDismiss}
-      >
-        <View style={styles.bottomSheetContent}>
-          <View>
-            <View style={styles.bottomSheetHeader}>
-              <View style={{ flexShrink: 1 }}>
-                <Text style={[typography.h3, { color: colors.text }]} numberOfLines={2}>
-                  {list.name}
-                </Text>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                    Par {list.owner.username}
+      <>
+        <TrueSheet
+          ref={ref}
+          detents={["auto"]}
+          cornerRadius={30}
+          backgroundColor={colors.background}
+          grabber={false}
+          onDidDismiss={handleDismiss}
+        >
+          <View style={styles.bottomSheetContent}>
+            <View>
+              <View style={styles.bottomSheetHeader}>
+                <View style={{ flexShrink: 1 }}>
+                  <Text style={[typography.h3, { color: colors.text }]} numberOfLines={2}>
+                    {list.name}
                   </Text>
-                  {separator()}
-                  <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                    {list.books.total} {list.books.total > 1 ? "éléments" : "élément"}
-                  </Text>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Text style={[typography.caption, { color: colors.secondaryText }]}>
+                      {t("list.by", { username: list.owner.username })}
+                    </Text>
+                    {separator()}
+                    <Text style={[typography.caption, { color: colors.secondaryText }]}>
+                      {list.books.total > 1
+                        ? t("list.itemsCount", { count: list.books.total })
+                        : t("list.itemCount", { count: list.books.total })}
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
-            <View style={styles.bottomSheetActions}>
-              {actions.map((action, idx) => (
-                <ActionButton
-                  key={idx}
-                  action={action}
-                  typography={typography}
-                  colors={colors}
-                />
-              ))}
+              <View style={styles.bottomSheetActions}>
+                {actions.map((action, idx) => (
+                  <ActionButton
+                    key={idx}
+                    action={action}
+                    typography={typography}
+                    colors={colors}
+                  />
+                ))}
+              </View>
             </View>
           </View>
-        </View>
-      </TrueSheet>
+        </TrueSheet>
+        <ReportBottomSheet
+          ref={reportSheetRef}
+          resourceType="list"
+          resourceId={list.id}
+          resourceName={list.name}
+        />
+      </>
     );
   }
 );

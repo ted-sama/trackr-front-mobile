@@ -175,7 +175,8 @@
         "listsScreen": {
             "title": "Listes de {{username}}",
             "noLists": "Aucune liste"
-        }
+        },
+        "report": "Signaler l'utilisateur"
     },
     "stats": {
         "title": "Stats de {{name}}",
@@ -318,6 +319,11 @@
         "save": "Sauvegarder",
         "unsave": "Retirer",
         "likes": "{{count}} J'aime",
+        "share": "Partager",
+        "report": "Signaler",
+        "by": "Par {{username}}",
+        "itemCount": "{{count}} élément",
+        "itemsCount": "{{count}} éléments",
         "reorderModal": {
             "title": "Réordonner la liste",
             "book": "livre",
@@ -442,6 +448,28 @@
             "statusUpdated": "{{user}} a changé le statut de <bold>{{title}}</bold> à {{status}}",
             "chapterUpdated": "{{user}} a lu le chapitre {{chapter}} de <bold>{{title}}</bold>",
             "ratingUpdated": "{{user}} a noté <bold>{{title}}</bold>"
+        }
+    },
+    "report": {
+        "title": "Signaler",
+        "reportingUser": "Signalement de @{{name}}",
+        "reportingList": "Signalement de \"{{name}}\"",
+        "selectReason": "Sélectionnez une raison",
+        "reasons": {
+            "offensiveContent": "Contenu offensant",
+            "spam": "Spam",
+            "harassment": "Harcèlement",
+            "other": "Autre"
+        },
+        "additionalDetails": "Détails supplémentaires (optionnel)",
+        "descriptionPlaceholder": "Donnez plus de contexte sur ce signalement...",
+        "submit": "Envoyer le signalement",
+        "submitting": "Envoi en cours...",
+        "success": "Signalement envoyé avec succès",
+        "errors": {
+            "duplicate": "Vous avez déjà signalé ce contenu",
+            "invalidInput": "Vous ne pouvez pas signaler votre propre contenu",
+            "generic": "Échec de l'envoi du signalement. Veuillez réessayer."
         }
     },
     "subscription": {

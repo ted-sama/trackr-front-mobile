@@ -175,7 +175,8 @@
         "listsScreen": {
             "title": "Lists of {{username}}",
             "noLists": "No lists"
-        }
+        },
+        "report": "Report user"
     },
     "stats": {
         "title": "{{name}}'s stats",
@@ -318,6 +319,11 @@
         "save": "Save",
         "unsave": "Unsave",
         "likes": "{{count}} Likes",
+        "share": "Share",
+        "report": "Report",
+        "by": "By {{username}}",
+        "itemCount": "{{count}} item",
+        "itemsCount": "{{count}} items",
         "reorderModal": {
             "title": "Reorder list",
             "book": "book",
@@ -441,6 +447,28 @@
             "statusUpdated": "{{user}} changed status of <bold>{{title}}</bold> to {{status}}",
             "chapterUpdated": "{{user}} read chapter {{chapter}} of <bold>{{title}}</bold>",
             "ratingUpdated": "{{user}} rated <bold>{{title}}</bold>"
+        }
+    },
+    "report": {
+        "title": "Report",
+        "reportingUser": "Reporting @{{name}}",
+        "reportingList": "Reporting \"{{name}}\"",
+        "selectReason": "Select a reason",
+        "reasons": {
+            "offensiveContent": "Offensive content",
+            "spam": "Spam",
+            "harassment": "Harassment",
+            "other": "Other"
+        },
+        "additionalDetails": "Additional details (optional)",
+        "descriptionPlaceholder": "Provide more context about this report...",
+        "submit": "Submit report",
+        "submitting": "Submitting...",
+        "success": "Report submitted successfully",
+        "errors": {
+            "duplicate": "You have already reported this content",
+            "invalidInput": "Cannot report your own content",
+            "generic": "Failed to submit report. Please try again."
         }
     },
     "subscription": {

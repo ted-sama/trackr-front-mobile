@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useUserStore } from "@/stores/userStore";
 import {
@@ -31,12 +31,14 @@ import Animated, {
 } from "react-native-reanimated";
 import PillButton from "@/components/ui/PillButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Notebook, ChartNoAxesCombined } from "lucide-react-native";
+import { Notebook, ChartNoAxesCombined, Flag } from "lucide-react-native";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { getPalette } from "@somesoap/react-native-image-palette";
+import ReportBottomSheet from "@/components/ReportBottomSheet";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 
 dayjs.extend(utc);
 
@@ -57,6 +59,7 @@ export default function UserProfileScreen() {
     scrollY.value = event.contentOffset.y;
   });
   const [titleY, setTitleY] = useState<number>(0);
+  const reportSheetRef = useRef<TrueSheet>(null);
 
   const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
@@ -321,13 +324,13 @@ export default function UserProfileScreen() {
             <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.memberSince")} {dayjs.utc(user?.createdAt).format("DD/MM/YYYY")}</Text>
           </View>
         </View>
-        {isMe && (
-        <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
-          <PillButton
-            icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
-            title={t("profile.edit")}
-            onPress={() => {
-              router.push(`/profile/${userId}/edit`);
+        {isMe ? (
+          <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
+            <PillButton
+              icon={<Ionicons name="pencil" size={16} color={colors.secondaryText} />}
+              title={t("profile.edit")}
+              onPress={() => {
+                router.push(`/profile/${userId}/edit`);
               }}
             />
             <PillButton
@@ -336,6 +339,16 @@ export default function UserProfileScreen() {
               disabled={topBooks?.length === 0}
               onPress={() => {
                 router.push(`/profile/${userId}/reorder`);
+              }}
+            />
+          </View>
+        ) : (
+          <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
+            <PillButton
+              icon={<Flag size={16} color={colors.secondaryText} />}
+              title={t("profile.report")}
+              onPress={() => {
+                reportSheetRef.current?.present();
               }}
             />
           </View>
@@ -425,6 +438,14 @@ export default function UserProfileScreen() {
           ) : null}
         </View>
       </AnimatedScrollView>
+      {user && !isMe && (
+        <ReportBottomSheet
+          ref={reportSheetRef}
+          resourceType="user"
+          resourceId={user.id}
+          resourceName={user.username}
+        />
+      )}
     </View>
   );
 }

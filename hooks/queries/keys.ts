@@ -22,6 +22,9 @@ export const queryKeys = {
 
   search: (scope: 'books' | 'lists' | 'users', q: string, types?: string[]) => 
     types ? ['search', scope, q, types] as const : ['search', scope, q] as const,
+
+  // Reports
+  myReports: ['reports', 'my'] as const,
 };
 
 
