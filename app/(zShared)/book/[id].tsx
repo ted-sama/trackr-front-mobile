@@ -58,12 +58,15 @@ import { TrackingTabBar } from "@/components/book/TrackingTabBar";
 import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import { useBook, useBooksBySameAuthorCategory } from "@/hooks/queries/books";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/hooks/queries/keys";
 import RatingStars from "@/components/ui/RatingStars";
 import { useLocalization } from "@/hooks/useLocalization";
 import { getLocalizedDescription } from "@/utils/description";
 import { useTranslation } from "react-i18next";
 import { useUserTop } from "@/hooks/queries/users";
 import ConfettiCelebration, { ConfettiCelebrationMethods } from "@/components/ui/ConfettiCelebration";
+import { ReviewsSection, WriteReviewBottomSheet } from "@/components/reviews";
 // Constants for animation
 const HEADER_THRESHOLD = 320; // Threshold for header animation
 const DEFAULT_COVER_COLOR = '#6B7280'; // Grey color for missing covers
@@ -111,11 +114,14 @@ export default function BookScreen() {
   const insets = useSafeAreaInsets();
   const { isFrench } = useLocalization();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
   // Get the full BookTracking object
   const getTrackedBookStatus = useTrackedBooksStore(
     (state) => state.getTrackedBookStatus
   );
   const bookTracking = book ? getTrackedBookStatus(book.id) : null;
+
   const isInFavorites = favoriteBooks?.some((favoriteBook) => favoriteBook.id === book?.id);
 
   // Bottom sheet refs
@@ -125,6 +131,7 @@ export default function BookScreen() {
   const listEditorSheetRef = useRef<TrueSheet>(null);
   const listCreatorSheetRef = useRef<TrueSheet>(null);
   const setChapterBottomSheetRef = useRef<TrueSheet>(null);
+  const writeReviewSheetRef = useRef<TrueSheet>(null);
   // Confetti celebration ref
   const confettiRef = useRef<ConfettiCelebrationMethods>(null);
   // Animation setup for button
@@ -293,6 +300,21 @@ export default function BookScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setChapterBottomSheetRef.current?.present();
   }, []);
+
+  const handlePresentWriteReviewSheet = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    writeReviewSheetRef.current?.present();
+  }, []);
+
+  const handleReviewSuccess = useCallback(() => {
+    if (book) {
+      // Force refetch all review queries for this book
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.bookReviewsBase(book.id.toString()),
+        refetchType: 'all',
+      });
+    }
+  }, [book, queryClient]);
 
   const {
     addTrackedBook: addTrackedBookToStore,
@@ -655,6 +677,13 @@ export default function BookScreen() {
             key={bookTracking?.currentChapter}
             onBookCompleted={handleBookCompleted}
           />
+          <WriteReviewBottomSheet
+            ref={writeReviewSheetRef}
+            bookId={book.id.toString()}
+            bookTitle={book.title}
+            userRating={bookTracking?.rating}
+            onSuccess={handleReviewSuccess}
+          />
         </>
       )}
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
@@ -899,6 +928,14 @@ export default function BookScreen() {
               </Pressable>
             </View>
           </View>
+          {/* Reviews Section */}
+          {book && (
+            <ReviewsSection 
+              bookId={book.id.toString()} 
+              isTracking={Boolean(bookTracking)}
+              onWriteReviewPress={handlePresentWriteReviewSheet}
+            />
+          )}
           {/* Recommendations */}
           {booksBySameAuthor && booksBySameAuthor.books.length > 0 && (
             <View
@@ -1141,14 +1178,14 @@ const styles = StyleSheet.create({
   socialAction: {
     flex: 1,
     padding: 12,
-    backgroundColor: "red",
     borderRadius: 10,
-    shadowColor:
-      Platform.OS === "android" ? "rgba(0, 0, 0, 0.589)" : "rgba(0, 0, 0, 0.1)",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.8,
-    shadowRadius: 6,
-    elevation: 8,
+    // Shadow iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    // Shadow Android
+    elevation: 2,
   },
   recommendationsContainer: {
     borderTopWidth: 1,

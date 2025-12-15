@@ -64,8 +64,8 @@ const lightColors = {
   review: '#51d2f9',
   list: '#11d261',
   actionButton: '#eaeaea',
-  secondaryButton: '#121212',
-  secondaryButtonText: '#FFFFFF',
+  secondaryButton: '#e8e8e8',
+  secondaryButtonText: '#3b3b3b',
   // TabBar
   tabBarBorder: '#F6F6F6',
   tabBarBackground: '#F0F0F3',
@@ -104,8 +104,8 @@ const darkColors = {
   review: '#51d2f9',
   list: '#11d261',
   actionButton: '#2b2b2b',
-  secondaryButton: '#FFFFFF',
-  secondaryButtonText: '#202020',
+  secondaryButton: '#2b2b2b',
+  secondaryButtonText: '#d4d4d4',
   // TabBar
   tabBarBorder: '#18181d',
   tabBarBackground: '#23232a',

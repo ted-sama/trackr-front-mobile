@@ -164,7 +164,16 @@ export function HeaderCollection({
                   style={[
                     StyleSheet.absoluteFillObject,
                     styles.circleButtonBg,
-                    { backgroundColor: colors.backButtonBackground },
+                    {
+                      backgroundColor: colors.backButtonBackground,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 2,
+                      elevation: 1,
+                    },
                   ]}
                 />
                 <Ionicons name="add" size={22} color={colors.icon} />
@@ -174,7 +183,16 @@ export function HeaderCollection({
                   style={[
                     StyleSheet.absoluteFillObject,
                     styles.circleButtonBg,
-                    { backgroundColor: colors.backButtonBackground },
+                    {
+                      backgroundColor: colors.backButtonBackground,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 2,
+                      elevation: 1,
+                    },
                   ]}
                 />
                 <Ionicons name="search" size={20} color={colors.icon} />

@@ -160,8 +160,8 @@ export default function MyLibrary() {
   const [selectedStatuses, setSelectedStatuses] = useState<ReadingStatus[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortOption, setSortOption] = useState<SortOption>({
-    type: "date",
-    order: "desc",
+    type: "title",
+    order: "asc",
   });
 
   const handleBack = () => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { Pressable, Text, StyleSheet, ViewStyle, TextStyle, View } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
@@ -11,11 +11,21 @@ interface ButtonProps {
   style?: ViewStyle;
   textStyle?: TextStyle;
   disabled?: boolean;
+  icon?: React.ReactNode;
+  iconPosition?: 'left' | 'right';
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export default function Button({ title, onPress, style, textStyle, disabled = false }: ButtonProps) {
+export default function Button({ 
+  title, 
+  onPress, 
+  style, 
+  textStyle, 
+  disabled = false,
+  icon,
+  iconPosition = 'left'
+}: ButtonProps) {
   const { colors } = useTheme();
   const typography = useTypography();
   const scale = useSharedValue(1);
@@ -59,9 +69,17 @@ export default function Button({ title, onPress, style, textStyle, disabled = fa
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
-      <Text style={[typography.button, { color: colors.buttonText }, textStyle]}>
-        {title}
-      </Text>
+      <View style={styles.content}>
+        {icon && iconPosition === 'left' && (
+          <View style={styles.iconLeft}>{icon}</View>
+        )}
+        <Text style={[typography.actionButton, { color: colors.buttonText }, textStyle]}>
+          {title}
+        </Text>
+        {icon && iconPosition === 'right' && (
+          <View style={styles.iconRight}>{icon}</View>
+        )}
+      </View>
     </AnimatedPressable>
   );
 }
@@ -80,5 +98,16 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 1 },
     overflow: 'hidden',
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconLeft: {
+    marginRight: 8,
+  },
+  iconRight: {
+    marginLeft: 8,
   },
 }); 

@@ -81,6 +81,13 @@ const styles = StyleSheet.create({
     maxWidth: 220,
     flexDirection: "row",
     gap: 4,
+    // Shadow iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    // Shadow Android
+    elevation: 2,
   },
   pillText: {
     textAlign: "left",

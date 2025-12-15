@@ -134,7 +134,16 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
               style={[
                 StyleSheet.absoluteFillObject,
                 styles.backButtonBg,
-                { backgroundColor: colors.backButtonBackground },
+                {
+                  backgroundColor: colors.backButtonBackground,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 2,
+                  elevation: 1,
+                },
               ]}
             />
             <Ionicons name="arrow-back" size={22} color={colors.icon} />
@@ -155,7 +164,16 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
                 style={[
                   StyleSheet.absoluteFillObject,
                   styles.backButtonBg,
-                  { backgroundColor: colors.backButtonBackground },
+                  {
+                    backgroundColor: colors.backButtonBackground,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 2,
+                    elevation: 1,
+                  },
                 ]}
               />
               {closeRightButtonIcon}
@@ -167,7 +185,16 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
                 style={[
                   StyleSheet.absoluteFillObject,
                   styles.backButtonBg,
-                  { backgroundColor: colors.backButtonBackground },
+                  {
+                    backgroundColor: colors.backButtonBackground,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 2,
+                    elevation: 1,
+                  },
                 ]}
               />
               {rightButtonIcon}
@@ -181,7 +208,16 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
                 style={[
                   StyleSheet.absoluteFillObject,
                   styles.backButtonBg,
-                  { backgroundColor: colors.backButtonBackground },
+                  {
+                    backgroundColor: colors.backButtonBackground,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 2,
+                    elevation: 1,
+                  },
                 ]}
               />
               {farRightButtonIcon}

@@ -23,6 +23,7 @@ import { Circle } from "lucide-react-native";
 import { PredefinedQuestions } from "@/components/chat/PredefinedQuestions";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(DefaultScrollView);
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 // Composant pour les trois points animés
 const TypingIndicator = ({ color }: { color?: string }) => {
@@ -105,8 +106,8 @@ export default function ChatScreen() {
     const { messages, error, sendMessage, status } = useChat({
         transport: new DefaultChatTransport({
             fetch: expoFetch as unknown as typeof globalThis.fetch,
-            api: `http://localhost:3333/chat/${bookId}`,
-            // api: `https://api.trackrr.app/chat/${bookId}`,
+            // api: `http://localhost:3333/chat/${bookId}`,
+            api: `https://api.trackrr.app/chat/${bookId}`,
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -192,6 +193,20 @@ export default function ChatScreen() {
       bottom: keyboardHeight.value,
     };
   });
+
+  const sendButtonScale = useSharedValue(1);
+
+  const sendButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: sendButtonScale.value }],
+  }));
+
+  const handleSendPressIn = () => {
+    sendButtonScale.value = withTiming(0.9, { duration: 100 });
+  };
+
+  const handleSendPressOut = () => {
+    sendButtonScale.value = withTiming(1, { duration: 100 });
+  };
 
   // Créer les styles Markdown en fusionnant typography avec les couleurs
   const markdownStyles = React.useMemo(() => ({
@@ -474,27 +489,27 @@ export default function ChatScreen() {
                 maxLength={1000}
               />
 
-              <Pressable
+              <AnimatedPressable
                 onPress={handleSend}
+                onPressIn={handleSendPressIn}
+                onPressOut={handleSendPressOut}
                 disabled={!input.trim()}
-                style={styles.sendButton}
+                style={[styles.sendButton, sendButtonAnimatedStyle]}
               >
-                {({ pressed }) => (
-                  <View style={[
-                    styles.sendButtonInner,
-                    {
-                      backgroundColor: (!input.trim()) ? colors.secondaryText : colors.secondaryButton,
-                      opacity: pressed ? 0.8 : 1
-                    }
-                  ]}>
-                    <Ionicons
-                      name="arrow-up"
-                      size={18}
-                      color={colors.secondaryButtonText}
-                    />
-                  </View>
-                )}
-              </Pressable>
+                <View style={[
+                  styles.sendButtonInner,
+                  {
+                    backgroundColor: colors.secondaryButton,
+                    opacity: input.trim() ? 1 : 0.5
+                  }
+                ]}>
+                  <Ionicons
+                    name="arrow-up"
+                    size={18}
+                    color={colors.secondaryButtonText}
+                  />
+                </View>
+              </AnimatedPressable>
             </View>
           </Animated.View>
     </SafeAreaView>

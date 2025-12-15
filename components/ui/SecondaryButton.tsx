@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { Pressable, Text, StyleSheet, ViewStyle, TextStyle, View } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
@@ -11,11 +11,21 @@ interface ButtonProps {
   style?: ViewStyle;
   textStyle?: TextStyle;
   disabled?: boolean;
+  icon?: React.ReactNode;
+  iconPosition?: 'left' | 'right';
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export default function SecondaryButton({ title, onPress, style, textStyle, disabled = false }: ButtonProps) {
+export default function SecondaryButton({ 
+  title, 
+  onPress, 
+  style, 
+  textStyle, 
+  disabled = false,
+  icon,
+  iconPosition = 'left'
+}: ButtonProps) {
   const { colors } = useTheme();
   const typography = useTypography();
   const scale = useSharedValue(1);
@@ -53,9 +63,15 @@ export default function SecondaryButton({ title, onPress, style, textStyle, disa
       style={[styles.button, animatedStyle, { backgroundColor: colors.secondaryButton }, style]}
       disabled={disabled}
     >
-      <Text style={[typography.button, { color: colors.secondaryButtonText }, textStyle]}>
+      {icon && iconPosition === 'left' && (
+        <View style={styles.iconLeft}>{icon}</View>
+      )}
+      <Text style={[typography.actionButton, { color: colors.secondaryButtonText }, textStyle]}>
         {title}
       </Text>
+      {icon && iconPosition === 'right' && (
+        <View style={styles.iconRight}>{icon}</View>
+      )}
     </AnimatedPressable>
   );
 }
@@ -67,7 +83,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
     minHeight: 48,
     overflow: 'hidden',
+  },
+  iconLeft: {
+    marginRight: 8,
+  },
+  iconRight: {
+    marginLeft: 8,
   },
 }); 

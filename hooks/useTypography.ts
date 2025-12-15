@@ -15,6 +15,7 @@ export interface Typography {
   plusBadge: object;
   badge: object;
   button: object;
+  actionButton: object;
   categoryTitle: object;
   slashSeparator: object;
   trackingTabBarButton: object;
@@ -98,6 +99,12 @@ export function useTypography(): Typography {
     },
     button: {
       fontFamily: 'Manrope_500Medium',
+      fontSize: 16,
+      lineHeight: 22,
+      letterSpacing: -0.3,
+    },
+    actionButton: {
+      fontFamily: 'Manrope_600SemiBold',
       fontSize: 16,
       lineHeight: 22,
       letterSpacing: -0.3,

@@ -7,7 +7,6 @@ import {
   Text,
   FlatList,
   StyleSheet,
-  TouchableOpacity,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
@@ -30,6 +29,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import PillButton from "@/components/ui/PillButton";
+import ActionButton from "@/components/ui/ActionButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Notebook, ChartNoAxesCombined, Flag } from "lucide-react-native";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
@@ -419,21 +419,14 @@ export default function UserProfileScreen() {
               ) : (
                 <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.noLists")}</Text>
               )}
-              <TouchableOpacity
-                style={[
-                  styles.actionButton,
-                  { backgroundColor: colors.actionButton, marginTop: 16 },
-                  { opacity: userLists.pages.flatMap((page) => page.data).slice(0, 2).length === 0 ? 0.5 : 1 },
-                ]}
+              <ActionButton
+                title={t("profile.seeAllLists")}
                 onPress={() => {
                   router.push(`/profile/${userId}/lists`);
                 }}
                 disabled={userLists.pages.flatMap((page) => page.data).slice(0, 2).length === 0}
-              >
-                <Text style={[typography.caption, { color: colors.text }]}>
-                  {t("profile.seeAllLists")}
-                </Text>
-              </TouchableOpacity>
+                style={{ marginTop: 16 }}
+              />
             </View>
           ) : null}
         </View>
@@ -454,13 +447,5 @@ const styles = StyleSheet.create({
   sliderContent: {
     paddingLeft: 16,
     paddingRight: 16,
-  },
-  actionButton: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 10,
-    padding: 16,
-    borderRadius: 16,
   },
 });

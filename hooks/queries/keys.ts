@@ -25,6 +25,14 @@ export const queryKeys = {
 
   // Reports
   myReports: ['reports', 'my'] as const,
+
+  // Reviews
+  bookReviewsBase: (bookId: string) => ['book', bookId, 'reviews'] as const,
+  bookReviews: (bookId: string, sort?: string) =>
+    sort ? ['book', bookId, 'reviews', sort] as const : ['book', bookId, 'reviews'] as const,
+  myBookReview: (bookId: string) => ['book', bookId, 'reviews', 'me'] as const,
+  review: (bookId: string, reviewId: string) => ['book', bookId, 'review', reviewId] as const,
+  userReviews: (username: string) => ['user', username, 'reviews'] as const,
 };
 
 
