@@ -13,6 +13,7 @@ export interface BookReview {
   likesCount: number;
   isLikedByMe: boolean;
   revisionsCount: number;
+  isSpoiler: boolean;
   createdAt: string;
   updatedAt: string;
   user: Pick<User, "id" | "username" | "displayName" | "avatar" | "plan">;
@@ -35,6 +36,7 @@ export interface BookReviewRevision {
  */
 export interface CreateReviewDTO {
   content: string;
+  isSpoiler?: boolean;
 }
 
 /**
@@ -42,6 +44,7 @@ export interface CreateReviewDTO {
  */
 export interface UpdateReviewDTO {
   content: string;
+  isSpoiler?: boolean;
 }
 
 /**

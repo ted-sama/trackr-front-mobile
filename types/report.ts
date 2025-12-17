@@ -1,7 +1,7 @@
 import { User } from "./user";
 
 export type ReportReason = "offensive_content" | "spam" | "harassment" | "other";
-export type ResourceType = "user" | "list";
+export type ResourceType = "user" | "list" | "review";
 export type ReportStatus = "pending" | "reviewed" | "resolved" | "rejected";
 
 export interface Report {

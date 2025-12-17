@@ -311,15 +311,28 @@
         "title": "Avis",
         "sortBy": "Trier par",
         "sortedBy": "Trié par",
+        "sortRecent": "Récents",
+        "sortPopular": "Populaires",
         "noReviews": "Aucun avis pour le moment",
+        "empty": "Aucun avis pour ce livre",
+        "seeAll": "Voir tous les avis",
         "writeReview": "Écrire un avis",
         "editReview": "Modifier votre avis",
+        "yourReview": "Votre avis",
+        "edit": "Modifier",
+        "editingReview": "Modification de votre avis",
         "yourRating": "Votre note",
         "ratingRequired": "Vous devez d'abord noter ce livre",
+        "loginRequired": "Connectez-vous pour écrire un avis",
+        "trackRequired": "Ajoutez ce livre à votre bibliothèque pour écrire un avis",
         "placeholder": "Partagez votre avis sur ce livre...",
         "publish": "Publier",
+        "submit": "Publier",
         "update": "Mettre à jour",
         "helpText": "Votre note au moment de l'écriture sera enregistrée avec votre avis.",
+        "created": "Avis publié avec succès !",
+        "updated": "Avis mis à jour avec succès !",
+        "deleted": "Avis supprimé avec succès",
         "createSuccess": "Avis publié avec succès !",
         "createError": "Impossible de publier l'avis",
         "updateSuccess": "Avis mis à jour avec succès !",
@@ -335,11 +348,25 @@
         "deleteConfirmMessage": "Cette action est irréversible. Votre avis et tout son historique seront définitivement supprimés.",
         "deleteSuccess": "Avis supprimé avec succès",
         "deleteError": "Impossible de supprimer l'avis",
+        "spoiler": "Spoiler",
+        "containsSpoiler": "Contient des spoilers",
+        "containsSpoilerWarning": "Cet avis contient des spoilers",
+        "tapToReveal": "Appuyer pour révéler",
         "sort": {
             "popular": "Les plus populaires",
             "recent": "Les plus récents",
             "highestRated": "Les mieux notés",
             "lowestRated": "Les moins bien notés"
+        },
+        "errors": {
+            "notTracked": "Vous devez d'abord ajouter ce livre à votre bibliothèque",
+            "notRated": "Vous devez d'abord noter ce livre",
+            "alreadyExists": "Vous avez déjà publié un avis pour ce livre",
+            "createFailed": "Impossible de publier l'avis",
+            "updateFailed": "Impossible de mettre à jour l'avis",
+            "deleteFailed": "Impossible de supprimer l'avis",
+            "notFound": "Avis introuvable",
+            "notOwned": "Vous ne pouvez modifier que vos propres avis"
         }
     },
     "chat": {
@@ -480,7 +507,9 @@
             "removedFromFavorites": "Vous avez retiré <bold>{{title}}</bold> de vos favoris",
             "statusUpdated": "Vous avez changé le statut de <bold>{{title}}</bold> à {{status}}",
             "chapterUpdated": "Vous avez lu le chapitre {{chapter}} de <bold>{{title}}</bold>",
-            "ratingUpdated": "Vous avez noté <bold>{{title}}</bold>"
+            "ratingUpdated": "Vous avez noté <bold>{{title}}</bold>",
+            "reviewCreated": "Vous avez publié un avis sur <bold>{{title}}</bold>",
+            "reviewUpdated": "Vous avez modifié votre avis sur <bold>{{title}}</bold>"
         },
         "profile": {
             "addedToLibrary": "{{user}} a ajouté <bold>{{title}}</bold> à sa bibliothèque",
@@ -489,13 +518,17 @@
             "removedFromFavorites": "{{user}} a retiré <bold>{{title}}</bold> ses favoris",
             "statusUpdated": "{{user}} a changé le statut de <bold>{{title}}</bold> à {{status}}",
             "chapterUpdated": "{{user}} a lu le chapitre {{chapter}} de <bold>{{title}}</bold>",
-            "ratingUpdated": "{{user}} a noté <bold>{{title}}</bold>"
+            "ratingUpdated": "{{user}} a noté <bold>{{title}}</bold>",
+            "reviewCreated": "{{user}} a publié un avis sur <bold>{{title}}</bold>",
+            "reviewUpdated": "{{user}} a modifié son avis sur <bold>{{title}}</bold>"
         }
     },
     "report": {
         "title": "Signaler",
+        "report": "Signaler",
         "reportingUser": "Signalement de @{{name}}",
         "reportingList": "Signalement de \"{{name}}\"",
+        "reportingReview": "Signalement de l'avis de {{name}}",
         "selectReason": "Sélectionnez une raison",
         "reasons": {
             "offensiveContent": "Contenu offensant",

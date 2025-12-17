@@ -58,8 +58,10 @@ import { TrackingTabBar } from "@/components/book/TrackingTabBar";
 import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import { useBook, useBooksBySameAuthorCategory } from "@/hooks/queries/books";
+import { useMyBookReview } from "@/hooks/queries/reviews";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/hooks/queries/keys";
+import { useAuth } from "@/contexts/AuthContext";
 import RatingStars from "@/components/ui/RatingStars";
 import { useLocalization } from "@/hooks/useLocalization";
 import { getLocalizedDescription } from "@/utils/description";
@@ -115,6 +117,10 @@ export default function BookScreen() {
   const { isFrench } = useLocalization();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
+
+  // Get user's existing review for this book (if any)
+  const { data: myReview } = useMyBookReview(isAuthenticated && book ? book.id.toString() : undefined);
 
   // Get the full BookTracking object
   const getTrackedBookStatus = useTrackedBooksStore(
@@ -309,9 +315,13 @@ export default function BookScreen() {
   const handleReviewSuccess = useCallback(() => {
     if (book) {
       // Force refetch all review queries for this book
-      queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({
         queryKey: queryKeys.bookReviewsBase(book.id.toString()),
         refetchType: 'all',
+      });
+      // Also invalidate user's own review query
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.myBookReview(book.id.toString()),
       });
     }
   }, [book, queryClient]);
@@ -682,6 +692,7 @@ export default function BookScreen() {
             bookId={book.id.toString()}
             bookTitle={book.title}
             userRating={bookTracking?.rating}
+            existingReview={myReview}
             onSuccess={handleReviewSuccess}
           />
         </>

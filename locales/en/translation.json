@@ -311,15 +311,28 @@
         "title": "Reviews",
         "sortBy": "Sort by",
         "sortedBy": "Sorted by",
+        "sortRecent": "Recent",
+        "sortPopular": "Popular",
         "noReviews": "No reviews yet",
+        "empty": "No reviews for this book",
+        "seeAll": "See all reviews",
         "writeReview": "Write a review",
         "editReview": "Edit your review",
+        "yourReview": "Your review",
+        "edit": "Edit",
+        "editingReview": "Editing your review",
         "yourRating": "Your rating",
         "ratingRequired": "You need to rate this book first",
+        "loginRequired": "Sign in to write a review",
+        "trackRequired": "Add this book to your library to write a review",
         "placeholder": "Share your thoughts about this book...",
         "publish": "Publish",
+        "submit": "Submit",
         "update": "Update",
         "helpText": "Your rating at the time of writing will be saved with your review.",
+        "created": "Review published successfully!",
+        "updated": "Review updated successfully!",
+        "deleted": "Review deleted successfully",
         "createSuccess": "Review published successfully!",
         "createError": "Failed to publish review",
         "updateSuccess": "Review updated successfully!",
@@ -335,11 +348,25 @@
         "deleteConfirmMessage": "This action cannot be undone. Your review and all its history will be permanently deleted.",
         "deleteSuccess": "Review deleted successfully",
         "deleteError": "Failed to delete review",
+        "spoiler": "Spoiler",
+        "containsSpoiler": "Contains spoilers",
+        "containsSpoilerWarning": "This review contains spoilers",
+        "tapToReveal": "Tap to reveal",
         "sort": {
             "popular": "Most popular",
             "recent": "Most recent",
             "highestRated": "Highest rated",
             "lowestRated": "Lowest rated"
+        },
+        "errors": {
+            "notTracked": "You must first add this book to your library",
+            "notRated": "You must first rate this book",
+            "alreadyExists": "You have already published a review for this book",
+            "createFailed": "Failed to publish review",
+            "updateFailed": "Failed to update review",
+            "deleteFailed": "Failed to delete review",
+            "notFound": "Review not found",
+            "notOwned": "You can only edit your own reviews"
         }
     },
     "chat": {
@@ -479,7 +506,9 @@
             "removedFromFavorites": "You have removed <bold>{{title}}</bold> from your favorites",
             "statusUpdated": "You have changed status of <bold>{{title}}</bold> to {{status}}",
             "chapterUpdated": "You have read chapter {{chapter}} of <bold>{{title}}</bold>",
-            "ratingUpdated": "You have rated <bold>{{title}}</bold>"
+            "ratingUpdated": "You have rated <bold>{{title}}</bold>",
+            "reviewCreated": "You have posted a review on <bold>{{title}}</bold>",
+            "reviewUpdated": "You have updated your review on <bold>{{title}}</bold>"
         },
         "profile": {
             "addedToLibrary": "{{user}} added <bold>{{title}}</bold> to their library",
@@ -488,13 +517,17 @@
             "removedFromFavorites": "{{user}} removed <bold>{{title}}</bold> from their favorites",
             "statusUpdated": "{{user}} changed status of <bold>{{title}}</bold> to {{status}}",
             "chapterUpdated": "{{user}} read chapter {{chapter}} of <bold>{{title}}</bold>",
-            "ratingUpdated": "{{user}} rated <bold>{{title}}</bold>"
+            "ratingUpdated": "{{user}} rated <bold>{{title}}</bold>",
+            "reviewCreated": "{{user}} posted a review on <bold>{{title}}</bold>",
+            "reviewUpdated": "{{user}} updated their review on <bold>{{title}}</bold>"
         }
     },
     "report": {
         "title": "Report",
+        "report": "Report",
         "reportingUser": "Reporting @{{name}}",
         "reportingList": "Reporting \"{{name}}\"",
+        "reportingReview": "Reporting review by {{name}}",
         "selectReason": "Select a reason",
         "reasons": {
             "offensiveContent": "Offensive content",

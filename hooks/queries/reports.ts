@@ -76,6 +76,30 @@ export function useReportList() {
   });
 }
 
+export function useReportReview() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      reviewId,
+      reason,
+      description,
+    }: {
+      reviewId: string | number;
+      reason: ReportReason;
+      description?: string;
+    }) =>
+      createReport({
+        resourceType: "review",
+        resourceId: String(reviewId),
+        reason,
+        description,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.myReports });
+    },
+  });
+}
+
 export function useDeleteReport() {
   const qc = useQueryClient();
   return useMutation({

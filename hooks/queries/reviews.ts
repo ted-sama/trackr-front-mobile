@@ -157,16 +157,18 @@ export function useToggleReviewLike(bookId: string) {
     onMutate: async ({ reviewId, isLiked }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: queryKeys.bookReviewsBase(bookId) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.review(bookId, reviewId.toString()) });
 
-      // Snapshot the previous value
+      // Snapshot the previous values
       const previousReviews = queryClient.getQueriesData({ queryKey: queryKeys.bookReviewsBase(bookId) });
+      const previousReview = queryClient.getQueryData<BookReview>(queryKeys.review(bookId, reviewId.toString()));
 
       // Optimistically update all review queries for this book
       queryClient.setQueriesData(
         { queryKey: queryKeys.bookReviewsBase(bookId) },
         (old: BookReviewsResponse | undefined) => {
           if (!old) return old;
-          
+
           return {
             ...old,
             reviews: old.reviews.map((review) =>
@@ -182,7 +184,19 @@ export function useToggleReviewLike(bookId: string) {
         }
       );
 
-      return { previousReviews };
+      // Optimistically update the single review query (for detail page)
+      if (previousReview) {
+        queryClient.setQueryData<BookReview>(
+          queryKeys.review(bookId, reviewId.toString()),
+          {
+            ...previousReview,
+            isLikedByMe: !isLiked,
+            likesCount: isLiked ? previousReview.likesCount - 1 : previousReview.likesCount + 1,
+          }
+        );
+      }
+
+      return { previousReviews, previousReview };
     },
     onError: (err, variables, context) => {
       // Rollback on error
@@ -190,6 +204,12 @@ export function useToggleReviewLike(bookId: string) {
         context.previousReviews.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
         });
+      }
+      if (context?.previousReview) {
+        queryClient.setQueryData(
+          queryKeys.review(bookId, variables.reviewId.toString()),
+          context.previousReview
+        );
       }
     },
   });

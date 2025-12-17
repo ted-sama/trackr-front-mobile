@@ -31,6 +31,7 @@ import {
   PlusIcon,
   MinusIcon,
   BookImageIcon,
+  MessageSquareTextIcon,
 } from "lucide-react-native";
 import { snakeToCamel } from "@/utils/snakeToCamel";
 import RatingStars from "@/components/ui/RatingStars";
@@ -62,6 +63,9 @@ function getActivityIcon(action: string, colors: any) {
       return <BookOpenIcon {...iconProps} color={colors.icon} />;
     case "book.ratingUpdated":
       return <StarIcon {...iconProps} color={colors.icon} />;
+    case "book.reviewCreated":
+    case "book.reviewUpdated":
+      return <MessageSquareTextIcon {...iconProps} color={colors.icon} />;
     default:
       return <BookImageIcon {...iconProps} />;
   }
@@ -156,9 +160,9 @@ function ActivityContent({ activity, colors, isMe, userDisplayName }: ActivityCo
       return (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 4, maxWidth: "100%" }}>
           <Text style={baseStyle}>
-            <Trans 
+            <Trans
               i18nKey={`${keyPrefix}.ratingUpdated`}
-              values={{ 
+              values={{
                 ...values,
                 title: resource.item.title,
               }}
@@ -168,6 +172,26 @@ function ActivityContent({ activity, colors, isMe, userDisplayName }: ActivityCo
             <RatingStars rating={metadata.rating} size={14} color={colors.text} />
           </Text>
         </View>
+      );
+    case "book.reviewCreated":
+      return (
+        <Text style={baseStyle}>
+          <Trans
+            i18nKey={`${keyPrefix}.reviewCreated`}
+            values={{ ...values, title: resource.item.title }}
+            components={{ bold: <Text style={typography.bodyBold2} /> }}
+          />
+        </Text>
+      );
+    case "book.reviewUpdated":
+      return (
+        <Text style={baseStyle}>
+          <Trans
+            i18nKey={`${keyPrefix}.reviewUpdated`}
+            values={{ ...values, title: resource.item.title }}
+            components={{ bold: <Text style={typography.bodyBold2} /> }}
+          />
+        </Text>
       );
     default:
       return <Text style={baseStyle}>{action}</Text>;

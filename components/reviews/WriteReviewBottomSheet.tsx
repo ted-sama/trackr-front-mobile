@@ -7,9 +7,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Switch,
+  Pressable,
+  Keyboard,
 } from "react-native";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
-import { Star, Send } from "lucide-react-native";
+import { Star, Send, AlertTriangle } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import * as Haptics from "expo-haptics";
 
@@ -36,16 +39,18 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
     const { t } = useTranslation();
     
     const [content, setContent] = useState(existingReview?.content ?? "");
+    const [isSpoiler, setIsSpoiler] = useState(existingReview?.isSpoiler ?? false);
     const isEditing = Boolean(existingReview);
-    
+
     const { mutate: createReview, isPending: isCreating } = useCreateReview(bookId);
     const { mutate: updateReview, isPending: isUpdating } = useUpdateReview(bookId);
-    
+
     const isPending = isCreating || isUpdating;
     const canSubmit = content.trim().length >= 10 && userRating !== null && userRating !== undefined;
 
     useEffect(() => {
       setContent(existingReview?.content ?? "");
+      setIsSpoiler(existingReview?.isSpoiler ?? false);
     }, [existingReview]);
 
     const handleSubmit = useCallback(() => {
@@ -55,7 +60,7 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
       
       if (isEditing && existingReview) {
         updateReview(
-          { reviewId: existingReview.id, dto: { content: content.trim() } },
+          { reviewId: existingReview.id, dto: { content: content.trim(), isSpoiler } },
           {
             onSuccess: () => {
               toast.success(t("reviews.updateSuccess"));
@@ -69,11 +74,12 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
         );
       } else {
         createReview(
-          { content: content.trim() },
+          { content: content.trim(), isSpoiler },
           {
             onSuccess: () => {
               toast.success(t("reviews.createSuccess"));
               setContent("");
+              setIsSpoiler(false);
               (ref as React.RefObject<TrueSheet>)?.current?.dismiss();
               onSuccess?.();
             },
@@ -84,7 +90,7 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
           }
         );
       }
-    }, [canSubmit, isPending, isEditing, existingReview, content, createReview, updateReview, ref, onSuccess, t]);
+    }, [canSubmit, isPending, isEditing, existingReview, content, isSpoiler, createReview, updateReview, ref, onSuccess, t]);
 
     return (
       <TrueSheet
@@ -98,7 +104,7 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.container}
         >
-          <View style={styles.content}>
+          <Pressable style={styles.content} onPress={Keyboard.dismiss}>
             {/* Header */}
             <View style={styles.header}>
               <Text style={[typography.categoryTitle, { color: colors.text }]}>
@@ -151,6 +157,27 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
               editable={!isPending}
             />
 
+            {/* Spoiler Toggle */}
+            <Pressable
+              style={[styles.spoilerRow, { backgroundColor: colors.card, borderRadius: 12, padding: 12 }]}
+              onPress={() => !isPending && setIsSpoiler(!isSpoiler)}
+            >
+              <View style={styles.spoilerLabel}>
+                <AlertTriangle size={18} color={isSpoiler ? "#F59E0B" : colors.secondaryText} />
+                <Text style={[typography.body, { color: isSpoiler ? "#F59E0B" : colors.text, marginLeft: 8, fontWeight: "500" }]}>
+                  {t("reviews.containsSpoiler")}
+                </Text>
+              </View>
+              <Switch
+                value={isSpoiler}
+                onValueChange={setIsSpoiler}
+                trackColor={{ false: colors.border, true: "#F59E0B" }}
+                thumbColor={Platform.OS === "android" ? "#FFFFFF" : undefined}
+                ios_backgroundColor={colors.border}
+                disabled={isPending}
+              />
+            </Pressable>
+
             {/* Character count */}
             <Text style={[typography.bodyCaption, styles.charCount, { color: colors.secondaryText }]}>
               {content.length}/2000
@@ -176,7 +203,7 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
             <Text style={[typography.bodyCaption, styles.helpText, { color: colors.secondaryText }]}>
               {t("reviews.helpText")}
             </Text>
-          </View>
+          </Pressable>
         </KeyboardAvoidingView>
       </TrueSheet>
     );
@@ -218,6 +245,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     fontSize: 15,
     lineHeight: 22,
+  },
+  spoilerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  spoilerLabel: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   charCount: {
     textAlign: "right",

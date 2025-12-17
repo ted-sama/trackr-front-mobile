@@ -70,7 +70,8 @@ export default function ReviewSection({ bookId, preview = false }: ReviewSection
   } = useBookReviews(bookId, sortOption);
 
   // Get user's own review (dedicated endpoint)
-  const { data: myReview } = useMyBookReview(isAuthenticated ? bookId : undefined);
+  // myReview is: undefined (loading), null (no review), or BookReview (has review)
+  const { data: myReview, isLoading: isLoadingMyReview } = useMyBookReview(isAuthenticated ? bookId : undefined);
 
   // Mutations
   const { mutateAsync: createReview, isPending: isCreating } =
@@ -83,7 +84,8 @@ export default function ReviewSection({ bookId, preview = false }: ReviewSection
     return reviewsData?.reviews ?? [];
   }, [reviewsData]);
 
-  const canWriteReview = isAuthenticated && isTracked && hasRating && !myReview;
+  // Only allow writing if: authenticated, tracked, rated, NOT loading myReview, myReview is explicitly null, AND not currently editing
+  const canWriteReview = isAuthenticated && isTracked && hasRating && !isLoadingMyReview && myReview === null && !editingReview;
 
   // Animated values for sort button
   const sortScale = useSharedValue(1);
@@ -93,9 +95,9 @@ export default function ReviewSection({ bookId, preview = false }: ReviewSection
 
   // Handlers
   const handleCreateReview = useCallback(
-    async (content: string) => {
+    async (content: string, isSpoiler: boolean) => {
       try {
-        await createReview({ content });
+        await createReview({ content, isSpoiler });
         toast.success(t("reviews.created"));
       } catch (error) {
         const axiosError = error as AxiosError<{ code?: string }>;
@@ -116,14 +118,25 @@ export default function ReviewSection({ bookId, preview = false }: ReviewSection
   );
 
   const handleUpdateReview = useCallback(
-    async (content: string) => {
+    async (content: string, isSpoiler: boolean) => {
       if (!editingReview) return;
       try {
-        await updateReview({ reviewId: editingReview.id, dto: { content } });
+        await updateReview({ reviewId: editingReview.id, dto: { content, isSpoiler } });
         setEditingReview(null);
         toast.success(t("reviews.updated"));
       } catch (error) {
-        toast.error(t("reviews.errors.updateFailed"));
+        const axiosError = error as AxiosError<{ code?: string }>;
+        const errorCode = axiosError.response?.data?.code;
+
+        if (errorCode === "BOOK_NOT_RATED") {
+          toast.error(t("reviews.errors.notRated"));
+        } else if (errorCode === "REVIEW_NOT_FOUND") {
+          toast.error(t("reviews.errors.notFound"));
+        } else if (errorCode === "REVIEW_NOT_OWNED") {
+          toast.error(t("reviews.errors.notOwned"));
+        } else {
+          toast.error(t("reviews.errors.updateFailed"));
+        }
       }
     },
     [updateReview, editingReview, t],
@@ -266,39 +279,9 @@ export default function ReviewSection({ bookId, preview = false }: ReviewSection
       );
     }
 
-    if (reviews.length === 0) {
-      return (
-         <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <View style={styles.titleRow}>
-                    <MessageSquare size={20} color={colors.text} />
-                    <Text
-                        style={[
-                        typography.categoryTitle,
-                        { color: colors.text, marginLeft: 8 },
-                        ]}
-                    >
-                        {t("reviews.title")}
-                    </Text>
-                </View>
-            </View>
-            <View style={styles.emptyContainer}>
-                <Text
-                    style={[
-                    typography.body,
-                    { color: colors.secondaryText, textAlign: "center" },
-                    ]}
-                >
-                    {t("reviews.empty")}
-                </Text>
-            </View>
-         </View>
-      );
-    }
-
     return (
       <View style={styles.container}>
+        {/* Header */}
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <MessageSquare size={20} color={colors.text} />
@@ -310,44 +293,63 @@ export default function ReviewSection({ bookId, preview = false }: ReviewSection
             >
               {t("reviews.title")}
             </Text>
-            <Text
-              style={[
-                typography.caption,
-                { color: colors.secondaryText, marginLeft: 8 },
-              ]}
-            >
-              ({totalReviews})
-            </Text>
+            {totalReviews > 0 && (
+              <Text
+                style={[
+                  typography.caption,
+                  { color: colors.secondaryText, marginLeft: 8 },
+                ]}
+              >
+                ({totalReviews})
+              </Text>
+            )}
           </View>
         </View>
 
-        <FlatList
-          horizontal
-          data={previewReviews}
-          keyExtractor={(item) => item.id.toString()}
-          snapToInterval={CARD_WIDTH + 12}
-          decelerationRate="fast"
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}
-          renderItem={({ item }) => (
-            <View style={{ width: CARD_WIDTH }}>
-              <ReviewCard
-                review={item}
-                bookId={bookId}
-              />
-            </View>
-          )}
-        />
+        {/* Reviews list or empty state */}
+        {reviews.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text
+              style={[
+                typography.body,
+                { color: colors.secondaryText, textAlign: "center" },
+              ]}
+            >
+              {t("reviews.empty")}
+            </Text>
+            {renderEligibilityMessage()}
+          </View>
+        ) : (
+          <>
+            <FlatList
+              horizontal
+              data={previewReviews}
+              keyExtractor={(item) => item.id.toString()}
+              snapToInterval={CARD_WIDTH + 12}
+              decelerationRate="fast"
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}
+              renderItem={({ item }) => (
+                <View style={{ width: CARD_WIDTH }}>
+                  <ReviewCard
+                    review={item}
+                    bookId={bookId}
+                  />
+                </View>
+              )}
+            />
 
-        <Pressable
-          style={[styles.seeAllButton, { borderColor: colors.border, backgroundColor: colors.card }]}
-          onPress={() => router.push(`/book/${bookId}/reviews`)}
-        >
-          <Text style={[typography.body, { color: colors.text, fontWeight: "600" }]}>
-            {t("reviews.seeAll")}
-          </Text>
-          <ChevronRight size={16} color={colors.text} />
-        </Pressable>
+            <Pressable
+              style={[styles.seeAllButton, { borderColor: colors.border, backgroundColor: colors.card }]}
+              onPress={() => router.push(`/book/${bookId}/reviews`)}
+            >
+              <Text style={[typography.body, { color: colors.text, fontWeight: "600" }]}>
+                {t("reviews.seeAll")}
+              </Text>
+              <ChevronRight size={16} color={colors.text} />
+            </Pressable>
+          </>
+        )}
       </View>
     );
   }
@@ -403,11 +405,35 @@ export default function ReviewSection({ bookId, preview = false }: ReviewSection
       </View>
 
       {/* Form or eligibility message */}
-      {canWriteReview ? (
+      {/* Priority 1: If editing, always show edit form (most important to prevent race conditions) */}
+      {editingReview ? (
+        <View style={styles.formWrapper}>
+          <Text
+            style={[
+              typography.caption,
+              { color: colors.secondaryText, marginBottom: 8 },
+            ]}
+          >
+            {t("reviews.editingReview")}
+          </Text>
+          <ReviewForm
+            initialContent={editingReview.content}
+            initialIsSpoiler={editingReview.isSpoiler}
+            isEditing
+            isSubmitting={isUpdating}
+            onSubmit={handleUpdateReview}
+            onCancel={() => setEditingReview(null)}
+          />
+        </View>
+      ) : isLoadingMyReview && isAuthenticated && isTracked && hasRating ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator color={colors.accent} size="small" />
+        </View>
+      ) : canWriteReview ? (
         <View style={styles.formWrapper}>
           <ReviewForm onSubmit={handleCreateReview} isSubmitting={isCreating} />
         </View>
-      ) : myReview && !editingReview ? (
+      ) : myReview ? (
         <View style={styles.myReviewSection}>
           <View style={styles.myReviewHeader}>
             <Text style={[typography.caption, { color: colors.secondaryText }]}>
@@ -445,24 +471,6 @@ export default function ReviewSection({ bookId, preview = false }: ReviewSection
           <ReviewCard
             review={myReview}
             bookId={bookId}
-          />
-        </View>
-      ) : editingReview ? (
-        <View style={styles.formWrapper}>
-          <Text
-            style={[
-              typography.caption,
-              { color: colors.secondaryText, marginBottom: 8 },
-            ]}
-          >
-            {t("reviews.editingReview")}
-          </Text>
-          <ReviewForm
-            initialContent={editingReview.content}
-            isEditing
-            isSubmitting={isUpdating}
-            onSubmit={handleUpdateReview}
-            onCancel={() => setEditingReview(null)}
           />
         </View>
       ) : (

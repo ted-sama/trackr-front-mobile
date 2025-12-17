@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -12,10 +12,11 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { Star, History } from "lucide-react-native";
+import { Star, History, AlertTriangle } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { BlurView } from "expo-blur";
 
 import { BookReview } from "@/types/review";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -55,9 +56,12 @@ export function ReviewCard({
   
   // Check if this is the current user's own review
   const isOwnReview = currentUser?.id === review.userId;
-  
+
   // Track if text is truncated
-  const [isTruncated, setIsTruncated] = React.useState(false);
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  // Track if spoiler content is revealed
+  const [spoilerRevealed, setSpoilerRevealed] = useState(false);
 
   const scale = useSharedValue(1);
   const likeScale = useSharedValue(1);
@@ -164,53 +168,74 @@ export function ReviewCard({
             </View>
           </Pressable>
 
-          {/* Rating Badge */}
-          {review.rating !== null && (
-            <View
-              style={[
-                styles.ratingBadge,
-                {
-                  backgroundColor: currentTheme === "dark" 
-                    ? "rgba(255,255,255,0.08)" 
-                    : "rgba(0,0,0,0.04)",
-                },
-              ]}
-            >
-              <Star
-                size={12}
-                fill={colors.primary}
-                color={colors.primary}
-              />
-              <Text
+          <View style={styles.headerBadges}>
+            {/* Rating Badge */}
+            {review.rating !== null && (
+              <View
                 style={[
-                  typography.badge,
-                  { color: colors.text, marginLeft: 3 },
+                  styles.ratingBadge,
+                  {
+                    backgroundColor: currentTheme === "dark"
+                      ? "rgba(255,255,255,0.08)"
+                      : "rgba(0,0,0,0.04)",
+                  },
                 ]}
               >
-                {review.rating}
-              </Text>
-            </View>
-          )}
+                <Star
+                  size={12}
+                  fill={colors.primary}
+                  color={colors.primary}
+                />
+                <Text
+                  style={[
+                    typography.badge,
+                    { color: colors.text, marginLeft: 3 },
+                  ]}
+                >
+                  {review.rating}
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
 
         {/* Content */}
-        <Text
-          style={[
-            typography.body,
-            styles.content,
-            { color: colors.text },
-          ]}
-          numberOfLines={variant === "compact" ? 3 : 5}
-          onTextLayout={handleTextLayout}
-        >
-          {review.content}
-        </Text>
+        {review.isSpoiler && !spoilerRevealed ? (
+          <Pressable
+            style={[styles.spoilerOverlay, { backgroundColor: currentTheme === "dark" ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.08)" }]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setSpoilerRevealed(true);
+            }}
+          >
+            <View style={styles.spoilerContent}>
+              <AlertTriangle size={24} color={colors.secondaryText} />
+              <Text style={[typography.body, { color: colors.secondaryText, marginTop: 8, fontWeight: "600" }]}>
+                {t("reviews.containsSpoilerWarning")}
+              </Text>
+            </View>
+          </Pressable>
+        ) : (
+          <>
+            <Text
+              style={[
+                typography.body,
+                styles.content,
+                { color: colors.text },
+              ]}
+              numberOfLines={variant === "compact" ? 3 : 5}
+              onTextLayout={handleTextLayout}
+            >
+              {review.content}
+            </Text>
 
-        {/* View More Button */}
-        {isTruncated && (
-          <Text style={[typography.bodyBold, { color: colors.primary }]}>
-            {t("book.viewMore")}
-          </Text>
+            {/* View More Button */}
+            {isTruncated && (
+              <Text style={[typography.bodyBold, { color: colors.primary }]}>
+                {t("book.viewMore")}
+              </Text>
+            )}
+          </>
         )}
       </Animated.View>
     </Pressable>
@@ -255,13 +280,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  headerBadges: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  spoilerBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
   ratingBadge: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 20,
-    marginLeft: 8,
   },
   content: {
     lineHeight: 22,
@@ -270,6 +306,26 @@ const styles = StyleSheet.create({
   viewMoreButton: {
     paddingTop: 8,
     alignSelf: "flex-start",
+  },
+  spoilerOverlay: {
+    flex: 1,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  spoilerContent: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    borderRadius: 12,
+  },
+  revealButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginTop: 12,
   },
 });
 

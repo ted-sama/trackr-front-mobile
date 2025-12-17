@@ -61,6 +61,16 @@ export function ReviewsSection({
 
     const hasExistingReview = Boolean(userReview);
 
+    // Reorder reviews to show user's review first if it exists
+    const orderedReviews = useMemo(() => {
+        if (!data?.reviews) return [];
+        if (!userReview) return data.reviews;
+        
+        // Filter out user's review from the list and put it first
+        const otherReviews = data.reviews.filter((review) => review.id !== userReview.id);
+        return [userReview, ...otherReviews];
+    }, [data?.reviews, userReview]);
+
     const handleSeeAllPress = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         router.push(`/book/${bookId}/reviews`);
@@ -132,9 +142,6 @@ export function ReviewsSection({
 
     // Always show the section if tracking (to allow writing reviews)
     const hasReviews = data?.reviews && data.reviews.length > 0;
-    if (!isLoading && !hasReviews && !isTracking) {
-        return null;
-    }
 
     return (
         <View style={[styles.container, { borderColor: colors.border }]}>
@@ -217,7 +224,7 @@ export function ReviewsSection({
                 </View>
             ) : hasReviews ? (
                 <FlatList
-                    data={data?.reviews}
+                    data={orderedReviews}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={renderReviewItem}
                     horizontal
@@ -234,7 +241,7 @@ export function ReviewsSection({
                     decelerationRate="fast"
                 />
             ) : (
-                <View style={[styles.emptyState, { backgroundColor: colors.card }]}>
+                <View style={styles.emptyState}>
                     <Text style={[typography.body, { color: colors.secondaryText }]}>
                         {t("reviews.noReviews")}
                     </Text>
@@ -336,8 +343,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     emptyState: {
-        padding: 24,
-        borderRadius: 16,
+        paddingVertical: 24,
         alignItems: "center",
     },
     deleteSheetContent: {

@@ -1,5 +1,15 @@
 import React, { forwardRef, useState, useCallback } from "react";
-import { View, Text, StyleSheet, Pressable, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  ActivityIndicator,
+} from "react-native";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import Animated, {
   useSharedValue,
@@ -10,10 +20,11 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useTranslation } from "react-i18next";
 import { ReportReason, ResourceType } from "@/types/report";
-import { useReportUser, useReportList } from "@/hooks/queries/reports";
+import { useReportUser, useReportList, useReportReview } from "@/hooks/queries/reports";
 import { toast } from "sonner-native";
-import { Check } from "lucide-react-native";
+import { Check, Send } from "lucide-react-native";
 import { AxiosError } from "axios";
+import Button from "@/components/ui/Button";
 
 export interface ReportBottomSheetProps {
   resourceType: ResourceType;
@@ -89,8 +100,9 @@ const ReportBottomSheet = forwardRef<TrueSheet, ReportBottomSheetProps>(
 
     const { mutateAsync: reportUser, isPending: isReportingUser } = useReportUser();
     const { mutateAsync: reportList, isPending: isReportingList } = useReportList();
+    const { mutateAsync: reportReview, isPending: isReportingReview } = useReportReview();
 
-    const isSubmitting = isReportingUser || isReportingList;
+    const isSubmitting = isReportingUser || isReportingList || isReportingReview;
 
     const closeSheet = useCallback(() => {
       const sheetRef = typeof ref === "object" ? ref?.current : null;
@@ -111,9 +123,15 @@ const ReportBottomSheet = forwardRef<TrueSheet, ReportBottomSheetProps>(
             reason: selectedReason,
             description: description.trim() || undefined,
           });
-        } else {
+        } else if (resourceType === "list") {
           await reportList({
             listId: resourceId,
+            reason: selectedReason,
+            description: description.trim() || undefined,
+          });
+        } else if (resourceType === "review") {
+          await reportReview({
+            reviewId: resourceId,
             reason: selectedReason,
             description: description.trim() || undefined,
           });
@@ -134,78 +152,72 @@ const ReportBottomSheet = forwardRef<TrueSheet, ReportBottomSheetProps>(
       }
     };
 
-    const pressed = useSharedValue(0);
-    const submitAnimatedStyle = useAnimatedStyle(() => ({
-      opacity: isSubmitting ? 0.6 : 1,
-      transform: [{ scale: 1 - pressed.value * 0.02 }],
-    }));
-
     return (
       <TrueSheet
         ref={ref}
         detents={["auto"]}
-        cornerRadius={30}
+        cornerRadius={24}
         backgroundColor={colors.background}
         grabber={false}
         onDidDismiss={handleDismiss}
       >
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <Text style={[typography.h2, { color: colors.text }]}>
-              {t("report.title")}
-            </Text>
-            {resourceName && (
-              <Text
-                style={[typography.body, { color: colors.secondaryText }]}
-                numberOfLines={1}
-              >
-                {resourceType === "user"
-                  ? t("report.reportingUser", { name: resourceName })
-                  : t("report.reportingList", { name: resourceName })}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.container}
+        >
+          <Pressable style={styles.content} onPress={Keyboard.dismiss}>
+            {/* Header */}
+            <View style={styles.header}>
+              <Text style={[typography.categoryTitle, { color: colors.text }]}>
+                {t("report.title")}
               </Text>
-            )}
-          </View>
-
-          <View style={styles.reasonsSection}>
-            <Text
-              style={[
-                typography.caption,
-                { color: colors.secondaryText, marginBottom: 12 },
-              ]}
-            >
-              {t("report.selectReason")}
-            </Text>
-            <View style={styles.reasonsContainer}>
-              {REASON_OPTIONS.map((option) => (
-                <ReasonButton
-                  key={option.value}
-                  option={option}
-                  isSelected={selectedReason === option.value}
-                  onPress={() => setSelectedReason(option.value)}
-                  typography={typography}
-                  colors={colors}
-                />
-              ))}
+              {resourceName && (
+                <Text
+                  style={[typography.bodyCaption, { color: colors.secondaryText, marginTop: 4 }]}
+                  numberOfLines={1}
+                >
+                  {resourceType === "user"
+                    ? t("report.reportingUser", { name: resourceName })
+                    : resourceType === "list"
+                      ? t("report.reportingList", { name: resourceName })
+                      : t("report.reportingReview", { name: resourceName })}
+                </Text>
+              )}
             </View>
-          </View>
 
-          <View style={styles.descriptionSection}>
-            <Text
-              style={[
-                typography.caption,
-                { color: colors.secondaryText, marginBottom: 8 },
-              ]}
-            >
-              {t("report.additionalDetails")}
-            </Text>
+            {/* Reason Selection */}
+            <View style={styles.reasonsSection}>
+              <Text
+                style={[
+                  typography.bodyCaption,
+                  { color: colors.secondaryText, marginBottom: 12 },
+                ]}
+              >
+                {t("report.selectReason")}
+              </Text>
+              <View style={styles.reasonsContainer}>
+                {REASON_OPTIONS.map((option) => (
+                  <ReasonButton
+                    key={option.value}
+                    option={option}
+                    isSelected={selectedReason === option.value}
+                    onPress={() => setSelectedReason(option.value)}
+                    typography={typography}
+                    colors={colors}
+                  />
+                ))}
+              </View>
+            </View>
+
+            {/* Description Input */}
             <TextInput
               style={[
                 styles.textInput,
                 typography.body,
                 {
-                  color: colors.text,
                   backgroundColor: colors.card,
                   borderColor: colors.border,
+                  color: colors.text,
                 },
               ]}
               placeholder={t("report.descriptionPlaceholder")}
@@ -215,37 +227,30 @@ const ReportBottomSheet = forwardRef<TrueSheet, ReportBottomSheetProps>(
               multiline
               maxLength={1000}
               textAlignVertical="top"
+              editable={!isSubmitting}
             />
-            <Text
-              style={[
-                typography.caption,
-                { color: colors.secondaryText, textAlign: "right", marginTop: 4 },
-              ]}
-            >
+
+            {/* Character count */}
+            <Text style={[typography.bodyCaption, styles.charCount, { color: colors.secondaryText }]}>
               {description.length}/1000
             </Text>
-          </View>
 
-          <AnimatedPressable
-            onPressIn={() => {
-              pressed.value = withTiming(1, { duration: 100 });
-            }}
-            onPressOut={() => {
-              pressed.value = withTiming(0, { duration: 200 });
-            }}
-            onPress={handleSubmit}
-            disabled={isSubmitting}
-            style={[
-              styles.submitButton,
-              { backgroundColor: colors.accent },
-              submitAnimatedStyle,
-            ]}
-          >
-            <Text style={[typography.h3, { color: "#FFFFFF" }]}>
-              {isSubmitting ? t("report.submitting") : t("report.submit")}
-            </Text>
-          </AnimatedPressable>
-        </View>
+            {/* Submit Button */}
+            {isSubmitting ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color={colors.primary} />
+              </View>
+            ) : (
+              <Button
+                title={t("report.submit")}
+                onPress={handleSubmit}
+                icon={<Send size={18} color="#fff" />}
+                iconPosition="left"
+                style={styles.submitButton}
+              />
+            )}
+          </Pressable>
+        </KeyboardAvoidingView>
       </TrueSheet>
     );
   }
@@ -254,14 +259,19 @@ const ReportBottomSheet = forwardRef<TrueSheet, ReportBottomSheetProps>(
 ReportBottomSheet.displayName = "ReportBottomSheet";
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   content: {
     padding: 24,
+    paddingBottom: 40,
   },
   header: {
-    marginBottom: 24,
+    alignItems: "center",
+    marginBottom: 20,
   },
   reasonsSection: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   reasonsContainer: {
     gap: 8,
@@ -274,20 +284,28 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
   },
-  descriptionSection: {
-    marginBottom: 24,
-  },
   textInput: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-    minHeight: 100,
-  },
-  submitButton: {
-    paddingVertical: 16,
+    minHeight: 120,
+    maxHeight: 200,
+    padding: 16,
     borderRadius: 16,
+    borderWidth: 1,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  charCount: {
+    textAlign: "right",
+    marginTop: 8,
+  },
+  loadingContainer: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    paddingVertical: 16,
+    marginTop: 16,
+  },
+  submitButton: {
+    marginTop: 16,
   },
 });
 

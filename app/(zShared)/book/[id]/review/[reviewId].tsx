@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Star, StarHalf, Clock, History } from "lucide-react-native";
+import { Star, StarHalf, Clock, History, Flag, AlertTriangle } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useTranslation } from "react-i18next";
 import Animated, {
@@ -19,6 +19,7 @@ import Animated, {
 } from "react-native-reanimated";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
@@ -28,8 +29,11 @@ import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import Avatar from "@/components/ui/Avatar";
 import PlusBadge from "@/components/ui/PlusBadge";
 import LikeButton from "@/components/ui/LikeButton";
+import ReportBottomSheet from "@/components/ReportBottomSheet";
 import { useUserStore } from "@/stores/userStore";
+import { useAuth } from "@/contexts/AuthContext";
 import { BookReviewRevision } from "@/types/review";
+import PillButton from "@/components/ui/PillButton";
 
 dayjs.extend(relativeTime);
 
@@ -51,10 +55,13 @@ export default function ReviewDetailScreen() {
   
   const { data: review, isLoading, refetch } = useReview(bookId, reviewIdStr);
   const { currentUser } = useUserStore();
+  const { isAuthenticated } = useAuth();
   const { mutate: toggleLike } = useToggleReviewLike(bookId);
+  const reportSheetRef = useRef<TrueSheet>(null);
 
   const isOwnReview = currentUser?.id === review?.userId;
   const hasRevisions = review?.revisions && review.revisions.length > 0;
+  const [spoilerRevealed, setSpoilerRevealed] = useState(false);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -81,6 +88,12 @@ export default function ReviewDetailScreen() {
     if (!review) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/profile/${review.user.username}`);
+  };
+
+  const handleReportPress = () => {
+    if (!review || isOwnReview || !isAuthenticated) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    reportSheetRef.current?.present();
   };
 
   const formattedDate = review ? dayjs(review.createdAt).fromNow() : "";
@@ -182,9 +195,9 @@ export default function ReviewDetailScreen() {
           </View>
         </Pressable>
 
-        {/* Rating Stars */}
-        {review.rating !== null && (
-          <View style={styles.ratingSection}>
+        {/* Rating Stars and Spoiler Badge */}
+        <View style={styles.ratingSection}>
+          {review.rating !== null && (
             <View style={styles.starsContainer}>
               {[1, 2, 3, 4, 5].map((star) => {
                 const fullStars = Math.floor(review.rating!);
@@ -214,14 +227,31 @@ export default function ReviewDetailScreen() {
                 );
               })}
             </View>
-          </View>
-        )}
+          )}
+        </View>
 
         {/* Review Content */}
         <View style={[styles.contentSection, { borderColor: colors.border }]}>
-          <Text style={[typography.body, { color: colors.text, lineHeight: 26 }]}>
-            {review.content}
-          </Text>
+          {review.isSpoiler && !spoilerRevealed ? (
+            <Pressable
+              style={[styles.spoilerOverlay, { backgroundColor: currentTheme === "dark" ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.08)" }]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setSpoilerRevealed(true);
+              }}
+            >
+              <View style={styles.spoilerContent}>
+                <AlertTriangle size={32} color={colors.secondaryText} />
+                <Text style={[typography.body, { color: colors.secondaryText, marginTop: 12, fontWeight: "600", textAlign: "center" }]}>
+                  {t("reviews.containsSpoilerWarning")}
+                </Text>
+              </View>
+            </Pressable>
+          ) : (
+            <Text style={[typography.body, { color: colors.text, lineHeight: 26 }]}>
+              {review.content}
+            </Text>
+          )}
         </View>
 
         {/* Date and Edited Info */}
@@ -242,7 +272,7 @@ export default function ReviewDetailScreen() {
           )}
         </View>
 
-        {/* Like Button */}
+        {/* Actions: Like & Report */}
         <View style={styles.actionsSection}>
           <LikeButton
             isLiked={review.isLikedByMe}
@@ -250,6 +280,13 @@ export default function ReviewDetailScreen() {
             onPress={handleLikePress}
             disabled={isOwnReview}
           />
+          {!isOwnReview && isAuthenticated && (
+            <PillButton
+              title={t("report.report")}
+              onPress={handleReportPress}
+              icon={<Flag size={16} color={colors.secondaryText} />}
+            />
+          )}
         </View>
 
         {/* Previous Versions */}
@@ -331,6 +368,16 @@ export default function ReviewDetailScreen() {
           </View>
         )}
       </AnimatedScrollView>
+
+      {/* Report Bottom Sheet */}
+      {review && !isOwnReview && (
+        <ReportBottomSheet
+          ref={reportSheetRef}
+          resourceType="review"
+          resourceId={review.id.toString()}
+          resourceName={review.user.displayName}
+        />
+      )}
     </View>
   );
 }
@@ -365,15 +412,47 @@ const styles = StyleSheet.create({
   ratingSection: {
     marginTop: 16,
     flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 12,
   },
   starsContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
+  spoilerBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
   contentSection: {
     marginTop: 20,
     paddingTop: 20,
     borderTopWidth: 1,
+  },
+  spoilerOverlay: {
+    borderRadius: 12,
+    overflow: "hidden",
+    minHeight: 150,
+  },
+  spoilerContent: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+    borderRadius: 12,
+    minHeight: 150,
+  },
+  revealButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F59E0B",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginTop: 16,
   },
   dateSection: {
     marginTop: 20,
@@ -385,6 +464,15 @@ const styles = StyleSheet.create({
   actionsSection: {
     marginTop: 20,
     flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  reportButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
   },
   revisionsSection: {
     marginTop: 32,
