@@ -166,7 +166,16 @@ export default function ListOrder() {
           onPress={handleBack}
           style={[
             styles.backButton,
-            { backgroundColor: colors.backButtonBackground },
+            {
+              backgroundColor: colors.backButtonBackground,
+              borderWidth: 1,
+              borderColor: colors.border,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.08,
+              shadowRadius: 2,
+              elevation: 1,
+            },
           ]}
         >
           <Ionicons name="arrow-back" size={24} color={colors.icon} />
@@ -178,7 +187,17 @@ export default function ListOrder() {
           onPress={handleSave}
           style={[
             styles.backButton,
-            { backgroundColor: colors.primary, opacity: hasChanges ? 1 : 0.5 },
+            {
+              backgroundColor: colors.primary,
+              opacity: hasChanges ? 1 : 0.5,
+              borderWidth: 1,
+              borderColor: colors.border,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.08,
+              shadowRadius: 2,
+              elevation: 1,
+            },
           ]}
           disabled={!hasChanges || isLoading}
         >

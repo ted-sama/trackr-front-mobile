@@ -37,6 +37,10 @@ import { queryClient } from '@/lib/queryClient';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({
+  duration: 200,
+  fade: true,
+});
 
 // Composant racine qui fournit les contextes globaux
 export default function RootLayout() {

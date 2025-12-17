@@ -312,7 +312,8 @@
         "openIn": "Ouvrir dans",
         "reviews": "Avis",
         "seeAllReviews": "Voir tous les avis",
-        "viewMore": "Voir plus"
+        "viewMore": "Voir plus",
+        "reviewDeleted": "Avis supprimé"
     },
     "reviews": {
         "title": "Avis",
@@ -516,7 +517,8 @@
             "chapterUpdated": "Vous avez lu le chapitre {{chapter}} de <bold>{{title}}</bold>",
             "ratingUpdated": "Vous avez noté <bold>{{title}}</bold>",
             "reviewCreated": "Vous avez publié un avis sur <bold>{{title}}</bold>",
-            "reviewUpdated": "Vous avez modifié votre avis sur <bold>{{title}}</bold>"
+            "reviewUpdated": "Vous avez modifié votre avis sur <bold>{{title}}</bold>",
+            "reviewDeleted": "Vous avez supprimé votre avis sur <bold>{{title}}</bold>"
         },
         "profile": {
             "addedToLibrary": "{{user}} a ajouté <bold>{{title}}</bold> à sa bibliothèque",
@@ -527,7 +529,8 @@
             "chapterUpdated": "{{user}} a lu le chapitre {{chapter}} de <bold>{{title}}</bold>",
             "ratingUpdated": "{{user}} a noté <bold>{{title}}</bold>",
             "reviewCreated": "{{user}} a publié un avis sur <bold>{{title}}</bold>",
-            "reviewUpdated": "{{user}} a modifié son avis sur <bold>{{title}}</bold>"
+            "reviewUpdated": "{{user}} a modifié son avis sur <bold>{{title}}</bold>",
+            "reviewDeleted": "{{user}} a supprimé son avis sur <bold>{{title}}</bold>"
         }
     },
     "report": {

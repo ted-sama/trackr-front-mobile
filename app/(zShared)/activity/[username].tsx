@@ -65,6 +65,7 @@ function getActivityIcon(action: string, colors: any) {
       return <StarIcon {...iconProps} color={colors.icon} />;
     case "book.reviewCreated":
     case "book.reviewUpdated":
+    case "book.reviewDeleted":
       return <MessageSquareTextIcon {...iconProps} color={colors.icon} />;
     default:
       return <BookImageIcon {...iconProps} />;
@@ -188,6 +189,16 @@ function ActivityContent({ activity, colors, isMe, userDisplayName }: ActivityCo
         <Text style={baseStyle}>
           <Trans
             i18nKey={`${keyPrefix}.reviewUpdated`}
+            values={{ ...values, title: resource.item.title }}
+            components={{ bold: <Text style={typography.bodyBold2} /> }}
+          />
+        </Text>
+      );
+    case "book.reviewDeleted":
+      return (
+        <Text style={baseStyle}>
+          <Trans
+            i18nKey={`${keyPrefix}.reviewDeleted`}
             values={{ ...values, title: resource.item.title }}
             components={{ bold: <Text style={typography.bodyBold2} /> }}
           />

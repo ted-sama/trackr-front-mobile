@@ -14,6 +14,7 @@ import { useLists } from "@/hooks/queries/lists";
 import CategorySlider from "@/components/CategorySlider";
 import CollectionListElement from "@/components/CollectionListElement";
 import { useTranslation } from "react-i18next";
+import { ChevronRight } from "lucide-react-native";
 
 type FilterType = 'books' | 'lists' | 'users';
 
@@ -141,6 +142,7 @@ export default function Discover() {
   const { colors, currentTheme } = useTheme();
   const { t } = useTranslation();
   const typography = useTypography();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('books');
   const scrollY = useSharedValue(0);
@@ -192,9 +194,15 @@ export default function Discover() {
 
         {/* Lists Section */}
         <View style={styles.section}>
-          <Text style={[typography.categoryTitle, { color: colors.text, marginBottom: 16, marginHorizontal: 16 }]}>
-            {t('discover.lists.header')}
-          </Text>
+          <Pressable
+            style={styles.sectionHeader}
+            onPress={() => router.push('/(tabs)/discover/all-lists')}
+          >
+            <Text style={[typography.categoryTitle, { color: colors.text }]}>
+              {t('discover.lists.header')}
+            </Text>
+            <ChevronRight size={20} strokeWidth={2.5} color={colors.secondaryText} />
+          </Pressable>
           <UserListsSection />
         </View>
       </View>
@@ -239,6 +247,13 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 32,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 16,
   },
   centered: {
     flex: 1,

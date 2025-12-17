@@ -94,7 +94,19 @@ export default function ReorderFavoritesModal() {
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <Pressable
             onPress={handleBack}
-            style={[styles.iconButton, { backgroundColor: colors.backButtonBackground }]}
+            style={[
+              styles.iconButton,
+              {
+                backgroundColor: colors.backButtonBackground,
+                borderWidth: 1,
+                borderColor: colors.border,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.08,
+                shadowRadius: 2,
+                elevation: 1,
+              },
+            ]}
             accessibilityRole="button"
             accessibilityLabel={t("toast.goBack")}
           >
@@ -104,7 +116,20 @@ export default function ReorderFavoritesModal() {
           <Pressable
             onPress={handleSave}
             disabled={isSaveDisabled}
-            style={[styles.iconButton, { backgroundColor: colors.primary, opacity: isSaveDisabled ? 0.5 : 1 }]}
+            style={[
+              styles.iconButton,
+              {
+                backgroundColor: colors.primary,
+                opacity: isSaveDisabled ? 0.5 : 1,
+                borderWidth: 1,
+                borderColor: colors.border,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.08,
+                shadowRadius: 2,
+                elevation: 1,
+              },
+            ]}
             accessibilityRole="button"
             accessibilityLabel={t("toast.saveFavorites")}
           >

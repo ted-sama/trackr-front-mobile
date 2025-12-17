@@ -312,7 +312,8 @@
         "openIn": "Open in",
         "reviews": "Reviews",
         "seeAllReviews": "See all reviews",
-        "viewMore": "View more"
+        "viewMore": "View more",
+        "reviewDeleted": "Review deleted"
     },
     "reviews": {
         "title": "Reviews",
@@ -515,7 +516,8 @@
             "chapterUpdated": "You have read chapter {{chapter}} of <bold>{{title}}</bold>",
             "ratingUpdated": "You have rated <bold>{{title}}</bold>",
             "reviewCreated": "You have posted a review on <bold>{{title}}</bold>",
-            "reviewUpdated": "You have updated your review on <bold>{{title}}</bold>"
+            "reviewUpdated": "You have updated your review on <bold>{{title}}</bold>",
+            "reviewDeleted": "You have deleted your review on <bold>{{title}}</bold>"
         },
         "profile": {
             "addedToLibrary": "{{user}} added <bold>{{title}}</bold> to their library",
@@ -526,7 +528,8 @@
             "chapterUpdated": "{{user}} read chapter {{chapter}} of <bold>{{title}}</bold>",
             "ratingUpdated": "{{user}} rated <bold>{{title}}</bold>",
             "reviewCreated": "{{user}} posted a review on <bold>{{title}}</bold>",
-            "reviewUpdated": "{{user}} updated their review on <bold>{{title}}</bold>"
+            "reviewUpdated": "{{user}} updated their review on <bold>{{title}}</bold>",
+            "reviewDeleted": "{{user}} deleted their review on <bold>{{title}}</bold>"
         }
     },
     "report": {

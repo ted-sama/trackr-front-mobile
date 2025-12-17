@@ -49,10 +49,10 @@ const AllListsHeader = React.memo(
             <Text
               style={[typography.h1, { color: colors.text, maxWidth: "80%" }]}
               accessibilityRole="header"
-              accessibilityLabel="All Lists"
+              accessibilityLabel="Popular lists"
               numberOfLines={1}
             >
-              {t("collection.allLists.title")}
+              {t("discover.lists.header")}
             </Text>
             <Text style={[typography.caption, { color: colors.secondaryText }]}>
               {listsCount} {t("common.list")}
