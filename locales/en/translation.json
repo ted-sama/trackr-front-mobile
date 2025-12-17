@@ -197,16 +197,19 @@
         "activity": {
             "title": "Reading activity",
             "chartTitle": "Number of chapters read per month",
-            "total": "{{count}} chapters total"
+            "total": "{{count}} chapters total",
+            "chapters": "chapters"
         },
         "genres": {
             "title": "Top genres",
-            "chartTitle": "Top 12 genres you like to read"
+            "chartTitle": "Top 12 genres you like to read",
+            "total": "genres"
         },
         "ratings": {
             "title": "Rating distribution",
             "chartTitle": "Distribution of ratings",
-            "total": "{{count}} ratings total"
+            "total": "{{count}} ratings total",
+            "books": "books"
         },
         "series": {
             "title": "Series length",
@@ -214,7 +217,9 @@
             "oneshot": "One-shot",
             "short": "Short (2-49)",
             "medium": "Medium (50-500)",
-            "long": "Long (501+)"
+            "long": "Long (501+)",
+            "count": "series",
+            "completed": "completed series"
         },
         "heatmap": {
             "title": "Reading moments",
@@ -223,7 +228,8 @@
             "12am": "12am",
             "11pm": "11pm",
             "less": "Less",
-            "more": "More"
+            "more": "More",
+            "activities": "activities"
         },
         "funnel": {
             "title": "Reading status",
@@ -239,7 +245,8 @@
             "title": "Book types",
             "chartTitle": "Distribution of book types you like to read",
             "series": "{{count}} series",
-            "serie": "{{count}} serie"
+            "serie": "{{count}} serie",
+            "total": "books"
         }
     },
     "settings": {

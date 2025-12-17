@@ -4,7 +4,6 @@ import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { hexToRgba } from "@/utils/colors";
-import { StatsSection } from "./StatsSection";
 import { useTranslation } from "react-i18next";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { useUserBooks } from "@/hooks/queries/users";
@@ -18,11 +17,10 @@ interface AuthorData {
 
 interface AuthorsChartProps {
   data: AuthorData[];
-  title: string;
   username?: string;
 }
 
-export function AuthorsChart({ data, title, username }: AuthorsChartProps) {
+export function AuthorsChart({ data, username }: AuthorsChartProps) {
   const { colors } = useTheme();
   const typography = useTypography();
   const { t } = useTranslation();
@@ -40,18 +38,14 @@ export function AuthorsChart({ data, title, username }: AuthorsChartProps) {
     [topAuthors]
   );
 
-  // Group books by author
   const booksByAuthor = useMemo(() => {
-    // Use API data for other users, local store for current user
     const books: TrackedBookWithMeta[] = username && userBooks ? userBooks : getTrackedBooks();
     const grouped: Record<string, TrackedBookWithMeta[]> = {};
 
     books.forEach((book) => {
       if (book.authors && book.authors.length > 0) {
         book.authors.forEach((author) => {
-          if (!grouped[author.name]) {
-            grouped[author.name] = [];
-          }
+          if (!grouped[author.name]) grouped[author.name] = [];
           grouped[author.name].push(book);
         });
       }
@@ -67,16 +61,8 @@ export function AuthorsChart({ data, title, username }: AuthorsChartProps) {
   if (!topAuthors.length) return null;
 
   return (
-    <StatsSection title={title} plusBadge={true}>
-      <Text
-        style={[
-          typography.bodyCaption,
-          {
-            color: colors.secondaryText,
-            marginBottom: 12,
-          },
-        ]}
-      >
+    <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.text }]}>
+      <Text style={[typography.bodyCaption, { color: colors.secondaryText, marginBottom: 12 }]}>
         {t("stats.authors.chartTitle")}
       </Text>
       <View style={styles.authorsList}>
@@ -87,10 +73,7 @@ export function AuthorsChart({ data, title, username }: AuthorsChartProps) {
             <View key={author.label} style={styles.authorSection}>
               <View style={styles.authorRow}>
                 <View style={{ flex: 1 }}>
-                  <Text
-                    style={[typography.body, { color: colors.text }]}
-                    numberOfLines={1}
-                  >
+                  <Text style={[typography.body, { color: colors.text }]} numberOfLines={1}>
                     {author.label}
                   </Text>
                   <View style={styles.funnelBarBackground}>
@@ -105,17 +88,11 @@ export function AuthorsChart({ data, title, username }: AuthorsChartProps) {
                     />
                   </View>
                 </View>
-                <Text
-                  style={[
-                    typography.caption,
-                    { color: colors.secondaryText, marginLeft: 8, width: 50, textAlign: "right" },
-                  ]}
-                >
+                <Text style={[typography.caption, { color: colors.secondaryText, marginLeft: 8, width: 50, textAlign: "right" }]}>
                   {author.value > 1 ? t("stats.authors.series", { count: author.value }) : t("stats.authors.serie", { count: author.value })}
                 </Text>
               </View>
 
-              {/* Books Grid */}
               {authorBooks.length > 0 && (
                 <FlatList
                   data={authorBooks}
@@ -142,11 +119,20 @@ export function AuthorsChart({ data, title, username }: AuthorsChartProps) {
           );
         })}
       </View>
-    </StatsSection>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  card: {
+    width: "100%",
+    borderRadius: 20,
+    padding: 16,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
   authorsList: {
     gap: 24,
   },
@@ -176,4 +162,3 @@ const styles = StyleSheet.create({
     gap: 8,
   },
 });
-

@@ -281,10 +281,15 @@ export function useUserActivity(username?: string) {
   });
 }
 
+// Get device timezone (e.g., 'Europe/Paris')
+const getTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 export function useMeStats() {
   return useQuery({
     queryKey: queryKeys.userStats(),
-    queryFn: async () => (await api.get<UserStats>('/me/stats')).data,
+    queryFn: async () => (await api.get<UserStats>('/me/stats', {
+      params: { timezone: getTimezone() }
+    })).data,
     staleTime: 60_000,
   });
 }
@@ -296,7 +301,9 @@ export function useUserStats(username?: string) {
 
   return useQuery({
     queryKey: queryKeys.userStats(isMe ? undefined : username),
-    queryFn: async () => (await api.get<UserStats>(endpoint)).data,
+    queryFn: async () => (await api.get<UserStats>(endpoint, {
+      params: { timezone: getTimezone() }
+    })).data,
     enabled: isMe || Boolean(username),
     staleTime: 60_000,
   });

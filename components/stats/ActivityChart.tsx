@@ -1,12 +1,14 @@
-import React, { useMemo, useEffect } from "react";
-import { View, Text } from "react-native";
+import React, { useMemo } from "react";
+import { View, Text, StyleSheet } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { CartesianChart, Line, Scatter } from "victory-native";
+import { CartesianChart, Line, Scatter, useChartPressState } from "victory-native";
 import { hexToRgba } from "@/utils/colors";
-import { StatsSection } from "./StatsSection";
 import type { SkFont } from "@shopify/react-native-skia";
+import { Circle } from "@shopify/react-native-skia";
 import { useTranslation } from "react-i18next";
+import type { SharedValue } from "react-native-reanimated";
+import Animated, { useAnimatedStyle, withTiming, Easing } from "react-native-reanimated";
 
 interface SimplePoint extends Record<string, unknown> {
   label: string;
@@ -15,33 +17,61 @@ interface SimplePoint extends Record<string, unknown> {
 
 interface ActivityChartProps {
   data: SimplePoint[];
-  title: string;
   font: SkFont | null;
 }
 
-export function ActivityChart({ data, title, font }: ActivityChartProps) {
+interface TooltipProps {
+  x: SharedValue<number>;
+  y: SharedValue<number>;
+  color: string;
+}
+
+function ChartTooltip({ x, y, color }: TooltipProps) {
+  return (
+    <>
+      <Circle cx={x} cy={y} r={8} color={color} opacity={0.3} />
+      <Circle cx={x} cy={y} r={5} color={color} />
+    </>
+  );
+}
+
+export function ActivityChart({ data, font }: ActivityChartProps) {
   const { colors } = useTheme();
   const typography = useTypography();
   const { t } = useTranslation();
 
-  useEffect(() => {
-    // Add a default point if data is not empty for visualization smoothing
-    if (data.length > 0) {
-      data = [...data, { label: "2025-12", value: 566 }];
-    }
-
-    console.log("ActivityChart data", data);
-  }, [data]);
+  const { state, isActive } = useChartPressState({
+    x: "",
+    y: { value: 0 }
+  });
 
   const totalChapters = useMemo(
     () => data.reduce((sum, p) => sum + p.value, 0),
     [data]
   );
 
+  const maxValue = useMemo(
+    () => Math.max(...data.map((p) => p.value), 1),
+    [data]
+  );
+
+  const tooltipStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(isActive ? 1 : 0, { duration: 200, easing: Easing.out(Easing.ease) }),
+    transform: [{ scale: withTiming(isActive ? 1 : 0.95, { duration: 200, easing: Easing.out(Easing.ease) }) }],
+  }));
+
   if (!data.length) return null;
 
   return (
-    <StatsSection title={title} plusBadge={true}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.card,
+          shadowColor: colors.text,
+        },
+      ]}
+    >
       <Text
         style={[
           typography.bodyCaption,
@@ -53,29 +83,45 @@ export function ActivityChart({ data, title, font }: ActivityChartProps) {
       >
         {t("stats.activity.chartTitle")}
       </Text>
+
+      {/* Tooltip externe */}
+      <Animated.View style={[styles.tooltipContainer, tooltipStyle]}>
+        <View style={[styles.tooltip, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={[typography.caption, { color: colors.accent, fontWeight: "600" }]}>
+            {state.y.value.value.value.toFixed(0)} {t("stats.activity.chapters")}
+          </Text>
+          <Text style={[typography.bodyCaption, { color: colors.secondaryText, fontSize: 10 }]}>
+            {state.x.value.value}
+          </Text>
+        </View>
+      </Animated.View>
+
       <View style={{ height: 240 }}>
         <CartesianChart<SimplePoint, "label", "value">
           data={data}
-          xKey={"label"}
+          xKey="label"
           yKeys={["value"]}
+          chartPressState={state}
           axisOptions={{
             tickCount: {
-                x: data.length,
-                y: 10,
-            },
-            tickValues: {
-                x: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                y: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
+              x: Math.min(data.length, 6),
+              y: 5,
             },
             formatXLabel(label) {
-                if (!label) return "";
-                return label;
+              if (label == null) return "";
+              const labelStr = String(label);
+              // Format YYYY-MM to MM/YY
+              const parts = labelStr.split("-");
+              if (parts.length === 2) {
+                return `${parts[1]}/${parts[0].slice(2)}`;
+              }
+              return labelStr;
             },
             labelColor: colors.secondaryText,
             font,
           }}
-          viewport={{
-            y: [0, Math.max(...data.map((p) => p.value)) * 1.2],
+          domain={{
+            y: [0, maxValue * 1.3],
           }}
         >
           {({ points }) => (
@@ -83,41 +129,84 @@ export function ActivityChart({ data, title, font }: ActivityChartProps) {
               <Line
                 points={points.value}
                 color={hexToRgba(colors.accent, 0.9)}
-                strokeWidth={2}
+                strokeWidth={2.5}
                 curveType="natural"
-                animate={{ type: "timing", duration: 650 }}
+                animate={{ type: "spring", duration: 800 }}
               />
               <Scatter
                 points={points.value}
-                color={hexToRgba(colors.primary, 0.9)}
+                color={colors.accent}
                 radius={4}
-                animate={{ type: "timing", duration: 650 }}
+                style="fill"
+                animate={{ type: "spring", duration: 800 }}
               />
+              {isActive && (
+                <ChartTooltip
+                  x={state.x.position}
+                  y={state.y.value.position}
+                  color={colors.accent}
+                />
+              )}
             </>
           )}
         </CartesianChart>
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          marginTop: 4,
-        }}
-      >
-        <Text
-          style={[
-            typography.bodyCaption,
-            {
-              color: colors.secondaryText,
-              textAlign: "center",
-            },
-          ]}
-        >
-          {t("stats.activity.total", { count: totalChapters })}
-        </Text>
+      <View style={styles.totalContainer}>
+        <View style={[styles.totalBadge, { backgroundColor: hexToRgba(colors.accent, 0.1) }]}>
+          <Text
+            style={[
+              typography.caption,
+              {
+                color: colors.accent,
+                fontWeight: "600",
+              },
+            ]}
+          >
+            {t("stats.activity.total", { count: totalChapters })}
+          </Text>
+        </View>
       </View>
-    </StatsSection>
+    </View>
   );
 }
 
+const styles = StyleSheet.create({
+  card: {
+    width: "100%",
+    borderRadius: 20,
+    padding: 16,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  tooltipContainer: {
+    position: "absolute",
+    top: 50,
+    right: 16,
+    zIndex: 10,
+  },
+  tooltip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: "flex-end",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  totalContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  totalBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+});

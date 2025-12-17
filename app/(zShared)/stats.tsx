@@ -207,36 +207,21 @@ export default function StatsScreen() {
         </View>
 
         <View style={{ gap: 24 }}>
-          <OverviewCards cards={overviewCards} title={t("stats.overview.title")} />
-          <FunnelChart
-            counts={funnelCounts}
-            title={t("stats.funnel.title")}
-          />
+          <OverviewCards cards={overviewCards} />
+          <FunnelChart counts={funnelCounts} />
           {user?.plan === "plus" && (
             <View style={{ gap: 24 }}>
-              <GenreChart data={genreData} title={t("stats.genres.title")} />
-              <TypesChart data={typesData} title={t("stats.types.title")} />
-              <ActivityChart
-                data={activityData}
-                title={t("stats.activity.title")}
-                font={font}
-              />
-              <RatingChart
-                data={ratingData}
-                title={t("stats.ratings.title")}
-                font={font}
-              />
-              <ReadingHeatmap
-                data={stats?.preferences.heatmap ?? []}
-                title={t("stats.heatmap.title")}
-              />
+              <GenreChart data={genreData} />
+              <TypesChart data={typesData} />
+              <ActivityChart data={activityData} font={font} />
+              <RatingChart data={ratingData} font={font} />
+              <ReadingHeatmap data={stats?.preferences.heatmap ?? []} />
               <SeriesChart
                 distributionData={seriesDistributionData}
                 currentProgress={stats?.series.currentProgress ?? []}
-                title={t("stats.series.title")}
                 font={font}
               />
-              <AuthorsChart data={authorsData} title={t("stats.authors.title")} username={isMe ? undefined : username} />
+              <AuthorsChart data={authorsData} username={isMe ? undefined : username} />
             </View>
           )}
         </View>

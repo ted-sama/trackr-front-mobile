@@ -185,7 +185,7 @@
     "stats": {
         "title": "Stats de {{name}}",
         "overview": {
-            "title": "Vue d’ensemble",
+            "title": "Vue d'ensemble",
             "followed": "En bibliothèque",
             "chapters": "Chapitres lus",
             "streak": "Plus longue série",
@@ -197,16 +197,19 @@
         "activity": {
             "title": "Activité de lecture",
             "chartTitle": "Nombre de chapitres lus par mois",
-            "total": "{{count}} chapitres au total"
+            "total": "{{count}} chapitres au total",
+            "chapters": "chapitres"
         },
         "genres": {
             "title": "Genres les plus lus",
-            "chartTitle": "Top 12 des genres que vous aimez lire"
+            "chartTitle": "Top 12 des genres que vous aimez lire",
+            "total": "genres"
         },
         "ratings": {
             "title": "Répartition des notes",
             "chartTitle": "Distribution des notes",
-            "total": "{{count}} notes au total"
+            "total": "{{count}} notes au total",
+            "books": "livres"
         },
         "series": {
             "title": "Longueur des séries",
@@ -214,7 +217,9 @@
             "oneshot": "One-shot",
             "short": "Court (2-49)",
             "medium": "Moyen (50-500)",
-            "long": "Long (501+)"
+            "long": "Long (501+)",
+            "count": "séries",
+            "completed": "séries complétées"
         },
         "heatmap": {
             "title": "Moments de lecture",
@@ -223,7 +228,8 @@
             "12pm": "12h",
             "11pm": "23h",
             "less": "Moins",
-            "more": "Plus"
+            "more": "Plus",
+            "activities": "activités"
         },
         "funnel": {
             "title": "Statuts de lecture",
@@ -239,7 +245,8 @@
             "title": "Types de livres",
             "chartTitle": "Répartition des types de livres que vous lisez",
             "series": "{{count}} séries",
-            "serie": "{{count}} série"
+            "serie": "{{count}} série",
+            "total": "livres"
         }
     },
     "settings": {

@@ -1,21 +1,89 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { hexToRgba } from "@/utils/colors";
-import { StatsSection } from "./StatsSection";
 import type { HeatmapDataPoint } from "@/types/stats";
 import { useTranslation } from "react-i18next";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withDelay,
+  withTiming,
+  Easing,
+  interpolate,
+  Extrapolation,
+} from "react-native-reanimated";
+import { Clock } from "lucide-react-native";
 
 interface ReadingHeatmapProps {
   data: HeatmapDataPoint[];
-  title: string;
 }
 
-export function ReadingHeatmap({ data, title }: ReadingHeatmapProps) {
+interface SelectedCell {
+  day: number;
+  hour: number;
+  value: number;
+}
+
+const DAY_NAMES_FULL = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+function formatHour(hour: number): string {
+  if (hour === 0) return "00h";
+  if (hour === 12) return "12h";
+  return `${hour}h`;
+}
+
+interface AnimatedCellProps {
+  dayIndex: number;
+  hour: number;
+  value: number;
+  maxValue: number;
+  isSelected: boolean;
+  onPress: () => void;
+  colors: any;
+}
+
+function AnimatedCell({ dayIndex, hour, value, maxValue, isSelected, onPress, colors }: AnimatedCellProps) {
+  const progress = useSharedValue(0);
+  const intensity = value / maxValue;
+  const backgroundColor = intensity === 0
+    ? hexToRgba(colors.border, 0.5)
+    : hexToRgba(colors.accent, 0.2 + intensity * 0.6);
+
+  useEffect(() => {
+    progress.value = withDelay((dayIndex * 24 + hour) * 3, withSpring(1, { damping: 20, stiffness: 150 }));
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0, 1], [0, 1], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(progress.value, [0, 1], [0.5, 1], Extrapolation.CLAMP) }],
+  }));
+
+  return (
+    <Pressable onPress={onPress} style={{ flex: 1 }}>
+      <Animated.View
+        style={[
+          styles.heatmapCell,
+          {
+            backgroundColor,
+            borderWidth: isSelected ? 2 : 0,
+            borderColor: isSelected ? colors.text : "transparent",
+          },
+          animatedStyle,
+        ]}
+      />
+    </Pressable>
+  );
+}
+
+export function ReadingHeatmap({ data }: ReadingHeatmapProps) {
   const { colors } = useTheme();
   const typography = useTypography();
   const { t } = useTranslation();
+  const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
 
   const heatmapMatrix = React.useMemo(() => {
     const byDay: { [day: number]: { [hour: number]: number } } = {};
@@ -25,57 +93,85 @@ export function ReadingHeatmap({ data, title }: ReadingHeatmapProps) {
       byDay[item.day][item.hour] = item.value;
       if (item.value > maxValue) maxValue = item.value;
     });
-    return {
-      byDay,
-      maxValue: maxValue || 1,
-    };
+    return { byDay, maxValue: maxValue || 1 };
   }, [data]);
 
-  const days = ["L", "M", "M", "J", "V", "S", "D"];
+  const peakTime = React.useMemo(() => {
+    let maxDay = 0, maxHour = 0, maxVal = 0;
+    data.forEach((item) => {
+      if (item.value > maxVal) {
+        maxVal = item.value;
+        maxDay = item.day;
+        maxHour = item.hour;
+      }
+    });
+    return { day: maxDay, hour: maxHour, value: maxVal };
+  }, [data]);
+
+  const dayLabels = ["L", "M", "M", "J", "V", "S", "D"];
+
+  const handleCellPress = useCallback((dowValue: number, hour: number) => {
+    const value = heatmapMatrix.byDay[dowValue]?.[hour] ?? 0;
+    setSelectedCell((prev) =>
+      prev?.day === dowValue && prev?.hour === hour ? null : { day: dowValue, hour, value }
+    );
+  }, [heatmapMatrix.byDay]);
+
+  const tooltipOpacity = useSharedValue(selectedCell ? 1 : 0);
+
+  useEffect(() => {
+    tooltipOpacity.value = withTiming(selectedCell ? 1 : 0, { duration: 200, easing: Easing.out(Easing.ease) });
+  }, [selectedCell]);
+
+  const tooltipStyle = useAnimatedStyle(() => ({
+    opacity: tooltipOpacity.value,
+    transform: [{ scale: interpolate(tooltipOpacity.value, [0, 1], [0.95, 1], Extrapolation.CLAMP) }],
+  }));
 
   if (!data.length) return null;
 
   return (
-    <StatsSection title={title} plusBadge={true}>
-      <Text
-        style={[
-          typography.bodyCaption,
-          {
-            color: colors.secondaryText,
-            marginBottom: 12,
-          },
-        ]}
-      >
+    <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.text }]}>
+      <Text style={[typography.bodyCaption, { color: colors.secondaryText, marginBottom: 12 }]}>
         {t("stats.heatmap.chartTitle")}
       </Text>
+
+      <Animated.View style={[styles.tooltipContainer, tooltipStyle]}>
+        {selectedCell && (
+          <View style={[styles.tooltip, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={styles.tooltipRow}>
+              <Clock size={14} color={colors.accent} />
+              <Text style={[typography.caption, { color: colors.accent, fontWeight: "600", marginLeft: 4 }]}>
+                {DAY_NAMES_FULL[selectedCell.day]} {formatHour(selectedCell.hour)}
+              </Text>
+            </View>
+            <Text style={[typography.bodyCaption, { color: colors.secondaryText, fontSize: 10 }]}>
+              {selectedCell.value} {t("stats.heatmap.activities")}
+            </Text>
+          </View>
+        )}
+      </Animated.View>
+
       <View style={styles.heatmapContainer}>
-        {days.map((dayLabel, dayIndex) => (
-          <View key={dayLabel + dayIndex} style={styles.heatmapRow}>
-            <Text
-              style={[
-                typography.bodyCaption,
-                { color: colors.secondaryText, width: 18 },
-              ]}
-            >
-              {dayLabel}
+        {DAY_ORDER.map((dowValue, displayIndex) => (
+          <View key={`day-${dowValue}`} style={styles.heatmapRow}>
+            <Text style={[typography.bodyCaption, { color: colors.secondaryText, width: 18, fontSize: 10 }]}>
+              {dayLabels[displayIndex]}
             </Text>
             <View style={styles.heatmapRowBlocks}>
               {Array.from({ length: 24 }).map((_, hour) => {
-                const value = heatmapMatrix.byDay[dayIndex]?.[hour] ?? 0;
-                const intensity = value / heatmapMatrix.maxValue;
-                const backgroundColor =
-                  intensity === 0
-                    ? hexToRgba(colors.border, 0.5)
-                    : hexToRgba(colors.accent, 0.2 + intensity * 0.6);
+                const value = heatmapMatrix.byDay[dowValue]?.[hour] ?? 0;
+                const isSelected = selectedCell?.day === dowValue && selectedCell?.hour === hour;
                 return (
-                  <View
-                    key={`${dayIndex}-${hour}`}
-                    style={[
-                      styles.heatmapCell,
-                      {
-                        backgroundColor,
-                      },
-                    ]}
+                  <AnimatedCell
+                    key={`${dowValue}-${hour}`}
+                    dayIndex={displayIndex}
+                    hour={hour}
+                    value={value}
+                    maxValue={heatmapMatrix.maxValue}
+                    isSelected={isSelected}
+                    onPress={() => handleCellPress(dowValue, hour)}
+                    colors={colors}
                   />
                 );
               })}
@@ -83,83 +179,89 @@ export function ReadingHeatmap({ data, title }: ReadingHeatmapProps) {
           </View>
         ))}
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          marginTop: 8,
-          paddingHorizontal: 24,
-        }}
-      >
-        <Text
-          style={[typography.bodyCaption, { color: colors.secondaryText }]}
-        >
+
+      <View style={styles.timeLabels}>
+        <Text style={[typography.bodyCaption, { color: colors.secondaryText, fontSize: 10 }]}>
           {t("stats.heatmap.12am")}
         </Text>
-        <Text
-          style={[typography.bodyCaption, { color: colors.secondaryText }]}
-        >
+        <Text style={[typography.bodyCaption, { color: colors.secondaryText, fontSize: 10 }]}>
           {t("stats.heatmap.12pm")}
         </Text>
-        <Text
-          style={[typography.bodyCaption, { color: colors.secondaryText }]}
-        >
+        <Text style={[typography.bodyCaption, { color: colors.secondaryText, fontSize: 10 }]}>
           {t("stats.heatmap.11pm")}
         </Text>
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          marginTop: 12,
-          gap: 8,
-        }}
-      >
-        <View
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: 2,
-            backgroundColor: hexToRgba(colors.border, 0.5),
-          }}
-        />
-        <Text
-          style={[typography.bodyCaption, { color: colors.secondaryText }]}
-        >
-          {t("stats.heatmap.less")}
-        </Text>
-        <View style={{ flexDirection: "row", gap: 2 }}>
-          {[0.3, 0.5, 0.7, 1].map((intensity, idx) => (
-            <View
-              key={idx}
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 2,
-                backgroundColor: hexToRgba(colors.accent, 0.2 + intensity * 0.6),
-              }}
-            />
-          ))}
+
+      <View style={styles.footerRow}>
+        <View style={styles.legendContainer}>
+          <View style={[styles.legendCell, { backgroundColor: hexToRgba(colors.border, 0.5) }]} />
+          <Text style={[typography.bodyCaption, { color: colors.secondaryText, fontSize: 10 }]}>
+            {t("stats.heatmap.less")}
+          </Text>
+          <View style={styles.legendGradient}>
+            {[0.3, 0.5, 0.7, 1].map((intensity, idx) => (
+              <View
+                key={idx}
+                style={[styles.legendCell, { backgroundColor: hexToRgba(colors.accent, 0.2 + intensity * 0.6) }]}
+              />
+            ))}
+          </View>
+          <Text style={[typography.bodyCaption, { color: colors.secondaryText, fontSize: 10 }]}>
+            {t("stats.heatmap.more")}
+          </Text>
         </View>
-        <Text
-          style={[typography.bodyCaption, { color: colors.secondaryText }]}
-        >
-          {t("stats.heatmap.more")}
-        </Text>
+
+        {peakTime.value > 0 && (
+          <View style={[styles.peakBadge, { backgroundColor: hexToRgba(colors.accent, 0.1) }]}>
+            <Text style={[typography.bodyCaption, { color: colors.accent, fontSize: 10, fontWeight: "600" }]}>
+              Peak: {DAY_NAMES_FULL[peakTime.day].slice(0, 3)} {formatHour(peakTime.hour)}
+            </Text>
+          </View>
+        )}
       </View>
-    </StatsSection>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  card: {
+    width: "100%",
+    borderRadius: 20,
+    padding: 16,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  tooltipContainer: {
+    position: "absolute",
+    top: 50,
+    right: 16,
+    zIndex: 10,
+  },
+  tooltip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: "flex-end",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  tooltipRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   heatmapContainer: {
-    gap: 4,
+    gap: 3,
   },
   heatmapRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
   },
   heatmapRowBlocks: {
     flex: 1,
@@ -169,6 +271,37 @@ const styles = StyleSheet.create({
   heatmapCell: {
     flex: 1,
     aspectRatio: 1,
+    borderRadius: 3,
+  },
+  timeLabels: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+    paddingHorizontal: 24,
+  },
+  footerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 12,
+  },
+  legendContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  legendGradient: {
+    flexDirection: "row",
+    gap: 2,
+  },
+  legendCell: {
+    width: 10,
+    height: 10,
     borderRadius: 2,
+  },
+  peakBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
 });
