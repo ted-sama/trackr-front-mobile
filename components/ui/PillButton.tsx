@@ -27,7 +27,7 @@ export default function PillButton({title, icon = null, style = 'default', disab
                 style={[
                     styles.actionButton,
                     { backgroundColor: colors.card, borderColor: colors.border },
-                    style === 'destructive' && { backgroundColor: colors.card, borderColor: colors.error },
+                    style === 'destructive' && { backgroundColor: `${colors.error}15`, borderColor: colors.error },
                     toggleable && !selected && { opacity: 0.4 },
                     disabled && { opacity: 0.5 },
                 ]}

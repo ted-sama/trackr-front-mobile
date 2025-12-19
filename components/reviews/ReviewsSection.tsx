@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { router } from "expo-router";
 import {
-    MessageSquareText,
+    MessageSquare,
     PenLine,
     Pencil,
     Trash2,
@@ -72,7 +72,6 @@ export function ReviewsSection({
     }, [data?.reviews, userReview]);
 
     const handleSeeAllPress = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         router.push(`/book/${bookId}/reviews`);
     };
 
@@ -113,7 +112,6 @@ export function ReviewsSection({
     };
 
     const handleCancelDelete = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         deleteSheetRef.current?.dismiss();
     };
 
@@ -148,7 +146,7 @@ export function ReviewsSection({
             {/* Header */}
             <View style={styles.header}>
                 <View style={styles.titleRow}>
-                    <MessageSquareText size={20} color={colors.text} strokeWidth={2} />
+                    <MessageSquare size={20} color={colors.text} fill={colors.text} strokeWidth={2} />
                     <Text
                         style={[
                             typography.categoryTitle,
@@ -261,7 +259,6 @@ export function ReviewsSection({
             <TrueSheet
                 ref={deleteSheetRef}
                 detents={["auto"]}
-                cornerRadius={24}
                 backgroundColor={colors.background}
                 grabber={false}
             >

@@ -1,6 +1,8 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { View, Text, StyleSheet, Pressable, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, StyleSheet, Pressable, KeyboardAvoidingView, Platform } from "react-native";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
+import * as Haptics from "expo-haptics";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,6 +12,7 @@ import { useList , useReorderBooksInList } from "@/hooks/queries/lists";
 import BookDraggableList from "@/components/BookDraggableList";
 import { Book } from "@/types/book";
 import { Ionicons } from "@expo/vector-icons";
+import UnsavedChangesBottomSheet from "@/components/shared/UnsavedChangesBottomSheet";
 import { Check } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { toast } from "sonner-native";
@@ -21,6 +24,7 @@ export default function ListOrder() {
   const typography = useTypography();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const unsavedChangesRef = useRef<TrueSheet>(null);
   const { data: list } = useList(listId as string);
   const { mutateAsync: reorderBooksInList } = useReorderBooksInList();
   const isLoading = false;
@@ -48,25 +52,8 @@ export default function ListOrder() {
 
   const handleBack = () => {
     if (hasChanges) {
-      Alert.alert(
-        "Modifications non sauvegardées",
-        "Vous avez des modifications non sauvegardées. Voulez-vous vraiment quitter sans sauvegarder ?",
-        [
-          { text: "Annuler", style: "cancel" },
-          {
-            text: "Quitter sans sauvegarder",
-            style: "destructive",
-            onPress: () => router.back(),
-          },
-          {
-            text: "Sauvegarder et quitter",
-            onPress: async () => {
-              await handleSave();
-              router.back();
-            },
-          },
-        ]
-      );
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      unsavedChangesRef.current?.present();
     } else {
       router.back();
     }
@@ -98,12 +85,14 @@ export default function ListOrder() {
 
       await reorderBooksInList({ listId: listId as string, positions: bookOrders });
 
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setHasChanges(false);
       setOriginalBooks([...localBooks]);
 
       router.back();
       toast(t("toast.listUpdated"));
     } catch (error: any) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       toast.error(t("toast.errorSavingList"));
     }
   };
@@ -252,12 +241,24 @@ export default function ListOrder() {
             }}
           />
           <LinearGradient
-            colors={[`${colors.background}`, `${colors.background}00`]}
+            colors={[
+              colors.background,
+              `${colors.background}E6`,
+              `${colors.background}99`,
+              `${colors.background}4D`,
+              `${colors.background}00`,
+            ]}
+            locations={[0, 0.25, 0.5, 0.75, 1]}
             style={styles.fade}
             pointerEvents="none"
           />
         </View>
       </View>
+
+      <UnsavedChangesBottomSheet
+        ref={unsavedChangesRef}
+        onDiscard={() => router.back()}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -301,10 +302,10 @@ const styles = StyleSheet.create({
   },
   fade: {
     position: "absolute",
-    top: -1, // Correction pour le positionnement
+    top: -1,
     left: 0,
     right: 0,
-    height: 48, // Augmentation pour un effet plus doux
+    height: 64,
   },
   header: {
     position: "absolute",

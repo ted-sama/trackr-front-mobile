@@ -2,6 +2,7 @@ import React, { forwardRef, useCallback, useState } from "react";
 import { View, Text, StyleSheet, TextInput } from "react-native";
 import { useTranslation } from "react-i18next";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
+import * as Haptics from "expo-haptics";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useCreateList } from "@/hooks/queries/lists";
@@ -42,14 +43,16 @@ const CreateListBottomSheet = forwardRef<
 
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
-    
+
     try {
       const newList = await createList(newListName.trim());
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       toast.success(t("toast.listCreated"));
       onListCreated?.(newList.id);
       closeSheet();
     } catch (error) {
       console.error("Error creating list:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       toast.error(t("toast.errorCreatingList"));
     }
   };
@@ -58,7 +61,6 @@ const CreateListBottomSheet = forwardRef<
     <TrueSheet
       ref={ref}
       detents={["auto"]}
-      cornerRadius={30}
       backgroundColor={colors.background}
       grabber={false}
       onDidDismiss={handleSheetDismiss}

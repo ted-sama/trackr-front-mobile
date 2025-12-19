@@ -7,6 +7,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import { Book } from "@/types/book";
 import { BookTracking, ReadingStatus } from "@/types/reading-status";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -114,6 +115,7 @@ const StatusEditorBottomSheet = forwardRef<
       }
 
       await updateTrackedBook(book.id, updateData);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       if (status === "completed") {
         onBookCompleted?.();
@@ -126,6 +128,7 @@ const StatusEditorBottomSheet = forwardRef<
       }, 100);
     } catch (error) {
       console.error("Error updating book status:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       const currentStatus = getTrackedBookStatus(book.id);
       setTempStatus(currentStatus?.status || "plan_to_read");
     }
@@ -163,7 +166,6 @@ const StatusEditorBottomSheet = forwardRef<
     <TrueSheet
       ref={ref}
       detents={["auto"]}
-      cornerRadius={30}
       backgroundColor={colors.background}
       grabber={false}
       onDidDismiss={handleSheetDismiss}

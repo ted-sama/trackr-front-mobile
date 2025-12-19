@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { forwardRef, useCallback, useRef } from "react";
+import React, { forwardRef, useRef } from "react";
 import { View, Text, StyleSheet, Pressable, Share } from "react-native";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import Animated, {
@@ -134,7 +134,6 @@ const ListActionsBottomSheet = forwardRef<TrueSheet, ListActionsBottomSheetProps
         <TrueSheet
           ref={ref}
           detents={["auto"]}
-          cornerRadius={30}
           backgroundColor={colors.background}
           grabber={false}
           onDidDismiss={handleDismiss}

@@ -9,6 +9,7 @@ import { View, Text, StyleSheet, FlatList } from "react-native";
 import { useTranslation } from "react-i18next";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
 import { Book } from "@/types/book";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
@@ -124,6 +125,8 @@ const ListEditorBottomSheet = forwardRef<
         )
       );
 
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
       if (listsToAdd.length > 0 && listsToRemove.length > 0) {
         toast.success(t("toast.listsUpdated"));
       } else if (listsToAdd.length > 0) {
@@ -135,6 +138,7 @@ const ListEditorBottomSheet = forwardRef<
       onListsUpdated?.();
       closeSheet();
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       toast.error(t("toast.errorSavingLists"));
     }
   };
@@ -143,7 +147,6 @@ const ListEditorBottomSheet = forwardRef<
     <TrueSheet
       ref={ref}
       detents={["auto"]}
-      cornerRadius={30}
       backgroundColor={colors.background}
       grabber={false}
       onDidDismiss={handleSheetDismiss}

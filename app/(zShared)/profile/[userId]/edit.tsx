@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -32,6 +32,8 @@ import { Image } from "expo-image";
 import PlusBadge from "@/components/ui/PlusBadge";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTranslation } from "react-i18next";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
+import UnsavedChangesBottomSheet from "@/components/shared/UnsavedChangesBottomSheet";
 
 export default function ProfileEditModal() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
@@ -43,7 +45,7 @@ export default function ProfileEditModal() {
   const refreshCurrentUser = useUserStore((s) => s.fetchCurrentUser);
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-
+  const unsavedChangesRef = useRef<TrueSheet>(null);
   const { mutateAsync: updateMe } = useUpdateMe();
   const { mutateAsync: uploadAvatar, isPending: isUploadingAvatar } =
     useUpdateUserAvatarImage();
@@ -137,13 +139,14 @@ export default function ProfileEditModal() {
 
   const handleBack = () => {
     if (hasChanges) {
-      toast(t("toast.changesNotSaved"));
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      unsavedChangesRef.current?.present();
+    } else {
+      router.back();
     }
-    router.back();
   };
 
   const handlePickAvatar = async () => {
-    Haptics.selectionAsync();
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -161,7 +164,6 @@ export default function ProfileEditModal() {
       toast(t("toast.backdropReserved"));
       return;
     }
-    Haptics.selectionAsync();
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -175,7 +177,6 @@ export default function ProfileEditModal() {
   };
 
   const handleDeleteAvatar = () => {
-    Haptics.selectionAsync();
     if (!selectedAvatarImage && !currentUser?.avatar) {
       return;
     }
@@ -248,7 +249,7 @@ export default function ProfileEditModal() {
         <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
         <View style={styles.loadingContainer}>
           <Text style={[typography.body, { color: colors.secondaryText }]}>
-            Chargement...
+            {t("common.loading")}
           </Text>
         </View>
       </View>
@@ -332,7 +333,6 @@ export default function ProfileEditModal() {
               backdropMode === "color" && { borderColor: colors.primary },
             ]}
             onPress={() => {
-              Haptics.selectionAsync();
               setBackdropMode("color");
             }}
           >
@@ -368,7 +368,6 @@ export default function ProfileEditModal() {
                 toast(t("toast.backdropReserved"));
                 return;
               }
-              Haptics.selectionAsync();
               setBackdropMode("image");
             }}
           >
@@ -489,7 +488,6 @@ export default function ProfileEditModal() {
               <Pressable
                 key={c}
                 onPress={() => {
-                  Haptics.selectionAsync();
                   setBackdropColor(c);
                 }}
                 style={[
@@ -536,6 +534,11 @@ export default function ProfileEditModal() {
           />
         </View>
       </ScrollView>
+
+      <UnsavedChangesBottomSheet
+        ref={unsavedChangesRef}
+        onDiscard={() => router.back()}
+      />
     </KeyboardAvoidingView>
   );
 }

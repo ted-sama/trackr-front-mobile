@@ -13,7 +13,15 @@
         "search": "Rechercher des livres",
         "error": "Erreur",
         "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "delete": "Supprimer",
         "deleting": "Suppression...",
+        "loading": "Chargement...",
+        "unsavedChangesTitle": "Modifications non sauvegardées",
+        "unsavedChangesMessage": "Vous avez des modifications non sauvegardées. Que voulez-vous faire ?",
+        "discardChanges": "Quitter sans sauvegarder",
+        "saveAndExit": "Sauvegarder et quitter",
+        "continueEditing": "Continuer",
         "bookTypes": {
             "comic": "Comic",
             "novel": "Roman",
@@ -315,6 +323,11 @@
         "viewMore": "Voir plus",
         "reviewDeleted": "Avis supprimé"
     },
+    "ratingSlider": {
+        "notRated": "Pas encore noté",
+        "dragOrTapToRate": "Glissez ou touchez pour noter",
+        "deleteRating": "Supprimer la note"
+    },
     "reviews": {
         "title": "Avis",
         "sortBy": "Trier par",
@@ -427,6 +440,10 @@
             "rankedDescription": "Liste avec ordre de préférence",
             "collection": "Collection",
             "collectionDescription": "Collection simple sans classement"
+        },
+        "deleteModal": {
+            "title": "Supprimer la liste",
+            "message": "Cette action est irréversible. La liste et tout son contenu seront définitivement supprimés."
         }
     },
     "bookBottomSheet": {

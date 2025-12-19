@@ -95,7 +95,6 @@ export function ReviewCard({
   };
 
   const handleUserPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/profile/${review.user.username}`);
   };
 
@@ -105,7 +104,6 @@ export function ReviewCard({
   };
 
   const handleViewMore = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     // Navigate to full reviews page where user can see complete review
     router.push(`/book/${bookId}/reviews`);
   };

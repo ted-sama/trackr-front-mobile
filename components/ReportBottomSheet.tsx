@@ -16,6 +16,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useTranslation } from "react-i18next";
@@ -136,9 +137,11 @@ const ReportBottomSheet = forwardRef<TrueSheet, ReportBottomSheetProps>(
             description: description.trim() || undefined,
           });
         }
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         toast.success(t("report.success"));
         closeSheet();
       } catch (error) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         const axiosError = error as AxiosError<{ code?: string }>;
         const errorCode = axiosError.response?.data?.code;
 
@@ -156,7 +159,6 @@ const ReportBottomSheet = forwardRef<TrueSheet, ReportBottomSheetProps>(
       <TrueSheet
         ref={ref}
         detents={["auto"]}
-        cornerRadius={24}
         backgroundColor={colors.background}
         grabber={false}
         onDidDismiss={handleDismiss}

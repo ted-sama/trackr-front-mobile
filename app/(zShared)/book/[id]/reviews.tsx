@@ -169,7 +169,6 @@ export default function AllReviewsScreen() {
   }, [toggleLike]);
 
   const handleReviewPress = useCallback((reviewId: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/book/${bookId}/review/${reviewId}`);
   }, [router, bookId]);
 
@@ -289,7 +288,6 @@ export default function AllReviewsScreen() {
       <TrueSheet
         ref={sortSheetRef}
         detents={["auto"]}
-        cornerRadius={30}
         backgroundColor={colors.background}
         grabber={false}
       >

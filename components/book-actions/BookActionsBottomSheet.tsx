@@ -270,7 +270,6 @@ const BookActionsBottomSheet = forwardRef<
       <TrueSheet
         ref={ref}
         detents={["auto"]}
-        cornerRadius={30}
         backgroundColor={colors.background}
         grabber={false}
         onDidDismiss={handleSheetDismiss}

@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated, LayoutChangeEvent } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useTypography } from '@/hooks/useTypography';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -23,6 +24,7 @@ export default function TabBar<T extends string | number>({ tabs, selected, onTa
 
   // Animation lors du switch
   const handleTabPress = (index: number, value: T) => {
+    Haptics.selectionAsync();
     onTabChange(value);
     Animated.timing(tabAnim, {
       toValue: index,

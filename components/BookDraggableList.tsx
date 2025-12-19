@@ -1,8 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist';
-import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { Book } from '@/types/book';
@@ -24,10 +24,25 @@ export const BookDraggableList: React.FC<BookDraggableListProps> = ({
 }) => {
   const { colors } = useTheme();
   const typography = useTypography();
+  const lastPlaceholderIndex = useRef<number | null>(null);
+
+  const handleDragBegin = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    lastPlaceholderIndex.current = null;
+  }, []);
 
   const handleDragEnd = useCallback(({ data }: { data: Book[] }) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    lastPlaceholderIndex.current = null;
     onDragEnd(data);
   }, [onDragEnd]);
+
+  const handlePlaceholderIndexChange = useCallback((index: number) => {
+    if (lastPlaceholderIndex.current !== null && lastPlaceholderIndex.current !== index) {
+      Haptics.selectionAsync();
+    }
+    lastPlaceholderIndex.current = index;
+  }, []);
 
   const renderBookItem = useCallback(({ item, drag, isActive }: RenderItemParams<Book>) => (
     <TouchableOpacity
@@ -75,7 +90,9 @@ export const BookDraggableList: React.FC<BookDraggableListProps> = ({
   return (
     <DraggableFlatList
       data={books}
+      onDragBegin={handleDragBegin}
       onDragEnd={handleDragEnd}
+      onPlaceholderIndexChange={handlePlaceholderIndexChange}
       keyExtractor={(item) => item.id.toString()}
       renderItem={renderBookItem}
       contentContainerStyle={[{ paddingBottom: 20 }, contentContainerStyle]}

@@ -854,7 +854,7 @@ export default function BookScreen() {
               }}
             >
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Ionicons name="star" size={24} color={colors.primary} />
+                <Ionicons name="star" size={24} color={colors.accent} />
                 <Text
                   style={[
                     typography.categoryTitle,
@@ -1043,7 +1043,10 @@ export default function BookScreen() {
               status={bookTracking.status}
               currentChapter={bookTracking.currentChapter}
               onBookmarkPress={() => handlePresentChapterModalPress()}
-              onMarkLastChapterAsReadPress={() => incrementCurrentChapter()}
+              onMarkLastChapterAsReadPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                incrementCurrentChapter();
+              }}
               markLastChapterAsReadDisabled={bookTracking.currentChapter !== null && bookTracking.currentChapter === book?.chapters}
               onStatusPress={handlePresentStatusEditorSheet}
             />  

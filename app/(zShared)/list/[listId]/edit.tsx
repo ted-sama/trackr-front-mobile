@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   View,
@@ -6,15 +6,20 @@ import {
   TextInput,
   StyleSheet,
   Pressable,
-  Alert,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { StatusBar } from "expo-status-bar";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, {
+  FadeInDown,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useList, useUpdateList, useUpdateBackdropImage } from "@/hooks/queries/lists";
@@ -22,11 +27,12 @@ import { useUserStore } from "@/stores/userStore";
 import Badge from "@/components/ui/Badge";
 import { X, Plus, Check, Globe, Lock, Trophy, Users, Palette, Camera } from "lucide-react-native";
 import { toast } from "sonner-native";
-import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import PlusBadge from "@/components/ui/PlusBadge";
 import { Image } from "expo-image";
+import * as Haptics from "expo-haptics";
+import UnsavedChangesBottomSheet from "@/components/shared/UnsavedChangesBottomSheet";
 
 export default function ListEdit() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
@@ -35,6 +41,7 @@ export default function ListEdit() {
   const typography = useTypography();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const unsavedChangesRef = useRef<TrueSheet>(null);
   // Data
   const { data: list } = useList(listId as string);
   const { mutateAsync: updateList } = useUpdateList();
@@ -67,6 +74,18 @@ export default function ListEdit() {
   const [selectedImage, setSelectedImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [backdropMode, setBackdropMode] = useState<"color" | "image">("color");
   const [backdropColor, setBackdropColor] = useState<string>("#7C3AED");
+
+  // Scale animations for toggle buttons
+  const publicScale = useSharedValue(1);
+  const rankedScale = useSharedValue(1);
+
+  const publicAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: publicScale.value }],
+  }));
+
+  const rankedAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: rankedScale.value }],
+  }));
 
   // Query hook loads data
 
@@ -103,18 +122,8 @@ export default function ListEdit() {
 
   const handleBack = () => {
     if (hasChanges) {
-      Alert.alert(
-        "Modifications non sauvegardées",
-        "Vous avez des modifications non sauvegardées. Voulez-vous vraiment quitter ?",
-        [
-          { text: "Annuler", style: "cancel" },
-          {
-            text: "Quitter",
-            style: "destructive",
-            onPress: () => router.back(),
-          },
-        ]
-      );
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      unsavedChangesRef.current?.present();
     } else {
       router.back();
     }
@@ -125,7 +134,6 @@ export default function ListEdit() {
       toast(t("toast.backdropReserved"));
       return;
     }
-    Haptics.selectionAsync();
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -142,14 +150,12 @@ export default function ListEdit() {
   const addTag = () => {
     const trimmedTag = newTag.trim();
     if (trimmedTag && !tags.includes(trimmedTag)) {
-      Haptics.selectionAsync();
       setTags([...tags, trimmedTag]);
       setNewTag("");
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    Haptics.selectionAsync();
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
@@ -200,12 +206,16 @@ export default function ListEdit() {
   //
 
   const togglePublic = () => {
-    Haptics.selectionAsync();
+    publicScale.value = withTiming(0.97, { duration: 100 }, () => {
+      publicScale.value = withTiming(1, { duration: 100 });
+    });
     setIsPublic(!isPublic);
   };
 
   const toggleRanked = () => {
-    Haptics.selectionAsync();
+    rankedScale.value = withTiming(0.97, { duration: 100 }, () => {
+      rankedScale.value = withTiming(1, { duration: 100 });
+    });
     setRanked(!ranked);
   };
 
@@ -215,7 +225,7 @@ export default function ListEdit() {
         <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
         <View style={styles.loadingContainer}>
           <Text style={[typography.body, { color: colors.secondaryText }]}>
-            Chargement...
+            {t("common.loading")}
           </Text>
         </View>
       </View>
@@ -287,7 +297,6 @@ export default function ListEdit() {
                 backdropMode === "color" && { borderColor: colors.primary },
               ]}
               onPress={() => {
-                Haptics.selectionAsync();
                 setBackdropMode("color");
               }}
             >
@@ -308,7 +317,6 @@ export default function ListEdit() {
                   toast(t("toast.backdropReserved"));
                   return;
                 }
-                Haptics.selectionAsync();
                 setBackdropMode("image");
               }}
             >
@@ -372,7 +380,6 @@ export default function ListEdit() {
                 <Pressable
                   key={c}
                   onPress={() => {
-                    Haptics.selectionAsync();
                     setBackdropColor(c);
                   }}
                   style={[
@@ -522,94 +529,103 @@ export default function ListEdit() {
               
               <View style={styles.toggleContainer}>
                 {/* Public/Private Toggle */}
-                <Pressable
-                  style={[
-                    styles.toggleButton,
-                    {
-                      backgroundColor: colors.card,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                  onPress={togglePublic}
-                >
-                  <View style={styles.toggleContent}>
-                    {isPublic ? (
-                      <Globe size={20} color={colors.text} />
-                    ) : (
-                      <Lock size={20} color={colors.text} />
-                    )}
-                    <View style={styles.toggleTextContainer}>
-                      <Text
-                        style={[
-                          typography.body,
-                          styles.toggleTitle,
-                          { color: colors.text },
-                        ]}
-                      >
-                        {isPublic ? t("list.editModal.public") : t("list.editModal.private")}
-                      </Text>
-                      <Text
-                        style={[
-                          typography.caption,
-                          styles.toggleDescription,
-                          { color: colors.secondaryText },
-                        ]}
-                      >
-                        {isPublic 
-                          ? t("list.editModal.publicDescription")
-                          : t("list.editModal.privateDescription")
-                        }
-                      </Text>
+                <Animated.View style={publicAnimatedStyle}>
+                  <Pressable
+                    style={[
+                      styles.toggleButton,
+                      {
+                        backgroundColor: colors.card,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                    onPress={togglePublic}
+                  >
+                    <View style={styles.toggleContent}>
+                      {isPublic ? (
+                        <Globe size={20} color={colors.text} />
+                      ) : (
+                        <Lock size={20} color={colors.text} />
+                      )}
+                      <View style={styles.toggleTextContainer}>
+                        <Text
+                          style={[
+                            typography.body,
+                            styles.toggleTitle,
+                            { color: colors.text },
+                          ]}
+                        >
+                          {isPublic ? t("list.editModal.public") : t("list.editModal.private")}
+                        </Text>
+                        <Text
+                          style={[
+                            typography.caption,
+                            styles.toggleDescription,
+                            { color: colors.secondaryText },
+                          ]}
+                        >
+                          {isPublic
+                            ? t("list.editModal.publicDescription")
+                            : t("list.editModal.privateDescription")
+                          }
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                </Pressable>
+                  </Pressable>
+                </Animated.View>
 
                 {/* Ranked Toggle */}
-                <Pressable
-                  style={[
-                    styles.toggleButton,
-                    {
-                      backgroundColor: colors.card,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                  onPress={toggleRanked}
-                >
-                  <View style={styles.toggleContent}>
-                    {ranked ? (
-                      <Trophy size={20} color={colors.text} />
-                    ) : (
-                      <Users size={20} color={colors.text} />
-                    )}
-                    <View style={styles.toggleTextContainer}>
-                      <Text
-                        style={[
-                          typography.body,
-                          styles.toggleTitle,
-                          { color: colors.text },
-                        ]}
-                      >
-                        {ranked ? t("list.editModal.ranked") : t("list.editModal.collection")}
-                      </Text>
-                      <Text
-                        style={[
-                          typography.caption,
-                          styles.toggleDescription,
-                          { color: colors.secondaryText },
-                        ]}
-                      >
-                        {ranked 
-                          ? t("list.editModal.rankedDescription")
-                          : t("list.editModal.collectionDescription")
-                        }
-                      </Text>
+                <Animated.View style={rankedAnimatedStyle}>
+                  <Pressable
+                    style={[
+                      styles.toggleButton,
+                      {
+                        backgroundColor: colors.card,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                    onPress={toggleRanked}
+                  >
+                    <View style={styles.toggleContent}>
+                      {ranked ? (
+                        <Trophy size={20} color={colors.text} />
+                      ) : (
+                        <Users size={20} color={colors.text} />
+                      )}
+                      <View style={styles.toggleTextContainer}>
+                        <Text
+                          style={[
+                            typography.body,
+                            styles.toggleTitle,
+                            { color: colors.text },
+                          ]}
+                        >
+                          {ranked ? t("list.editModal.ranked") : t("list.editModal.collection")}
+                        </Text>
+                        <Text
+                          style={[
+                            typography.caption,
+                            styles.toggleDescription,
+                            { color: colors.secondaryText },
+                          ]}
+                        >
+                          {ranked
+                            ? t("list.editModal.rankedDescription")
+                            : t("list.editModal.collectionDescription")
+                          }
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                </Pressable>
+                  </Pressable>
+                </Animated.View>
               </View>
             </View>
         </ScrollView>
         </View>
+
+      <UnsavedChangesBottomSheet
+        ref={unsavedChangesRef}
+        onDiscard={() => router.back()}
+      />
     </KeyboardAvoidingView>
   );
 }

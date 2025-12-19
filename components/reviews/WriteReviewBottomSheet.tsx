@@ -55,19 +55,21 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
 
     const handleSubmit = useCallback(() => {
       if (!canSubmit || isPending) return;
-      
+
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      
+
       if (isEditing && existingReview) {
         updateReview(
           { reviewId: existingReview.id, dto: { content: content.trim(), isSpoiler } },
           {
             onSuccess: () => {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               toast.success(t("reviews.updateSuccess"));
               (ref as React.RefObject<TrueSheet>)?.current?.dismiss();
               onSuccess?.();
             },
             onError: () => {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
               toast.error(t("reviews.updateError"));
             },
           }
@@ -77,6 +79,7 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
           { content: content.trim(), isSpoiler },
           {
             onSuccess: () => {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               toast.success(t("reviews.createSuccess"));
               setContent("");
               setIsSpoiler(false);
@@ -84,6 +87,7 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
               onSuccess?.();
             },
             onError: (error) => {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
               console.error("Create review error:", error);
               toast.error(t("reviews.createError"));
             },
@@ -96,7 +100,6 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
       <TrueSheet
         ref={ref}
         detents={["auto"]}
-        cornerRadius={24}
         backgroundColor={colors.background}
         grabber={false}
       >

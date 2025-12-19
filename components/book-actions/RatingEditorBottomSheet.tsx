@@ -2,6 +2,7 @@ import React, { forwardRef, useCallback, useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
+import * as Haptics from "expo-haptics";
 import { Book } from "@/types/book";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
@@ -52,10 +53,12 @@ const RatingEditorBottomSheet = forwardRef<
 
       const ratingValue = tempRating === 0 ? null : tempRating;
       await updateTrackedBook(book.id, { rating: ratingValue });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       onRatingUpdated?.(ratingValue);
       closeSheet();
     } catch (error) {
       console.error("Error saving rating:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
 
@@ -63,7 +66,6 @@ const RatingEditorBottomSheet = forwardRef<
     <TrueSheet
       ref={ref}
       detents={["auto"]}
-      cornerRadius={30}
       backgroundColor={colors.background}
       grabber={false}
       onDidDismiss={handleSheetDismiss}

@@ -86,7 +86,6 @@ export default function ReviewDetailScreen() {
 
   const handleUserPress = () => {
     if (!review) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/profile/${review.user.username}`);
   };
 

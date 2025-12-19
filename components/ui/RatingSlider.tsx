@@ -13,6 +13,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
+import { useTranslation } from 'react-i18next';
 
 interface RatingSliderProps {
   bookId: string;
@@ -30,6 +31,7 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
   style,
 }) => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const typography = useTypography();
   const [currentRating, setCurrentRating] = useState<number>(0);
   const scaleValue = useSharedValue(1);
@@ -103,8 +105,8 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
 
     // Determine star fill based on current rating
     const getStarFill = () => {
-      if (rating >= starValue) return colors.primary;
-      if (rating >= starValue - 0.5) return colors.primary;
+      if (rating >= starValue) return colors.accent;
+      if (rating >= starValue - 0.5) return colors.accent;
       return 'transparent';
     };
 
@@ -124,7 +126,7 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
         <View style={{ position: 'relative' }}>
           <Star
             size={size}
-            color={colors.primary}
+            color={colors.accent}
             fill={getStarFill()}
             strokeWidth={1.5}
             opacity={getStarOpacity()}
@@ -141,8 +143,8 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
             >
               <Star
                 size={size}
-                color={colors.primary}
-                fill={colors.primary}
+                color={colors.accent}
+                fill={colors.accent}
                 strokeWidth={1.5}
               />
             </View>
@@ -156,7 +158,7 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
     <View style={[styles.container, style]}>
       {showValue && (
         <Text style={[typography.h2, { color: colors.text, textAlign: 'center', marginBottom: 24 }]}>
-          {currentRating === 0 ? 'Pas encore noté' : `${(currentRating || 0).toFixed(1)}/5.0`}
+          {currentRating === 0 ? t("ratingSlider.notRated") : `${(currentRating || 0).toFixed(1)}/5.0`}
         </Text>
       )}
       
@@ -167,7 +169,7 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
       </GestureDetector>
 
       <Text style={[typography.caption, { color: colors.secondaryText, textAlign: 'center', marginTop: 16 }]}>
-        Glissez ou touchez pour noter
+        {t("ratingSlider.dragOrTapToRate")}
       </Text>
 
         <View style={styles.resetContainer}>
@@ -175,7 +177,7 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
             style={[
               typography.caption,
               { 
-                color: currentRating === 0 ? colors.secondaryText : colors.primary,
+                color: currentRating === 0 ? colors.secondaryText : colors.accent,
                 textAlign: 'center',
                 marginTop: 12,
                 textDecorationLine: currentRating === 0 ? 'none' : 'underline',
@@ -186,7 +188,7 @@ const RatingSlider: React.FC<RatingSliderProps> = ({
             accessibilityState={{ disabled: currentRating === 0 }}
             disabled={currentRating === 0}
           >
-            Supprimer la note
+            {t("ratingSlider.deleteRating")}
           </Text>
         </View>
     </View>

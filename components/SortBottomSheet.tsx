@@ -8,6 +8,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import {
@@ -135,6 +136,7 @@ const SortBottomSheet = forwardRef<TrueSheet, SortBottomSheetProps>(
     ];
 
     const handleSortPress = (sortOption: SortOption) => {
+      Haptics.selectionAsync();
       onSortChange(sortOption);
       const sheetRef = typeof ref === 'object' ? ref?.current : null;
       if (sheetRef) {
@@ -152,7 +154,6 @@ const SortBottomSheet = forwardRef<TrueSheet, SortBottomSheetProps>(
       <TrueSheet
         ref={ref}
         detents={["auto"]}
-        cornerRadius={30}
         backgroundColor={colors.background}
         grabber={false}
       >

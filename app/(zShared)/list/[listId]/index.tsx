@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import * as Haptics from "expo-haptics";
-import { View, Text, StyleSheet, FlatList, Alert, Pressable } from "react-native";
+import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
@@ -24,6 +24,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Ellipsis } from "lucide-react-native";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import ListActionsBottomSheet from "@/components/ListActionsBottomSheet";
+import DeleteBottomSheet from "@/components/shared/DeleteBottomSheet";
 import Avatar from "@/components/ui/Avatar";
 import PlusBadge from "@/components/ui/PlusBadge";
 import PillButton from "@/components/ui/PillButton";
@@ -407,6 +408,8 @@ export default function ListFullScreen() {
   });
   const [titleY, setTitleY] = useState<number>(0);
   const listActionsBottomSheetRef = useRef<TrueSheet>(null);
+  const deleteBottomSheetRef = useRef<TrueSheet>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const currentLayout = useUIStore(state => state.listLayout);
   const setLayout = useUIStore(state => state.setListLayout);
   const insets = useSafeAreaInsets();
@@ -491,32 +494,24 @@ export default function ListFullScreen() {
 
   const handleDeleteList = () => {
     if (!list) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    deleteBottomSheetRef.current?.present();
+  };
 
-    Alert.alert(
-      "Supprimer la liste",
-      `Êtes-vous sûr de vouloir supprimer la liste "${list.name}" ? Cette action est irréversible.`,
-      [
-        {
-          text: "Annuler",
-          style: "cancel",
-        },
-        {
-          text: "Supprimer",
-          onPress: async () => {
-            if (!list) return;
-            try {
-              await deleteListFromStore(list.id);
-              toast(t("toast.listDeleted"));
-              router.back();
-            } catch (error) {
-              toast.error(t("toast.errorDeletingList"));
-              console.error("Failed to delete list:", error);
-            }
-          },
-          style: "destructive",
-        },
-      ]
-    );
+  const confirmDeleteList = async () => {
+    if (!list) return;
+    setIsDeleting(true);
+    try {
+      await deleteListFromStore(list.id);
+      toast(t("toast.listDeleted"));
+      router.back();
+    } catch (error) {
+      toast.error(t("toast.errorDeletingList"));
+      console.error("Failed to delete list:", error);
+      throw error;
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Local button animation handlers removed; handled inside PillButton
@@ -686,15 +681,12 @@ export default function ListFullScreen() {
               isEditable={isEditable(list.id)}
               isOwnList={isOwnList}
               onReorderPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push(`/list/${listId}/reorder`);
               }}
               onEditPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push(`/list/${listId}/edit`);
               }}
               onDeletePress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 handleDeleteList();
               }}
               onActionsPress={() => handlePresentModalPress("actions")}
@@ -762,10 +754,20 @@ export default function ListFullScreen() {
         />
       )}
       {list && (
-        <ListActionsBottomSheet
-          ref={listActionsBottomSheetRef}
-          list={list}
-        />
+        <>
+          <ListActionsBottomSheet
+            ref={listActionsBottomSheetRef}
+            list={list}
+          />
+          <DeleteBottomSheet
+            ref={deleteBottomSheetRef}
+            title={t("list.deleteModal.title")}
+            message={t("list.deleteModal.message")}
+            itemName={list.name}
+            onConfirm={confirmDeleteList}
+            isDeleting={isDeleting}
+          />
+        </>
       )}
     </View>
   );

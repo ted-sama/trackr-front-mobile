@@ -2,6 +2,7 @@
 import React, { forwardRef, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, interpolateColor, withTiming } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
@@ -107,7 +108,7 @@ const SetChapterBottomSheet = forwardRef<TrueSheet, SetChapterBottomSheetProps>(
     const handleDismiss = () => {
         // Toujours réinitialiser l'état du chapitre à la fermeture
         setChapter(bookTracking?.currentChapter?.toString() ?? '0');
-        
+
         if (onDismiss) {
             onDismiss();
         }
@@ -129,33 +130,38 @@ const SetChapterBottomSheet = forwardRef<TrueSheet, SetChapterBottomSheetProps>(
 
     const handleSave = async () => {
         if (isTracking) {
-            const chapterNumber = Number(chapter);
-            const hasKnownChapterCount = book.chapters !== null && book.chapters !== undefined;
-            const isCompleting = hasKnownChapterCount && chapterNumber >= book.chapters!;
-            const wasAlreadyCompleted = bookTracking?.status === 'completed';
-            const isGoingBackFromCompleted = wasAlreadyCompleted && hasKnownChapterCount && chapterNumber < book.chapters!;
-            
-            // Build update data with status changes
-            const updateData: { currentChapter: number; status?: 'completed' | 'reading' } = { currentChapter: chapterNumber };
-            
-            if (isCompleting) {
-                // If reaching max chapters, set status to "completed"
-                updateData.status = 'completed';
-            } else if (isGoingBackFromCompleted) {
-                // If going back from completed, set status to "reading"
-                updateData.status = 'reading';
-            }
-            
-            await updateTrackedBook(book.id, updateData);
-            setChapter(chapter);
-            
-            // Trigger celebration only if this action completes the book (wasn't already completed)
-            if (isCompleting && !wasAlreadyCompleted) {
-                onBookCompleted?.();
-            }
-            
-            if (ref && typeof ref === 'object' && 'current' in ref) {
-                ref.current?.dismiss();
+            try {
+                const chapterNumber = Number(chapter);
+                const hasKnownChapterCount = book.chapters !== null && book.chapters !== undefined;
+                const isCompleting = hasKnownChapterCount && chapterNumber >= book.chapters!;
+                const wasAlreadyCompleted = bookTracking?.status === 'completed';
+                const isGoingBackFromCompleted = wasAlreadyCompleted && hasKnownChapterCount && chapterNumber < book.chapters!;
+
+                // Build update data with status changes
+                const updateData: { currentChapter: number; status?: 'completed' | 'reading' } = { currentChapter: chapterNumber };
+
+                if (isCompleting) {
+                    // If reaching max chapters, set status to "completed"
+                    updateData.status = 'completed';
+                } else if (isGoingBackFromCompleted) {
+                    // If going back from completed, set status to "reading"
+                    updateData.status = 'reading';
+                }
+
+                await updateTrackedBook(book.id, updateData);
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                setChapter(chapter);
+
+                // Trigger celebration only if this action completes the book (wasn't already completed)
+                if (isCompleting && !wasAlreadyCompleted) {
+                    onBookCompleted?.();
+                }
+
+                if (ref && typeof ref === 'object' && 'current' in ref) {
+                    ref.current?.dismiss();
+                }
+            } catch (error) {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             }
         }
     };
@@ -164,7 +170,6 @@ const SetChapterBottomSheet = forwardRef<TrueSheet, SetChapterBottomSheetProps>(
         <TrueSheet
             ref={ref}
             detents={["auto"]}
-            cornerRadius={30}
             backgroundColor={colors.background}
             grabber={false}
             onDidDismiss={handleDismiss}
