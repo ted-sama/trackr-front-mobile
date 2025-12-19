@@ -170,6 +170,16 @@ export default function Settings() {
           </SettingsSection>
         )}
 
+        {isAuthenticated && (
+          <SettingsSection title={t('settings.privacy.title')}>
+            <SettingsItem
+              icon="lock-closed-outline"
+              label={t('settings.privacy.title')}
+              onPress={() => router.push('/(zShared)/privacy')}
+            />
+          </SettingsSection>
+        )}
+
         <SettingsSection title={t('settings.appearance.title')}>
           <SettingsItem
             icon="color-palette-outline"

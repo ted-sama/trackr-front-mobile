@@ -294,7 +294,7 @@ export default function Profile() {
               </Text>
               {currentUser?.plan === "plus" && <PlusBadge />}
             </View>
-            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{currentUser?.username}</Text>
+            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>@{currentUser?.username}</Text>
             <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.memberSince")} {dayjs.utc(currentUser?.createdAt).format("DD/MM/YYYY")}</Text>
           </View>
         </View>

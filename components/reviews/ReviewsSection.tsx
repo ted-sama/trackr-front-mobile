@@ -28,6 +28,7 @@ import LikeButton from "@/components/ui/LikeButton";
 import ActionButton from "@/components/ui/ActionButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { useToggleReviewLike } from "@/hooks/queries/reviews";
+import DotSeparator from "@/components/ui/DotSeparator";
 
 interface ReviewsSectionProps {
     bookId: string;
@@ -157,15 +158,7 @@ export function ReviewsSection({
                     </Text>
                     {data?.total != null && data.total > 0 && (
                         <>
-                            <Text
-                                style={{
-                                    fontWeight: "900",
-                                    marginHorizontal: 4,
-                                    color: colors.secondaryText,
-                                }}
-                            >
-                                ·
-                            </Text>
+                            <DotSeparator />
                             <Text
                                 style={[typography.caption, { color: colors.secondaryText }]}
                             >

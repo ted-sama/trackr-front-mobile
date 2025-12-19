@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import Animated, {
   useAnimatedScrollHandler,
@@ -43,7 +44,10 @@ export default function StatsScreen() {
 
   const isMe = !username || username === currentUser?.username;
   const { data: user } = isMe ? { data: currentUser } : useUser(username || '');
-  const { data: stats, isLoading, isError } = isMe ? useMeStats() : useUserStats(username);
+  const { data: stats, isLoading, isError, error } = isMe ? useMeStats() : useUserStats(username);
+
+  // Check if error is due to private stats
+  const isPrivateError = (error as any)?.response?.data?.code === 'STATS_PRIVATE';
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -165,13 +169,22 @@ export default function StatsScreen() {
       <View
         style={[
           styles.container,
-          { backgroundColor: colors.background, justifyContent: "center", alignItems: "center" },
+          { backgroundColor: colors.background, justifyContent: "center", alignItems: "center", paddingHorizontal: 32 },
         ]}
       >
         <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-        <Text style={[typography.body, { color: colors.secondaryText }]}>
-          Une erreur est survenue lors du chargement des statistiques.
-        </Text>
+        {isPrivateError ? (
+          <>
+            <Ionicons name="lock-closed" size={48} color={colors.secondaryText} style={{ marginBottom: 16 }} />
+            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>
+              {t("stats.private")}
+            </Text>
+          </>
+        ) : (
+          <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>
+            {t("stats.error")}
+          </Text>
+        )}
       </View>
     );
   }

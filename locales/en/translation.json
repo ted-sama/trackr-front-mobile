@@ -255,7 +255,9 @@
             "series": "{{count}} series",
             "serie": "{{count}} serie",
             "total": "books"
-        }
+        },
+        "private": "This user's statistics are private",
+        "error": "An error occurred while loading statistics"
     },
     "settings": {
         "title": "Settings",
@@ -290,6 +292,14 @@
             "version": "Version",
             "privacy": "Privacy policy",
             "terms": "Terms of service"
+        },
+        "privacy": {
+            "title": "Privacy",
+            "description": "Control what other users can see on your profile.",
+            "statsPublic": "Public statistics",
+            "statsPublicDescription": "Allow other users to view your statistics",
+            "activityPublic": "Public activity",
+            "activityPublicDescription": "Allow other users to view your activity log"
         }
     },
     "languages": {
@@ -522,6 +532,8 @@
     "activity": {
         "title": "Activity",
         "empty": "No activity yet",
+        "private": "This user's activity is private",
+        "error": "An error occurred while loading activity",
         "loadingMore": "Loading more activities...",
         "noMoreActivities": "No more activities to load",
         "me": {

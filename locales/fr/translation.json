@@ -255,7 +255,9 @@
             "series": "{{count}} séries",
             "serie": "{{count}} série",
             "total": "livres"
-        }
+        },
+        "private": "Les statistiques de cet utilisateur sont privées",
+        "error": "Une erreur est survenue lors du chargement des statistiques"
     },
     "settings": {
         "title": "Paramètres",
@@ -290,6 +292,14 @@
             "version": "Version",
             "privacy": "Politique de confidentialité",
             "terms": "Conditions d'utilisation"
+        },
+        "privacy": {
+            "title": "Confidentialité",
+            "description": "Contrôlez ce que les autres utilisateurs peuvent voir sur votre profil.",
+            "statsPublic": "Statistiques publiques",
+            "statsPublicDescription": "Autoriser les autres utilisateurs à voir vos statistiques",
+            "activityPublic": "Activité publique",
+            "activityPublicDescription": "Autoriser les autres utilisateurs à voir votre journal d'activité"
         }
     },
     "languages": {
@@ -523,6 +533,8 @@
     "activity": {
         "title": "Activité",
         "empty": "Aucune activité pour le moment",
+        "private": "L'activité de cet utilisateur est privée",
+        "error": "Une erreur est survenue lors du chargement de l'activité",
         "loadingMore": "Chargement d'autres activités...",
         "noMoreActivities": "Aucune autre activité à charger",
         "me": {

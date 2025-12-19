@@ -26,6 +26,7 @@ import PlusBadge from "@/components/ui/PlusBadge";
 import { useToggleReviewLike } from "@/hooks/queries/reviews";
 import { useUserStore } from "@/stores/userStore";
 import { useTranslation } from "react-i18next";
+import DotSeparator from "../ui/DotSeparator";
 
 dayjs.extend(relativeTime);
 
@@ -153,9 +154,7 @@ export function ReviewCard({
                 </Text>
                 {review.revisionsCount > 0 && (
                   <>
-                    <Text style={[typography.bodyCaption, { color: colors.secondaryText, marginHorizontal: 4 }]}>
-                      •
-                    </Text>
+                    <DotSeparator />
                     <History size={12} color={colors.secondaryText} />
                     <Text style={[typography.bodyCaption, { color: colors.secondaryText, marginLeft: 3 }]}>
                       {review.revisionsCount}

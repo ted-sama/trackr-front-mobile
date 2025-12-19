@@ -12,6 +12,8 @@ export interface User {
     preferences?: {
         [key: string]: any;
     };
+    isStatsPublic: boolean;
+    isActivityPublic: boolean;
     createdAt: string;
     updatedAt: string;
 };

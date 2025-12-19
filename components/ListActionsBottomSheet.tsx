@@ -15,6 +15,7 @@ import { useList } from "@/hooks/queries/lists";
 import { useUserStore } from "@/stores/userStore";
 import { useTranslation } from "react-i18next";
 import ReportBottomSheet from "./ReportBottomSheet";
+import DotSeparator from "./ui/DotSeparator";
 
 export interface ListActionsBottomSheetProps {
   list: List;
@@ -106,9 +107,6 @@ const ListActionsBottomSheet = forwardRef<TrueSheet, ListActionsBottomSheetProps
       }, 300);
     };
 
-    const separator = () => (
-      <Text style={{ fontWeight: "900", marginHorizontal: 4, color: colors.secondaryText }}>·</Text>
-    );
 
     const actions = [
       // Share action - always available
@@ -149,7 +147,7 @@ const ListActionsBottomSheet = forwardRef<TrueSheet, ListActionsBottomSheetProps
                     <Text style={[typography.caption, { color: colors.secondaryText }]}>
                       {t("list.by", { username: list.owner.username })}
                     </Text>
-                    {separator()}
+                    <DotSeparator />
                     <Text style={[typography.caption, { color: colors.secondaryText }]}>
                       {list.books.total > 1
                         ? t("list.itemsCount", { count: list.books.total })

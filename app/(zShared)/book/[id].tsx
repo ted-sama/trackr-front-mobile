@@ -63,6 +63,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/hooks/queries/keys";
 import { useAuth } from "@/contexts/AuthContext";
 import RatingStars from "@/components/ui/RatingStars";
+import DotSeparator from "@/components/ui/DotSeparator";
 import { useLocalization } from "@/hooks/useLocalization";
 import { getLocalizedDescription } from "@/utils/description";
 import { useTranslation } from "react-i18next";
@@ -401,19 +402,6 @@ export default function BookScreen() {
     );
   }
 
-  const separator = () => {
-    return (
-      <Text
-        style={{
-          fontWeight: "900",
-          marginHorizontal: 4,
-          color: colors.secondaryText,
-        }}
-      >
-        ·
-      </Text>
-    );
-  };
   const dates = () => {
     if (book?.releaseYear && book?.endYear) {
       return `${book?.releaseYear} - ${book?.endYear}`;
@@ -775,7 +763,7 @@ export default function BookScreen() {
                 >
                   {t("common.bookTypes." + book?.type)}
                 </Text>
-                {separator()}
+                <DotSeparator />
                 <Text
                   style={[typography.caption, { color: colors.secondaryText }]}
                   numberOfLines={1}
@@ -784,7 +772,7 @@ export default function BookScreen() {
                 </Text>
                 {book?.chapters && (
                   <>
-                    {separator()}
+                    <DotSeparator />
                     <Text style={[typography.caption, { color: colors.secondaryText }]}>
                       {book?.type === "comic"
                         ? `${book?.chapters} ${book?.chapters === 1 ? t("common.issue") : t("common.issues")}`
@@ -864,7 +852,7 @@ export default function BookScreen() {
                   {book?.rating ? book?.rating : "N/A"}
                 </Text>
               </View>
-              {separator()}
+              <DotSeparator />
               <Text
                 style={[typography.caption, { color: colors.secondaryText }]}
               >
@@ -875,7 +863,7 @@ export default function BookScreen() {
                     : t("book.rating")
                   : t("book.rating")}
               </Text>
-              {separator()}
+              <DotSeparator />
               <Text
                 style={[typography.caption, { color: colors.secondaryText }]}
               >

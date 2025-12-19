@@ -32,6 +32,7 @@ import {
   MinusIcon,
   BookImageIcon,
   MessageSquareTextIcon,
+  LockIcon,
 } from "lucide-react-native";
 import { snakeToCamel } from "@/utils/snakeToCamel";
 import RatingStars from "@/components/ui/RatingStars";
@@ -266,14 +267,19 @@ export default function ActivityPage() {
   // Récupérer les infos de l'utilisateur si ce n'est pas moi
   const { data: user } = useUser(isMe ? '' : username || '');
   
-  const { 
-    data, 
-    isLoading, 
-    fetchNextPage, 
-    hasNextPage, 
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
     isFetchingNextPage,
     refetch,
+    error,
+    isError,
   } = useUserActivity(username);
+
+  // Check if error is due to private activity
+  const isPrivateError = (error as any)?.response?.data?.code === 'ACTIVITY_PRIVATE';
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -335,6 +341,25 @@ export default function ActivityPage() {
         </View>
       );
     }
+    if (isPrivateError) {
+      return (
+        <View style={styles.emptyContainer}>
+          <LockIcon size={48} color={colors.secondaryText} style={{ marginBottom: 16 }} />
+          <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>
+            {t("activity.private")}
+          </Text>
+        </View>
+      );
+    }
+    if (isError) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>
+            {t("activity.error")}
+          </Text>
+        </View>
+      );
+    }
     return (
       <View style={styles.emptyContainer}>
         <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>
@@ -342,7 +367,7 @@ export default function ActivityPage() {
         </Text>
       </View>
     );
-  }, [isLoading, colors.accent, colors.secondaryText, typography.body, t]);
+  }, [isLoading, isPrivateError, isError, colors.accent, colors.secondaryText, typography.body, t]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

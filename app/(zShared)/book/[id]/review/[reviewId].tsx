@@ -34,6 +34,7 @@ import { useUserStore } from "@/stores/userStore";
 import { useAuth } from "@/contexts/AuthContext";
 import { BookReviewRevision } from "@/types/review";
 import PillButton from "@/components/ui/PillButton";
+import DotSeparator from "@/components/ui/DotSeparator";
 
 dayjs.extend(relativeTime);
 
@@ -189,7 +190,7 @@ export default function ReviewDetailScreen() {
               )}
             </View>
             <Text style={[typography.caption, { color: colors.secondaryText }]}>
-              {review.user.username}
+              @{review.user.username}
             </Text>
           </View>
         </Pressable>
@@ -258,7 +259,7 @@ export default function ReviewDetailScreen() {
           <View style={styles.dateRow}>
             <Clock size={14} color={colors.secondaryText} />
             <Text style={[typography.caption, { color: colors.secondaryText, marginLeft: 6 }]}>
-              {formattedDate} · {formattedFullDate}
+              {formattedDate} <DotSeparator /> {formattedFullDate}
             </Text>
           </View>
           {wasEdited && (
@@ -295,7 +296,8 @@ export default function ReviewDetailScreen() {
               <Text style={[typography.categoryTitle, { color: colors.text }]}>
                 {t("reviews.previousVersions")}
               </Text>
-              <Text style={[typography.caption, { color: colors.secondaryText, marginLeft: 8 }]}>
+              <DotSeparator />
+              <Text style={[typography.caption, { color: colors.secondaryText }]}>
                 {review.revisionsCount} {review.revisionsCount === 1 ? t("reviews.revision") : t("reviews.revisions")}
               </Text>
             </View>

@@ -207,22 +207,22 @@ export default function UserProfileScreen() {
         scrollY={scrollY}
         collapseThreshold={titleY > 0 ? titleY : undefined}
         onBack={() => router.back()}
-        closeRightButtonIcon={<Notebook size={22} color={colors.icon} />}
-        onCloseRightButtonPress={() => {
+        closeRightButtonIcon={(isMe || user?.isActivityPublic !== false) ? <Notebook size={22} color={colors.icon} /> : undefined}
+        onCloseRightButtonPress={(isMe || user?.isActivityPublic !== false) ? () => {
           if (isMe) {
             router.push(`/activity/${currentUser?.username}`);
           } else {
             router.push(`/activity/${user?.username}`);
           }
-        }}
-        rightButtonIcon={<ChartNoAxesCombined size={22} color={colors.icon} />}
-        onRightButtonPress={() => {
+        } : undefined}
+        rightButtonIcon={(isMe || user?.isStatsPublic !== false) ? <ChartNoAxesCombined size={22} color={colors.icon} /> : undefined}
+        onRightButtonPress={(isMe || user?.isStatsPublic !== false) ? () => {
           if (isMe) {
             router.push(`/stats`);
           } else {
             router.push(`/stats?username=${user?.username}`);
           }
-        }}
+        } : undefined}
       />
       <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} style={{ paddingTop: insets.top }} contentContainerStyle={{ paddingBottom: 64 }}>
         <View style={{ paddingHorizontal: 16 }}>
@@ -320,7 +320,7 @@ export default function UserProfileScreen() {
               </Text>
               {user?.plan === "plus" && <PlusBadge />}
             </View>
-            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{user?.username}</Text>
+            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>@{user?.username}</Text>
             <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.memberSince")} {dayjs.utc(user?.createdAt).format("DD/MM/YYYY")}</Text>
           </View>
         </View>
