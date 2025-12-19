@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     top: -1,
     left: 0,
     right: 0,
-    height: 64,
+    height: 32,
   },
   skeletonContainer: {
     flex: 1,
