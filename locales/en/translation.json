@@ -585,6 +585,11 @@
             "generic": "Failed to submit report. Please try again."
         }
     },
+    "error": {
+        "title": "Something went wrong",
+        "subtitle": "Unable to load data. Please try again.",
+        "tapToRetry": "Tap to retry"
+    },
     "subscription": {
         "title": "Subscription",
         "trackrPlus": "Trackr Plus",

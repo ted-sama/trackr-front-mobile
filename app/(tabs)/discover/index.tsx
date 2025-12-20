@@ -15,6 +15,7 @@ import CategorySlider from "@/components/CategorySlider";
 import CollectionListElement from "@/components/CollectionListElement";
 import { useTranslation } from "react-i18next";
 import { ChevronRight } from "lucide-react-native";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
 
 type FilterType = 'books' | 'lists' | 'users';
 
@@ -210,6 +211,7 @@ export default function Discover() {
   };
 
   return (
+    <ScreenWrapper>
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
       edges={["right", "left"]}
@@ -232,6 +234,7 @@ export default function Discover() {
         {renderContent()}
       </Animated.ScrollView>
     </SafeAreaView>
+    </ScreenWrapper>
   );
 }
 

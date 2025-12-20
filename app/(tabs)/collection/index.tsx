@@ -15,6 +15,7 @@ import { useTypography } from "@/hooks/useTypography";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useMyLists } from '@/hooks/queries/lists';
 import { useStableTrimmedQuery } from '@/hooks/useDebouncedValue';
+import { ScreenWrapper } from "@/components/ScreenWrapper";
 
 const AnimatedExpoImage = Animated.createAnimatedComponent(ExpoImage);
 
@@ -216,6 +217,7 @@ export default function Collection() {
   ), [mosaicBooks, colors, typography, router, myLibrary.length]);
 
   return (
+    <ScreenWrapper>
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["right", "left"]}>
       <CollectionHeader
         searchText={searchText}
@@ -239,6 +241,7 @@ export default function Collection() {
       />
       <CreateListBottomSheet ref={createListBottomSheetRef} />
     </SafeAreaView>
+    </ScreenWrapper>
   );
 }
 

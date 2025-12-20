@@ -15,6 +15,8 @@ import { useAnimatedStyle, useSharedValue, withTiming, useAnimatedScrollHandler 
 import Animated from "react-native-reanimated";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { HomeAnimatedHeader } from "@/components/home/HomeAnimatedHeader";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { ErrorState } from "@/components/ErrorState";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(Animated.ScrollView);
 
@@ -26,10 +28,15 @@ export default function Index() {
 
   // Subscribe to trackedBooks state directly so the component re-renders when it changes
   const trackedBooks = useTrackedBooksStore((state) => state.trackedBooks);
-  const { data: mostTracked, isLoading: isLoadingMostTracked } = useMostTrackedCategory();
-  const { data: topRated, isLoading: isLoadingTopRated } = useTopRatedCategory();
+  const { data: mostTracked, isLoading: isLoadingMostTracked, error: errorMostTracked, refetch: refetchMostTracked } = useMostTrackedCategory();
+  const { data: topRated, isLoading: isLoadingTopRated, error: errorTopRated, refetch: refetchTopRated } = useTopRatedCategory();
 
   const isLoading = isLoadingMostTracked || isLoadingTopRated;
+  const error = errorMostTracked || errorTopRated;
+  const refetch = () => {
+    refetchMostTracked();
+    refetchTopRated();
+  };
 
   const lastRead = React.useMemo(() => {
     const booksArray = Object.values(trackedBooks).filter(book => book && book.id);
@@ -62,6 +69,7 @@ export default function Index() {
 
   if (isLoading) {
     return (
+      <ScreenWrapper>
       <SafeAreaView
         edges={["right", "left"]}
         style={[styles.container, { backgroundColor: colors.background }]}
@@ -130,10 +138,26 @@ export default function Index() {
           </View>
         </AnimatedScrollView>
       </SafeAreaView>
+      </ScreenWrapper>
+    );
+  }
+
+  if (error && !isLoading) {
+    return (
+      <ScreenWrapper>
+      <SafeAreaView
+        edges={["right", "left"]}
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+        <ErrorState onRetry={refetch} />
+      </SafeAreaView>
+      </ScreenWrapper>
     );
   }
 
   return (
+    <ScreenWrapper>
     <SafeAreaView
       edges={["right", "left"]}
       style={[styles.container, { backgroundColor: colors.background }]}
@@ -183,6 +207,7 @@ export default function Index() {
         </View>
       </AnimatedScrollView>
     </SafeAreaView>
+    </ScreenWrapper>
   );
 }
 

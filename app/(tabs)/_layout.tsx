@@ -11,7 +11,7 @@ import { CircleUserRound, Library } from 'lucide-react-native';
 export default function TabLayout() {
   const { colors, currentTheme } = useTheme();
   const { t } = useTranslation();
-  const supportsLiquidGlass = Platform.OS === 'ios' && isLiquidGlassAvailable();
+    const supportsLiquidGlass = Platform.OS === 'ios' && isLiquidGlassAvailable();
 
   // if (supportsLiquidGlass) {
   //   return (

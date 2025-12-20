@@ -37,6 +37,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { getPalette } from "@somesoap/react-native-image-palette";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
 
 dayjs.extend(utc);
 
@@ -109,6 +110,7 @@ export default function Profile() {
 
   if (isLoading) {
     return (
+      <ScreenWrapper>
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
         <ScrollView contentContainerStyle={{ paddingBottom: 64 }}>
@@ -180,11 +182,13 @@ export default function Profile() {
           <SkeletonLoader width={22} height={22} style={{ borderRadius: 11 }} />
         </View>
       </View>
+      </ScreenWrapper>
     );
   }
 
   // no-op
   return (
+    <ScreenWrapper>
     <View style={{ flex: 1 }}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <AnimatedHeader
@@ -394,6 +398,7 @@ export default function Profile() {
         </View>
       </AnimatedScrollView>
     </View>
+    </ScreenWrapper>
   );
 }
 

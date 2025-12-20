@@ -586,6 +586,11 @@
             "generic": "Échec de l'envoi du signalement. Veuillez réessayer."
         }
     },
+    "error": {
+        "title": "Une erreur est survenue",
+        "subtitle": "Impossible de charger les données. Veuillez réessayer.",
+        "tapToRetry": "Appuyer pour réessayer"
+    },
     "subscription": {
         "title": "Abonnement",
         "trackrPlus": "Trackr Plus",
