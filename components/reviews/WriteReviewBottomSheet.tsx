@@ -4,15 +4,19 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
-  Switch,
   Pressable,
   Keyboard,
+  ScrollView,
 } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
-import { Star, Send, AlertTriangle } from "lucide-react-native";
+import { Check, AlertTriangle, Star } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import * as Haptics from "expo-haptics";
 
@@ -20,9 +24,9 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useCreateReview, useUpdateReview } from "@/hooks/queries/reviews";
 import { BookReview } from "@/types/review";
-import { BookTracking } from "@/types/reading-status";
 import { toast } from "sonner-native";
-import Button from "@/components/ui/Button";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface WriteReviewBottomSheetProps {
   bookId: string;
@@ -34,10 +38,10 @@ interface WriteReviewBottomSheetProps {
 
 const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps>(
   ({ bookId, bookTitle, userRating, existingReview, onSuccess }, ref) => {
-    const { colors, currentTheme } = useTheme();
+    const { colors } = useTheme();
     const typography = useTypography();
     const { t } = useTranslation();
-    
+
     const [content, setContent] = useState(existingReview?.content ?? "");
     const [isSpoiler, setIsSpoiler] = useState(existingReview?.isSpoiler ?? false);
     const isEditing = Boolean(existingReview);
@@ -48,10 +52,28 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
     const isPending = isCreating || isUpdating;
     const canSubmit = content.trim().length >= 10 && userRating !== null && userRating !== undefined;
 
+    // Animation scales
+    const spoilerScale = useSharedValue(1);
+    const submitScale = useSharedValue(1);
+
+    const spoilerAnimatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: spoilerScale.value }],
+    }));
+
+    const submitAnimatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: submitScale.value }],
+    }));
+
     useEffect(() => {
       setContent(existingReview?.content ?? "");
       setIsSpoiler(existingReview?.isSpoiler ?? false);
     }, [existingReview]);
+
+    const handleSpoilerToggle = useCallback(() => {
+      if (isPending) return;
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      setIsSpoiler(!isSpoiler);
+    }, [isPending, isSpoiler]);
 
     const handleSubmit = useCallback(() => {
       if (!canSubmit || isPending) return;
@@ -96,6 +118,11 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
       }
     }, [canSubmit, isPending, isEditing, existingReview, content, isSpoiler, createReview, updateReview, ref, onSuccess, t]);
 
+    const handleDismiss = useCallback(() => {
+      Keyboard.dismiss();
+      (ref as React.RefObject<TrueSheet>)?.current?.dismiss();
+    }, [ref]);
+
     return (
       <TrueSheet
         ref={ref}
@@ -103,111 +130,190 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
         backgroundColor={colors.background}
         grabber={false}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.container}
-        >
-          <Pressable style={styles.content} onPress={Keyboard.dismiss}>
-            {/* Header */}
-            <View style={styles.header}>
-              <Text style={[typography.categoryTitle, { color: colors.text }]}>
-                {isEditing ? t("reviews.editReview") : t("reviews.writeReview")}
-              </Text>
-              <Text 
-                style={[typography.bodyCaption, { color: colors.secondaryText, marginTop: 4 }]}
-                numberOfLines={1}
-              >
-                {bookTitle}
-              </Text>
-            </View>
-
-            {/* Rating Info */}
-            {userRating !== null && userRating !== undefined ? (
-              <View style={[styles.ratingInfo, { backgroundColor: colors.card }]}>
-                <Star size={16} fill={colors.primary} color={colors.primary} />
-                <Text style={[typography.bodyBold, { color: colors.text, marginLeft: 6 }]}>
-                  {t("reviews.yourRating")}: {userRating}/5
-                </Text>
-              </View>
-            ) : (
-              <View style={[styles.ratingWarning, { backgroundColor: colors.card, borderColor: colors.error }]}>
-                <Text style={[typography.bodyCaption, { color: colors.error }]}>
-                  {t("reviews.ratingRequired")}
-                </Text>
-              </View>
-            )}
-
-            {/* Text Input */}
-            <TextInput
-              style={[
-                styles.textInput,
-                typography.body,
-                {
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                  color: colors.text,
-                },
-              ]}
-              placeholder={t("reviews.placeholder")}
-              placeholderTextColor={colors.secondaryText}
-              value={content}
-              onChangeText={setContent}
-              multiline
-              maxLength={2000}
-              textAlignVertical="top"
-              autoCorrect={false}
-              autoCapitalize="sentences"
-              editable={!isPending}
-            />
-
-            {/* Spoiler Toggle */}
+        <View style={styles.container}>
+          {/* Header Toolbar */}
+          <View style={styles.header}>
             <Pressable
-              style={[styles.spoilerRow, { backgroundColor: colors.card, borderRadius: 12, padding: 12 }]}
-              onPress={() => !isPending && setIsSpoiler(!isSpoiler)}
+              style={styles.headerButton}
+              onPress={handleDismiss}
+              hitSlop={8}
             >
-              <View style={styles.spoilerLabel}>
-                <AlertTriangle size={18} color={isSpoiler ? "#F59E0B" : colors.secondaryText} />
-                <Text style={[typography.body, { color: isSpoiler ? "#F59E0B" : colors.text, marginLeft: 8, fontWeight: "500" }]}>
-                  {t("reviews.containsSpoiler")}
-                </Text>
-              </View>
-              <Switch
-                value={isSpoiler}
-                onValueChange={setIsSpoiler}
-                trackColor={{ false: colors.border, true: "#F59E0B" }}
-                thumbColor={Platform.OS === "android" ? "#FFFFFF" : undefined}
-                ios_backgroundColor={colors.border}
-                disabled={isPending}
-              />
+              <Text style={[typography.bodyBold, { color: colors.secondaryText }]}>
+                {t("common.cancel")}
+              </Text>
             </Pressable>
 
-            {/* Character count */}
-            <Text style={[typography.bodyCaption, styles.charCount, { color: colors.secondaryText }]}>
-              {content.length}/2000
+            <Text style={[typography.categoryTitle, { color: colors.text }]} numberOfLines={1}>
+              {isEditing ? t("reviews.editReview") : t("reviews.newReview")}
             </Text>
 
-            {/* Submit Button */}
-            {isPending ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="small" color={colors.primary} />
+            <View style={styles.headerActions}>
+              {/* Spoiler Toggle */}
+              <AnimatedPressable
+                style={[
+                  styles.iconButton,
+                  spoilerAnimatedStyle,
+                  {
+                    backgroundColor: isSpoiler ? "rgba(245, 158, 11, 0.15)" : colors.backButtonBackground,
+                    borderWidth: 1,
+                    borderColor: isSpoiler ? "#F59E0B" : colors.border,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 2,
+                    elevation: 1,
+                  },
+                ]}
+                onPressIn={() => {
+                  spoilerScale.value = withTiming(0.9, { duration: 100 });
+                }}
+                onPressOut={() => {
+                  spoilerScale.value = withTiming(1, { duration: 100 });
+                }}
+                onPress={handleSpoilerToggle}
+                hitSlop={4}
+              >
+                <AlertTriangle
+                  size={20}
+                  color={isSpoiler ? "#F59E0B" : colors.icon}
+                  fill={isSpoiler ? "#F59E0B" : "transparent"}
+                />
+              </AnimatedPressable>
+
+              {/* Submit Button */}
+              <AnimatedPressable
+                style={[
+                  styles.iconButton,
+                  submitAnimatedStyle,
+                  {
+                    backgroundColor: canSubmit ? colors.accent : colors.backButtonBackground,
+                    borderWidth: 1,
+                    borderColor: canSubmit ? colors.accent : colors.border,
+                    opacity: !canSubmit && !isPending ? 0.5 : 1,
+                    marginLeft: 8,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 2,
+                    elevation: 1,
+                  },
+                ]}
+                onPressIn={() => {
+                  if (canSubmit && !isPending) {
+                    submitScale.value = withTiming(0.9, { duration: 100 });
+                  }
+                }}
+                onPressOut={() => {
+                  submitScale.value = withTiming(1, { duration: 100 });
+                }}
+                onPress={handleSubmit}
+                disabled={!canSubmit || isPending}
+                hitSlop={4}
+              >
+                {isPending ? (
+                  <ActivityIndicator size="small" color={colors.buttonText} />
+                ) : (
+                  <Check
+                    size={20}
+                    color={canSubmit ? colors.buttonText : colors.icon}
+                    strokeWidth={2.5}
+                  />
+                )}
+              </AnimatedPressable>
+            </View>
+          </View>
+
+          {/* Book Title & Rating */}
+          <View style={styles.metaInfo}>
+            <Text
+              style={[
+                styles.bookTitle,
+                typography.body,
+                { color: colors.secondaryText },
+              ]}
+              numberOfLines={1}
+            >
+              {bookTitle}
+            </Text>
+
+            {userRating !== null && userRating !== undefined ? (
+              <View style={styles.ratingRow}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    size={16}
+                    color={star <= userRating ? colors.accent : colors.border}
+                    fill={star <= userRating ? colors.accent : "transparent"}
+                    style={{ marginRight: 2 }}
+                  />
+                ))}
               </View>
             ) : (
-              <Button
-                title={isEditing ? t("reviews.update") : t("reviews.publish")}
-                onPress={handleSubmit}
-                disabled={!canSubmit}
-                icon={<Send size={18} color="#fff" />}
-                iconPosition="left"
-                style={styles.submitButton}
-              />
+              <Text style={[typography.bodyCaption, { color: colors.error }]}>
+                {t("reviews.ratingRequired")}
+              </Text>
             )}
+          </View>
 
-            {/* Help text */}
-            <Text style={[typography.bodyCaption, styles.helpText, { color: colors.secondaryText }]}>
-              {t("reviews.helpText")}
+          {/* Writing Area with fades */}
+          <View style={styles.textAreaContainer}>
+            {/* Top fade */}
+            <LinearGradient
+              colors={[colors.background, `${colors.background}00`]}
+              style={styles.fadeTop}
+              pointerEvents="none"
+            />
+
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              <TextInput
+                style={[
+                  styles.textInput,
+                  {
+                    color: colors.text,
+                  },
+                ]}
+                placeholder={t("reviews.startWriting")}
+                placeholderTextColor={colors.secondaryText}
+                value={content}
+                onChangeText={setContent}
+                multiline
+                maxLength={2000}
+                textAlignVertical="top"
+                autoCorrect
+                autoCapitalize="sentences"
+                editable={!isPending}
+                scrollEnabled={false}
+              />
+            </ScrollView>
+
+            {/* Bottom fade */}
+            <LinearGradient
+              colors={[`${colors.background}00`, colors.background]}
+              style={styles.fadeBottom}
+              pointerEvents="none"
+            />
+          </View>
+
+          {/* Footer */}
+          <View style={[styles.footer, { borderTopColor: colors.border }]}>
+            <Text style={[typography.bodyCaption, { color: colors.secondaryText }]}>
+              {content.length}/2000
             </Text>
-          </Pressable>
-        </KeyboardAvoidingView>
+            {isSpoiler && (
+              <View style={styles.spoilerBadge}>
+                <AlertTriangle size={12} color="#F59E0B" />
+                <Text style={[typography.bodyCaption, { color: "#F59E0B", marginLeft: 4 }]}>
+                  {t("reviews.markedAsSpoiler")}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
       </TrueSheet>
     );
   }
@@ -217,66 +323,86 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
-    padding: 24,
-    paddingBottom: 40,
-  },
   header: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  ratingInfo: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 16,
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  ratingWarning: {
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 16,
+  headerButton: {
+    minWidth: 60,
+  },
+  headerActions: {
+    flexDirection: "row",
     alignItems: "center",
+    minWidth: 60,
+    justifyContent: "flex-end",
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  metaInfo: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  bookTitle: {
+    fontSize: 15,
+    marginBottom: 8,
+  },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  textAreaContainer: {
+    height: 280,
+    position: "relative",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   textInput: {
-    minHeight: 150,
-    maxHeight: 250,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 17,
+    lineHeight: 26,
+    minHeight: 250,
   },
-  spoilerRow: {
+  fadeTop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 24,
+    zIndex: 1,
+  },
+  fadeBottom: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 24,
+    zIndex: 1,
+  },
+  footer: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    paddingBottom: 24,
+    borderTopWidth: StyleSheet.hairlineWidth,
   },
-  spoilerLabel: {
+  spoilerBadge: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  charCount: {
-    textAlign: "right",
-    marginTop: 8,
-  },
-  loadingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    marginTop: 16,
-  },
-  submitButton: {
-    marginTop: 16,
-  },
-  helpText: {
-    textAlign: "center",
-    marginTop: 12,
-    lineHeight: 18,
   },
 });
 

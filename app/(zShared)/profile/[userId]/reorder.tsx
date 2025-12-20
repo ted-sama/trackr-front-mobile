@@ -138,7 +138,7 @@ export default function ReorderFavoritesModal() {
           style={[
             styles.iconButton,
             {
-              backgroundColor: colors.primary,
+              backgroundColor: colors.accent,
               opacity: isSaveDisabled ? 0.5 : 1,
               borderWidth: 1,
               borderColor: colors.border,

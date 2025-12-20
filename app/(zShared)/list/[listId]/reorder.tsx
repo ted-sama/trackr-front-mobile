@@ -177,7 +177,7 @@ export default function ListOrder() {
           style={[
             styles.backButton,
             {
-              backgroundColor: colors.primary,
+              backgroundColor: colors.accent,
               opacity: hasChanges ? 1 : 0.5,
               borderWidth: 1,
               borderColor: colors.border,

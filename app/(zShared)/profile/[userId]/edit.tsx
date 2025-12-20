@@ -301,7 +301,7 @@ export default function ProfileEditModal() {
           style={[
             styles.backButton,
             {
-              backgroundColor: colors.primary,
+              backgroundColor: colors.accent,
               opacity: hasChanges ? 1 : 0.5,
               borderWidth: 1,
               borderColor: colors.border,
@@ -330,7 +330,7 @@ export default function ProfileEditModal() {
             style={[
               styles.modeToggleButton,
               { backgroundColor: colors.card, borderColor: colors.border },
-              backdropMode === "color" && { borderColor: colors.primary },
+              backdropMode === "color" && { borderColor: colors.accent },
             ]}
             onPress={() => {
               setBackdropMode("color");
@@ -360,7 +360,7 @@ export default function ProfileEditModal() {
                 opacity: isPlus ? 1 : 0.6,
               },
               backdropMode === "image" && {
-                borderColor: isPlus ? colors.primary : colors.border,
+                borderColor: isPlus ? colors.accent : colors.border,
               },
             ]}
             onPress={() => {
@@ -453,7 +453,7 @@ export default function ProfileEditModal() {
             <View
               style={[
                 styles.avatarCameraBtn,
-                { backgroundColor: colors.primary },
+                { backgroundColor: colors.accent },
               ]}
             >
               <Ionicons name="camera" size={14} color={colors.buttonText} />
@@ -498,7 +498,7 @@ export default function ProfileEditModal() {
                       (backdropColor ||
                         currentUser.backdropColor ||
                         "#7C3AED") === c
-                        ? colors.primary
+                        ? colors.accent
                         : "transparent",
                   },
                 ]}

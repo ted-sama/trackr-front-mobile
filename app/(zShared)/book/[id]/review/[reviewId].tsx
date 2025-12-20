@@ -210,8 +210,8 @@ export default function ReviewDetailScreen() {
                     <StarHalf
                       key={star}
                       size={15}
-                      fill={colors.primary}
-                      color={colors.primary}
+                      fill={colors.accent}
+                      color={colors.accent}
                       style={{ marginRight: 4 }}
                     />
                   );
@@ -220,8 +220,8 @@ export default function ReviewDetailScreen() {
                   <Star
                     key={star}
                     size={15}
-                    fill={isFull ? colors.primary : "transparent"}
-                    color={isFull ? colors.primary : colors.border}
+                    fill={isFull ? colors.accent : "transparent"}
+                    color={isFull ? colors.accent : colors.border}
                     style={{ marginRight: 4 }}
                   />
                 );
@@ -333,8 +333,8 @@ export default function ReviewDetailScreen() {
                               <StarHalf
                                 key={star}
                                 size={12}
-                                fill={colors.primary}
-                                color={colors.primary}
+                                fill={colors.accent}
+                                color={colors.accent}
                                 style={{ marginRight: 2 }}
                               />
                             );
@@ -343,8 +343,8 @@ export default function ReviewDetailScreen() {
                             <Star
                               key={star}
                               size={12}
-                              fill={isFull ? colors.primary : "transparent"}
-                              color={isFull ? colors.primary : colors.border}
+                              fill={isFull ? colors.accent : "transparent"}
+                              color={isFull ? colors.accent : colors.border}
                               style={{ marginRight: 2 }}
                             />
                           );

@@ -266,7 +266,7 @@ export default function ListEdit() {
           style={[
             styles.backButton,
             {
-              backgroundColor: colors.primary,
+              backgroundColor: colors.accent,
               opacity: hasChanges ? 1 : 0.5,
               borderWidth: 1,
               borderColor: colors.border,
@@ -294,7 +294,7 @@ export default function ListEdit() {
               style={[
                 styles.modeToggleButton,
                 { backgroundColor: colors.card, borderColor: colors.border },
-                backdropMode === "color" && { borderColor: colors.primary },
+                backdropMode === "color" && { borderColor: colors.accent },
               ]}
               onPress={() => {
                 setBackdropMode("color");
@@ -310,7 +310,7 @@ export default function ListEdit() {
               style={[
                 styles.modeToggleButton,
                 { backgroundColor: colors.card, borderColor: colors.border, opacity: isPlus ? 1 : 0.6 },
-                backdropMode === "image" && { borderColor: isPlus ? colors.primary : colors.border },
+                backdropMode === "image" && { borderColor: isPlus ? colors.accent : colors.border },
               ]}
               onPress={() => {
                 if (!isPlus) {
@@ -384,7 +384,7 @@ export default function ListEdit() {
                   }}
                   style={[
                     styles.swatch,
-                    { backgroundColor: c, borderColor: (backdropColor || list.backdropColor || "#7C3AED") === c ? colors.primary : "transparent" },
+                    { backgroundColor: c, borderColor: (backdropColor || list.backdropColor || "#7C3AED") === c ? colors.accent : "transparent" },
                   ]}
                 />
               ))}

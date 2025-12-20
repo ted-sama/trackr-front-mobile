@@ -180,8 +180,8 @@ export function ReviewCard({
               >
                 <Star
                   size={12}
-                  fill={colors.primary}
-                  color={colors.primary}
+                  fill={colors.accent}
+                  color={colors.accent}
                 />
                 <Text
                   style={[
