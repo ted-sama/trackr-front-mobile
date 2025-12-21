@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { View, Text, TextInput, StyleSheet, ViewStyle, TextStyle, TextInputProps, Pressable, Platform } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
@@ -10,11 +10,11 @@ interface TextFieldProps extends Omit<TextInputProps, 'style'> {
   error?: string;
 }
 
-export function TextField({ label, type = 'default', error, ...inputProps }: TextFieldProps) {
+export const TextField = forwardRef<TextInput, TextFieldProps>(({ label, type = 'default', error, ...inputProps }, ref) => {
   const { colors } = useTheme();
   const typography = useTypography();
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const hasError = error && error.length > 0;
 
   return (
@@ -34,6 +34,7 @@ export function TextField({ label, type = 'default', error, ...inputProps }: Tex
         }
       ]}>
         <TextInput
+          ref={ref}
           {...inputProps}
           placeholderTextColor={colors.secondaryText}
           style={[
@@ -63,7 +64,7 @@ export function TextField({ label, type = 'default', error, ...inputProps }: Tex
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   label: {

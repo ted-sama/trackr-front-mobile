@@ -39,13 +39,13 @@ export default function Button({
 
   const handlePressIn = () => {
     if (!disabled) {
-      scale.value = withSpring(0.95, { damping: 15, stiffness: 300 });
+      scale.value = withTiming(0.95, { duration: 220 });
     }
   };
 
   const handlePressOut = () => {
     if (!disabled) {
-      scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+      scale.value = withTiming(1, { duration: 220 });
     }
   };
 

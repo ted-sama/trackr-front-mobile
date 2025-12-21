@@ -4,8 +4,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  Pressable,
+  Keyboard,
+  TextInput,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Button from "@/components/ui/Button";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -34,6 +37,11 @@ export default function Signup() {
   const typography = useTypography();
   const router = useRouter();
   const { isLoading, isAuthenticated, register } = useAuth();
+
+  // Refs for keyboard navigation
+  const emailRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   // Validation functions
   const validateUsername = () => {
@@ -134,7 +142,10 @@ export default function Signup() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <Pressable
+      style={[styles.container, { backgroundColor: colors.background }]}
+      onPress={Keyboard.dismiss}
+    >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -158,8 +169,11 @@ export default function Signup() {
             }}
             placeholder={t("auth.signup.usernamePlaceholder")}
             error={errors.username}
+            returnKeyType="next"
+            onSubmitEditing={() => emailRef.current?.focus()}
           />
           <TextField
+            ref={emailRef}
             label={t("auth.signup.email")}
             value={email}
             onChangeText={(text) => {
@@ -170,8 +184,11 @@ export default function Signup() {
             keyboardType="email-address"
             autoCapitalize="none"
             error={errors.email}
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
           />
           <TextField
+            ref={passwordRef}
             label={t("auth.signup.password")}
             value={password}
             onChangeText={(text) => {
@@ -181,8 +198,11 @@ export default function Signup() {
             placeholder={t("auth.signup.passwordPlaceholder")}
             type="password"
             error={errors.password}
+            returnKeyType="next"
+            onSubmitEditing={() => confirmPasswordRef.current?.focus()}
           />
           <TextField
+            ref={confirmPasswordRef}
             label={t("auth.signup.confirmPassword")}
             value={confirmPassword}
             onChangeText={(text) => {
@@ -192,6 +212,8 @@ export default function Signup() {
             placeholder={t("auth.signup.confirmPasswordPlaceholder")}
             type="password"
             error={errors.confirmPassword}
+            returnKeyType="done"
+            onSubmitEditing={handleSignup}
           />
         </View>
 
@@ -235,7 +257,7 @@ export default function Signup() {
           />
         </View>
       </ScrollView>
-    </View>
+    </Pressable>
   );
 }
 

@@ -4,8 +4,10 @@ import {
   StyleSheet,
   ActivityIndicator,
   Pressable,
+  Keyboard,
+  TextInput,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -62,6 +64,7 @@ export default function Login() {
   const router = useRouter();
   const { login, loginWithGoogle, isLoading, isAuthenticated } = useAuth();
   const scale = useSharedValue(1);
+  const passwordRef = useRef<TextInput>(null);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -129,7 +132,10 @@ export default function Login() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <Pressable
+      style={[styles.container, { backgroundColor: colors.background }]}
+      onPress={Keyboard.dismiss}
+    >
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       <Text style={[typography.h1, styles.title, { color: colors.text }]}>
         {t("auth.login.title")}
@@ -146,8 +152,11 @@ export default function Login() {
           keyboardType="email-address"
           autoCapitalize="none"
           error={errors.email}
+          returnKeyType="next"
+          onSubmitEditing={() => passwordRef.current?.focus()}
         />
         <TextField
+          ref={passwordRef}
           label={t("auth.login.password")}
           value={password}
           onChangeText={(text) => {
@@ -157,6 +166,8 @@ export default function Login() {
           placeholder={t("auth.login.passwordPlaceholder")}
           type="password"
           error={errors.password}
+          returnKeyType="done"
+          onSubmitEditing={handleLogin}
         />
       </View>
       <LinkButton
@@ -207,7 +218,7 @@ export default function Login() {
           onPress={() => router.push("/auth/signup")}
         />
       </View>
-    </View>
+    </Pressable>
   );
 }
 

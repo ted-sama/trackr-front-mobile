@@ -36,10 +36,9 @@
     "create": "Créer",
     "auth": {
         "onboarding": {
-            "slogan": "Suivez vos lectures",
-            "sloganSubtitle": "Gardez une trace de chaque livre, manga et comic que vous lisez",
+            "slogan": "Suivez vos mangas, manhwas et comics",
             "continue": "Continuer",
-            "chooseMethod": "Comment souhaitez-vous continuer ?",
+            "chooseMethod": "Trackr. Une app pour gérer toutes vos lectures.",
             "chooseMethodSubtitle": "Connectez-vous ou creez un compte pour commencer",
             "continueWithGoogle": "Continuer avec Google",
             "continueWithEmail": "Continuer avec Email"

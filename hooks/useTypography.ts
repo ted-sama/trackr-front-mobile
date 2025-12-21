@@ -29,7 +29,7 @@ export function useTypography(): Typography {
   return StyleSheet.create({
     onboardingSlogan: {
       fontFamily: 'Manrope_700Bold',
-      fontSize: 32,
+      fontSize: 30,
       lineHeight: 40,
       letterSpacing: -0.3,
     },

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
+  Keyboard,
+  TextInput,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -68,6 +68,11 @@ export default function EmailFlowScreen() {
   });
 
   const checkEmailMutation = useCheckEmail();
+
+  // Refs for keyboard navigation
+  const passwordRef = useRef<TextInput>(null);
+  const usernameRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   // Animation values
   const slideX = useSharedValue(0);
@@ -272,6 +277,8 @@ export default function EmailFlowScreen() {
               autoCapitalize="none"
               autoFocus
               error={errors.email}
+              returnKeyType="next"
+              onSubmitEditing={handleEmailContinue}
             />
           </View>
         );
@@ -280,6 +287,7 @@ export default function EmailFlowScreen() {
         return (
           <View style={styles.form}>
             <TextField
+              ref={passwordRef}
               label={t('auth.login.password')}
               value={password}
               onChangeText={(text) => {
@@ -290,6 +298,8 @@ export default function EmailFlowScreen() {
               type="password"
               autoFocus
               error={errors.password}
+              returnKeyType="done"
+              onSubmitEditing={handleLogin}
             />
             <LinkButton
               title={t('auth.login.forgotPassword')}
@@ -303,6 +313,7 @@ export default function EmailFlowScreen() {
         return (
           <View style={styles.form}>
             <TextField
+              ref={usernameRef}
               label={t('auth.signup.username')}
               value={username}
               onChangeText={(text) => {
@@ -313,8 +324,11 @@ export default function EmailFlowScreen() {
               autoCapitalize="none"
               autoFocus
               error={errors.username}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
             />
             <TextField
+              ref={passwordRef}
               label={t('auth.signup.password')}
               value={password}
               onChangeText={(text) => {
@@ -324,8 +338,11 @@ export default function EmailFlowScreen() {
               placeholder={t('auth.signup.passwordPlaceholder')}
               type="password"
               error={errors.password}
+              returnKeyType="next"
+              onSubmitEditing={() => confirmPasswordRef.current?.focus()}
             />
             <TextField
+              ref={confirmPasswordRef}
               label={t('auth.signup.confirmPassword')}
               value={confirmPassword}
               onChangeText={(text) => {
@@ -335,6 +352,8 @@ export default function EmailFlowScreen() {
               placeholder={t('auth.signup.confirmPasswordPlaceholder')}
               type="password"
               error={errors.confirmPassword}
+              returnKeyType="done"
+              onSubmitEditing={handleRegister}
             />
           </View>
         );
@@ -346,9 +365,9 @@ export default function EmailFlowScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['bottom']}>
-      <KeyboardAvoidingView
+      <Pressable
         style={[styles.keyboardView, { paddingTop: insets.top }]}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        onPress={Keyboard.dismiss}
       >
         <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />
 
@@ -410,7 +429,7 @@ export default function EmailFlowScreen() {
             style={styles.button}
           />
         </View>
-      </KeyboardAvoidingView>
+      </Pressable>
     </SafeAreaView>
   );
 }

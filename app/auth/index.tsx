@@ -117,7 +117,7 @@ export default function OnboardingScreen() {
   };
 
   const handleGooglePressIn = () => {
-    googleScale.value = withTiming(0.97, { duration: 100 });
+    googleScale.value = withTiming(0.95, { duration: 220 });
   };
 
   const handleGooglePressOut = () => {
@@ -204,11 +204,8 @@ export default function OnboardingScreen() {
 
         {/* Auth Options Text (visible in auth_options state) */}
         <Animated.View style={[styles.textWrapper, styles.authTextWrapper, authTextStyle]}>
-          <Text style={[typography.h2, styles.title, { color: colors.text }]}>
+          <Text style={[typography.onboardingSlogan, styles.title, { color: colors.text }]}>
             {t('auth.onboarding.chooseMethod')}
-          </Text>
-          <Text style={[typography.body, styles.subtitle, { color: colors.secondaryText }]}>
-            {t('auth.onboarding.chooseMethodSubtitle')}
           </Text>
         </Animated.View>
       </View>
