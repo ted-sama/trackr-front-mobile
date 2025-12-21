@@ -35,6 +35,30 @@
     "save": "Save",
     "create": "Create",
     "auth": {
+        "onboarding": {
+            "slogan": "Track your reads",
+            "sloganSubtitle": "Keep track of every book, manga, and comic you read",
+            "continue": "Continue",
+            "chooseMethod": "How would you like to continue?",
+            "chooseMethodSubtitle": "Sign in or create an account to get started",
+            "continueWithGoogle": "Continue with Google",
+            "continueWithEmail": "Continue with Email"
+        },
+        "email": {
+            "title": "What's your email?",
+            "subtitle": "We'll check if you already have an account",
+            "continue": "Continue"
+        },
+        "password": {
+            "title": "Welcome back!",
+            "subtitle": "Enter your password for {{email}}",
+            "loginButton": "Sign in"
+        },
+        "register": {
+            "title": "Create your account",
+            "subtitle": "Just a few more details for {{email}}",
+            "createButton": "Create account"
+        },
         "login": {
             "title": "Sign in to your account",
             "email": "Email",

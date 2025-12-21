@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 export interface Typography {
+  onboardingSlogan: object;
   headerTitle: object;
   h1: object;
   h2: object;
@@ -26,6 +27,12 @@ export interface Typography {
 
 export function useTypography(): Typography {
   return StyleSheet.create({
+    onboardingSlogan: {
+      fontFamily: 'Manrope_700Bold',
+      fontSize: 32,
+      lineHeight: 40,
+      letterSpacing: -0.3,
+    },
     headerTitle: {
       fontFamily: 'Manrope_700Bold',
       fontSize: 22,

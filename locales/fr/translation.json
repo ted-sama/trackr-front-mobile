@@ -35,6 +35,30 @@
     "save": "Enregistrer",
     "create": "Créer",
     "auth": {
+        "onboarding": {
+            "slogan": "Suivez vos lectures",
+            "sloganSubtitle": "Gardez une trace de chaque livre, manga et comic que vous lisez",
+            "continue": "Continuer",
+            "chooseMethod": "Comment souhaitez-vous continuer ?",
+            "chooseMethodSubtitle": "Connectez-vous ou creez un compte pour commencer",
+            "continueWithGoogle": "Continuer avec Google",
+            "continueWithEmail": "Continuer avec Email"
+        },
+        "email": {
+            "title": "Quel est votre email ?",
+            "subtitle": "Nous allons verifier si vous avez deja un compte",
+            "continue": "Continuer"
+        },
+        "password": {
+            "title": "Bon retour !",
+            "subtitle": "Entrez votre mot de passe pour {{email}}",
+            "loginButton": "Se connecter"
+        },
+        "register": {
+            "title": "Creez votre compte",
+            "subtitle": "Encore quelques details pour {{email}}",
+            "createButton": "Creer mon compte"
+        },
         "login": {
             "title": "Connectez-vous à votre compte",
             "email": "Email",

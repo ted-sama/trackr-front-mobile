@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconLeft: {
-    marginRight: 8,
+    marginRight: 12,
   },
   iconRight: {
     marginLeft: 8,
