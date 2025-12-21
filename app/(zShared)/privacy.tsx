@@ -49,13 +49,15 @@ function PrivacyToggle({ icon, label, description, value, onValueChange, disable
           </Text>
         </View>
       </View>
-      <Switch
-        value={value}
-        onValueChange={onValueChange}
-        disabled={disabled}
-        trackColor={{ false: colors.border, true: colors.primary }}
-        thumbColor="#ffffff"
-      />
+      <View style={styles.privacyOptionRight}>
+        <Switch
+          value={value}
+          onValueChange={onValueChange}
+          disabled={disabled}
+          trackColor={{ false: colors.border, true: colors.primary }}
+          thumbColor="#ffffff"
+        />
+      </View>
     </View>
   );
 }
@@ -174,5 +176,8 @@ const styles = StyleSheet.create({
   },
   privacyTextContainer: {
     flex: 1,
+  },
+  privacyOptionRight: {
+    marginRight: 12,
   },
 });

@@ -174,7 +174,7 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
                 hitSlop={4}
               >
                 <AlertTriangle
-                  size={20}
+                  size={24}
                   color={isSpoiler ? "#F59E0B" : colors.icon}
                   fill={isSpoiler ? "#F59E0B" : "transparent"}
                 />
@@ -214,7 +214,7 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
                   <ActivityIndicator size="small" color={colors.buttonText} />
                 ) : (
                   <Check
-                    size={20}
+                    size={24}
                     color={canSubmit ? colors.buttonText : colors.icon}
                     strokeWidth={2.5}
                   />
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
   },
   headerButton: {
     minWidth: 60,
@@ -340,9 +340,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
   },

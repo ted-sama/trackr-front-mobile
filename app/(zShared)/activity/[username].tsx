@@ -31,7 +31,7 @@ import {
   PlusIcon,
   MinusIcon,
   BookImageIcon,
-  MessageSquareTextIcon,
+  MessageSquareIcon,
   LockIcon,
 } from "lucide-react-native";
 import { snakeToCamel } from "@/utils/snakeToCamel";
@@ -67,7 +67,7 @@ function getActivityIcon(action: string, colors: any) {
     case "book.reviewCreated":
     case "book.reviewUpdated":
     case "book.reviewDeleted":
-      return <MessageSquareTextIcon {...iconProps} color={colors.icon} />;
+      return <MessageSquareIcon {...iconProps} color={colors.icon} />;
     default:
       return <BookImageIcon {...iconProps} />;
   }
