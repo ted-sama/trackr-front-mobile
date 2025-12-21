@@ -18,7 +18,7 @@ import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronLeft } from 'lucide-react-native';
+import { ArrowLeft } from 'lucide-react-native';
 import { toast } from 'sonner-native';
 
 import Button from '@/components/ui/Button';
@@ -222,7 +222,7 @@ export default function EmailFlowScreen() {
   };
 
   const handleForgotPassword = () => {
-    toast(t('toast.comingSoon'));
+    router.push('/auth/forgot-password');
   };
 
   // Animated styles
@@ -374,7 +374,7 @@ export default function EmailFlowScreen() {
         {/* Header with back button */}
         <View style={styles.header}>
           <Pressable onPress={handleBack} style={styles.backButton}>
-            <ChevronLeft size={24} color={colors.text} />
+            <ArrowLeft size={24} color={colors.text} />
           </Pressable>
         </View>
 

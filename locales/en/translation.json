@@ -99,6 +99,35 @@
             "usernameTooShort": "Username must be at least 3 characters long",
             "usernameTooLong": "Username must be less than 30 characters long",
             "usernameContainsSpace": "Username cannot contain spaces"
+        },
+        "forgotPassword": {
+            "title": "Forgot your password?",
+            "subtitle": "Enter your email address and we'll send you a link to reset your password.",
+            "sendLink": "Send reset link",
+            "backToLogin": "Back to login",
+            "checkEmail": "Check your email",
+            "emailSent": "We've sent a password reset link to {{email}}. Please check your inbox.",
+            "noEmail": "Didn't receive the email?",
+            "resend": "Resend",
+            "errorSending": "Failed to send reset link. Please try again."
+        },
+        "resetPassword": {
+            "title": "Reset your password",
+            "subtitle": "Enter your new password below.",
+            "newPassword": "New password",
+            "newPasswordPlaceholder": "Enter your new password",
+            "confirmPassword": "Confirm password",
+            "confirmPasswordPlaceholder": "Confirm your new password",
+            "resetButton": "Reset password",
+            "success": "Password reset!",
+            "successSubtitle": "Your password has been successfully reset. You can now log in with your new password.",
+            "goToLogin": "Go to login",
+            "invalidLink": "Invalid link",
+            "invalidLinkSubtitle": "This password reset link is invalid or has expired.",
+            "requestNewLink": "Request a new link",
+            "invalidToken": "Invalid reset token",
+            "tokenExpired": "This link has expired. Please request a new one.",
+            "errorResetting": "Failed to reset password. Please try again."
         }
     },
     "status": {

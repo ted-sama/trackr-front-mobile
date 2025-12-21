@@ -253,7 +253,7 @@ export default function Signup() {
           </Text>
           <LinkButton
             title={t("auth.signup.loginLink")}
-            onPress={() => router.push("/auth/login")}
+            onPress={() => router.push("/auth/email-flow")}
           />
         </View>
       </ScrollView>

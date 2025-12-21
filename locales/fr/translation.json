@@ -99,6 +99,35 @@
             "usernameTooShort": "Le nom d'utilisateur doit contenir au moins 3 caractères",
             "usernameTooLong": "Le nom d'utilisateur doit contenir moins de 30 caractères",
             "usernameContainsSpace": "Le nom d'utilisateur ne peut contenir d'espaces"
+        },
+        "forgotPassword": {
+            "title": "Mot de passe oublié ?",
+            "subtitle": "Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+            "sendLink": "Envoyer le lien",
+            "backToLogin": "Retour à la connexion",
+            "checkEmail": "Vérifiez votre email",
+            "emailSent": "Nous avons envoyé un lien de réinitialisation à {{email}}. Veuillez vérifier votre boîte de réception.",
+            "noEmail": "Vous n'avez pas reçu l'email ?",
+            "resend": "Renvoyer",
+            "errorSending": "Échec de l'envoi du lien. Veuillez réessayer."
+        },
+        "resetPassword": {
+            "title": "Réinitialiser votre mot de passe",
+            "subtitle": "Entrez votre nouveau mot de passe ci-dessous.",
+            "newPassword": "Nouveau mot de passe",
+            "newPasswordPlaceholder": "Entrez votre nouveau mot de passe",
+            "confirmPassword": "Confirmer le mot de passe",
+            "confirmPasswordPlaceholder": "Confirmez votre nouveau mot de passe",
+            "resetButton": "Réinitialiser",
+            "success": "Mot de passe réinitialisé !",
+            "successSubtitle": "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+            "goToLogin": "Aller à la connexion",
+            "invalidLink": "Lien invalide",
+            "invalidLinkSubtitle": "Ce lien de réinitialisation est invalide ou a expiré.",
+            "requestNewLink": "Demander un nouveau lien",
+            "invalidToken": "Token de réinitialisation invalide",
+            "tokenExpired": "Ce lien a expiré. Veuillez en demander un nouveau.",
+            "errorResetting": "Échec de la réinitialisation. Veuillez réessayer."
         }
     },
     "status": {

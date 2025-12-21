@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         try {
             const response = await api.post<RegisterResponse>('/auth/register', { email, password, username, displayName: username });
             toast(t("toast.registerSuccess"));
-            router.push('/auth/login');
+            router.push('/auth/email-flow');
         } catch (error: any) {
             toast.error(t(handleErrorCodes(error)));
         } finally {
