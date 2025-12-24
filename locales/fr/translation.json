@@ -694,6 +694,7 @@
         "restoreSuccess": "Achats restaurés avec succès",
         "restoreFailed": "Aucun achat à restaurer",
         "whatYouGet": "Ce que vous obtenez avec Trackr Plus",
+        "whatYouGetWith": "Ce que vous obtenez avec",
         "loadingOfferings": "Chargement des options d'abonnement...",
         "noOfferingsAvailable": "Aucune option d'abonnement disponible",
         "errorLoadingOfferings": "Échec du chargement des options d'abonnement",

@@ -4,7 +4,6 @@ import {
   Text,
   View,
   StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,8 +17,8 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { useChatUsage, BookChatUsage } from '@/hooks/queries/subscription';
+import { useChatUsage } from '@/hooks/queries/subscription';
+import ChatUsageBookItem from '@/components/chat/ChatUsageBookItem';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -27,6 +26,7 @@ import 'dayjs/locale/fr';
 import 'dayjs/locale/en';
 import i18n from '@/i18n';
 import { Canvas, Path, Skia } from '@shopify/react-native-skia';
+import Button from '@/components/ui/Button';
 
 dayjs.extend(relativeTime);
 
@@ -92,78 +92,6 @@ function CircularProgress({
         </Text>
       </View>
     </View>
-  );
-}
-
-function BookUsageItem({ item, colors, typography, onPress }: {
-  item: BookChatUsage;
-  colors: any;
-  typography: any;
-  onPress: () => void;
-}) {
-  const { t } = useTranslation();
-
-  const formatLastUsed = (dateString: string | null) => {
-    if (!dateString) return '';
-    try {
-      dayjs.locale(i18n.language);
-      return dayjs(dateString).fromNow();
-    } catch {
-      return '';
-    }
-  };
-
-  return (
-    <TouchableOpacity
-      style={[styles.bookItem, { backgroundColor: colors.card }]}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View style={styles.bookCover}>
-        {item.book?.coverImage ? (
-          <Image
-            source={{ uri: item.book.coverImage }}
-            style={styles.coverImage}
-            contentFit="cover"
-          />
-        ) : (
-          <View style={[styles.coverPlaceholder, { backgroundColor: colors.border }]}>
-            <Ionicons name="book-outline" size={24} color={colors.secondaryText} />
-          </View>
-        )}
-      </View>
-      <View style={styles.bookInfo}>
-        <Text
-          style={[typography.body, { color: colors.text, fontWeight: '600' }]}
-          numberOfLines={2}
-        >
-          {item.book?.title || `Book #${item.bookId}`}
-        </Text>
-        {item.lastUsedAt && (
-          <Text style={[typography.caption, { color: colors.secondaryText, marginTop: 2 }]}>
-            {formatLastUsed(item.lastUsedAt)}
-          </Text>
-        )}
-      </View>
-      <View style={styles.usageStats}>
-        <View style={styles.statRow}>
-          <Text style={[typography.caption, { color: colors.secondaryText }]}>
-            {t('chat.usage.thisMonth')}
-          </Text>
-          <Text style={[typography.body, { color: colors.accent, fontWeight: '600' }]}>
-            {item.monthlyRequests}
-          </Text>
-        </View>
-        <View style={styles.statRow}>
-          <Text style={[typography.caption, { color: colors.secondaryText }]}>
-            {t('chat.usage.allTime')}
-          </Text>
-          <Text style={[typography.body, { color: colors.text, fontWeight: '500' }]}>
-            {item.totalRequests}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
   );
 }
 
@@ -252,15 +180,12 @@ export default function ChatUsageScreen() {
           </View>
 
           {!isTrackrPlus && (
-            <TouchableOpacity
-              style={[styles.upgradeButton, { backgroundColor: colors.accent }]}
+            <Button
+            icon={<Ionicons name="star" size={16} color="#FFFFFF" />}
+              title={t('chat.usage.unlimitedHint')}
               onPress={handleUpgrade}
-            >
-              <Ionicons name="star" size={16} color="#FFFFFF" />
-              <Text style={styles.upgradeButtonText}>
-                {t('chat.usage.unlimitedHint')}
-              </Text>
-            </TouchableOpacity>
+              style={styles.upgradeButton}
+            />
           )}
         </View>
 
@@ -282,11 +207,9 @@ export default function ChatUsageScreen() {
         ) : (
           <View style={styles.booksList}>
             {books.map((item) => (
-              <BookUsageItem
+              <ChatUsageBookItem
                 key={item.bookId}
                 item={item}
-                colors={colors}
-                typography={typography}
                 onPress={() => navigateToBook(item.bookId)}
               />
             ))}
@@ -371,20 +294,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   upgradeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     marginTop: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    gap: 8,
-  },
-  upgradeButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'Manrope_600SemiBold',
   },
   emptyState: {
     borderRadius: 16,
@@ -392,42 +302,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   booksList: {
-    gap: 12,
-  },
-  bookItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
-  },
-  bookCover: {
-    width: 48,
-    height: 72,
-    borderRadius: 6,
-    overflow: 'hidden',
-  },
-  coverImage: {
-    width: '100%',
-    height: '100%',
-  },
-  coverPlaceholder: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bookInfo: {
-    flex: 1,
-    marginLeft: 12,
-    marginRight: 12,
-  },
-  usageStats: {
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  statRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    gap: 16,
   },
 });

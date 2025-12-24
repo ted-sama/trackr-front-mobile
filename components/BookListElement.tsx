@@ -39,7 +39,7 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
   const hasCover = Boolean(book.coverImage);
   const { colors } = useTheme();
   const typography = useTypography();
-  const { isBottomSheetVisible, openBookActions } = useBottomSheet();
+  const { openBookActions } = useBottomSheet();
   const { isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
   const isTracking = isBookTracked(book.id);
   const trackingStatus = getTrackedBookStatus(book.id);
@@ -73,68 +73,93 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
   // Présenter le bottom sheet via context
   const handlePresentModalPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    openBookActions(book, 'actions', currentListId, isFromListPage);
+    openBookActions(book, currentListId, isFromListPage);
   }, [book, openBookActions, currentListId, isFromListPage]);
 
   return (
     <>
-      <Animated.View style={[animatedStyle]}> 
+      <Animated.View style={[animatedStyle]}>
         <Pressable
           onPress={onPress ?? (() => {})}
           onPressIn={() => { scale.value = withTiming(0.97, { duration: 220 }); }}
           onPressOut={() => { scale.value = withTiming(1, { duration: 220 }); }}
           style={styles.container}
         >
-          <View style={styles.detailsGroup}>
-            {hasCover ? (
-              <Image source={{ uri: book.coverImage }} style={[styles.image, compact && styles.imageCompact]} />
-            ) : (
-              <View style={[styles.image, compact && styles.imageCompact, styles.noCoverContainer, { backgroundColor: DEFAULT_COVER_COLOR }]}>
-                <Ionicons name="book-outline" size={compact ? 16 : 24} color="rgba(255,255,255,0.5)" />
+            <View style={styles.detailsGroup}>
+              {hasCover ? (
+                <Image source={{ uri: book.coverImage }} style={[styles.image, compact && styles.imageCompact]} />
+              ) : (
+                <View style={[styles.image, compact && styles.imageCompact, styles.noCoverContainer, { backgroundColor: DEFAULT_COVER_COLOR }]}>
+                  <Ionicons name="book-outline" size={compact ? 16 : 24} color="rgba(255,255,255,0.5)" />
+                </View>
+              )}
+              <View style={[styles.infoContainer, compact && styles.infoContainerCompact]}>
+                {rank && (
+                  <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: compact ? 2 : 4 }]}>
+                    {rank}
+                  </Text>
+                )}
+                <Text style={[styles.title, typography.h3, { color: colors.text, marginBottom: compact ? 2 : 4 }]} numberOfLines={2} ellipsizeMode="tail">{book.title}</Text>
+                {showAuthor && (book.type === 'comic' ? book.publishers : book.authors) && (
+                  <Text style={[styles.author, typography.caption, { color: colors.secondaryText, marginBottom: compact ? 1 : 2 }]} numberOfLines={1} ellipsizeMode="tail">
+                    {book.type === 'comic'
+                      ? book.publishers?.map((pub) => pub.name).join(", ")
+                      : book.authors?.map((author) => author.name).join(", ")
+                    }
+                  </Text>
+                )}
+                {showBookType && (
+                  <Text style={[styles.bookType, typography.caption, { color: colors.secondaryText, marginBottom: compact ? 1 : 2 }]} numberOfLines={1} ellipsizeMode="tail">{t("common.bookTypes." + book.type)}</Text>
+                )}
+                {showRating && (
+                  <View style={styles.ratingContainer}>
+                    <Ionicons name="star" size={compact ? 10 : 12} color={colors.secondaryText} />
+                    <Text
+                      style={[
+                        styles.ratingText,
+                        typography.caption,
+                        { color: colors.secondaryText },
+                      ]}
+                    >
+                      {book.rating || "N/A"}
+                    </Text>
+                  </View>
+                )}
+                {trackingStatus && showTrackingStatus && !compact && (
+                  <View style={[styles.badgeContainer, compact && styles.badgeContainerCompact]}>
+                    <Badge
+                      text={trackingStatusValues[trackingStatus.status as ReadingStatus].text}
+                      color={colors.badgeText}
+                      backgroundColor={colors.badgeBackground}
+                      icon={trackingStatusValues[trackingStatus.status as ReadingStatus].icon}
+                      borderColor={colors.badgeBorder}
+                    />
+                    {showTrackingChapter && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
+                      <Badge
+                        text={`#${trackingStatus.currentChapter.toString()}`}
+                        color={colors.badgeText}
+                        backgroundColor={colors.badgeBackground}
+                        borderColor={colors.badgeBorder}
+                      />
+                    )}
+                  </View>
+                )}
+                {showUserRating && trackingStatus?.rating && (
+                  <View style={styles.userRatingContainer}>
+                    <StarRating
+                      rating={trackingStatus.rating}
+                      size={compact ? 10 : 12}
+                      color={colors.secondaryText}
+                    />
+                  </View>
+                )}
               </View>
-            )}
-          <View style={[styles.infoContainer, compact && styles.infoContainerCompact]}>
-            {rank && (
-              <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: compact ? 2 : 4 }]}>
-                {rank}
-              </Text>
-            )}
-            <Text style={[styles.title, typography.h3, { color: colors.text, marginBottom: compact ? 2 : 4 }]} numberOfLines={2} ellipsizeMode="tail">{book.title}</Text>
-            {showAuthor && (book.type === 'comic' ? book.publishers : book.authors) && (
-              <Text style={[styles.author, typography.caption, { color: colors.secondaryText, marginBottom: compact ? 1 : 2 }]} numberOfLines={1} ellipsizeMode="tail">
-                {book.type === 'comic'
-                  ? book.publishers?.map((pub) => pub.name).join(", ")
-                  : book.authors?.map((author) => author.name).join(", ")
-                }
-              </Text>
-            )}
-            {showBookType && (
-              <Text style={[styles.bookType, typography.caption, { color: colors.secondaryText, marginBottom: compact ? 1 : 2 }]} numberOfLines={1} ellipsizeMode="tail">{t("common.bookTypes." + book.type)}</Text>
-            )}
-            {showRating && (
-              <View style={styles.ratingContainer}>
-              <Ionicons name="star" size={compact ? 10 : 12} color={colors.secondaryText} />
-              <Text
-                style={[
-                  styles.ratingText,
-                  typography.caption,
-                  { color: colors.secondaryText },
-                ]}
-              >
-                {book.rating || "N/A"}
-              </Text>
             </View>
-            )}
-            {trackingStatus && showTrackingStatus && !compact && (
-              <View style={[styles.badgeContainer, compact && styles.badgeContainerCompact]}>
-                <Badge
-                  text={trackingStatusValues[trackingStatus.status as ReadingStatus].text}
-                  color={colors.badgeText}
-                  backgroundColor={colors.badgeBackground}
-                  icon={trackingStatusValues[trackingStatus.status as ReadingStatus].icon}
-                  borderColor={colors.badgeBorder}
-                />
-                {showTrackingChapter && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
+              <View style={[styles.actionsContainer, compact && styles.actionsContainerCompact]}>
+                {showTrackingButton && (
+                  <TrackingIconButton isTracking={isTracking} onPress={handleTrackingToggle} />
+                )}
+                {compact && showTrackingChapter && trackingStatus && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
                   <Badge
                     text={`#${trackingStatus.currentChapter.toString()}`}
                     color={colors.badgeText}
@@ -142,35 +167,10 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
                     borderColor={colors.badgeBorder}
                   />
                 )}
+                <Pressable onPress={handlePresentModalPress}>
+                  <Ellipsis size={22} color={colors.icon} strokeWidth={2} />
+                </Pressable>
               </View>
-            )}
-            {showUserRating && trackingStatus?.rating && (
-              <View style={styles.userRatingContainer}>
-                <StarRating
-                  rating={trackingStatus.rating}
-                  size={compact ? 10 : 12}
-                  color={colors.secondaryText}
-                />
-              </View>
-            )}
-          </View>
-        </View>
-        <View style={[styles.actionsContainer, compact && styles.actionsContainerCompact]}>
-          {showTrackingButton && (
-            <TrackingIconButton isTracking={isTracking} onPress={handleTrackingToggle} />
-          )}
-          {compact && showTrackingChapter && trackingStatus && trackingStatus.status !== 'completed' && trackingStatus.currentChapter && (
-            <Badge
-              text={`#${trackingStatus.currentChapter.toString()}`}
-              color={colors.badgeText}
-              backgroundColor={colors.badgeBackground}
-              borderColor={colors.badgeBorder}
-            />
-          )}
-          <Pressable onPress={handlePresentModalPress}>
-            <Ellipsis size={22} color={colors.icon} strokeWidth={2} />
-          </Pressable>
-        </View>
         </Pressable>
       </Animated.View>
     </>

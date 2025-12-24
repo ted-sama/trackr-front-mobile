@@ -693,6 +693,7 @@
         "restoreSuccess": "Purchases restored successfully",
         "restoreFailed": "No purchases to restore",
         "whatYouGet": "What you get with Trackr Plus",
+        "whatYouGetWith": "What you get with",
         "loadingOfferings": "Loading subscription options...",
         "noOfferingsAvailable": "No subscription options available",
         "errorLoadingOfferings": "Failed to load subscription options",

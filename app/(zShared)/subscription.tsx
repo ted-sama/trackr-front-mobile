@@ -3,8 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
@@ -20,6 +18,9 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner-native';
+import Button from '@/components/ui/Button';
+import SecondaryButton from '@/components/ui/SecondaryButton';
+import PlusBadge from '@/components/ui/PlusBadge';
 
 export default function Subscription() {
   const { colors, currentTheme } = useTheme();
@@ -176,65 +177,43 @@ export default function Subscription() {
         {/* Action Buttons */}
         <View style={styles.actionsSection}>
           {!isTrackrPlus ? (
-            <TouchableOpacity
-              style={[styles.primaryButton, { backgroundColor: colors.accent }]}
+            <Button
+              title={t('subscription.upgradeToPro')}
               onPress={handleUpgrade}
               disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <>
-                  <Ionicons name="star" size={20} color="#FFFFFF" />
-                  <Text style={[styles.buttonText, { marginLeft: 8 }]}>
-                    {t('subscription.upgradeToPro')}
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
+              icon={<Ionicons name="star" size={20} color="#FFFFFF" />}
+            />
           ) : (
-            <TouchableOpacity
-              style={[styles.secondaryButton, { backgroundColor: colors.card }]}
+            <SecondaryButton
+              title={t('subscription.manageSubscription')}
               onPress={handleManageSubscription}
               disabled={isLoading}
-            >
-              <Ionicons name="settings-outline" size={20} color={colors.text} />
-              <Text
-                style={[
-                  styles.buttonText,
-                  { color: colors.text, marginLeft: 8 },
-                ]}
-              >
-                {t('subscription.manageSubscription')}
-              </Text>
-            </TouchableOpacity>
+              icon={<Ionicons name="settings-outline" size={20} color={colors.text} />}
+            />
           )}
 
-          <TouchableOpacity
-            style={[styles.secondaryButton, { backgroundColor: colors.card }]}
+          <SecondaryButton
+            title={t('subscription.restorePurchases')}
             onPress={handleRestorePurchases}
             disabled={isLoading}
-          >
-            <Ionicons name="refresh-outline" size={20} color={colors.text} />
-            <Text
-              style={[styles.buttonText, { color: colors.text, marginLeft: 8 }]}
-            >
-              {t('subscription.restorePurchases')}
-            </Text>
-          </TouchableOpacity>
+            icon={<Ionicons name="refresh-outline" size={20} color={colors.text} />}
+          />
         </View>
 
         {/* Features List */}
         {!isTrackrPlus && (
           <View style={styles.featuresSection}>
-            <Text
-              style={[
-                typography.h3,
-                { color: colors.text, marginBottom: 16 },
-              ]}
-            >
-              {t('subscription.whatYouGet')}
-            </Text>
+            <View style={styles.whatYouGetHeader}>
+              <Text
+                style={[
+                  typography.h3,
+                  { color: colors.text },
+                ]}
+              >
+                {t('subscription.whatYouGetWith')}
+              </Text>
+              <PlusBadge />
+            </View>
             <FeatureItem
               icon="image-outline"
               title={t('subscription.features.customBackdrops')}
@@ -365,30 +344,14 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 32,
   },
-  primaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-  },
-  secondaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'Manrope_600SemiBold',
-    color: '#FFFFFF',
-  },
   featuresSection: {
     marginTop: 8,
+  },
+  whatYouGetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
   },
   featureItem: {
     flexDirection: 'row',
