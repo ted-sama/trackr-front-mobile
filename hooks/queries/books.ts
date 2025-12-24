@@ -3,6 +3,7 @@ import { api } from '@/services/api';
 import { Book } from '@/types/book';
 import { Category } from '@/types/category';
 import { queryKeys } from './keys';
+import { staleTimes } from '@/lib/queryClient';
 
 async function fetchBook(id: string): Promise<Book> {
   const { data } = await api.get<Book>(`/books/${id}`);
@@ -35,6 +36,7 @@ export function useBook(id: string | undefined) {
     queryKey: id ? queryKeys.book(id) : ['book', 'missing-id'],
     queryFn: () => fetchBook(id as string),
     enabled: Boolean(id),
+    staleTime: staleTimes.reference,
   });
 }
 
@@ -43,7 +45,7 @@ export function useBooksBySameAuthorCategory(bookId: string | undefined) {
     queryKey: bookId ? queryKeys.sameAuthorCategory(bookId) : ['book', 'missing-id', 'same-author'],
     queryFn: () => fetchBooksBySameAuthorCategory(bookId as string),
     enabled: Boolean(bookId),
-    staleTime: 5 * 60 * 1000,
+    staleTime: staleTimes.reference,
   });
 }
 

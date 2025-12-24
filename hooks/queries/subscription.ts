@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/services/api';
 import { queryKeys } from './keys';
+import { staleTimes } from '@/lib/queryClient';
 
 export interface ChatLimits {
   limit: number;
@@ -61,7 +62,7 @@ export function useSubscriptionInfo() {
       const { data } = await api.get<SubscriptionInfo>('/me/subscription');
       return data;
     },
-    staleTime: 30_000, // 30 seconds
+    staleTime: staleTimes.realtime,
   });
 }
 
@@ -75,7 +76,7 @@ export function useChatUsage() {
       const { data } = await api.get<ChatUsageResponse>('/me/chat-usage');
       return data;
     },
-    staleTime: 30_000, // 30 seconds
+    staleTime: staleTimes.realtime,
   });
 }
 

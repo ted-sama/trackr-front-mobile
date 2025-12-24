@@ -4,6 +4,7 @@ import { Category } from '@/types/category';
 import { PaginatedResponse } from '@/types/api';
 import { Book } from '@/types/book';
 import { queryKeys } from './keys';
+import { staleTimes } from '@/lib/queryClient';
 
 async function fetchCategories(): Promise<Category[]> {
   const { data } = await api.get<PaginatedResponse<Category>>('/categories');
@@ -51,7 +52,7 @@ export function useCategories() {
   return useQuery({
     queryKey: queryKeys.categories,
     queryFn: fetchCategories,
-    staleTime: 5 * 60 * 1000,
+    staleTime: staleTimes.static,
   });
 }
 
@@ -60,7 +61,7 @@ export function useCategory(id: string | undefined) {
     queryKey: id ? queryKeys.category(id) : ['category', 'missing-id'],
     queryFn: () => fetchCategory(id as string),
     enabled: Boolean(id),
-    staleTime: 5 * 60 * 1000,
+    staleTime: staleTimes.reference,
   });
 }
 
@@ -68,7 +69,7 @@ export function useMostTrackedCategory() {
   return useQuery({
     queryKey: queryKeys.mostTracked,
     queryFn: fetchMostTrackedCategory,
-    staleTime: 10 * 60 * 1000,
+    staleTime: staleTimes.static,
   });
 }
 
@@ -76,7 +77,7 @@ export function useTopRatedCategory() {
   return useQuery({
     queryKey: queryKeys.topRated,
     queryFn: fetchTopRatedCategory,
-    staleTime: 10 * 60 * 1000,
+    staleTime: staleTimes.static,
   });
 }
 

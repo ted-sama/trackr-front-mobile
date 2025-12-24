@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/services/api';
 import { BookReview, CreateReviewDTO, UpdateReviewDTO, ReviewSortOption } from '@/types/review';
 import { queryKeys } from './keys';
+import { staleTimes } from '@/lib/queryClient';
 
 interface BookReviewsResponse {
   reviews: BookReview[];
@@ -92,7 +93,7 @@ export function useBookReviews(
     queryKey: bookId ? queryKeys.bookReviews(bookId, sort) : ['book', 'reviews', 'disabled'],
     queryFn: () => fetchBookReviews(bookId as string, sort, limit),
     enabled: Boolean(bookId),
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: staleTimes.content,
   });
 }
 
@@ -226,7 +227,7 @@ export function useMyBookReview(bookId: string | undefined) {
     queryKey: bookId ? queryKeys.myBookReview(bookId) : ['my-review', 'disabled'],
     queryFn: () => fetchMyReview(bookId as string),
     enabled: Boolean(bookId),
-    staleTime: 2 * 60 * 1000,
+    staleTime: staleTimes.content,
   });
 }
 
@@ -242,7 +243,7 @@ export function useReview(bookId: string | undefined, reviewId: string | undefin
     queryKey: bookId && reviewId ? queryKeys.review(bookId, reviewId) : ['review', 'disabled'],
     queryFn: () => fetchReview(bookId as string, reviewId as string),
     enabled: Boolean(bookId) && Boolean(reviewId),
-    staleTime: 2 * 60 * 1000,
+    staleTime: staleTimes.content,
   });
 }
 

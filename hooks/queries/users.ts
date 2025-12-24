@@ -11,6 +11,7 @@ import { UserStats } from '@/types/stats';
 import { TrackedBook } from '@/types/tracked-book';
 import { BookTracking, ReadingStatus } from '@/types/reading-status';
 import { queryKeys } from './keys';
+import { staleTimes } from '@/lib/queryClient';
 
 function invalidateUserQueries(qc: QueryClient, userId?: string) {
   qc.invalidateQueries({ queryKey: ['user', 'top', 'me'], refetchType: 'active' });
@@ -54,7 +55,7 @@ export function useUserTop(userId?: string) {
     queryKey: ['user', 'top', isMe ? 'me' : userId],
     queryFn: async () => (await api.get<Book[]>(endpoint)).data,
     enabled: isMe || Boolean(userId),
-    staleTime: 60_000,
+    staleTime: staleTimes.user,
   });
 }
 
@@ -88,7 +89,7 @@ export function useUserLists(userId?: string, search?: string) {
       return currentPage < lastPage ? currentPage + 1 : undefined;
     },
     enabled: isMe || Boolean(userId),
-    staleTime: 60_000,
+    staleTime: staleTimes.user,
   });
 }
 
@@ -133,7 +134,7 @@ export function useUserCreatedLists(username?: string, search?: string) {
       return currentPage < lastPage ? currentPage + 1 : undefined;
     },
     enabled: isMe ? Boolean(currentUser?.id) : Boolean(targetUsername),
-    staleTime: 60_000,
+    staleTime: staleTimes.user,
   });
 }
 
@@ -277,7 +278,7 @@ export function useUserActivity(username?: string) {
       return currentPage < lastPage ? currentPage + 1 : undefined;
     },
     enabled: isMe || Boolean(username),
-    staleTime: 30_000,
+    staleTime: staleTimes.realtime,
   });
 }
 
@@ -290,7 +291,7 @@ export function useMeStats() {
     queryFn: async () => (await api.get<UserStats>('/me/stats', {
       params: { timezone: getTimezone() }
     })).data,
-    staleTime: 60_000,
+    staleTime: staleTimes.user,
   });
 }
 
@@ -305,7 +306,7 @@ export function useUserStats(username?: string) {
       params: { timezone: getTimezone() }
     })).data,
     enabled: isMe || Boolean(username),
-    staleTime: 60_000,
+    staleTime: staleTimes.user,
   });
 }
 
@@ -348,6 +349,6 @@ export function useUserBooks(username?: string) {
       return transformedBooks;
     },
     enabled: isMe || Boolean(username),
-    staleTime: 60_000,
+    staleTime: staleTimes.user,
   });
 }

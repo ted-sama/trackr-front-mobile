@@ -5,6 +5,7 @@ import { List } from '@/types/list';
 import { PaginatedResponse } from '@/types/api';
 import { queryKeys } from './keys';
 import { useUserStore } from '@/stores/userStore';
+import { staleTimes } from '@/lib/queryClient';
 
 async function fetchLists(): Promise<List[]> {
   const { data } = await api.get<PaginatedResponse<List>>('/lists');
@@ -76,7 +77,11 @@ async function unsaveList(listId: string): Promise<void> {
 }
 
 export function useLists() {
-  return useQuery({ queryKey: queryKeys.lists, queryFn: fetchLists });
+  return useQuery({
+    queryKey: queryKeys.lists,
+    queryFn: fetchLists,
+    staleTime: staleTimes.content,
+  });
 }
 
 export function useMyLists(q?: string) {
@@ -88,6 +93,7 @@ export function useMyLists(q?: string) {
       return currentPage < last ? currentPage + 1 : undefined;
     },
     initialPageParam: 1,
+    staleTime: staleTimes.user,
   });
 }
 
@@ -99,6 +105,7 @@ export function useList(id?: string) {
       return list;
     },
     enabled: Boolean(id),
+    staleTime: staleTimes.content,
   });
 }
 

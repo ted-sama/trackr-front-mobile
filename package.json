@@ -23,6 +23,7 @@
     "@legendapp/list": "^1.0.7",
     "@lodev09/react-native-true-sheet": "^3.0.4",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/netinfo": "^11.4.1",
     "@react-native-masked-view/masked-view": "^0.3.2",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/material-top-tabs": "^7.2.13",

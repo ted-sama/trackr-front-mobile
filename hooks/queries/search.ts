@@ -6,6 +6,7 @@ import { List } from '@/types/list';
 import { User } from '@/types/user';
 import { queryKeys } from './keys';
 import { useUIStore, BookType, ALL_BOOK_TYPES } from '@/stores/uiStore';
+import { staleTimes } from '@/lib/queryClient';
 
 type Scope = 'books' | 'lists' | 'users';
 
@@ -42,6 +43,7 @@ export function useSearch(scope: Scope, q: string) {
     },
     initialPageParam: 1,
     enabled,
+    staleTime: staleTimes.static,
   });
 }
 
