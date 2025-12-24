@@ -150,7 +150,7 @@ export function HeaderCollection({
               containerStyle={{ flex: 1 }}
             />
             <TouchableOpacity onPress={handleCancelSearch} style={styles.cancelButton}>
-              <Text style={[typography.h3, { color: colors.primary }]}>{t("discover.cancel")}</Text>
+              <Text style={[typography.h3, { color: colors.accent }]}>{t("discover.cancel")}</Text>
             </TouchableOpacity>
           </View>
         ) : (

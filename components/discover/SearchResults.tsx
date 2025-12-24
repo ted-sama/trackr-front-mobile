@@ -111,7 +111,7 @@ export function SearchResults({ searchQuery, activeFilter }: SearchResultsProps)
       onEndReachedThreshold={0.2}
       ListFooterComponent={isFetchingNextPage ? (
         <View style={styles.footerContainer}>
-          <ActivityIndicator size="small" color={colors.primary} />
+          <ActivityIndicator size="small" color={colors.accent} />
         </View>
       ) : null}
     />

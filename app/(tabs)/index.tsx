@@ -189,8 +189,8 @@ export default function Index() {
               onPressIn={handlePressIn}
               onPressOut={handlePressOut}
             >
-              <Text style={[typography.body, { color: colors.accent }]}>{t("home.goToLibrary")}</Text>
-              <ChevronRight size={16} strokeWidth={2.5} color={colors.accent} />
+              <Text style={[typography.h3, { color: colors.accent }]}>{t("home.goToLibrary")}</Text>
+              <ChevronRight size={16} strokeWidth={2.5} color={colors.accent} opacity={0.8} />
             </Pressable>
           </Animated.View>
         </View>

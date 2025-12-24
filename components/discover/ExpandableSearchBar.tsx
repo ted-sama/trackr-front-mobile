@@ -148,9 +148,9 @@ export function ExpandableSearchBar({
                 styles.pill,
                 {
                   backgroundColor:
-                    selectedFilter === filter.key ? colors.primary : colors.card,
+                    selectedFilter === filter.key ? colors.accent : colors.card,
                   borderColor:
-                    selectedFilter === filter.key ? colors.primary : colors.border,
+                    selectedFilter === filter.key ? colors.accent : colors.border,
                 },
               ]}
             >

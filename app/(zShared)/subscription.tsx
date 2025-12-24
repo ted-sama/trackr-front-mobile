@@ -109,7 +109,7 @@ export default function Subscription() {
                 styles.planBadge,
                 {
                   backgroundColor: isTrackrPlus
-                    ? colors.primary
+                    ? colors.accent
                     : colors.secondaryText,
                 },
               ]}
@@ -158,11 +158,11 @@ export default function Subscription() {
               </View>
               {subscriptionStatus.isInTrial && (
                 <View style={styles.trialBadge}>
-                  <Ionicons name="time-outline" size={14} color={colors.primary} />
+                  <Ionicons name="time-outline" size={14} color={colors.accent} />
                   <Text
                     style={[
                       typography.caption,
-                      { color: colors.primary, marginLeft: 4 },
+                      { color: colors.accent, marginLeft: 4 },
                     ]}
                   >
                     {t('subscription.trialActive')}
@@ -177,7 +177,7 @@ export default function Subscription() {
         <View style={styles.actionsSection}>
           {!isTrackrPlus ? (
             <TouchableOpacity
-              style={[styles.primaryButton, { backgroundColor: colors.primary }]}
+              style={[styles.primaryButton, { backgroundColor: colors.accent }]}
               onPress={handleUpgrade}
               disabled={isLoading}
             >
@@ -297,7 +297,7 @@ function FeatureItem({
       <View
         style={[styles.featureIcon, { backgroundColor: colors.card }]}
       >
-        <Ionicons name={icon} size={24} color={colors.primary} />
+        <Ionicons name={icon} size={24} color={colors.accent} />
       </View>
       <View style={styles.featureContent}>
         <Text style={[typography.body, { color: colors.text, fontWeight: '600' }]}>

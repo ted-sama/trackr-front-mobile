@@ -36,7 +36,7 @@ function BookCategoriesSection() {
   if (isLoading && !hasLoadedOnce) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
@@ -132,7 +132,7 @@ function UserListsSection() {
       )}
       {isLoading && !hasLoadedOnce && (
         <View style={[styles.emptyContainer, { backgroundColor: colors.background }]}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color={colors.accent} />
         </View>
       )}
     </View>

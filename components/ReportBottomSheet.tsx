@@ -240,7 +240,7 @@ const ReportBottomSheet = forwardRef<TrueSheet, ReportBottomSheetProps>(
             {/* Submit Button */}
             {isSubmitting ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="small" color={colors.primary} />
+                <ActivityIndicator size="small" color={colors.accent} />
               </View>
             ) : (
               <Button

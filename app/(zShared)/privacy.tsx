@@ -8,12 +8,12 @@ import { useTypography } from '@/hooks/useTypography';
 import { useRouter } from 'expo-router';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
 import { useUserStore } from '@/stores/userStore';
 import { useUpdateMe } from '@/hooks/queries/users';
+import { ChartNoAxesCombined, Notebook } from 'lucide-react-native';
 
 interface PrivacyToggleProps {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: React.ReactNode;
   label: string;
   description: string;
   value: boolean;
@@ -34,11 +34,7 @@ function PrivacyToggle({ icon, label, description, value, onValueChange, disable
     >
       <View style={styles.privacyOptionLeft}>
         <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
-          <Ionicons
-            name={icon}
-            size={24}
-            color={colors.icon}
-          />
+          {icon}
         </View>
         <View style={styles.privacyTextContainer}>
           <Text style={[typography.body, { color: colors.text, fontWeight: '600', marginBottom: 2 }]}>
@@ -54,7 +50,7 @@ function PrivacyToggle({ icon, label, description, value, onValueChange, disable
           value={value}
           onValueChange={onValueChange}
           disabled={disabled}
-          trackColor={{ false: colors.border, true: colors.primary }}
+          trackColor={{ false: colors.border, true: colors.accent }}
           thumbColor="#ffffff"
         />
       </View>
@@ -121,7 +117,7 @@ export default function PrivacyScreen() {
 
         <View style={styles.optionsContainer}>
           <PrivacyToggle
-            icon="stats-chart-outline"
+            icon={<ChartNoAxesCombined size={20} color={colors.icon} />}
             label={t('settings.privacy.statsPublic')}
             description={t('settings.privacy.statsPublicDescription')}
             value={currentUser.isStatsPublic}
@@ -129,7 +125,7 @@ export default function PrivacyScreen() {
             disabled={updateMe.isPending}
           />
           <PrivacyToggle
-            icon="time-outline"
+            icon={<Notebook size={20} color={colors.icon} />}
             label={t('settings.privacy.activityPublic')}
             description={t('settings.privacy.activityPublicDescription')}
             value={currentUser.isActivityPublic}

@@ -322,9 +322,20 @@
             "title": "Subscription",
             "plan": "Current plan"
         },
+        "aiChat": {
+            "title": "AI Chat",
+            "usage": "Chat usage",
+            "usageValue": "{{used}}/{{limit}} messages",
+            "resetsOn": "Resets on {{date}}",
+            "viewDetails": "View details"
+        },
         "appearance": {
             "title": "Appearance",
-            "theme": "Theme"
+            "theme": "Theme",
+            "light": "Light",
+            "dark": "Dark",
+            "system": "System",
+            "systemDescription": "Follow options defined in your device settings"
         },
         "language": {
             "title": "Language",
@@ -463,6 +474,22 @@
             "summarizeLastChapter": "Summarize the last chapter read",
             "presentWork": "Introduce the work to me",
             "analyzeCurrentArc": "Analyze the current arc"
+        },
+        "usage": {
+            "title": "Chat Usage",
+            "summary": "Monthly Summary",
+            "remaining": "{{remaining}} messages remaining",
+            "used": "{{used}} of {{limit}} messages used",
+            "resetsOn": "Resets on {{date}}",
+            "unlimitedHint": "Upgrade to Plus for more messages",
+            "booksUsed": "Books you've chatted about",
+            "noBooksYet": "No chat history yet",
+            "noBooksHint": "Start chatting with AI about your books to see usage here",
+            "thisMonth": "This month",
+            "allTime": "All time",
+            "requests": "{{count}} request",
+            "requests_plural": "{{count}} requests",
+            "lastUsed": "Last used {{date}}"
         }
     },
     "list": {

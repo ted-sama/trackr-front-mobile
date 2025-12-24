@@ -78,7 +78,7 @@ export default function Paywall() {
         ]}
       >
         <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={colors.accent} />
         <Text style={[typography.body, { color: colors.secondaryText, marginTop: 16 }]}>
           {t('subscription.loadingOfferings')}
         </Text>

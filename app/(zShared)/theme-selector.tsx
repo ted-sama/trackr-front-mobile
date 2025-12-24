@@ -9,11 +9,12 @@ import { useRouter } from 'expo-router';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Sun, Moon, Settings } from 'lucide-react-native';
 
 interface ThemeOptionProps {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: React.ReactNode;
   label: string;
-  description: string;
+  description: string | null;
   value: 'light' | 'dark' | 'system';
   isSelected: boolean;
   onPress: () => void;
@@ -38,19 +39,17 @@ function ThemeOption({ icon, label, description, isSelected, onPress }: ThemeOpt
     >
       <View style={styles.themeOptionLeft}>
         <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
-          <Ionicons 
-            name={icon} 
-            size={24} 
-            color={isSelected ? colors.accent : colors.icon} 
-          />
+          {icon}
         </View>
         <View style={styles.themeTextContainer}>
           <Text style={[typography.body, { color: colors.text, fontWeight: '600', marginBottom: 2 }]}>
             {label}
           </Text>
-          <Text style={[typography.body, { color: colors.secondaryText, fontSize: 13 }]}>
-            {description}
-          </Text>
+          {description && (
+            <Text style={[typography.body, { color: colors.secondaryText, fontSize: 13 }]} numberOfLines={1} ellipsizeMode="tail">
+              {description}
+            </Text>
+          )}
         </View>
       </View>
       {isSelected && (
@@ -76,27 +75,21 @@ export default function ThemeSelector() {
   const themeOptions = [
     {
       value: 'light' as const,
-      icon: 'sunny' as const,
-      label: t('languages.french') === 'Français' ? 'Clair' : 'Light',
-      description: t('languages.french') === 'Français' 
-        ? 'Utiliser le mode clair' 
-        : 'Use light mode',
+      icon: <Sun size={20} color={colors.icon} />,
+      label: t('settings.appearance.light'),
+      description: null,
     },
     {
       value: 'dark' as const,
-      icon: 'moon' as const,
-      label: t('languages.french') === 'Français' ? 'Sombre' : 'Dark',
-      description: t('languages.french') === 'Français' 
-        ? 'Utiliser le mode sombre' 
-        : 'Use dark mode',
+      icon: <Moon size={20} color={colors.icon} />,
+      label: t('settings.appearance.dark'),
+      description: null,
     },
     {
       value: 'system' as const,
-      icon: 'settings-outline' as const,
-      label: t('languages.french') === 'Français' ? 'Système' : 'System',
-      description: t('languages.french') === 'Français' 
-        ? 'Suivre les réglages du système' 
-        : 'Follow system settings',
+      icon: <Settings size={20} color={colors.icon} />,
+      label: t('settings.appearance.system'),
+      description: t('settings.appearance.systemDescription'),
     },
   ];
 

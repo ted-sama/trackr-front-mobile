@@ -322,9 +322,20 @@
             "title": "Abonnement",
             "plan": "Plan actuel"
         },
+        "aiChat": {
+            "title": "Chat IA",
+            "usage": "Utilisation du chat",
+            "usageValue": "{{used}}/{{limit}} messages",
+            "resetsOn": "Réinitialisation le {{date}}",
+            "viewDetails": "Voir les détails"
+        },
         "appearance": {
             "title": "Apparence",
-            "theme": "Thème"
+            "theme": "Thème",
+            "light": "Clair",
+            "dark": "Sombre",
+            "system": "Système",
+            "systemDescription": "Suivre les options définies dans les paramètres de votre appareil"
         },
         "language": {
             "title": "Langue",
@@ -463,6 +474,22 @@
             "summarizeLastChapter": "Résume le dernier chapitre lu",
             "presentWork": "Présente-moi l'œuvre",
             "analyzeCurrentArc": "Analyse l'arc actuel"
+        },
+        "usage": {
+            "title": "Utilisation du Chat",
+            "summary": "Résumé mensuel",
+            "remaining": "{{remaining}} messages restants",
+            "used": "{{used}} sur {{limit}} messages utilisés",
+            "resetsOn": "Réinitialisation le {{date}}",
+            "unlimitedHint": "Passez à Plus pour plus de messages",
+            "booksUsed": "Livres sur lesquels vous avez discuté",
+            "noBooksYet": "Aucun historique de chat",
+            "noBooksHint": "Commencez à discuter avec l'IA sur vos livres pour voir l'utilisation ici",
+            "thisMonth": "Ce mois-ci",
+            "allTime": "Total",
+            "requests": "{{count}} requête",
+            "requests_plural": "{{count}} requêtes",
+            "lastUsed": "Dernière utilisation {{date}}"
         }
     },
     "list": {

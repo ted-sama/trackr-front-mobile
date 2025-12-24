@@ -14,9 +14,12 @@ import Constants from 'expo-constants';
 import i18n from '@/i18n';
 import { Ionicons } from '@expo/vector-icons';
 import { useUIStore, ALL_BOOK_TYPES } from '@/stores/uiStore';
+import { useSubscriptionInfo, formatResetDate } from '@/hooks/queries/subscription';
+import { UserRound, LogOut, MessageCircle, Lock, Palette, Languages, ChartColumnStacked, Info, ShieldCheck, FileText  } from 'lucide-react-native';
+import TrackrIcon from '@/components/icons/TrackrIcon';
 
 interface SettingsItemProps {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: React.ReactNode;
   label: string;
   value?: string;
   onPress?: () => void;
@@ -37,7 +40,7 @@ function SettingsItem({ icon, label, value, onPress, showChevron = true, danger 
     >
       <View style={styles.settingsItemLeft}>
         <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
-          <Ionicons name={icon} size={20} color={danger ? colors.error : colors.icon} />
+          {icon}
         </View>
         <Text style={[typography.body, { color: danger ? colors.error : colors.text, fontWeight: '500' }]}>
           {label}
@@ -85,6 +88,7 @@ export default function Settings() {
   const router = useRouter();
   const { logout, isAuthenticated } = useAuth();
   const { isTrackrPlus } = useSubscription();
+  const { data: subscriptionInfo } = useSubscriptionInfo();
   const searchTypes = useUIStore((state) => state.searchTypes);
   const scrollY = useSharedValue(0);
   const [titleY, setTitleY] = useState<number>(0);
@@ -92,6 +96,12 @@ export default function Settings() {
     scrollY.value = event.contentOffset.y;
   });
   const { t } = useTranslation();
+
+  const getChatUsageValue = () => {
+    if (!subscriptionInfo?.chat) return '';
+    const { used, limit } = subscriptionInfo.chat;
+    return t('settings.aiChat.usageValue', { used, limit });
+  };
 
   const getThemeLabel = () => {
     switch (theme) {
@@ -143,14 +153,14 @@ export default function Settings() {
         {isAuthenticated && (
           <SettingsSection title={t('settings.account.title')}>
             <SettingsItem
-              icon="person-outline"
+              icon={<UserRound size={20} color={colors.icon} />}
               label={t('settings.account.profile')}
               onPress={() => {
                 // Navigation vers l'écran de profil
               }}
             />
             <SettingsItem
-              icon="log-out-outline"
+              icon={<LogOut size={20} color={colors.icon} />}
               label={t('settings.account.logout')}
               onPress={logout}
               showChevron={false}
@@ -162,7 +172,7 @@ export default function Settings() {
         {isAuthenticated && (
           <SettingsSection title={t('settings.subscription.title')}>
             <SettingsItem
-              icon={isTrackrPlus ? 'star' : 'star-outline'}
+              icon={<TrackrIcon color={isTrackrPlus ? colors.accent : colors.icon} />}
               label={t('settings.subscription.plan')}
               value={isTrackrPlus ? t('subscription.trackrPlus') : t('subscription.freePlan')}
               onPress={() => router.push('/(zShared)/subscription')}
@@ -171,9 +181,20 @@ export default function Settings() {
         )}
 
         {isAuthenticated && (
+          <SettingsSection title={t('settings.aiChat.title')}>
+            <SettingsItem
+              icon={<MessageCircle size={20} color={colors.icon} />}
+              label={t('settings.aiChat.usage')}
+              value={getChatUsageValue()}
+              onPress={() => router.push('/(zShared)/chat-usage')}
+            />
+          </SettingsSection>
+        )}
+
+        {isAuthenticated && (
           <SettingsSection title={t('settings.privacy.title')}>
             <SettingsItem
-              icon="lock-closed-outline"
+              icon={<Lock size={20} color={colors.icon} />}
               label={t('settings.privacy.title')}
               onPress={() => router.push('/(zShared)/privacy')}
             />
@@ -182,7 +203,7 @@ export default function Settings() {
 
         <SettingsSection title={t('settings.appearance.title')}>
           <SettingsItem
-            icon="color-palette-outline"
+            icon={<Palette size={20} color={colors.icon} />}
             label={t('settings.appearance.theme')}
             value={getThemeLabel()}
             onPress={() => {
@@ -194,7 +215,7 @@ export default function Settings() {
 
         <SettingsSection title={t('settings.language.title')}>
           <SettingsItem
-            icon="language-outline"
+            icon={<Languages size={20} color={colors.icon} />}
             label={t('settings.language.current')}
             value={getCurrentLanguage()}
             onPress={() => {
@@ -206,7 +227,7 @@ export default function Settings() {
 
         <SettingsSection title={t('settings.search.title')}>
           <SettingsItem
-            icon="filter-outline"
+            icon={<ChartColumnStacked size={20} color={colors.icon} />}
             label={t('settings.search.types')}
             value={getSearchTypesValue()}
             onPress={() => {
@@ -217,21 +238,21 @@ export default function Settings() {
 
         <SettingsSection title={t('settings.about.title')}>
           <SettingsItem
-            icon="information-circle-outline"
+            icon={<Info size={20} color={colors.icon} />}
             label={t('settings.about.version')}
             value={Constants.expoConfig?.version || '1.0.0'}
             showChevron={false}
             onPress={undefined}
           />
           <SettingsItem
-            icon="shield-checkmark-outline"
+            icon={<ShieldCheck size={20} color={colors.icon} />}
             label={t('settings.about.privacy')}
             onPress={() => {
               // Navigation vers la politique de confidentialité
             }}
           />
           <SettingsItem
-            icon="document-text-outline"
+            icon={<FileText size={20} color={colors.icon} />}
             label={t('settings.about.terms')}
             onPress={() => {
               // Navigation vers les conditions d'utilisation

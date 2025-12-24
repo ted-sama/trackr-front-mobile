@@ -22,7 +22,7 @@ export default function PillButton({title, icon = null, style = 'default', disab
         transform: [{ scale: scaleAnim.value }]
     }));
     return (
-        <Animated.View style={animatedStyle}>
+        <Animated.View style={[animatedStyle, styles.shadowContainer]}>
             <Pressable
                 style={[
                     styles.actionButton,
@@ -51,6 +51,13 @@ export default function PillButton({title, icon = null, style = 'default', disab
 }
 
 const styles = StyleSheet.create({
+    shadowContainer: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 2,
+    },
     actionButton: {
         flexDirection: "row",
         alignItems: "center",

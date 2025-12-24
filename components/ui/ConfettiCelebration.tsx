@@ -20,7 +20,7 @@ const ConfettiCelebration = forwardRef<ConfettiCelebrationMethods, ConfettiCeleb
     // Celebration colors - vibrant and festive
     const celebrationColors = [
       colors.completed,
-      colors.primary,
+      colors.accent,
       '#FFD700', // Gold
       '#FF6B6B', // Coral
       '#4ECDC4', // Teal

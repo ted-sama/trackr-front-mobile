@@ -228,7 +228,7 @@ export function ReviewCard({
 
             {/* View More Button */}
             {isTruncated && (
-              <Text style={[typography.bodyBold, { color: colors.primary }]}>
+              <Text style={[typography.bodyBold, { color: colors.accent }]}>
                 {t("book.viewMore")}
               </Text>
             )}

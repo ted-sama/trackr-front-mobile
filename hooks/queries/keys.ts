@@ -33,6 +33,10 @@ export const queryKeys = {
   myBookReview: (bookId: string) => ['book', bookId, 'reviews', 'me'] as const,
   review: (bookId: string, reviewId: string) => ['book', bookId, 'review', reviewId] as const,
   userReviews: (username: string) => ['user', username, 'reviews'] as const,
+
+  // Subscription & Chat
+  subscription: ['subscription'] as const,
+  chatUsage: ['chat-usage'] as const,
 };
 
 

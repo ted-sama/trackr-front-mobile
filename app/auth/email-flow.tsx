@@ -387,7 +387,7 @@ export default function EmailFlowScreen() {
                   style={[
                     styles.stepDot,
                     {
-                      backgroundColor: index <= currentStepIndex ? colors.primary : colors.border,
+                      backgroundColor: index <= currentStepIndex ? colors.accent : colors.border,
                     },
                   ]}
                 />
@@ -396,7 +396,7 @@ export default function EmailFlowScreen() {
                     style={[
                       styles.stepLine,
                       {
-                        backgroundColor: index < currentStepIndex ? colors.primary : colors.border,
+                        backgroundColor: index < currentStepIndex ? colors.accent : colors.border,
                       },
                     ]}
                   />
@@ -404,7 +404,7 @@ export default function EmailFlowScreen() {
               </React.Fragment>
             ))
           ) : (
-            <View style={[styles.stepDot, { backgroundColor: colors.primary }]} />
+            <View style={[styles.stepDot, { backgroundColor: colors.accent }]} />
           )}
         </View>
 
