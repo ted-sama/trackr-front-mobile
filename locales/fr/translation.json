@@ -479,6 +479,7 @@
             "title": "Utilisation du Chat",
             "summary": "Résumé mensuel",
             "remaining": "{{remaining}} messages restants",
+            "remainingShort": "restants",
             "used": "{{used}} sur {{limit}} messages utilisés",
             "resetsOn": "Réinitialisation le {{date}}",
             "unlimitedHint": "Passez à Plus pour plus de messages",

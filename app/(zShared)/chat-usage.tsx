@@ -26,8 +26,74 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/fr';
 import 'dayjs/locale/en';
 import i18n from '@/i18n';
+import { Canvas, Path, Skia } from '@shopify/react-native-skia';
 
 dayjs.extend(relativeTime);
+
+const CIRCLE_SIZE = 120;
+const STROKE_WIDTH = 10;
+
+function CircularProgress({
+  progress,
+  remaining,
+  accentColor,
+  backgroundColor,
+  textColor,
+  secondaryTextColor,
+  t,
+}: {
+  progress: number;
+  remaining: number;
+  accentColor: string;
+  backgroundColor: string;
+  textColor: string;
+  secondaryTextColor: string;
+  t: (key: string) => string;
+}) {
+  const radius = (CIRCLE_SIZE - STROKE_WIDTH) / 2;
+  const center = CIRCLE_SIZE / 2;
+
+  const backgroundPath = Skia.Path.Make();
+  backgroundPath.addCircle(center, center, radius);
+
+  const progressPath = Skia.Path.Make();
+  const startAngle = -90;
+  const sweepAngle = 360 * Math.min(1, Math.max(0, 1 - progress));
+  progressPath.addArc(
+    { x: STROKE_WIDTH / 2, y: STROKE_WIDTH / 2, width: CIRCLE_SIZE - STROKE_WIDTH, height: CIRCLE_SIZE - STROKE_WIDTH },
+    startAngle,
+    sweepAngle
+  );
+
+  return (
+    <View style={styles.circularContainer}>
+      <Canvas style={{ width: CIRCLE_SIZE, height: CIRCLE_SIZE }}>
+        <Path
+          path={backgroundPath}
+          style="stroke"
+          strokeWidth={STROKE_WIDTH}
+          color={backgroundColor}
+          strokeCap="round"
+        />
+        <Path
+          path={progressPath}
+          style="stroke"
+          strokeWidth={STROKE_WIDTH}
+          color={accentColor}
+          strokeCap="round"
+        />
+      </Canvas>
+      <View style={styles.circularTextContainer}>
+        <Text style={[styles.circularValue, { color: textColor }]}>
+          {remaining}
+        </Text>
+        <Text style={[styles.circularLabel, { color: secondaryTextColor }]}>
+          {t('chat.usage.remainingShort')}
+        </Text>
+      </View>
+    </View>
+  );
+}
 
 function BookUsageItem({ item, colors, typography, onPress }: {
   item: BookChatUsage;
@@ -162,42 +228,28 @@ export default function ChatUsageScreen() {
     return (
       <>
         {/* Summary Card */}
-        <View style={[styles.summaryCard, { backgroundColor: colors.card }]}>
-          <View style={styles.summaryHeader}>
-            <View style={[styles.summaryIcon, { backgroundColor: colors.accent + '20' }]}>
-              <Ionicons name="chatbubbles" size={28} color={colors.accent} />
-            </View>
-            <View style={styles.summaryInfo}>
-              <Text style={[typography.h2, { color: colors.text }]}>
-                {summary?.remaining ?? 0}
-              </Text>
-              <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                {t('chat.usage.remaining', { remaining: summary?.remaining ?? 0 })}
-              </Text>
-            </View>
-          </View>
+        <View style={styles.summaryCard}>
+          <CircularProgress
+            progress={summary ? summary.used / summary.limit : 0}
+            remaining={summary?.remaining ?? 0}
+            accentColor={colors.accent}
+            backgroundColor={colors.border}
+            textColor={colors.text}
+            secondaryTextColor={colors.secondaryText}
+            t={t}
+          />
 
-          <View style={[styles.progressContainer, { backgroundColor: colors.border }]}>
-            <View
-              style={[
-                styles.progressBar,
-                {
-                  backgroundColor: colors.accent,
-                  width: summary ? `${Math.min(100, (summary.used / summary.limit) * 100)}%` : '0%',
-                },
-              ]}
-            />
-          </View>
-
-          <Text style={[typography.caption, { color: colors.secondaryText, marginTop: 8 }]}>
-            {t('chat.usage.used', { used: summary?.used ?? 0, limit: summary?.limit ?? 0 })}
-          </Text>
-
-          {summary?.resetsAt && (
-            <Text style={[typography.caption, { color: colors.secondaryText, marginTop: 4 }]}>
-              {t('chat.usage.resetsOn', { date: formatResetDate(summary.resetsAt) })}
+          <View style={styles.summaryDetails}>
+            <Text style={[typography.caption, { color: colors.secondaryText }]}>
+              {t('chat.usage.used', { used: summary?.used ?? 0, limit: summary?.limit ?? 0 })}
             </Text>
-          )}
+
+            {summary?.resetsAt && (
+              <Text style={[typography.caption, { color: colors.secondaryText, marginTop: 4 }]}>
+                {t('chat.usage.resetsOn', { date: formatResetDate(summary.resetsAt) })}
+              </Text>
+            )}
+          </View>
 
           {!isTrackrPlus && (
             <TouchableOpacity
@@ -291,33 +343,32 @@ const styles = StyleSheet.create({
     paddingVertical: 64,
   },
   summaryCard: {
-    borderRadius: 16,
-    padding: 20,
-  },
-  summaryHeader: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
   },
-  summaryIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 14,
-    alignItems: 'center',
+  circularContainer: {
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  summaryInfo: {
-    marginLeft: 16,
-    flex: 1,
+  circularTextContainer: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  progressContainer: {
-    height: 8,
-    borderRadius: 4,
-    overflow: 'hidden',
+  circularValue: {
+    fontSize: 32,
+    fontWeight: '700',
+    fontFamily: 'Manrope_700Bold',
   },
-  progressBar: {
-    height: '100%',
-    borderRadius: 4,
+  circularLabel: {
+    fontSize: 12,
+    fontFamily: 'Manrope_500Medium',
+    marginTop: 2,
+  },
+  summaryDetails: {
+    marginTop: 16,
+    alignItems: 'center',
   },
   upgradeButton: {
     flexDirection: 'row',

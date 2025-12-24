@@ -479,6 +479,7 @@
             "title": "Chat Usage",
             "summary": "Monthly Summary",
             "remaining": "{{remaining}} messages remaining",
+            "remainingShort": "remaining",
             "used": "{{used}} of {{limit}} messages used",
             "resetsOn": "Resets on {{date}}",
             "unlimitedHint": "Upgrade to Plus for more messages",
