@@ -46,3 +46,35 @@ export function useResetPassword() {
       resetPasswordRequest(token, password),
   });
 }
+
+interface ChangePasswordResponse {
+  message: string;
+}
+
+async function changePasswordRequest(
+  currentPassword: string,
+  newPassword: string
+): Promise<ChangePasswordResponse> {
+  const { data } = await api.post<ChangePasswordResponse>('/auth/change-password', {
+    currentPassword,
+    newPassword,
+  });
+  return data;
+}
+
+async function deleteAccountRequest(): Promise<void> {
+  await api.delete('/me');
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) =>
+      changePasswordRequest(currentPassword, newPassword),
+  });
+}
+
+export function useDeleteAccount() {
+  return useMutation({
+    mutationFn: () => deleteAccountRequest(),
+  });
+}

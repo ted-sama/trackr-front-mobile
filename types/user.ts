@@ -14,6 +14,7 @@ export interface User {
     };
     isStatsPublic: boolean;
     isActivityPublic: boolean;
+    hasPassword: boolean;
     createdAt: string;
     updatedAt: string;
 };

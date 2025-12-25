@@ -315,7 +315,8 @@
         "title": "Paramètres",
         "account": {
             "title": "Compte",
-            "profile": "Modifier le profil",
+            "changePassword": "Changer le mot de passe",
+            "deleteAccount": "Supprimer le compte",
             "logout": "Se déconnecter"
         },
         "subscription": {
@@ -609,9 +610,30 @@
     "errors": {
         "AUTH_EMAIL_ALREADY_USED": "Un compte avec cet email existe déjà",
         "AUTH_USERNAME_TAKEN": "Ce nom d'utilisateur est déjà pris, veuillez en choisir un autre",
+        "AUTH_INVALID_CURRENT_PASSWORD": "Le mot de passe actuel est incorrect",
+        "AUTH_NO_PASSWORD": "Impossible de changer le mot de passe pour les comptes Google",
         "BOOKS_TOP_LIMIT_REACHED": "Vous avez atteint la limite des 5 livres favoris",
         "E_INVALID_CREDENTIALS": "Email ou mot de passe incorrect",
         "errorCorrectionForm": "Veuillez corriger les erreurs dans le formulaire"
+    },
+    "changePassword": {
+        "title": "Changer le mot de passe",
+        "currentPassword": "Mot de passe actuel",
+        "currentPasswordPlaceholder": "Entrez votre mot de passe actuel",
+        "newPassword": "Nouveau mot de passe",
+        "newPasswordPlaceholder": "Entrez votre nouveau mot de passe",
+        "confirmPassword": "Confirmer le mot de passe",
+        "confirmPasswordPlaceholder": "Confirmez votre nouveau mot de passe",
+        "submit": "Changer le mot de passe",
+        "success": "Mot de passe modifié avec succès",
+        "errorChanging": "Impossible de changer le mot de passe"
+    },
+    "deleteAccount": {
+        "title": "Supprimer votre compte ?",
+        "warning": "Cette action est irréversible. Toutes vos données seront définitivement supprimées, incluant votre bibliothèque, vos listes, vos avis et vos statistiques.",
+        "confirm": "Supprimer définitivement",
+        "success": "Compte supprimé avec succès",
+        "errorDeleting": "Impossible de supprimer le compte"
     },
     "activity": {
         "title": "Activité",

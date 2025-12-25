@@ -315,7 +315,8 @@
         "title": "Settings",
         "account": {
             "title": "Account",
-            "profile": "Edit profile",
+            "changePassword": "Change password",
+            "deleteAccount": "Delete account",
             "logout": "Logout"
         },
         "subscription": {
@@ -608,9 +609,30 @@
     "errors": {
         "AUTH_EMAIL_ALREADY_USED": "An account with this email already exists",
         "AUTH_USERNAME_TAKEN": "This username is already taken, please choose another one",
+        "AUTH_INVALID_CURRENT_PASSWORD": "Current password is incorrect",
+        "AUTH_NO_PASSWORD": "Cannot change password for Google accounts",
         "BOOKS_TOP_LIMIT_REACHED": "You have reached the limit of 5 favorite books",
         "E_INVALID_CREDENTIALS": "Invalid email or password",
         "errorCorrectionForm": "Please correct the errors in the form"
+    },
+    "changePassword": {
+        "title": "Change password",
+        "currentPassword": "Current password",
+        "currentPasswordPlaceholder": "Enter your current password",
+        "newPassword": "New password",
+        "newPasswordPlaceholder": "Enter your new password",
+        "confirmPassword": "Confirm password",
+        "confirmPasswordPlaceholder": "Confirm your new password",
+        "submit": "Change password",
+        "success": "Password changed successfully",
+        "errorChanging": "Failed to change password"
+    },
+    "deleteAccount": {
+        "title": "Delete your account?",
+        "warning": "This action cannot be undone. All your data will be permanently deleted, including your library, lists, reviews, and statistics.",
+        "confirm": "Delete permanently",
+        "success": "Account deleted successfully",
+        "errorDeleting": "Failed to delete account"
     },
     "activity": {
         "title": "Activity",

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,9 +14,14 @@ import Constants from 'expo-constants';
 import i18n from '@/i18n';
 import { Ionicons } from '@expo/vector-icons';
 import { useUIStore, ALL_BOOK_TYPES } from '@/stores/uiStore';
-import { useSubscriptionInfo, formatResetDate } from '@/hooks/queries/subscription';
-import { UserRound, LogOut, MessageCircle, Lock, Palette, Languages, ChartColumnStacked, Info, ShieldCheck, FileText  } from 'lucide-react-native';
+import { useUserStore } from '@/stores/userStore';
+import { useSubscriptionInfo } from '@/hooks/queries/subscription';
+import { useDeleteAccount } from '@/hooks/queries/auth';
+import { KeyRound, LogOut, MessageCircle, Lock, Palette, Languages, ChartColumnStacked, Info, ShieldCheck, FileText, Trash2 } from 'lucide-react-native';
 import TrackrIcon from '@/components/icons/TrackrIcon';
+import { ConfirmationBottomSheet } from '@/components/shared/DeleteBottomSheet';
+import { TrueSheet } from '@lodev09/react-native-true-sheet';
+import { toast } from 'sonner-native';
 
 interface SettingsItemProps {
   icon: React.ReactNode;
@@ -89,13 +94,31 @@ export default function Settings() {
   const { logout, isAuthenticated } = useAuth();
   const { isTrackrPlus } = useSubscription();
   const { data: subscriptionInfo } = useSubscriptionInfo();
+  const currentUser = useUserStore((state) => state.currentUser);
+  const deleteAccountMutation = useDeleteAccount();
   const searchTypes = useUIStore((state) => state.searchTypes);
   const scrollY = useSharedValue(0);
   const [titleY, setTitleY] = useState<number>(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deleteAccountSheetRef = useRef<TrueSheet>(null);
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollY.value = event.contentOffset.y;
   });
   const { t } = useTranslation();
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteAccountMutation.mutateAsync();
+      toast.success(t('deleteAccount.success'));
+      await logout();
+      router.replace('/');
+    } catch (error) {
+      toast.error(t('deleteAccount.errorDeleting'));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const getChatUsageValue = () => {
     if (!subscriptionInfo?.chat) return '';
@@ -152,15 +175,21 @@ export default function Settings() {
         </View>
         {isAuthenticated && (
           <SettingsSection title={t('settings.account.title')}>
+            {currentUser?.hasPassword && (
+              <SettingsItem
+                icon={<KeyRound size={20} color={colors.icon} />}
+                label={t('settings.account.changePassword')}
+                onPress={() => router.push('/(zShared)/change-password')}
+              />
+            )}
             <SettingsItem
-              icon={<UserRound size={20} color={colors.icon} />}
-              label={t('settings.account.profile')}
-              onPress={() => {
-                // Navigation vers l'écran de profil
-              }}
+              icon={<Trash2 size={20} color={colors.error} />}
+              label={t('settings.account.deleteAccount')}
+              onPress={() => deleteAccountSheetRef.current?.present()}
+              danger
             />
             <SettingsItem
-              icon={<LogOut size={20} color={colors.icon} />}
+              icon={<LogOut size={20} color={colors.error} />}
               label={t('settings.account.logout')}
               onPress={logout}
               showChevron={false}
@@ -260,6 +289,16 @@ export default function Settings() {
           />
         </SettingsSection>
       </Animated.ScrollView>
+
+      <ConfirmationBottomSheet
+        ref={deleteAccountSheetRef}
+        title={t('deleteAccount.title')}
+        message={t('deleteAccount.warning')}
+        onConfirm={handleDeleteAccount}
+        isDeleting={isDeleting}
+        variant="destructive"
+        confirmText={t('deleteAccount.confirm')}
+      />
     </View>
   );
 }
