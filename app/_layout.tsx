@@ -34,6 +34,7 @@ import CreateListBottomSheet from "@/components/CreateListBottomSheet";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -128,6 +129,9 @@ function RootLayoutContent() {
       logoutUser();
     }
   }, [isAuthenticated, currentUser?.id]);
+
+  // Register for push notifications
+  usePushNotifications();
 
   // Present or dismiss the appropriate bottom sheet when visibility/type changes
   useEffect(() => {

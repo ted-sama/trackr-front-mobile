@@ -48,12 +48,13 @@ interface AnimatedHeaderProps {
   onRightButtonPress?: () => void;
   farRightButtonIcon?: React.ReactNode;
   onFarRightButtonPress?: () => void;
+  rightComponent?: React.ReactNode; // Custom component rendered on the right without button styling
   static?: boolean; // When true, displays header in final state without animation
 }
 
 const DEFAULT_THRESHOLD = 320;
 
-export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, closeRightButtonIcon, onCloseRightButtonPress, rightButtonIcon, onRightButtonPress, farRightButtonIcon, onFarRightButtonPress, static: isStatic = false }: AnimatedHeaderProps) {
+export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, closeRightButtonIcon, onCloseRightButtonPress, rightButtonIcon, onRightButtonPress, farRightButtonIcon, onFarRightButtonPress, rightComponent, static: isStatic = false }: AnimatedHeaderProps) {
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -156,74 +157,80 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
         >
           {title}
         </Animated.Text>
-        {/* width calculation: 44 per button + 8 gap between buttons */}
-        <View style={[styles.rightContainer, { width: farRightButtonIcon ? (closeRightButtonIcon ? 148 : 96) : (closeRightButtonIcon ? 96 : 44) }]}>
-          {closeRightButtonIcon ? (
-            <ScalePressable onPress={onCloseRightButtonPress} style={styles.closeRightButton}>
-              <View
-                style={[
-                  StyleSheet.absoluteFillObject,
-                  styles.backButtonBg,
-                  {
-                    backgroundColor: colors.backButtonBackground,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 2,
-                    elevation: 1,
-                  },
-                ]}
-              />
-              {closeRightButtonIcon}
-            </ScalePressable>
-          ) : null}
-          {rightButtonIcon ? (
-            <ScalePressable onPress={onRightButtonPress} style={styles.rightButton}>
-              <View
-                style={[
-                  StyleSheet.absoluteFillObject,
-                  styles.backButtonBg,
-                  {
-                    backgroundColor: colors.backButtonBackground,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 2,
-                    elevation: 1,
-                  },
-                ]}
-              />
-              {rightButtonIcon}
-            </ScalePressable>
-          ) : (
-            <View style={{ width: 44 }} />
-          )}
-          {farRightButtonIcon ? (
-            <ScalePressable onPress={onFarRightButtonPress} style={styles.rightButton}>
-              <View
-                style={[
-                  StyleSheet.absoluteFillObject,
-                  styles.backButtonBg,
-                  {
-                    backgroundColor: colors.backButtonBackground,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 2,
-                    elevation: 1,
-                  },
-                ]}
-              />
-              {farRightButtonIcon}
-            </ScalePressable>
-          ) : null}
-        </View>
+        {/* Right side: custom component or button icons */}
+        {rightComponent ? (
+          <View style={styles.rightComponentContainer}>
+            {rightComponent}
+          </View>
+        ) : (
+          <View style={[styles.rightContainer, { width: farRightButtonIcon ? (closeRightButtonIcon ? 148 : 96) : (closeRightButtonIcon ? 96 : 44) }]}>
+            {closeRightButtonIcon ? (
+              <ScalePressable onPress={onCloseRightButtonPress} style={styles.closeRightButton}>
+                <View
+                  style={[
+                    StyleSheet.absoluteFillObject,
+                    styles.backButtonBg,
+                    {
+                      backgroundColor: colors.backButtonBackground,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 2,
+                      elevation: 1,
+                    },
+                  ]}
+                />
+                {closeRightButtonIcon}
+              </ScalePressable>
+            ) : null}
+            {rightButtonIcon ? (
+              <ScalePressable onPress={onRightButtonPress} style={styles.rightButton}>
+                <View
+                  style={[
+                    StyleSheet.absoluteFillObject,
+                    styles.backButtonBg,
+                    {
+                      backgroundColor: colors.backButtonBackground,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 2,
+                      elevation: 1,
+                    },
+                  ]}
+                />
+                {rightButtonIcon}
+              </ScalePressable>
+            ) : (
+              <View style={{ width: 44 }} />
+            )}
+            {farRightButtonIcon ? (
+              <ScalePressable onPress={onFarRightButtonPress} style={styles.rightButton}>
+                <View
+                  style={[
+                    StyleSheet.absoluteFillObject,
+                    styles.backButtonBg,
+                    {
+                      backgroundColor: colors.backButtonBackground,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 2,
+                      elevation: 1,
+                    },
+                  ]}
+                />
+                {farRightButtonIcon}
+              </ScalePressable>
+            ) : null}
+          </View>
+        )}
       </View>
     </View>
   );
@@ -270,6 +277,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 8,
+  },
+  rightComponentContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   closeRightButton: {
     padding: 10,

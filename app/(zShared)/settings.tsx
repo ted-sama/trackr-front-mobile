@@ -17,7 +17,7 @@ import { useUIStore, ALL_BOOK_TYPES } from '@/stores/uiStore';
 import { useUserStore } from '@/stores/userStore';
 import { useSubscriptionInfo } from '@/hooks/queries/subscription';
 import { useDeleteAccount } from '@/hooks/queries/auth';
-import { KeyRound, LogOut, MessageCircle, Lock, Palette, Languages, ChartColumnStacked, Info, ShieldCheck, FileText, Trash2 } from 'lucide-react-native';
+import { KeyRound, LogOut, MessageCircle, Lock, Palette, Languages, ChartColumnStacked, Info, ShieldCheck, FileText, Trash2, Bell } from 'lucide-react-native';
 import TrackrIcon from '@/components/icons/TrackrIcon';
 import { ConfirmationBottomSheet } from '@/components/shared/DeleteBottomSheet';
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
@@ -226,6 +226,16 @@ export default function Settings() {
               icon={<Lock size={20} color={colors.icon} />}
               label={t('settings.privacy.title')}
               onPress={() => router.push('/(zShared)/privacy')}
+            />
+          </SettingsSection>
+        )}
+
+        {isAuthenticated && (
+          <SettingsSection title={t('settings.notifications.title')}>
+            <SettingsItem
+              icon={<Bell size={20} color={colors.icon} />}
+              label={t('settings.notifications.manage')}
+              onPress={() => router.push('/(zShared)/notification-settings')}
             />
           </SettingsSection>
         )}

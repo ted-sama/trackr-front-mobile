@@ -37,6 +37,11 @@ export const queryKeys = {
   // Subscription & Chat
   subscription: ['subscription'] as const,
   chatUsage: ['chat-usage'] as const,
+
+  // Notifications
+  notifications: ['notifications'] as const,
+  notificationsUnreadCount: ['notifications', 'unread-count'] as const,
+  notificationSettings: ['notifications', 'settings'] as const,
 };
 
 

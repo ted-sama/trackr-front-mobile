@@ -364,6 +364,17 @@
             "statsPublicDescription": "Allow other users to view your statistics",
             "activityPublic": "Public activity",
             "activityPublicDescription": "Allow other users to view your activity log"
+        },
+        "notifications": {
+            "title": "Notifications",
+            "manage": "Push notifications",
+            "description": "Choose which push notifications you want to receive. In-app notifications will always be shown.",
+            "reviewLikes": "Review likes",
+            "reviewLikesDescription": "Receive a push notification when someone likes your review",
+            "listLikes": "List likes",
+            "listLikesDescription": "Receive a push notification when someone likes your list",
+            "listSaves": "List saves",
+            "listSavesDescription": "Receive a push notification when someone saves your list"
         }
     },
     "languages": {
@@ -731,5 +742,15 @@
             "supportDev": "Support development",
             "supportDevDesc": "Help me build new features and improve Trackr"
         }
+    },
+    "notifications": {
+        "title": "Notifications",
+        "empty": "No notifications",
+        "markAllRead": "Mark all read",
+        "new": "New notification",
+        "likedYourReview": "liked your review",
+        "likedYourList": "liked your list",
+        "savedYourList": "saved your list",
+        "of": "of"
     }
 }

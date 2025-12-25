@@ -7,6 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import Avatar from '@/components/ui/Avatar';
+import NotificationBadge from '@/components/notifications/NotificationBadge';
 import { useUserStore } from '@/stores/userStore';
 import { router } from 'expo-router';
 import { useTypography } from '@/hooks/useTypography';
@@ -98,6 +99,7 @@ export function HomeAnimatedHeader({
             borderColor={colors.border}
           />
         </Pressable>
+        <NotificationBadge />
       </View>
     </View>
   );
@@ -116,7 +118,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
   },
   title: {
     flex: 1,
