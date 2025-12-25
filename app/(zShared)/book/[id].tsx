@@ -59,6 +59,7 @@ import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import { useBook, useBooksBySameAuthorCategory } from "@/hooks/queries/books";
 import { useMyBookReview } from "@/hooks/queries/reviews";
+import { useTranslateGenre } from "@/hooks/queries/genres";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/hooks/queries/keys";
 import { useAuth } from "@/contexts/AuthContext";
@@ -117,6 +118,7 @@ export default function BookScreen() {
   const insets = useSafeAreaInsets();
   const { isFrench } = useLocalization();
   const { t } = useTranslation();
+  const translateGenre = useTranslateGenre();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
 
@@ -807,7 +809,7 @@ export default function BookScreen() {
               {book.genres.map((tag) => (
                 <Badge
                   key={tag}
-                  text={tag}
+                  text={translateGenre(tag)}
                   color={colors.badgeText}
                   backgroundColor={colors.badgeBackground}
                   borderColor={colors.badgeBorder}

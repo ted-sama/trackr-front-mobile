@@ -42,6 +42,9 @@ export const queryKeys = {
   notifications: ['notifications'] as const,
   notificationsUnreadCount: ['notifications', 'unread-count'] as const,
   notificationSettings: ['notifications', 'settings'] as const,
+
+  // Genres
+  genreTranslations: ['genres', 'translations'] as const,
 };
 
 

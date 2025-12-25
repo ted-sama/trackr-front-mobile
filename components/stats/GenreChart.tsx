@@ -5,6 +5,7 @@ import { useTypography } from "@/hooks/useTypography";
 import { Pie, PolarChart } from "victory-native";
 import { useTranslation } from "react-i18next";
 import { hexToRgba } from "@/utils/colors";
+import { useTranslateGenre } from "@/hooks/queries/genres";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -107,16 +108,17 @@ export function GenreChart({ data }: GenreChartProps) {
   const typography = useTypography();
   const { t } = useTranslation();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const translateGenre = useTranslateGenre();
 
   const totalGenres = useMemo(() => data.reduce((sum, g) => sum + g.value, 0), [data]);
 
   const pieData: PieDataPoint[] = useMemo(
     () => data.map((item, index) => ({
-      label: item.label,
+      label: translateGenre(item.label),
       value: item.value,
       color: GENRE_COLORS[index % GENRE_COLORS.length],
     })),
-    [data]
+    [data, translateGenre]
   );
 
   const topGenre = useMemo(() => {

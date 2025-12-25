@@ -35,6 +35,7 @@ import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { prefetchGenreTranslations } from '@/hooks/queries/genres';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -111,6 +112,11 @@ function RootLayoutContent() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
+
+  // Prefetch static data on app start
+  useEffect(() => {
+    prefetchGenreTranslations();
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {

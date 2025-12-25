@@ -184,15 +184,24 @@ const SetChapterBottomSheet = forwardRef<TrueSheet, SetChapterBottomSheetProps>(
                         <Minus size={24} color={colors.icon} />
                     </AnimatedPressable>
                     <View style={styles.chapterContainer}>
-                        <View style={styles.chapterInputContainer}>
+                        <View
+                            style={[
+                                styles.chapterInputContainer,
+                                {
+                                    backgroundColor: colors.accent + '15',
+                                    borderColor: colors.accent + '40',
+                                },
+                            ]}
+                        >
                             <Text style={[typography.categoryTitle, { color: colors.accent }]}>{"#"}</Text>
                             <TextInput
-                                style={[typography.categoryTitle, { color: colors.accent }]}
+                                style={[typography.categoryTitle, styles.chapterInput, { color: colors.accent }]}
                                 inputMode='numeric'
                                 keyboardType='numeric'
                                 numberOfLines={1}
                                 value={chapter}
                                 onChangeText={handleInputChange}
+                                selectTextOnFocus
                             />
                         </View>
                         <Text style={[typography.slashSeparator, { color: colors.text }]}>/</Text>
@@ -297,5 +306,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 2,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+        borderWidth: 1.5,
+    },
+    chapterInput: {
+        minWidth: 20,
+        textAlign: 'center',
     },
 });
