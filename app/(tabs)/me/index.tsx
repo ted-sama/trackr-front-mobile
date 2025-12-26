@@ -197,8 +197,8 @@ export default function Profile() {
         collapseThreshold={titleY > 0 ? titleY : undefined}
         closeRightButtonIcon={<Notebook size={22} color={colors.icon} />}
         onCloseRightButtonPress={() => router.push(`/activity/${currentUser?.username}`)}
-        rightButtonIcon={<ChartNoAxesCombined size={22} color={colors.icon} />}
-        onRightButtonPress={() => router.push(`/stats`)}
+        rightButtonIcon={currentUser?.plan === "plus" ? <ChartNoAxesCombined size={22} color={colors.icon} /> : undefined}
+        onRightButtonPress={currentUser?.plan === "plus" ? () => router.push(`/stats`) : undefined}
         farRightButtonIcon={<Settings size={22} color={colors.icon} />}
         onFarRightButtonPress={() => router.push(`/settings`)}
       />

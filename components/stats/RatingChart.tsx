@@ -64,7 +64,7 @@ export function RatingChart({ data, font }: RatingChartProps) {
   if (!data.length) return null;
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.text }]}>
+    <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <Text
         style={[
           typography.bodyCaption,
@@ -104,7 +104,7 @@ export function RatingChart({ data, font }: RatingChartProps) {
               y: 5,
             },
             formatXLabel(label) {
-              return label != null ? `★${label}` : "";
+              return label != null ? `${label}` : "";
             },
             labelColor: colors.secondaryText,
             font,
@@ -120,7 +120,6 @@ export function RatingChart({ data, font }: RatingChartProps) {
                 barWidth={20}
                 roundedCorners={{ topLeft: 6, topRight: 6 }}
                 color={hexToRgba(colors.accent, 0.85)}
-                animate={{ type: "spring", duration: 700 }}
                 labels={{
                   position: "top",
                   font: font,
@@ -162,10 +161,7 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 20,
     padding: 16,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1,
   },
   tooltipContainer: {
     position: "absolute",

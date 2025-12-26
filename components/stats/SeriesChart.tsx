@@ -78,7 +78,7 @@ export function SeriesChart({ distributionData, currentProgress, font }: SeriesC
   if (!distributionData.length) return null;
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.text }]}>
+    <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <Text style={[typography.bodyCaption, { color: colors.secondaryText, marginBottom: 12 }]}>
         {t("stats.series.chartTitle")}
       </Text>
@@ -119,7 +119,6 @@ export function SeriesChart({ distributionData, currentProgress, font }: SeriesC
                 barWidth={26}
                 roundedCorners={{ topLeft: 6, topRight: 6 }}
                 color={hexToRgba(colors.accent, 0.85)}
-                animate={{ type: "spring", duration: 700 }}
                 labels={{ position: "top", font, color: colors.text }}
               />
               {isActive && (
@@ -146,10 +145,7 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 20,
     padding: 16,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1,
   },
   tooltipContainer: {
     position: "absolute",

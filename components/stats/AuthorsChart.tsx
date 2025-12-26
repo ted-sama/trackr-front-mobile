@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, FlatList } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { hexToRgba } from "@/utils/colors";
 import { useTranslation } from "react-i18next";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import { useUserBooks } from "@/hooks/queries/users";
@@ -33,11 +32,6 @@ export function AuthorsChart({ data, username }: AuthorsChartProps) {
     [data]
   );
 
-  const maxValue = useMemo(
-    () => Math.max(...topAuthors.map((a) => a.value)),
-    [topAuthors]
-  );
-
   const booksByAuthor = useMemo(() => {
     const books: TrackedBookWithMeta[] = username && userBooks ? userBooks : getTrackedBooks();
     const grouped: Record<string, TrackedBookWithMeta[]> = {};
@@ -61,7 +55,7 @@ export function AuthorsChart({ data, username }: AuthorsChartProps) {
   if (!topAuthors.length) return null;
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.text }]}>
+    <View style={styles.container}>
       <Text style={[typography.bodyCaption, { color: colors.secondaryText, marginBottom: 12 }]}>
         {t("stats.authors.chartTitle")}
       </Text>
@@ -72,23 +66,10 @@ export function AuthorsChart({ data, username }: AuthorsChartProps) {
           return (
             <View key={author.label} style={styles.authorSection}>
               <View style={styles.authorRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[typography.body, { color: colors.text }]} numberOfLines={1}>
-                    {author.label}
-                  </Text>
-                  <View style={styles.funnelBarBackground}>
-                    <View
-                      style={[
-                        styles.funnelBarFill,
-                        {
-                          width: `${(author.value / maxValue) * 100}%`,
-                          backgroundColor: hexToRgba(colors.accent, 0.9),
-                        },
-                      ]}
-                    />
-                  </View>
-                </View>
-                <Text style={[typography.caption, { color: colors.secondaryText, marginLeft: 8, width: 50, textAlign: "right" }]}>
+                <Text style={[typography.body, { color: colors.text, flex: 1 }]} numberOfLines={1}>
+                  {author.label}
+                </Text>
+                <Text style={[typography.caption, { color: colors.secondaryText }]}>
                   {author.value > 1 ? t("stats.authors.series", { count: author.value }) : t("stats.authors.serie", { count: author.value })}
                 </Text>
               </View>
@@ -124,14 +105,8 @@ export function AuthorsChart({ data, username }: AuthorsChartProps) {
 }
 
 const styles = StyleSheet.create({
-  card: {
+  container: {
     width: "100%",
-    borderRadius: 20,
-    padding: 16,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
   },
   authorsList: {
     gap: 24,
@@ -143,17 +118,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-  },
-  funnelBarBackground: {
-    height: 8,
-    backgroundColor: "rgba(100, 100, 100, 0.1)",
-    borderRadius: 4,
-    marginTop: 6,
-    overflow: "hidden",
-  },
-  funnelBarFill: {
-    height: "100%",
-    borderRadius: 4,
   },
   booksGrid: {
     marginTop: 4,

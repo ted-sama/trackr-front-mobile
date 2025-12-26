@@ -1,17 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { hexToRgba } from "@/utils/colors";
-import { LinearGradient } from "expo-linear-gradient";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withDelay,
-  interpolate,
-  Extrapolation,
-} from "react-native-reanimated";
 import {
   BookMarked,
   BookOpen,
@@ -50,52 +40,28 @@ const CARD_COLORS: Record<string, string> = {
   avgRating: "#eab308",
 };
 
-interface AnimatedCardProps {
+interface StatCardProps {
   card: OverviewCard;
-  index: number;
   colors: any;
   typography: any;
 }
 
-function AnimatedCard({ card, index, colors, typography }: AnimatedCardProps) {
-  const progress = useSharedValue(0);
-
-  useEffect(() => {
-    progress.value = withDelay(index * 80, withSpring(1, { damping: 15, stiffness: 100 }));
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0, 1], [0, 1], Extrapolation.CLAMP),
-    transform: [
-      { translateY: interpolate(progress.value, [0, 1], [20, 0], Extrapolation.CLAMP) },
-      { scale: interpolate(progress.value, [0, 1], [0.9, 1], Extrapolation.CLAMP) },
-    ],
-  }));
-
+function StatCard({ card, colors, typography }: StatCardProps) {
   const Icon = CARD_ICONS[card.key] || BookOpen;
   const iconColor = CARD_COLORS[card.key] || colors.accent;
 
   return (
-    <Animated.View style={[styles.overviewCard, animatedStyle]}>
+    <View style={styles.overviewCard}>
       <View
         style={[
           styles.cardInner,
           {
             backgroundColor: colors.card,
-            borderColor: hexToRgba(iconColor, 0.15),
-            shadowColor: colors.text,
+            borderColor: colors.border,
           },
         ]}
       >
-        <LinearGradient
-          colors={[hexToRgba(iconColor, 0.12), hexToRgba(iconColor, 0)]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFillObject}
-        />
-        <View style={[styles.iconContainer, { backgroundColor: hexToRgba(iconColor, 0.15) }]}>
-          <Icon size={16} color={iconColor} />
-        </View>
+        <Icon size={20} color={iconColor} style={{ marginBottom: 8 }} />
         <Text style={[typography.h2, { color: colors.text, marginBottom: 2, fontSize: 22 }]} numberOfLines={1}>
           {card.title}
         </Text>
@@ -103,7 +69,7 @@ function AnimatedCard({ card, index, colors, typography }: AnimatedCardProps) {
           {card.label}
         </Text>
       </View>
-    </Animated.View>
+    </View>
   );
 }
 
@@ -113,8 +79,8 @@ export function OverviewCards({ cards }: OverviewCardsProps) {
 
   return (
     <View style={styles.overviewGrid}>
-      {cards.map((card, index) => (
-        <AnimatedCard key={card.key} card={card} index={index} colors={colors} typography={typography} />
+      {cards.map((card) => (
+        <StatCard key={card.key} card={card} colors={colors} typography={typography} />
       ))}
     </View>
   );
@@ -134,18 +100,5 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 16,
     borderWidth: 1,
-    overflow: "hidden",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
   },
 });

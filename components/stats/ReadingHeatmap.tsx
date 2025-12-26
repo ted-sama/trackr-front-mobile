@@ -1,20 +1,10 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { hexToRgba } from "@/utils/colors";
 import type { HeatmapDataPoint } from "@/types/stats";
 import { useTranslation } from "react-i18next";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withDelay,
-  withTiming,
-  Easing,
-  interpolate,
-  Extrapolation,
-} from "react-native-reanimated";
 import { Clock } from "lucide-react-native";
 
 interface ReadingHeatmapProps {
@@ -36,9 +26,7 @@ function formatHour(hour: number): string {
   return `${hour}h`;
 }
 
-interface AnimatedCellProps {
-  dayIndex: number;
-  hour: number;
+interface HeatmapCellProps {
   value: number;
   maxValue: number;
   isSelected: boolean;
@@ -46,25 +34,15 @@ interface AnimatedCellProps {
   colors: any;
 }
 
-function AnimatedCell({ dayIndex, hour, value, maxValue, isSelected, onPress, colors }: AnimatedCellProps) {
-  const progress = useSharedValue(0);
+function HeatmapCell({ value, maxValue, isSelected, onPress, colors }: HeatmapCellProps) {
   const intensity = value / maxValue;
   const backgroundColor = intensity === 0
     ? hexToRgba(colors.border, 0.5)
     : hexToRgba(colors.accent, 0.2 + intensity * 0.6);
 
-  useEffect(() => {
-    progress.value = withDelay((dayIndex * 24 + hour) * 3, withSpring(1, { damping: 20, stiffness: 150 }));
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0, 1], [0, 1], Extrapolation.CLAMP),
-    transform: [{ scale: interpolate(progress.value, [0, 1], [0.5, 1], Extrapolation.CLAMP) }],
-  }));
-
   return (
     <Pressable onPress={onPress} style={{ flex: 1 }}>
-      <Animated.View
+      <View
         style={[
           styles.heatmapCell,
           {
@@ -72,7 +50,6 @@ function AnimatedCell({ dayIndex, hour, value, maxValue, isSelected, onPress, co
             borderWidth: isSelected ? 2 : 0,
             borderColor: isSelected ? colors.text : "transparent",
           },
-          animatedStyle,
         ]}
       />
     </Pressable>
@@ -117,27 +94,16 @@ export function ReadingHeatmap({ data }: ReadingHeatmapProps) {
     );
   }, [heatmapMatrix.byDay]);
 
-  const tooltipOpacity = useSharedValue(selectedCell ? 1 : 0);
-
-  useEffect(() => {
-    tooltipOpacity.value = withTiming(selectedCell ? 1 : 0, { duration: 200, easing: Easing.out(Easing.ease) });
-  }, [selectedCell]);
-
-  const tooltipStyle = useAnimatedStyle(() => ({
-    opacity: tooltipOpacity.value,
-    transform: [{ scale: interpolate(tooltipOpacity.value, [0, 1], [0.95, 1], Extrapolation.CLAMP) }],
-  }));
-
   if (!data.length) return null;
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.text }]}>
+    <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <Text style={[typography.bodyCaption, { color: colors.secondaryText, marginBottom: 12 }]}>
         {t("stats.heatmap.chartTitle")}
       </Text>
 
-      <Animated.View style={[styles.tooltipContainer, tooltipStyle]}>
-        {selectedCell && (
+      {selectedCell && (
+        <View style={styles.tooltipContainer}>
           <View style={[styles.tooltip, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.tooltipRow}>
               <Clock size={14} color={colors.accent} />
@@ -149,8 +115,8 @@ export function ReadingHeatmap({ data }: ReadingHeatmapProps) {
               {selectedCell.value} {t("stats.heatmap.activities")}
             </Text>
           </View>
-        )}
-      </Animated.View>
+        </View>
+      )}
 
       <View style={styles.heatmapContainer}>
         {DAY_ORDER.map((dowValue, displayIndex) => (
@@ -163,10 +129,8 @@ export function ReadingHeatmap({ data }: ReadingHeatmapProps) {
                 const value = heatmapMatrix.byDay[dowValue]?.[hour] ?? 0;
                 const isSelected = selectedCell?.day === dowValue && selectedCell?.hour === hour;
                 return (
-                  <AnimatedCell
+                  <HeatmapCell
                     key={`${dowValue}-${hour}`}
-                    dayIndex={displayIndex}
-                    hour={hour}
                     value={value}
                     maxValue={heatmapMatrix.maxValue}
                     isSelected={isSelected}
@@ -228,10 +192,7 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 20,
     padding: 16,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1,
   },
   tooltipContainer: {
     position: "absolute",

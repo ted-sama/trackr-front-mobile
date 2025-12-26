@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import Animated, {
@@ -20,10 +20,10 @@ import { GenreChart } from "@/components/stats/GenreChart";
 import { RatingChart } from "@/components/stats/RatingChart";
 import { ActivityChart } from "@/components/stats/ActivityChart";
 import { ReadingHeatmap } from "@/components/stats/ReadingHeatmap";
-import { FunnelChart } from "@/components/stats/FunnelChart";
 import { SeriesChart } from "@/components/stats/SeriesChart";
 import { AuthorsChart } from "@/components/stats/AuthorsChart";
 import { TypesChart } from "@/components/stats/TypesChart";
+import { StatsSkeleton } from "@/components/stats/StatsSkeleton";
 import { useUserStore } from "@/stores/userStore";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(
@@ -141,25 +141,26 @@ export default function StatsScreen() {
       }))
     : [];
 
-  const funnelCounts = stats
-    ? stats.funnel.counts
-    : {
-        reading: 0,
-        completed: 0,
-        on_hold: 0,
-        dropped: 0,
-      };
 
   if (isLoading) {
     return (
-      <View
-        style={[
-          styles.container,
-          { backgroundColor: colors.background, justifyContent: "center", alignItems: "center" },
-        ]}
-      >
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-        <ActivityIndicator size="large" color={colors.accent} />
+        <AnimatedHeader
+          title={t("stats.title", { name: "" })}
+          scrollY={scrollY}
+          onBack={() => router.back()}
+        />
+        <ScrollView
+          contentContainerStyle={{
+            paddingTop: insets.top + 70,
+            paddingBottom: 64,
+            paddingHorizontal: 16,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          <StatsSkeleton />
+        </ScrollView>
       </View>
     );
   }
@@ -221,7 +222,6 @@ export default function StatsScreen() {
 
         <View style={{ gap: 24 }}>
           <OverviewCards cards={overviewCards} />
-          <FunnelChart counts={funnelCounts} />
           {user?.plan === "plus" && (
             <View style={{ gap: 24 }}>
               <GenreChart data={genreData} />

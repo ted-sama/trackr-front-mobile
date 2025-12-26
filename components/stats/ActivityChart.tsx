@@ -68,7 +68,7 @@ export function ActivityChart({ data, font }: ActivityChartProps) {
         styles.card,
         {
           backgroundColor: colors.card,
-          shadowColor: colors.text,
+          borderColor: colors.border,
         },
       ]}
     >
@@ -131,14 +131,12 @@ export function ActivityChart({ data, font }: ActivityChartProps) {
                 color={hexToRgba(colors.accent, 0.9)}
                 strokeWidth={2.5}
                 curveType="natural"
-                animate={{ type: "spring", duration: 800 }}
               />
               <Scatter
                 points={points.value}
                 color={colors.accent}
                 radius={4}
                 style="fill"
-                animate={{ type: "spring", duration: 800 }}
               />
               {isActive && (
                 <ChartTooltip
@@ -175,10 +173,7 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 20,
     padding: 16,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1,
   },
   tooltipContainer: {
     position: "absolute",

@@ -11,6 +11,8 @@ import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native
 import { useUserStore } from '@/stores/userStore';
 import { useUpdateMe } from '@/hooks/queries/users';
 import { ChartNoAxesCombined, Notebook } from 'lucide-react-native';
+import { useTrackrPlus } from '@/hooks/useTrackrPlus';
+import PlusBadge from '@/components/ui/PlusBadge';
 
 interface PrivacyToggleProps {
   icon: React.ReactNode;
@@ -19,9 +21,10 @@ interface PrivacyToggleProps {
   value: boolean;
   onValueChange: (value: boolean) => void;
   disabled?: boolean;
+  badge?: React.ReactNode;
 }
 
-function PrivacyToggle({ icon, label, description, value, onValueChange, disabled = false }: PrivacyToggleProps) {
+function PrivacyToggle({ icon, label, description, value, onValueChange, disabled = false, badge }: PrivacyToggleProps) {
   const { colors } = useTheme();
   const typography = useTypography();
 
@@ -37,9 +40,12 @@ function PrivacyToggle({ icon, label, description, value, onValueChange, disable
           {icon}
         </View>
         <View style={styles.privacyTextContainer}>
-          <Text style={[typography.body, { color: colors.text, fontWeight: '600', marginBottom: 2 }]}>
-            {label}
-          </Text>
+          <View style={styles.labelContainer}>
+            <Text style={[typography.body, { color: colors.text, fontWeight: '600', marginBottom: 2 }]}>
+              {label}
+            </Text>
+            {badge}
+          </View>
           <Text style={[typography.body, { color: colors.secondaryText, fontSize: 13 }]}>
             {description}
           </Text>
@@ -68,12 +74,17 @@ export default function PrivacyScreen() {
   const { t } = useTranslation();
   const currentUser = useUserStore((state) => state.currentUser);
   const updateMe = useUpdateMe();
+  const { isTrackrPlus, presentPaywall } = useTrackrPlus();
 
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollY.value = event.contentOffset.y;
   });
 
-  const handleStatsPrivacyChange = (value: boolean) => {
+  const handleStatsPrivacyChange = async (value: boolean) => {
+    if (!isTrackrPlus) {
+      presentPaywall();
+      return;
+    }
     updateMe.mutate({ isStatsPublic: value });
   };
 
@@ -122,7 +133,8 @@ export default function PrivacyScreen() {
             description={t('settings.privacy.statsPublicDescription')}
             value={currentUser.isStatsPublic}
             onValueChange={handleStatsPrivacyChange}
-            disabled={updateMe.isPending}
+            disabled={updateMe.isPending || !isTrackrPlus}
+            badge={<PlusBadge />}
           />
           <PrivacyToggle
             icon={<Notebook size={20} color={colors.icon} />}
@@ -172,6 +184,11 @@ const styles = StyleSheet.create({
   },
   privacyTextContainer: {
     flex: 1,
+  },
+  labelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   privacyOptionRight: {
     marginRight: 12,

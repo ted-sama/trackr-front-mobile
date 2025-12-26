@@ -215,14 +215,24 @@ export default function UserProfileScreen() {
             router.push(`/activity/${user?.username}`);
           }
         } : undefined}
-        rightButtonIcon={(isMe || user?.isStatsPublic !== false) ? <ChartNoAxesCombined size={22} color={colors.icon} /> : undefined}
-        onRightButtonPress={(isMe || user?.isStatsPublic !== false) ? () => {
-          if (isMe) {
-            router.push(`/stats`);
-          } else {
-            router.push(`/stats?username=${user?.username}`);
-          }
-        } : undefined}
+        rightButtonIcon={
+          (isMe && currentUser?.plan === "plus") ||
+          (!isMe && user?.plan === "plus" && user?.isStatsPublic !== false)
+            ? <ChartNoAxesCombined size={22} color={colors.icon} />
+            : undefined
+        }
+        onRightButtonPress={
+          (isMe && currentUser?.plan === "plus") ||
+          (!isMe && user?.plan === "plus" && user?.isStatsPublic !== false)
+            ? () => {
+                if (isMe) {
+                  router.push(`/stats`);
+                } else {
+                  router.push(`/stats?username=${user?.username}`);
+                }
+              }
+            : undefined
+        }
       />
       <AnimatedScrollView onScroll={scrollHandler} scrollEventThrottle={16} style={{ paddingTop: insets.top }} contentContainerStyle={{ paddingBottom: 64 }}>
         <View style={{ paddingHorizontal: 16 }}>

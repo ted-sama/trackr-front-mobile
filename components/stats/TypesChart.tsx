@@ -1,20 +1,10 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { Pie, PolarChart } from "victory-native";
 import { useTranslation } from "react-i18next";
 import { hexToRgba } from "@/utils/colors";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withDelay,
-  withTiming,
-  Easing,
-  interpolate,
-  Extrapolation,
-} from "react-native-reanimated";
 import { BookType } from "lucide-react-native";
 
 const TYPE_COLORS = [
@@ -39,7 +29,6 @@ interface TypesChartProps {
 
 interface LegendItemProps {
   item: PieDataPoint;
-  index: number;
   isSelected: boolean;
   onPress: () => void;
   total: number;
@@ -48,29 +37,18 @@ interface LegendItemProps {
   t: any;
 }
 
-function LegendItem({ item, index, isSelected, onPress, total, colors, typography, t }: LegendItemProps) {
-  const progress = useSharedValue(0);
+function LegendItem({ item, isSelected, onPress, total, colors, typography, t }: LegendItemProps) {
   const percentage = ((item.value / total) * 100).toFixed(1);
-
-  useEffect(() => {
-    progress.value = withDelay(index * 60, withSpring(1, { damping: 15, stiffness: 120 }));
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0, 1], [0, 1], Extrapolation.CLAMP),
-    transform: [{ scale: interpolate(progress.value, [0, 1], [0.8, 1], Extrapolation.CLAMP) }],
-  }));
 
   return (
     <Pressable onPress={onPress}>
-      <Animated.View
+      <View
         style={[
           styles.legendItem,
           {
             backgroundColor: isSelected ? hexToRgba(item.color, 0.15) : "transparent",
             borderColor: isSelected ? item.color : "transparent",
           },
-          animatedStyle,
         ]}
       >
         <View style={[styles.legendDot, { backgroundColor: item.color }]} />
@@ -97,7 +75,7 @@ function LegendItem({ item, index, isSelected, onPress, total, colors, typograph
             {item.value} ({percentage}%)
           </Text>
         </View>
-      </Animated.View>
+      </View>
     </Pressable>
   );
 }
@@ -124,29 +102,18 @@ export function TypesChart({ data }: TypesChartProps) {
     return pieData.reduce((max, item) => (item.value > max.value ? item : max), pieData[0]);
   }, [pieData]);
 
-  const tooltipOpacity = useSharedValue(selectedIndex !== null ? 1 : 0);
-
-  useEffect(() => {
-    tooltipOpacity.value = withTiming(selectedIndex !== null ? 1 : 0, { duration: 200, easing: Easing.out(Easing.ease) });
-  }, [selectedIndex]);
-
-  const tooltipStyle = useAnimatedStyle(() => ({
-    opacity: tooltipOpacity.value,
-    transform: [{ scale: interpolate(tooltipOpacity.value, [0, 1], [0.95, 1], Extrapolation.CLAMP) }],
-  }));
-
   if (!data.length) return null;
 
   const selectedItem = selectedIndex !== null ? pieData[selectedIndex] : null;
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.text }]}>
+    <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <Text style={[typography.bodyCaption, { color: colors.secondaryText, marginBottom: 12 }]}>
         {t("stats.types.chartTitle")}
       </Text>
 
-      <Animated.View style={[styles.tooltipContainer, tooltipStyle]}>
-        {selectedItem && (
+      {selectedItem && (
+        <View style={styles.tooltipContainer}>
           <View style={[styles.tooltip, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.tooltipRow}>
               <View style={[styles.tooltipDot, { backgroundColor: selectedItem.color }]} />
@@ -158,8 +125,8 @@ export function TypesChart({ data }: TypesChartProps) {
               {selectedItem.value} ({((selectedItem.value / totalTypes) * 100).toFixed(1)}%)
             </Text>
           </View>
-        )}
-      </Animated.View>
+        </View>
+      )}
 
       <View style={styles.chartContainer}>
         <View style={{ height: 200, width: 200 }}>
@@ -198,7 +165,6 @@ export function TypesChart({ data }: TypesChartProps) {
           <LegendItem
             key={item.label}
             item={item}
-            index={index}
             isSelected={selectedIndex === index}
             onPress={() => setSelectedIndex(selectedIndex === index ? null : index)}
             total={totalTypes}
@@ -217,10 +183,7 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 20,
     padding: 16,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1,
   },
   tooltipContainer: {
     position: "absolute",
