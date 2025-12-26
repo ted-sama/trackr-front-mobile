@@ -6,6 +6,7 @@ import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { api } from '@/services/api';
 import { useUserStore } from '@/stores/userStore';
+import { useMarkAsRead } from './queries/notifications';
 
 // Configure how notifications behave when app is in foreground
 Notifications.setNotificationHandler({
@@ -24,6 +25,7 @@ export function usePushNotifications() {
   const notificationListener = useRef<Notifications.EventSubscription>();
   const responseListener = useRef<Notifications.EventSubscription>();
   const { currentUser } = useUserStore();
+  const markAsRead = useMarkAsRead();
 
   // Register for push notifications
   async function registerForPushNotificationsAsync(): Promise<string | null> {
@@ -106,11 +108,17 @@ export function usePushNotifications() {
 
     if (!data) return;
 
-    const { type, resourceType, resourceId } = data as {
+    const { type, resourceType, resourceId, notificationId } = data as {
       type?: string;
       resourceType?: string;
       resourceId?: string;
+      notificationId?: string;
     };
+
+    // Mark notification as read
+    if (notificationId) {
+      markAsRead.mutate(notificationId);
+    }
 
     // Navigate based on notification type
     if (resourceType === 'book_review' && resourceId) {
