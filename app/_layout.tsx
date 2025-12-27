@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import '@/i18n'
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import * as SystemUI from 'expo-system-ui';
 import ThemeProvider, { useTheme } from "../contexts/ThemeContext";
 import {
   BottomSheetProvider,
@@ -112,6 +113,11 @@ function RootLayoutContent() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
+
+  // Sync native background color with theme (fixes white flash on Android transitions)
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(colors.background);
+  }, [colors.background]);
 
   // Prefetch static data on app start
   useEffect(() => {

@@ -1,8 +1,11 @@
 import { Stack } from "expo-router";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function SharedLayout() {
+  const { colors } = useTheme();
+
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="book/[id]" />
       <Stack.Screen name="book/[id]/reviews" />
       <Stack.Screen name="chat/[bookId]" />
