@@ -57,6 +57,7 @@ export default function ReviewForm({
             color: colors.text,
             backgroundColor: colors.card,
             borderColor: colors.border,
+            includeFontPadding: false,
           },
         ]}
         placeholder={t("reviews.placeholder")}
