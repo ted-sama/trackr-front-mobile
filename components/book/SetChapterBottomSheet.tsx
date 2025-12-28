@@ -206,7 +206,7 @@ const SetChapterBottomSheet = forwardRef<TrueSheet, SetChapterBottomSheetProps>(
                         >
                             <Text style={[typography.categoryTitle, { color: colors.accent }]}>{"#"}</Text>
                             <TextInput
-                                style={[typography.categoryTitle, styles.chapterInput, { color: colors.accent }]}
+                                style={[typography.categoryTitle, styles.chapterInput, { color: colors.accent, includeFontPadding: false, textAlignVertical: 'center' }]}
                                 inputMode='numeric'
                                 keyboardType='numeric'
                                 numberOfLines={1}

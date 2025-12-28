@@ -220,6 +220,7 @@ const ReportBottomSheet = forwardRef<TrueSheet, ReportBottomSheetProps>(
                   backgroundColor: colors.card,
                   borderColor: colors.border,
                   color: colors.text,
+                  includeFontPadding: false,
                 },
               ]}
               placeholder={t("report.descriptionPlaceholder")}
