@@ -297,6 +297,7 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
                   styles.textInput,
                   {
                     color: colors.text,
+                    includeFontPadding: false,
                   },
                 ]}
                 placeholder={t("reviews.startWriting")}

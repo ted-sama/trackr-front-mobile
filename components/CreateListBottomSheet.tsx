@@ -110,7 +110,7 @@ const CreateListBottomSheet = forwardRef<
               autoCorrect={false}
               autoFocus
               style={[
-                { color: colors.text, fontSize: 16, paddingVertical: 8 },
+                { color: colors.text, fontSize: 16, paddingVertical: 8, includeFontPadding: false, textAlignVertical: 'center' },
                 typography.body,
               ]}
             />

@@ -46,7 +46,7 @@ const SearchBar = ({
         style={styles.searchIcon}
       />
       <TextInput
-        style={[styles.input, typography.caption, { color: colors.text }]}
+        style={[styles.input, typography.caption, { color: colors.text, includeFontPadding: false, textAlignVertical: 'center' }]}
         placeholder={placeholder}
         placeholderTextColor={colors.secondaryText}
         value={value}
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: "100%",
-    paddingVertical: Platform.OS === "android" ? 8 : 0,
+    paddingVertical: 0,
   },
   clearButton: {
     padding: 4,
