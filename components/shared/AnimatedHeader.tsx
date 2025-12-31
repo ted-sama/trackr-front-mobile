@@ -163,8 +163,8 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
             {rightComponent}
           </View>
         ) : (
-          <View style={[styles.rightContainer, { width: farRightButtonIcon ? (closeRightButtonIcon ? 148 : 96) : (closeRightButtonIcon ? 96 : 44) }]}>
-            {closeRightButtonIcon ? (
+          <View style={styles.rightContainer}>
+            {closeRightButtonIcon && (
               <ScalePressable onPress={onCloseRightButtonPress} style={styles.closeRightButton}>
                 <View
                   style={[
@@ -184,8 +184,8 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
                 />
                 {closeRightButtonIcon}
               </ScalePressable>
-            ) : null}
-            {rightButtonIcon ? (
+            )}
+            {rightButtonIcon && (
               <ScalePressable onPress={onRightButtonPress} style={styles.rightButton}>
                 <View
                   style={[
@@ -205,10 +205,8 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
                 />
                 {rightButtonIcon}
               </ScalePressable>
-            ) : (
-              <View style={{ width: 44 }} />
             )}
-            {farRightButtonIcon ? (
+            {farRightButtonIcon && (
               <ScalePressable onPress={onFarRightButtonPress} style={styles.rightButton}>
                 <View
                   style={[
@@ -228,7 +226,7 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
                 />
                 {farRightButtonIcon}
               </ScalePressable>
-            ) : null}
+            )}
           </View>
         )}
       </View>
@@ -276,6 +274,7 @@ const styles = StyleSheet.create({
   rightContainer: {
     alignItems: 'center',
     flexDirection: 'row',
+    justifyContent: 'flex-end',
     gap: 8,
   },
   rightComponentContainer: {
