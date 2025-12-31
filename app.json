@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/android-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.ted.trackr.app"
@@ -50,6 +50,7 @@
       [
         "expo-notifications",
         {
+          "icon": "./assets/images/trackr-logo.png",
           "color": "#ffffff",
           "sounds": []
         }
