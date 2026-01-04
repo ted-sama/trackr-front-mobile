@@ -262,7 +262,7 @@
         },
         "genres": {
             "title": "Genres les plus lus",
-            "chartTitle": "Top 12 des genres que vous aimez lire",
+            "chartTitle": "Top 12 des genres que vous aimez lire (hors comics)",
             "total": "genres"
         },
         "ratings": {
@@ -307,6 +307,11 @@
             "series": "{{count}} séries",
             "serie": "{{count}} série",
             "total": "livres"
+        },
+        "details": {
+            "booksCount": "{{count}} livre(s)",
+            "noBooks": "Aucun livre trouvé pour cette catégorie",
+            "stars": "étoile(s)"
         },
         "private": "Les statistiques de cet utilisateur sont privées",
         "error": "Une erreur est survenue lors du chargement des statistiques"

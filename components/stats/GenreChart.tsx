@@ -6,7 +6,8 @@ import { Pie, PolarChart } from "victory-native";
 import { useTranslation } from "react-i18next";
 import { hexToRgba } from "@/utils/colors";
 import { useTranslateGenre } from "@/hooks/queries/genres";
-import { Tag } from "lucide-react-native";
+import { Tag, ChevronRight } from "lucide-react-native";
+import { useRouter } from "expo-router";
 
 const GENRE_COLORS = [
   "#6366f1", "#8b5cf6", "#ec4899", "#f43f5e", "#f97316",
@@ -23,32 +24,35 @@ interface PieDataPoint extends Record<string, unknown> {
   label: string;
   value: number;
   color: string;
+  rawLabel: string;
 }
 
 interface GenreChartProps {
   data: SimplePoint[];
+  username?: string;
 }
 
 interface LegendItemProps {
   item: PieDataPoint;
   isSelected: boolean;
   onPress: () => void;
+  onNavigate: () => void;
   total: number;
   colors: any;
   typography: any;
 }
 
-function LegendItem({ item, isSelected, onPress, total, colors, typography }: LegendItemProps) {
+function LegendItem({ item, isSelected, onPress, onNavigate, total, colors, typography }: LegendItemProps) {
   const percentage = ((item.value / total) * 100).toFixed(1);
 
   return (
-    <Pressable onPress={onPress}>
+    <Pressable onPress={onPress} onLongPress={onNavigate}>
       <View
         style={[
           styles.legendItem,
           {
             backgroundColor: isSelected ? hexToRgba(item.color, 0.15) : "transparent",
-            borderColor: isSelected ? item.color : "transparent",
+            borderColor: isSelected ? item.color : colors.border,
           },
         ]}
       >
@@ -76,15 +80,17 @@ function LegendItem({ item, isSelected, onPress, total, colors, typography }: Le
             {item.value} ({percentage}%)
           </Text>
         </View>
+        <ChevronRight size={14} color={colors.secondaryText} style={{ marginLeft: 4 }} />
       </View>
     </Pressable>
   );
 }
 
-export function GenreChart({ data }: GenreChartProps) {
+export function GenreChart({ data, username }: GenreChartProps) {
   const { colors } = useTheme();
   const typography = useTypography();
   const { t } = useTranslation();
+  const router = useRouter();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const translateGenre = useTranslateGenre();
 
@@ -95,9 +101,22 @@ export function GenreChart({ data }: GenreChartProps) {
       label: translateGenre(item.label),
       value: item.value,
       color: GENRE_COLORS[index % GENRE_COLORS.length],
+      rawLabel: item.label,
     })),
     [data, translateGenre]
   );
+
+  const handleNavigateToDetails = (item: PieDataPoint) => {
+    router.push({
+      pathname: "/chart-details",
+      params: {
+        chartType: "genre",
+        filterValue: item.rawLabel,
+        filterLabel: item.label,
+        ...(username && { username }),
+      },
+    });
+  };
 
   const topGenre = useMemo(() => {
     if (!pieData.length) return null;
@@ -168,7 +187,8 @@ export function GenreChart({ data }: GenreChartProps) {
             key={item.label}
             item={item}
             isSelected={selectedIndex === index}
-            onPress={() => setSelectedIndex(selectedIndex === index ? null : index)}
+            onPress={() => handleNavigateToDetails(item)}
+            onNavigate={() => handleNavigateToDetails(item)}
             total={totalGenres}
             colors={colors}
             typography={typography}

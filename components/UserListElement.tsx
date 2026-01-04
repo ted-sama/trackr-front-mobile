@@ -6,6 +6,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
+const DEFAULT_AVATAR = require("@/assets/images/user/default.png");
+
 interface UserListElementProps {
   user: User;
   onPress?: () => void;
@@ -29,18 +31,10 @@ const UserListElement = ({ user, onPress }: UserListElementProps) => {
         style={styles.container}
       >
         <View style={styles.detailsGroup}>
-          {user.avatar ? (
-            <Image
-              source={{ uri: user.avatar }}
-              style={styles.avatar}
-            />
-          ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder, { backgroundColor: colors.border }]}>
-              <Text style={[typography.h3, { color: colors.secondaryText }]}>
-                {user.displayName?.charAt(0)?.toUpperCase() || user.username?.charAt(0)?.toUpperCase() || '?'}
-              </Text>
-            </View>
-          )}
+          <Image
+            source={user.avatar ? { uri: user.avatar } : DEFAULT_AVATAR}
+            style={styles.avatar}
+          />
           <View style={styles.infoContainer}>
             <Text style={[styles.displayName, typography.h3, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
               {user.displayName || user.username}
@@ -72,10 +66,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-  },
-  avatarPlaceholder: {
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   infoContainer: {
     marginHorizontal: 16,

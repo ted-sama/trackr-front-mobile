@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useTranslation } from "react-i18next";
@@ -10,7 +10,8 @@ import { Circle } from "@shopify/react-native-skia";
 import type { SeriesProgress } from "@/types/stats";
 import type { SharedValue } from "react-native-reanimated";
 import Animated, { useAnimatedStyle, withTiming, Easing } from "react-native-reanimated";
-import { BookOpen } from "lucide-react-native";
+import { BookOpen, ChevronRight } from "lucide-react-native";
+import { useRouter } from "expo-router";
 
 interface SimplePoint extends Record<string, unknown> {
   label: string;
@@ -21,6 +22,7 @@ interface SeriesChartProps {
   distributionData: SimplePoint[];
   currentProgress: SeriesProgress[];
   font: SkFont | null;
+  username?: string;
 }
 
 interface BarHighlightProps {
@@ -38,10 +40,14 @@ function BarHighlight({ x, y, color }: BarHighlightProps) {
   );
 }
 
-export function SeriesChart({ distributionData, currentProgress, font }: SeriesChartProps) {
+// Map translated labels back to raw keys
+const SERIES_KEYS = ["oneshot", "short", "medium", "long"];
+
+export function SeriesChart({ distributionData, currentProgress, font, username }: SeriesChartProps) {
   const { colors } = useTheme();
   const typography = useTypography();
   const { t } = useTranslation();
+  const router = useRouter();
 
   const { state, isActive } = useChartPressState({
     x: "",
@@ -59,8 +65,9 @@ export function SeriesChart({ distributionData, currentProgress, font }: SeriesC
   );
 
   const chartData = useMemo(() =>
-    distributionData.map((point) => ({
+    distributionData.map((point, index) => ({
       ...point,
+      rawLabel: SERIES_KEYS[index] || point.label,
       label:
         point.label === "oneshot" ? t("stats.series.oneshot") :
         point.label === "short" ? t("stats.series.short") :
@@ -74,6 +81,18 @@ export function SeriesChart({ distributionData, currentProgress, font }: SeriesC
     opacity: withTiming(isActive ? 1 : 0, { duration: 200, easing: Easing.out(Easing.ease) }),
     transform: [{ scale: withTiming(isActive ? 1 : 0.95, { duration: 200, easing: Easing.out(Easing.ease) }) }],
   }));
+
+  const handleNavigateToDetails = (rawLabel: string, translatedLabel: string) => {
+    router.push({
+      pathname: "/chart-details",
+      params: {
+        chartType: "series",
+        filterValue: rawLabel,
+        filterLabel: translatedLabel,
+        ...(username && { username }),
+      },
+    });
+  };
 
   if (!distributionData.length) return null;
 
@@ -136,6 +155,27 @@ export function SeriesChart({ distributionData, currentProgress, font }: SeriesC
           </Text>
         </View>
       </View>
+
+      <View style={styles.legendContainer}>
+        {chartData.map((item) => (
+          <Pressable
+            key={item.rawLabel}
+            onPress={() => handleNavigateToDetails(item.rawLabel, item.label)}
+            style={[styles.legendItem, { borderColor: colors.border }]}
+          >
+            <View style={styles.legendContent}>
+              <BookOpen size={12} color={colors.accent} />
+              <Text style={[typography.bodyCaption, { color: colors.text, fontSize: 11, marginLeft: 4 }]}>
+                {item.label}
+              </Text>
+              <Text style={[typography.bodyCaption, { color: colors.secondaryText, fontSize: 10, marginLeft: 4 }]}>
+                ({item.value})
+              </Text>
+            </View>
+            <ChevronRight size={14} color={colors.secondaryText} />
+          </Pressable>
+        ))}
+      </View>
     </View>
   );
 }
@@ -179,5 +219,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
+  },
+  legendContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 16,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  legendContent: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });

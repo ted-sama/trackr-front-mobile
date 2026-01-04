@@ -5,7 +5,8 @@ import { useTypography } from "@/hooks/useTypography";
 import { Pie, PolarChart } from "victory-native";
 import { useTranslation } from "react-i18next";
 import { hexToRgba } from "@/utils/colors";
-import { BookType } from "lucide-react-native";
+import { BookType, ChevronRight } from "lucide-react-native";
+import { useRouter } from "expo-router";
 
 const TYPE_COLORS = [
   "#6366f1", "#8b5cf6", "#ec4899", "#f43f5e",
@@ -25,6 +26,7 @@ interface PieDataPoint extends Record<string, unknown> {
 
 interface TypesChartProps {
   data: SimplePoint[];
+  username?: string;
 }
 
 interface LegendItemProps {
@@ -47,7 +49,7 @@ function LegendItem({ item, isSelected, onPress, total, colors, typography, t }:
           styles.legendItem,
           {
             backgroundColor: isSelected ? hexToRgba(item.color, 0.15) : "transparent",
-            borderColor: isSelected ? item.color : "transparent",
+            borderColor: isSelected ? item.color : colors.border,
           },
         ]}
       >
@@ -75,15 +77,17 @@ function LegendItem({ item, isSelected, onPress, total, colors, typography, t }:
             {item.value} ({percentage}%)
           </Text>
         </View>
+        <ChevronRight size={14} color={colors.secondaryText} style={{ marginLeft: 4 }} />
       </View>
     </Pressable>
   );
 }
 
-export function TypesChart({ data }: TypesChartProps) {
+export function TypesChart({ data, username }: TypesChartProps) {
   const { colors } = useTheme();
   const typography = useTypography();
   const { t } = useTranslation();
+  const router = useRouter();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const totalTypes = useMemo(() => data.reduce((sum, item) => sum + item.value, 0), [data]);
@@ -96,6 +100,18 @@ export function TypesChart({ data }: TypesChartProps) {
     })),
     [data]
   );
+
+  const handleNavigateToDetails = (item: PieDataPoint) => {
+    router.push({
+      pathname: "/chart-details",
+      params: {
+        chartType: "type",
+        filterValue: item.label,
+        filterLabel: t("common.bookTypes." + item.label),
+        ...(username && { username }),
+      },
+    });
+  };
 
   const topType = useMemo(() => {
     if (!pieData.length) return null;
@@ -166,7 +182,7 @@ export function TypesChart({ data }: TypesChartProps) {
             key={item.label}
             item={item}
             isSelected={selectedIndex === index}
-            onPress={() => setSelectedIndex(selectedIndex === index ? null : index)}
+            onPress={() => handleNavigateToDetails(item)}
             total={totalTypes}
             colors={colors}
             typography={typography}

@@ -95,8 +95,10 @@ export function useUserLists(userId?: string, search?: string) {
 
 export function useUserCreatedLists(username?: string, search?: string) {
   const { currentUser } = useUserStore();
-  const isMe = !username || username === currentUser?.username;
-  const targetUsername = username || currentUser?.username;
+  // Ensure username is a non-empty string for proper comparison
+  const normalizedUsername = username?.trim() || undefined;
+  const isMe = !normalizedUsername || normalizedUsername === currentUser?.username;
+  const targetUsername = normalizedUsername || currentUser?.username;
   // For current user, use /me/lists to get all lists (including private ones)
   // For other users, use /users/${username}/lists (which only returns public lists)
   const endpoint = isMe ? '/me/lists' : `/users/${targetUsername}/lists`;
@@ -113,7 +115,7 @@ export function useUserCreatedLists(username?: string, search?: string) {
       const { data } = await api.get<PaginatedResponse<List>>(endpoint, {
         params,
       });
-      
+
       // For current user, filter to only show lists created by them (exclude saved lists from others)
       if (isMe && currentUser?.id) {
         const filteredData = data.data.filter((list) => list.owner.id === currentUser.id);
@@ -122,7 +124,7 @@ export function useUserCreatedLists(username?: string, search?: string) {
           data: filteredData,
         };
       }
-      
+
       return data;
     },
     initialPageParam: 1,
@@ -257,11 +259,13 @@ export function useReorderUserTop() {
 
 export function useUserActivity(username?: string) {
   const { currentUser } = useUserStore();
-  const isMe = !username || username === currentUser?.username;
-  const endpoint = isMe ? '/me/activity' : `/users/${username}/activity`;
+  // Ensure username is a non-empty string for proper comparison
+  const normalizedUsername = username?.trim() || undefined;
+  const isMe = !normalizedUsername || normalizedUsername === currentUser?.username;
+  const endpoint = isMe ? '/me/activity' : `/users/${normalizedUsername}/activity`;
 
   return useInfiniteQuery({
-    queryKey: ['user', 'activity', isMe ? 'me' : username],
+    queryKey: ['user', 'activity', isMe ? 'me' : normalizedUsername],
     queryFn: async ({ pageParam }) => {
       const page = pageParam ?? 1;
       const { data } = await api.get<PaginatedResponse<ActivityLog>>(endpoint, {
@@ -277,7 +281,7 @@ export function useUserActivity(username?: string) {
       const { currentPage, lastPage } = lastPageData.meta;
       return currentPage < lastPage ? currentPage + 1 : undefined;
     },
-    enabled: isMe || Boolean(username),
+    enabled: isMe || Boolean(normalizedUsername),
     staleTime: staleTimes.realtime,
   });
 }
@@ -297,26 +301,54 @@ export function useMeStats() {
 
 export function useUserStats(username?: string) {
   const { currentUser } = useUserStore();
-  const isMe = !username || username === currentUser?.username;
-  const endpoint = isMe ? '/me/stats' : `/users/${username}/stats`;
+  // Ensure username is a non-empty string for proper comparison
+  const normalizedUsername = username?.trim() || undefined;
+  const isMe = !normalizedUsername || normalizedUsername === currentUser?.username;
+  const endpoint = isMe ? '/me/stats' : `/users/${normalizedUsername}/stats`;
 
   return useQuery({
-    queryKey: queryKeys.userStats(isMe ? undefined : username),
+    queryKey: queryKeys.userStats(isMe ? undefined : normalizedUsername),
     queryFn: async () => (await api.get<UserStats>(endpoint, {
       params: { timezone: getTimezone() }
     })).data,
-    enabled: isMe || Boolean(username),
+    enabled: isMe || Boolean(normalizedUsername),
+    staleTime: staleTimes.user,
+  });
+}
+
+export function useStatsFilteredBooks(
+  chartType: string,
+  filterValue: string,
+  username?: string
+) {
+  const { currentUser } = useUserStore();
+  // Ensure username is a non-empty string for proper comparison
+  const normalizedUsername = username?.trim() || undefined;
+  const isMe = !normalizedUsername || normalizedUsername === currentUser?.username;
+  const endpoint = isMe ? '/me/stats/books' : `/users/${normalizedUsername}/stats/books`;
+
+  return useQuery({
+    queryKey: ['stats', 'books', chartType, filterValue, isMe ? 'me' : normalizedUsername],
+    queryFn: async () => {
+      const response = await api.get<{ data: TrackedBookWithMeta[] }>(endpoint, {
+        params: { chartType, filterValue }
+      });
+      return response.data.data;
+    },
+    enabled: Boolean(chartType) && Boolean(filterValue),
     staleTime: staleTimes.user,
   });
 }
 
 export function useUserBooks(username?: string) {
   const { currentUser } = useUserStore();
-  const isMe = !username || username === currentUser?.username;
-  const endpoint = isMe ? '/me/books' : `/users/${username}/books`;
+  // Ensure username is a non-empty string for proper comparison
+  const normalizedUsername = username?.trim() || undefined;
+  const isMe = !normalizedUsername || normalizedUsername === currentUser?.username;
+  const endpoint = isMe ? '/me/books' : `/users/${normalizedUsername}/books`;
 
   return useQuery({
-    queryKey: queryKeys.userBooks(isMe ? undefined : username),
+    queryKey: queryKeys.userBooks(isMe ? undefined : normalizedUsername),
     queryFn: async () => {
       const { data } = await api.get<PaginatedResponse<TrackedBook>>(endpoint, {
         params: { offset: 0, limit: 1000 }
@@ -348,7 +380,7 @@ export function useUserBooks(username?: string) {
 
       return transformedBooks;
     },
-    enabled: isMe || Boolean(username),
+    enabled: isMe || Boolean(normalizedUsername),
     staleTime: staleTimes.user,
   });
 }

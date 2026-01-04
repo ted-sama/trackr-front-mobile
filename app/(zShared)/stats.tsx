@@ -224,15 +224,16 @@ export default function StatsScreen() {
           <OverviewCards cards={overviewCards} />
           {user?.plan === "plus" && (
             <View style={{ gap: 24 }}>
-              <GenreChart data={genreData} />
-              <TypesChart data={typesData} />
+              <GenreChart data={genreData} username={isMe ? undefined : username} />
+              <TypesChart data={typesData} username={isMe ? undefined : username} />
               <ActivityChart data={activityData} font={font} />
-              <RatingChart data={ratingData} font={font} />
+              <RatingChart data={ratingData} font={font} username={isMe ? undefined : username} />
               <ReadingHeatmap data={stats?.preferences.heatmap ?? []} />
               <SeriesChart
                 distributionData={seriesDistributionData}
                 currentProgress={stats?.series.currentProgress ?? []}
                 font={font}
+                username={isMe ? undefined : username}
               />
               <AuthorsChart data={authorsData} username={isMe ? undefined : username} />
             </View>

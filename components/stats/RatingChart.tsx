@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { CartesianChart, Bar, useChartPressState } from "victory-native";
@@ -9,7 +9,8 @@ import { Circle } from "@shopify/react-native-skia";
 import { useTranslation } from "react-i18next";
 import type { SharedValue } from "react-native-reanimated";
 import Animated, { useAnimatedStyle, withTiming, Easing } from "react-native-reanimated";
-import { Star } from "lucide-react-native";
+import { Star, ChevronRight } from "lucide-react-native";
+import { useRouter } from "expo-router";
 
 interface SimplePoint extends Record<string, unknown> {
   label: string;
@@ -19,6 +20,7 @@ interface SimplePoint extends Record<string, unknown> {
 interface RatingChartProps {
   data: SimplePoint[];
   font: SkFont | null;
+  username?: string;
 }
 
 interface BarTooltipProps {
@@ -36,10 +38,11 @@ function BarHighlight({ x, y, color }: BarTooltipProps) {
   );
 }
 
-export function RatingChart({ data, font }: RatingChartProps) {
+export function RatingChart({ data, font, username }: RatingChartProps) {
   const { colors } = useTheme();
   const typography = useTypography();
   const { t } = useTranslation();
+  const router = useRouter();
 
   const { state, isActive } = useChartPressState({
     x: "",
@@ -60,6 +63,18 @@ export function RatingChart({ data, font }: RatingChartProps) {
     opacity: withTiming(isActive ? 1 : 0, { duration: 200, easing: Easing.out(Easing.ease) }),
     transform: [{ scale: withTiming(isActive ? 1 : 0.95, { duration: 200, easing: Easing.out(Easing.ease) }) }],
   }));
+
+  const handleNavigateToDetails = (rating: string) => {
+    router.push({
+      pathname: "/chart-details",
+      params: {
+        chartType: "rating",
+        filterValue: rating,
+        filterLabel: `${rating} ${t("stats.details.stars")}`,
+        ...(username && { username }),
+      },
+    });
+  };
 
   if (!data.length) return null;
 
@@ -152,6 +167,27 @@ export function RatingChart({ data, font }: RatingChartProps) {
           </Text>
         </View>
       </View>
+
+      <View style={styles.legendContainer}>
+        {data.map((item) => (
+          <Pressable
+            key={item.label}
+            onPress={() => handleNavigateToDetails(item.label)}
+            style={[styles.legendItem, { borderColor: colors.border }]}
+          >
+            <View style={styles.legendContent}>
+              <Star size={12} color={colors.accent} fill={colors.accent} />
+              <Text style={[typography.bodyCaption, { color: colors.text, fontSize: 11, marginLeft: 4 }]}>
+                {item.label}
+              </Text>
+              <Text style={[typography.bodyCaption, { color: colors.secondaryText, fontSize: 10, marginLeft: 4 }]}>
+                ({item.value})
+              </Text>
+            </View>
+            <ChevronRight size={14} color={colors.secondaryText} />
+          </Pressable>
+        ))}
+      </View>
     </View>
   );
 }
@@ -195,5 +231,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
+  },
+  legendContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 16,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  legendContent: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });

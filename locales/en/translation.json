@@ -262,7 +262,7 @@
         },
         "genres": {
             "title": "Top genres",
-            "chartTitle": "Top 12 genres you like to read",
+            "chartTitle": "Top 12 genres you like to read (comics excluded)",
             "total": "genres"
         },
         "ratings": {
@@ -307,6 +307,11 @@
             "series": "{{count}} series",
             "serie": "{{count}} serie",
             "total": "books"
+        },
+        "details": {
+            "booksCount": "{{count}} book(s)",
+            "noBooks": "No books found for this category",
+            "stars": "star(s)"
         },
         "private": "This user's statistics are private",
         "error": "An error occurred while loading statistics"

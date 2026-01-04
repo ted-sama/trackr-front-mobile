@@ -13,6 +13,7 @@ export default function SharedLayout() {
       <Stack.Screen name="profile/[userId]" />
       <Stack.Screen name="activity/[username]" />
       <Stack.Screen name="stats" />
+      <Stack.Screen name="chart-details" />
       <Stack.Screen name="settings" />
       <Stack.Screen name="subscription" />
       <Stack.Screen
