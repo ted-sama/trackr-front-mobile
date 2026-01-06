@@ -321,7 +321,7 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexShrink: 0,
   },
   header: {
     flexDirection: "row",
