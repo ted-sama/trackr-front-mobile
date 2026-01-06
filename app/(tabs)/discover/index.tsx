@@ -9,12 +9,17 @@ import { SearchResults } from "@/components/discover/SearchResults";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { usePopularBooks } from "@/hooks/queries/books";
+import { useLists } from "@/hooks/queries/lists";
 import BookCard from "@/components/BookCard";
+import CollectionListElement from "@/components/CollectionListElement";
+import TabBar from "@/components/TabBar";
 import { useTranslation } from "react-i18next";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Book } from "@/types/book";
+import { List } from "@/types/list";
 
 type FilterType = 'books' | 'lists' | 'users';
+type DiscoverTab = 'books' | 'lists';
 
 const { width } = Dimensions.get("window");
 const NUM_COLUMNS = 3;
@@ -29,6 +34,7 @@ export default function Discover() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('books');
+  const [selectedTab, setSelectedTab] = useState<DiscoverTab>('books');
   const scrollY = useSharedValue(0);
   const debounceTimeoutRef = useRef<number | null>(null);
 
@@ -44,11 +50,32 @@ export default function Discover() {
     fetchNextPage,
   } = usePopularBooks();
 
+  // Lists query
+  const {
+    data: listsData,
+    isLoading: isLoadingLists,
+  } = useLists();
+
   // Flatten paginated data
   const popularBooks = useMemo(() => {
     if (!popularBooksData?.pages) return [];
     return popularBooksData.pages.flatMap((page) => page.data);
   }, [popularBooksData]);
+
+  // Popular lists (already sorted by likes from API)
+  const popularLists = useMemo(() => {
+    if (!listsData) return [];
+    return listsData.filter((list: List) => list.isPublic).slice(0, 10);
+  }, [listsData]);
+
+  // Recent lists (sorted by creation date)
+  const recentLists = useMemo(() => {
+    if (!listsData) return [];
+    return [...listsData]
+      .filter((list: List) => list.isPublic)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 10);
+  }, [listsData]);
 
   const handleSearchChange = useCallback((text: string) => {
     setSearchQuery(text);
@@ -69,6 +96,19 @@ export default function Discover() {
   const handleFilterChange = useCallback((filter: FilterType) => {
     setSelectedFilter(filter);
   }, []);
+
+  const handleTabChange = useCallback((tab: DiscoverTab) => {
+    setSelectedTab(tab);
+  }, []);
+
+  const handleListPress = useCallback((list: List) => {
+    router.push({ pathname: "/list/[listId]", params: { listId: list.id } });
+  }, [router]);
+
+  const discoverTabs = useMemo(() => [
+    { label: t('discover.filters.books'), value: 'books' as DiscoverTab },
+    { label: t('discover.filters.lists'), value: 'lists' as DiscoverTab },
+  ], [t]);
 
   const isSearching = debouncedSearchQuery.trim().length > 0;
 
@@ -152,11 +192,71 @@ export default function Discover() {
     );
   };
 
-  const renderContent = () => {
-    if (isSearching) {
-      return <SearchResults searchQuery={debouncedSearchQuery} activeFilter={selectedFilter} />;
+  const renderListsContent = () => {
+    if (isLoadingLists) {
+      return (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={colors.accent} />
+        </View>
+      );
     }
 
+    if (popularLists.length === 0 && recentLists.length === 0) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={[typography.body, { color: colors.secondaryText, textAlign: 'center' }]}>
+            {t('discover.lists.empty')}
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.listsContent}>
+        {/* Recent Lists Section */}
+        {recentLists.length > 0 && (
+          <View style={styles.listSection}>
+            <Text style={[typography.categoryTitle, { color: colors.text, marginBottom: 12 }]}>
+              {t('discover.lists.recent')}
+            </Text>
+            <View style={styles.listsContainer}>
+              {recentLists.map((list) => (
+                <View key={list.id} style={styles.listItem}>
+                  <CollectionListElement
+                    list={list}
+                    onPress={() => handleListPress(list)}
+                    size="default"
+                  />
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Popular Lists Section */}
+        {popularLists.length > 0 && (
+          <View style={styles.listSection}>
+            <Text style={[typography.categoryTitle, { color: colors.text, marginBottom: 12 }]}>
+              {t('discover.lists.popular')}
+            </Text>
+            <View style={styles.listsContainer}>
+              {popularLists.map((list) => (
+                <View key={list.id} style={styles.listItem}>
+                  <CollectionListElement
+                    list={list}
+                    onPress={() => handleListPress(list)}
+                    size="default"
+                  />
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const renderBooksContent = () => {
     return (
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
@@ -165,6 +265,26 @@ export default function Discover() {
           </Text>
         </View>
         {renderPopularContent()}
+      </View>
+    );
+  };
+
+  const renderContent = () => {
+    if (isSearching) {
+      return <SearchResults searchQuery={debouncedSearchQuery} activeFilter={selectedFilter} />;
+    }
+
+    return (
+      <View style={styles.section}>
+        <View style={styles.tabBarContainer}>
+          <TabBar
+            tabs={discoverTabs}
+            selected={selectedTab}
+            onTabChange={handleTabChange}
+            variant="subtle"
+          />
+        </View>
+        {selectedTab === 'books' ? renderBooksContent() : renderListsContent()}
       </View>
     );
   };
@@ -240,5 +360,21 @@ const styles = StyleSheet.create({
   loadingFooter: {
     paddingVertical: 20,
     alignItems: 'center',
+  },
+  tabBarContainer: {
+    paddingHorizontal: GRID_PADDING,
+    marginBottom: 8,
+  },
+  listsContent: {
+    paddingHorizontal: GRID_PADDING,
+  },
+  listSection: {
+    marginBottom: 24,
+  },
+  listsContainer: {
+    gap: 16,
+  },
+  listItem: {
+    marginBottom: 0,
   },
 });

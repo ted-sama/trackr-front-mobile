@@ -170,7 +170,9 @@
             "header": "Listes populaires",
             "description": "Découvrez les listes créées par la communauté",
             "empty": "Aucune liste trouvée",
-            "emptyDescription": "Il n'y a pas encore de listes publiques à afficher."
+            "emptyDescription": "Il n'y a pas encore de listes publiques à afficher.",
+            "recent": "Listes récentes",
+            "popular": "Listes populaires"
         },
         "popular": {
             "title": "Populaire sur Trackr",

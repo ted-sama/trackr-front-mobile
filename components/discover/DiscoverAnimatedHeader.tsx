@@ -47,9 +47,9 @@ export function DiscoverAnimatedHeader({
   });
 
   return (
-    <View style={[styles.container, { height: totalHeight }]}>
+    <View style={[styles.container, { height: totalHeight }]} pointerEvents="box-none">
       {/* Blurred background with gradient */}
-      <Animated.View style={[StyleSheet.absoluteFillObject, headerContainerStyle]}>
+      <Animated.View style={[StyleSheet.absoluteFillObject, headerContainerStyle]} pointerEvents="none">
         <MaskedView
           style={[StyleSheet.absoluteFillObject, { height: '120%' }]}
           maskElement={

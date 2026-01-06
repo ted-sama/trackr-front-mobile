@@ -13,14 +13,23 @@ interface TabBarProps<T> {
   tabs: TabBarTab<T>[];
   selected: T;
   onTabChange: (value: T) => void;
+  variant?: 'default' | 'subtle';
 }
 
-export default function TabBar<T extends string | number>({ tabs, selected, onTabChange }: TabBarProps<T>) {
+export default function TabBar<T extends string | number>({ tabs, selected, onTabChange, variant = 'default' }: TabBarProps<T>) {
   const selectedIndex = tabs.findIndex(tab => tab.value === selected);
   const tabAnim = useRef(new Animated.Value(selectedIndex >= 0 ? selectedIndex : 0)).current;
   const [tabWidth, setTabWidth] = useState(0);
   const typography = useTypography();
   const { colors } = useTheme();
+
+  // Colors based on variant
+  const isSubtle = variant === 'subtle';
+  const containerBg = isSubtle ? colors.card : colors.tabBarBackground;
+  const highlightBg = isSubtle ? colors.searchBar : colors.tabBarHighlight;
+  const borderColor = isSubtle ? colors.border : undefined;
+  const textActiveColor = isSubtle ? colors.text : colors.tabBarTextActive;
+  const textColor = isSubtle ? colors.icon : colors.tabBarText;
 
   // Animation lors du switch
   const handleTabPress = (index: number, value: T) => {
@@ -45,16 +54,28 @@ export default function TabBar<T extends string | number>({ tabs, selected, onTa
   };
 
   return (
-    <View style={{ marginBottom: 32 }}>
-      <View style={[styles.container, { backgroundColor: colors.tabBarBackground }]} onLayout={onLayout}>
+    <View style={{ marginBottom: isSubtle ? 16 : 32 }}>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: containerBg,
+            borderWidth: isSubtle ? 1 : 0,
+            borderColor: borderColor,
+          }
+        ]}
+        onLayout={onLayout}
+      >
         <Animated.View
           style={[
             styles.highlight,
             {
               left: highlightTranslate,
               width: tabWidth,
-              backgroundColor: colors.tabBarHighlight,
-              shadowColor: colors.tabBarHighlight,
+              backgroundColor: highlightBg,
+              shadowColor: isSubtle ? 'transparent' : colors.tabBarHighlight,
+              borderWidth: isSubtle ? 1 : 0,
+              borderColor: borderColor,
             },
           ]}
         />
@@ -68,7 +89,7 @@ export default function TabBar<T extends string | number>({ tabs, selected, onTa
               style={[
                 typography.h3,
                 styles.tabText,
-                { color: selected === tab.value ? colors.tabBarTextActive : colors.tabBarText },
+                { color: selected === tab.value ? textActiveColor : textColor },
               ]}
             >
               {tab.label}
