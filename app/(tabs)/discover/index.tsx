@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
-import { StyleSheet, View, Text, ActivityIndicator, Pressable } from "react-native";
-import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
+import React, { useState, useCallback, useRef, useMemo } from "react";
+import { StyleSheet, View, Text, ActivityIndicator, Dimensions } from "react-native";
+import Animated, { useAnimatedScrollHandler, useSharedValue, runOnJS } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
@@ -8,136 +8,19 @@ import { DiscoverAnimatedHeader } from "@/components/discover/DiscoverAnimatedHe
 import { SearchResults } from "@/components/discover/SearchResults";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { useBottomSheet } from "@/contexts/BottomSheetContext";
-import { useCategories } from "@/hooks/queries/categories";
-import { useLists } from "@/hooks/queries/lists";
-import CategorySlider from "@/components/CategorySlider";
-import CollectionListElement from "@/components/CollectionListElement";
+import { usePopularBooks } from "@/hooks/queries/books";
+import BookCard from "@/components/BookCard";
 import { useTranslation } from "react-i18next";
-import { ChevronRight } from "lucide-react-native";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { Book } from "@/types/book";
 
 type FilterType = 'books' | 'lists' | 'users';
 
-const MAX_LISTS_PREVIEW = 3;
-
-// Component for Book Categories Section
-function BookCategoriesSection() {
-  const { colors } = useTheme();
-  const { isBottomSheetVisible } = useBottomSheet();
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-
-  const { data: categories, isLoading, error } = useCategories();
-
-  useEffect(() => {
-    if (categories) setHasLoadedOnce(true);
-  }, [categories]);
-
-  if (isLoading && !hasLoadedOnce) {
-    return (
-      <View style={[styles.centered, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.accent} />
-      </View>
-    );
-  }
-
-  if (error && !hasLoadedOnce) {
-    return (
-      <View style={[styles.centered, { backgroundColor: colors.background }]}>
-        <Text style={{ color: colors.text }}>Erreur de chargement</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View>
-      {(categories || []).map((category) => (
-        <CategorySlider
-          key={category.id}
-          category={category}
-          isBottomSheetVisible={isBottomSheetVisible}
-          seeMore={false}
-        />
-      ))}
-    </View>
-  );
-}
-
-// Component for User Lists Section
-function UserListsSection() {
-  const { colors } = useTheme();
-  const { t } = useTranslation();
-  const typography = useTypography();
-  const router = useRouter();
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-
-  const { data: listsData, isLoading, error } = useLists();
-  const allLists = (listsData || []).filter(list => list.isPublic);
-  const lists = allLists.slice(0, MAX_LISTS_PREVIEW);
-  const hasMoreLists = allLists.length > MAX_LISTS_PREVIEW;
-
-  useEffect(() => {
-    if (listsData) setHasLoadedOnce(true);
-  }, [listsData]);
-
-  if (error && !hasLoadedOnce) {
-    return (
-      <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
-        <Text style={[typography.h3, { color: colors.text, textAlign: 'center' }]}>
-          Erreur de chargement
-        </Text>
-        <Text style={[typography.body, { color: colors.secondaryText, textAlign: 'center', marginTop: 8 }]}>
-          {error.message}
-        </Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.listsContent}>
-      {lists.map((item, index) => (
-        <View key={item.id.toString()}>
-          {index > 0 && <View style={{ height: 16 }} />}
-          <CollectionListElement
-            list={item}
-            showDescription
-            onPress={() => {
-              router.push(`/list/${item.id}`);
-            }}
-          />
-        </View>
-      ))}
-
-      {/* {hasMoreLists && (
-        <Pressable
-          onPress={() => router.push('/(tabs)/discover/all-lists')}
-          style={[styles.seeMoreButton, { borderColor: colors.border }]}
-        >
-          <Text style={[typography.body, { color: colors.primary, fontWeight: '600' }]}>
-            + de listes
-          </Text>
-          <ChevronRight size={20} color={colors.primary} />
-        </Pressable>
-      )} */}
-
-      {(!isLoading || hasLoadedOnce) && lists.length === 0 && (
-        <View style={styles.emptyContainer}>
-          <Text style={[typography.h3, { color: colors.text, textAlign: 'center' }]}>
-            {t('discover.lists.empty')}
-          </Text>
-          <Text style={[typography.body, { color: colors.secondaryText, textAlign: 'center', marginTop: 8 }]}>
-            {t('discover.lists.emptyDescription')}
-          </Text>
-        </View>
-      )}
-      {isLoading && !hasLoadedOnce && (
-        <View style={[styles.emptyContainer, { backgroundColor: colors.background }]}>
-          <ActivityIndicator size="large" color={colors.accent} />
-        </View>
-      )}
-    </View>
-  );
-}
+const { width } = Dimensions.get("window");
+const NUM_COLUMNS = 3;
+const GRID_PADDING = 16;
+const GRID_GAP = 12;
+const ITEM_WIDTH = (width - GRID_PADDING * 2 - GRID_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
 
 export default function Discover() {
   const { colors, currentTheme } = useTheme();
@@ -151,6 +34,21 @@ export default function Discover() {
 
   // Debounced search to avoid too many queries
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  // Popular books query
+  const {
+    data: popularBooksData,
+    isLoading: isLoadingPopular,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = usePopularBooks();
+
+  // Flatten paginated data
+  const popularBooks = useMemo(() => {
+    if (!popularBooksData?.pages) return [];
+    return popularBooksData.pages.flatMap((page) => page.data);
+  }, [popularBooksData]);
 
   const handleSearchChange = useCallback((text: string) => {
     setSearchQuery(text);
@@ -172,68 +70,129 @@ export default function Discover() {
     setSelectedFilter(filter);
   }, []);
 
+  const isSearching = debouncedSearchQuery.trim().length > 0;
+
+  const checkEndReached = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage && !isSearching) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, isSearching, fetchNextPage]);
+
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
+
+      // Check if near bottom for infinite scroll
+      const { layoutMeasurement, contentOffset, contentSize } = event;
+      const isNearBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 300;
+
+      if (isNearBottom) {
+        runOnJS(checkEndReached)();
+      }
     },
   });
 
-  const isSearching = debouncedSearchQuery.trim().length > 0;
+  const handleBookPress = useCallback((book: Book) => {
+    router.push({ pathname: "/book/[id]", params: { id: book.id.toString() } });
+  }, [router]);
+
+  // Create rows of books for grid layout
+  const bookRows = useMemo(() => {
+    const rows: Book[][] = [];
+    for (let i = 0; i < popularBooks.length; i += NUM_COLUMNS) {
+      rows.push(popularBooks.slice(i, i + NUM_COLUMNS));
+    }
+    return rows;
+  }, [popularBooks]);
+
+  const renderPopularContent = () => {
+    if (isLoadingPopular && popularBooks.length === 0) {
+      return (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={colors.accent} />
+        </View>
+      );
+    }
+
+    if (popularBooks.length === 0) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={[typography.body, { color: colors.secondaryText, textAlign: 'center' }]}>
+            {t('discover.popular.empty')}
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.gridContent}>
+        {bookRows.map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.gridRow}>
+            {row.map((book) => (
+              <View key={book.id} style={styles.gridItem}>
+                <BookCard
+                  book={book}
+                  onPress={handleBookPress}
+                  size="compact"
+                  showTitle={false}
+                  showAuthor={false}
+                  showRating={false}
+                  showTrackingButton={false}
+                />
+              </View>
+            ))}
+          </View>
+        ))}
+        {isFetchingNextPage && (
+          <View style={styles.loadingFooter}>
+            <ActivityIndicator size="small" color={colors.accent} />
+          </View>
+        )}
+      </View>
+    );
+  };
 
   const renderContent = () => {
     if (isSearching) {
       return <SearchResults searchQuery={debouncedSearchQuery} activeFilter={selectedFilter} />;
     }
 
-    // Show both books and lists together
     return (
-      <View>
-        {/* Books Section */}
-        <View style={styles.section}>
-          <BookCategoriesSection />
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={[typography.categoryTitle, { color: colors.text }]}>
+            {t('discover.popular.title')}
+          </Text>
         </View>
-
-        {/* Lists Section */}
-        <View style={styles.section}>
-          <Pressable
-            style={styles.sectionHeader}
-            onPress={() => router.push('/(tabs)/discover/all-lists')}
-          >
-            <Text style={[typography.categoryTitle, { color: colors.text }]}>
-              {t('discover.lists.header')}
-            </Text>
-            <ChevronRight size={20} strokeWidth={2.5} color={colors.secondaryText} />
-          </Pressable>
-          <UserListsSection />
-        </View>
+        {renderPopularContent()}
       </View>
     );
   };
 
   return (
     <ScreenWrapper>
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      edges={["right", "left"]}
-    >
-      <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-      <DiscoverAnimatedHeader
-        scrollY={scrollY}
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        selectedFilter={selectedFilter}
-        onFilterChange={handleFilterChange}
-      />
-      <Animated.ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
-        showsVerticalScrollIndicator={false}
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["right", "left"]}
       >
-        {renderContent()}
-      </Animated.ScrollView>
-    </SafeAreaView>
+        <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+        <DiscoverAnimatedHeader
+          scrollY={scrollY}
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          selectedFilter={selectedFilter}
+          onFilterChange={handleFilterChange}
+        />
+        <Animated.ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
+          showsVerticalScrollIndicator={false}
+        >
+          {renderContent()}
+        </Animated.ScrollView>
+      </SafeAreaView>
     </ScreenWrapper>
   );
 }
@@ -247,43 +206,39 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingTop: 140, // Space for the header
+    paddingBottom: 100, // Space for tab bar
   },
   section: {
-    marginBottom: 32,
+    flex: 1,
   },
   sectionHeader: {
     flexDirection: 'row',
-    gap: 8,
     alignItems: 'center',
-    marginHorizontal: 16,
+    marginHorizontal: GRID_PADDING,
     marginBottom: 16,
   },
   centered: {
-    flex: 1,
+    paddingVertical: 64,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  listsContent: {
-    paddingBottom: 128,
-    paddingHorizontal: 16,
-  },
-  errorContainer: {
-    paddingVertical: 32,
-    paddingHorizontal: 32,
   },
   emptyContainer: {
     paddingVertical: 64,
     paddingHorizontal: 32,
   },
-  seeMoreButton: {
+  gridContent: {
+    paddingHorizontal: GRID_PADDING,
+  },
+  gridRow: {
     flexDirection: 'row',
+    gap: GRID_GAP,
+    marginBottom: GRID_GAP,
+  },
+  gridItem: {
+    width: ITEM_WIDTH,
+  },
+  loadingFooter: {
+    paddingVertical: 20,
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginTop: 16,
   },
 });

@@ -38,7 +38,7 @@ const CategorySlider = ({ category, isBottomSheetVisible = false, header = true,
         </Pressable>
       )}
       <FlatList
-        data={books.slice(0, seeMore ? undefined : 8)}
+        data={books.slice(0, seeMore ? undefined : 20)}
         keyExtractor={(item, index) => `${item.id}-${index}`}
         renderItem={({ item, index }) => (
           <BookCard

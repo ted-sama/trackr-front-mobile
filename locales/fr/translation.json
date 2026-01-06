@@ -172,6 +172,10 @@
             "empty": "Aucune liste trouvée",
             "emptyDescription": "Il n'y a pas encore de listes publiques à afficher."
         },
+        "popular": {
+            "title": "Populaire sur Trackr",
+            "empty": "Aucun livre populaire en ce moment"
+        },
         "users": {
             "title": "Utilisateurs"
         },

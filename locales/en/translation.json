@@ -172,6 +172,10 @@
             "empty": "No lists found",
             "emptyDescription": "There are no public lists to display yet."
         },
+        "popular": {
+            "title": "Popular on Trackr",
+            "empty": "No popular books at the moment"
+        },
         "users": {
             "title": "Users"
         },

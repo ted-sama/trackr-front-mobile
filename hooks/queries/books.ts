@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { api } from '@/services/api';
 import { Book } from '@/types/book';
 import { Category } from '@/types/category';
+import { PaginatedResponse } from '@/types/api';
 import { queryKeys } from './keys';
 import { staleTimes } from '@/lib/queryClient';
 
@@ -58,4 +59,33 @@ export function useBookRecap(bookId: string | undefined, chapter: number | undef
   });
 }
 
+const POPULAR_BOOKS_LIMIT = 20;
+const POPULAR_BOOKS_MAX = 100;
 
+async function fetchPopularBooks(page: number): Promise<PaginatedResponse<Book>> {
+  const { data } = await api.get<PaginatedResponse<Book>>('/books/popular', {
+    params: {
+      page,
+      limit: POPULAR_BOOKS_LIMIT,
+    },
+  });
+  return data;
+}
+
+export function usePopularBooks() {
+  return useInfiniteQuery({
+    queryKey: queryKeys.popularBooks,
+    queryFn: ({ pageParam }) => fetchPopularBooks(pageParam),
+    getNextPageParam: (lastPage) => {
+      const { currentPage, lastPage: lastPageNum } = lastPage.meta;
+      // Stop at 100 books (5 pages of 20)
+      const maxPage = Math.ceil(POPULAR_BOOKS_MAX / POPULAR_BOOKS_LIMIT);
+      if (currentPage < lastPageNum && currentPage < maxPage) {
+        return currentPage + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
+    staleTime: staleTimes.content,
+  });
+}

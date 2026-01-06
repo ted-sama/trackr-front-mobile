@@ -2,6 +2,7 @@ export const queryKeys = {
   user: (userId: string) => ['user', userId] as const,
 
   book: (id: string) => ['book', id] as const,
+  popularBooks: ['books', 'popular'] as const,
   bookRecap: (id: string, chapter: number) => ['book', id, 'recap', chapter] as const,
   sameAuthorCategory: (id: string) => ['book', id, 'same-author'] as const,
 
