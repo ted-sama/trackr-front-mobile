@@ -10,7 +10,7 @@ import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useUserStore } from '@/stores/userStore';
 import { useUpdateMe } from '@/hooks/queries/users';
-import { ChartNoAxesCombined, Notebook } from 'lucide-react-native';
+import { ChartNoAxesCombined, Notebook, Library } from 'lucide-react-native';
 import { useTrackrPlus } from '@/hooks/useTrackrPlus';
 import PlusBadge from '@/components/ui/PlusBadge';
 
@@ -92,6 +92,10 @@ export default function PrivacyScreen() {
     updateMe.mutate({ isActivityPublic: value });
   };
 
+  const handleLibraryPrivacyChange = (value: boolean) => {
+    updateMe.mutate({ isLibraryPublic: value });
+  };
+
   if (!currentUser) {
     return null;
   }
@@ -142,6 +146,14 @@ export default function PrivacyScreen() {
             description={t('settings.privacy.activityPublicDescription')}
             value={currentUser.isActivityPublic}
             onValueChange={handleActivityPrivacyChange}
+            disabled={updateMe.isPending}
+          />
+          <PrivacyToggle
+            icon={<Library size={20} color={colors.icon} />}
+            label={t('settings.privacy.libraryPublic')}
+            description={t('settings.privacy.libraryPublicDescription')}
+            value={currentUser.isLibraryPublic}
+            onValueChange={handleLibraryPrivacyChange}
             disabled={updateMe.isPending}
           />
         </View>

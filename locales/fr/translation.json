@@ -246,7 +246,15 @@
             "title": "Listes de {{username}}",
             "noLists": "Aucune liste"
         },
-        "report": "Signaler l'utilisateur"
+        "libraryScreen": {
+            "title": "Bibliothèque de {{username}}",
+            "noBooks": "Aucun livre dans la bibliothèque",
+            "private": "Bibliothèque privée",
+            "privateDescription": "La bibliothèque de cet utilisateur est privée",
+            "infoNote": "Les statuts de lecture et la progression affichés sont ceux de {{username}}"
+        },
+        "report": "Signaler l'utilisateur",
+        "viewLibrary": "Voir la bibliothèque"
     },
     "stats": {
         "title": "Stats de {{name}}",
@@ -374,7 +382,9 @@
             "statsPublic": "Statistiques publiques",
             "statsPublicDescription": "Autoriser les autres utilisateurs à voir vos statistiques",
             "activityPublic": "Activité publique",
-            "activityPublicDescription": "Autoriser les autres utilisateurs à voir votre journal d'activité"
+            "activityPublicDescription": "Autoriser les autres utilisateurs à voir votre journal d'activité",
+            "libraryPublic": "Bibliothèque publique",
+            "libraryPublicDescription": "Autoriser les autres utilisateurs à voir votre bibliothèque"
         },
         "notifications": {
             "title": "Notifications",

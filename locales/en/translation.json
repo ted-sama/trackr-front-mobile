@@ -246,7 +246,15 @@
             "title": "Lists of {{username}}",
             "noLists": "No lists"
         },
-        "report": "Report user"
+        "libraryScreen": {
+            "title": "{{username}}'s library",
+            "noBooks": "No books in library",
+            "private": "Private library",
+            "privateDescription": "This user's library is private",
+            "infoNote": "Reading status and progress shown are {{username}}'s"
+        },
+        "report": "Report user",
+        "viewLibrary": "View library"
     },
     "stats": {
         "title": "{{name}}'s stats",
@@ -374,7 +382,9 @@
             "statsPublic": "Public statistics",
             "statsPublicDescription": "Allow other users to view your statistics",
             "activityPublic": "Public activity",
-            "activityPublicDescription": "Allow other users to view your activity log"
+            "activityPublicDescription": "Allow other users to view your activity log",
+            "libraryPublic": "Public library",
+            "libraryPublicDescription": "Allow other users to view your library"
         },
         "notifications": {
             "title": "Notifications",

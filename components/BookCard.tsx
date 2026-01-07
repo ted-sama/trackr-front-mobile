@@ -45,6 +45,12 @@ interface BookCardProps {
   rank?: number;
   currentListId?: string;
   isFromListPage?: boolean;
+  trackingStatusOverride?: {
+    status: ReadingStatus;
+    currentChapter?: number | null;
+    currentVolume?: number | null;
+    rating?: number | null;
+  } | null;
 }
 
 const { width } = Dimensions.get("window");
@@ -59,13 +65,15 @@ const COMPACT_XS_CARD_WIDTH = (width - 64 - 32) / 5;
 
 const DEFAULT_COVER_COLOR = '#6B7280'; // Grey color for missing covers
 
-const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showUserRating = false, showTrackingStatus = false, showTrackingButton = true, showTrackingChapter = false, rank, currentListId, isFromListPage }: BookCardProps) => {
+const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showUserRating = false, showTrackingStatus = false, showTrackingButton = true, showTrackingChapter = false, rank, currentListId, isFromListPage, trackingStatusOverride }: BookCardProps) => {
   const hasCover = Boolean(book.coverImage);
   const [isLoading, setIsLoading] = useState(hasCover);
   const [hasError, setHasError] = useState(false);
   const { isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
   const isTracking = isBookTracked(book.id);
-  const trackingStatus = getTrackedBookStatus(book.id);
+  const storeTrackingStatus = getTrackedBookStatus(book.id);
+  // Use override if provided, otherwise use store data
+  const trackingStatus = trackingStatusOverride !== undefined ? trackingStatusOverride : storeTrackingStatus;
   const { colors } = useTheme();
   const { isBottomSheetVisible, openBookActions } = useBottomSheet();
   const typography = useTypography();

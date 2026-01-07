@@ -31,7 +31,7 @@ import Animated, {
 import PillButton from "@/components/ui/PillButton";
 import ActionButton from "@/components/ui/ActionButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Notebook, ChartNoAxesCombined, Flag } from "lucide-react-native";
+import { Notebook, ChartNoAxesCombined, Flag, Library } from "lucide-react-native";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import dayjs from "dayjs";
@@ -354,6 +354,15 @@ export default function UserProfileScreen() {
           </View>
         ) : (
           <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
+            {(user?.isLibraryPublic !== false) && (
+              <PillButton
+                icon={<Library size={16} color={colors.secondaryText} />}
+                title={t("profile.viewLibrary")}
+                onPress={() => {
+                  router.push(`/profile/${userId}/library`);
+                }}
+              />
+            )}
             <PillButton
               icon={<Flag size={16} color={colors.secondaryText} />}
               title={t("profile.report")}

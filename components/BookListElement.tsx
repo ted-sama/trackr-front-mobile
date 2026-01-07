@@ -33,16 +33,24 @@ interface BookListElementProps {
   currentListId?: string;
   isFromListPage?: boolean;
   compact?: boolean;
+  trackingStatusOverride?: {
+    status: ReadingStatus;
+    currentChapter?: number | null;
+    currentVolume?: number | null;
+    rating?: number | null;
+  } | null;
 }
 
-const BookListElement = ({ book, onPress, showAuthor = true, showRating = false, showUserRating = false, showTrackingButton = false, showTrackingStatus = false, showTrackingChapter = false, showBookType = false, rank, currentListId, isFromListPage, compact = false }: BookListElementProps) => {
+const BookListElement = ({ book, onPress, showAuthor = true, showRating = false, showUserRating = false, showTrackingButton = false, showTrackingStatus = false, showTrackingChapter = false, showBookType = false, rank, currentListId, isFromListPage, compact = false, trackingStatusOverride }: BookListElementProps) => {
   const hasCover = Boolean(book.coverImage);
   const { colors } = useTheme();
   const typography = useTypography();
   const { openBookActions } = useBottomSheet();
   const { isBookTracked, getTrackedBookStatus } = useTrackedBooksStore();
   const isTracking = isBookTracked(book.id);
-  const trackingStatus = getTrackedBookStatus(book.id);
+  const storeTrackingStatus = getTrackedBookStatus(book.id);
+  // Use override if provided, otherwise use store data
+  const trackingStatus = trackingStatusOverride !== undefined ? trackingStatusOverride : storeTrackingStatus;
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
