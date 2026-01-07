@@ -106,8 +106,7 @@ export default function ChatScreen() {
     const { messages, error, sendMessage, status } = useChat({
         transport: new DefaultChatTransport({
             fetch: expoFetch as unknown as typeof globalThis.fetch,
-            api: `http://localhost:3333/chat/${bookId}`,
-            // api: `https://api.trackrr.app/chat/${bookId}`,
+            api: `${process.env.EXPO_PUBLIC_API_URL}/chat/${bookId}`,
             headers: {
                 'Authorization': `Bearer ${token}`
             }
