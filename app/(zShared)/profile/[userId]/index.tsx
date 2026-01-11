@@ -371,7 +371,7 @@ export default function UserProfileScreen() {
           )}
           {/* Follow button for other users */}
           {!isMe && user && (
-            <View style={{ marginTop: 16 }}>
+            <View style={{ marginTop: 16, alignItems: 'center' }}>
               <FollowButton
                 isFollowing={user.isFollowedByMe ?? false}
                 isFriend={user.isFriend}

@@ -61,12 +61,14 @@ export default function FollowButton({
     if (isFollowing) {
       return {
         backgroundColor: colors.secondaryButton,
-        borderWidth: 0,
+        borderWidth: 1,
+        borderColor: colors.border,
       };
     }
     return {
       backgroundColor: colors.accent,
-      borderWidth: 0,
+      borderWidth: 1,
+      borderColor: colors.accent,
     };
   };
 

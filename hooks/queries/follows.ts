@@ -85,9 +85,13 @@ export function useFollowUser() {
       queryClient.invalidateQueries({ queryKey: queryKeys.userFollowers(username) });
       queryClient.invalidateQueries({ queryKey: queryKeys.feedPopularAmongFollowing });
       queryClient.invalidateQueries({ queryKey: queryKeys.feedRecentlyRated });
-      // Also invalidate current user's following list (used by profile following screen)
+      // Also invalidate current user's following list and profile (used by profile following screen)
       if (currentUser?.username) {
         queryClient.invalidateQueries({ queryKey: queryKeys.userFollowing(currentUser.username) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.user(currentUser.username) });
+      }
+      if (currentUser?.id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.user(currentUser.id) });
       }
       // Refresh current user to update followingCount
       await useUserStore.getState().fetchCurrentUser();
@@ -118,9 +122,13 @@ export function useUnfollowUser() {
       queryClient.invalidateQueries({ queryKey: queryKeys.userFollowers(username) });
       queryClient.invalidateQueries({ queryKey: queryKeys.feedPopularAmongFollowing });
       queryClient.invalidateQueries({ queryKey: queryKeys.feedRecentlyRated });
-      // Also invalidate current user's following list (used by profile following screen)
+      // Also invalidate current user's following list and profile (used by profile following screen)
       if (currentUser?.username) {
         queryClient.invalidateQueries({ queryKey: queryKeys.userFollowing(currentUser.username) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.user(currentUser.username) });
+      }
+      if (currentUser?.id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.user(currentUser.id) });
       }
       // Refresh current user to update followingCount
       await useUserStore.getState().fetchCurrentUser();
