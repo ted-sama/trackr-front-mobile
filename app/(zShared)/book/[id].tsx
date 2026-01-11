@@ -71,6 +71,7 @@ import { useTranslation } from "react-i18next";
 import { useUserTop } from "@/hooks/queries/users";
 import ConfettiCelebration, { ConfettiCelebrationMethods } from "@/components/ui/ConfettiCelebration";
 import { ReviewsSection, WriteReviewBottomSheet } from "@/components/reviews";
+import { ReadBySection } from "@/components/book/ReadBySection";
 // Constants for animation
 const HEADER_THRESHOLD = 320; // Threshold for header animation
 const DEFAULT_COVER_COLOR = '#6B7280'; // Grey color for missing covers
@@ -931,11 +932,15 @@ export default function BookScreen() {
           </View>
           {/* Reviews Section */}
           {book && (
-            <ReviewsSection 
-              bookId={book.id.toString()} 
+            <ReviewsSection
+              bookId={book.id.toString()}
               isTracking={Boolean(bookTracking)}
               onWriteReviewPress={handlePresentWriteReviewSheet}
             />
+          )}
+          {/* Read By Section - followers who read this book */}
+          {book && isAuthenticated && (
+            <ReadBySection bookId={book.id.toString()} />
           )}
           {/* Recommendations */}
           {booksBySameAuthor && booksBySameAuthor.books.length > 0 && (

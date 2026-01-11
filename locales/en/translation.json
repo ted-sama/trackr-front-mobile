@@ -463,7 +463,10 @@
         "reviews": "Reviews",
         "seeAllReviews": "See all reviews",
         "viewMore": "View more",
-        "reviewDeleted": "Review deleted"
+        "reviewDeleted": "Review deleted",
+        "readBy": "Read by",
+        "following_singular": "following",
+        "following_plural": "followings"
     },
     "reviews": {
         "title": "Reviews",

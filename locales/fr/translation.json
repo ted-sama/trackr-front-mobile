@@ -458,7 +458,10 @@
         "reviews": "Avis",
         "seeAllReviews": "Voir tous les avis",
         "viewMore": "Voir plus",
-        "reviewDeleted": "Avis supprimé"
+        "reviewDeleted": "Avis supprimé",
+        "readBy": "Lu par",
+        "following_singular": "abonnement",
+        "following_plural": "abonnements"
     },
     "ratingSlider": {
         "notRated": "Pas encore noté",

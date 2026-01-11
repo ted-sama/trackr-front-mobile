@@ -35,6 +35,9 @@ export const queryKeys = {
   review: (bookId: string, reviewId: string) => ['book', bookId, 'review', reviewId] as const,
   userReviews: (username: string) => ['user', username, 'reviews'] as const,
 
+  // Book readers (following who read a book)
+  bookReaders: (bookId: string) => ['book', bookId, 'readers'] as const,
+
   // Subscription & Chat
   subscription: ['subscription'] as const,
   chatUsage: ['chat-usage'] as const,

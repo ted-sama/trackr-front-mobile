@@ -1,0 +1,229 @@
+import React from "react";
+import { View, Text, StyleSheet, FlatList, Pressable, Dimensions } from "react-native";
+import { router } from "expo-router";
+import { Users, MessageSquare } from "lucide-react-native";
+import * as Haptics from "expo-haptics";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+
+import { useTheme } from "@/contexts/ThemeContext";
+import { useTypography } from "@/hooks/useTypography";
+import { useBookReaders } from "@/hooks/queries/readers";
+import { BookReaderItem } from "@/types/reader";
+import Avatar from "@/components/ui/Avatar";
+import StarRating from "@/components/ui/StarRating";
+import { useTranslation } from "react-i18next";
+import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
+import DotSeparator from "@/components/ui/DotSeparator";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+// Card dimensions
+const READER_CARD_SIZE = 72;
+const READER_CARD_GAP = 12;
+
+interface ReadBySectionProps {
+  bookId: string;
+}
+
+interface ReaderCardProps {
+  reader: BookReaderItem;
+  bookId: string;
+}
+
+function ReaderCard({ reader, bookId }: ReaderCardProps) {
+  const { colors } = useTheme();
+  const typography = useTypography();
+
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withTiming(0.95, { duration: 100 });
+  };
+
+  const handlePressOut = () => {
+    scale.value = withTiming(1, { duration: 100 });
+  };
+
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Navigate to review if present, otherwise to profile
+    if (reader.hasReview && reader.reviewId) {
+      router.push({
+        pathname: '/book/[id]/review/[reviewId]',
+        params: { id: bookId, reviewId: reader.reviewId },
+      });
+    } else {
+      router.push(`/profile/${reader.user.username}`);
+    }
+  };
+
+  return (
+    <Pressable
+      onPress={handlePress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+    >
+      <Animated.View style={[styles.readerCard, animatedStyle]}>
+        {/* Avatar with simple border */}
+        <Avatar
+          image={reader.user.avatar ?? undefined}
+          size={READER_CARD_SIZE - 8}
+          borderWidth={1}
+          borderColor={colors.border}
+        />
+
+        {/* Username */}
+        <Text
+          style={[typography.caption, styles.username, { color: colors.text }]}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {reader.user.displayName || reader.user.username}
+        </Text>
+
+        {/* Rating and review indicator row */}
+        {(reader.rating !== null || reader.hasReview) && (
+          <View style={styles.ratingRow}>
+            {reader.rating !== null && (
+              <StarRating rating={reader.rating} size={10} color={colors.secondaryText} />
+            )}
+            {reader.hasReview && (
+              <MessageSquare
+                size={10}
+                color={colors.secondaryText}
+                fill={colors.secondaryText}
+                style={{ marginLeft: reader.rating !== null ? 4 : 0 }}
+              />
+            )}
+          </View>
+        )}
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+export function ReadBySection({ bookId }: ReadBySectionProps) {
+  const { colors } = useTheme();
+  const typography = useTypography();
+  const { t } = useTranslation();
+  const { data, isLoading } = useBookReaders(bookId, 20);
+
+  // Don't render if no readers
+  if (!isLoading && (!data || data.total === 0)) {
+    return null;
+  }
+
+  const renderReaderItem = ({ item }: { item: BookReaderItem }) => (
+    <ReaderCard reader={item} bookId={bookId} />
+  );
+
+  return (
+    <View style={[styles.container, { borderColor: colors.border }]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.titleRow}>
+          <Users size={20} color={colors.text} strokeWidth={2} />
+          <Text
+            style={[
+              typography.categoryTitle,
+              { color: colors.text, marginLeft: 8 },
+            ]}
+          >
+            {t("book.readBy")}
+          </Text>
+          {data?.total != null && data.total > 0 && (
+            <>
+              <DotSeparator />
+              <Text style={[typography.caption, { color: colors.secondaryText }]}>
+                {data.total} {data.total === 1 ? t("book.following_singular") : t("book.following_plural")}
+              </Text>
+            </>
+          )}
+        </View>
+      </View>
+
+      {/* Readers List - Horizontal Scroll */}
+      {isLoading ? (
+        <View style={styles.skeletonContainer}>
+          <View style={{ flexDirection: "row", gap: READER_CARD_GAP }}>
+            {[1, 2, 3, 4].map((i) => (
+              <View key={i} style={styles.skeletonItem}>
+                <SkeletonLoader
+                  width={READER_CARD_SIZE - 8}
+                  height={READER_CARD_SIZE - 8}
+                  style={{ borderRadius: (READER_CARD_SIZE - 8) / 2 }}
+                />
+                <SkeletonLoader
+                  width={50}
+                  height={12}
+                  style={{ marginTop: 6, borderRadius: 4 }}
+                />
+              </View>
+            ))}
+          </View>
+        </View>
+      ) : (
+        <FlatList
+          data={data?.readers}
+          keyExtractor={(item) => item.user.id}
+          renderItem={renderReaderItem}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginHorizontal: -16 }}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+          }}
+          ItemSeparatorComponent={() => <View style={{ width: READER_CARD_GAP }} />}
+        />
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    borderTopWidth: 1,
+    marginTop: 24,
+    paddingTop: 24,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  skeletonContainer: {
+    marginBottom: 8,
+  },
+  skeletonItem: {
+    alignItems: "center",
+  },
+  readerCard: {
+    alignItems: "center",
+    width: READER_CARD_SIZE,
+  },
+  username: {
+    marginTop: 6,
+    textAlign: "center",
+    maxWidth: READER_CARD_SIZE,
+  },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 2,
+  },
+});
+
+export default React.memo(ReadBySection);
