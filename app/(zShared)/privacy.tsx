@@ -10,7 +10,7 @@ import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useUserStore } from '@/stores/userStore';
 import { useUpdateMe } from '@/hooks/queries/users';
-import { ChartNoAxesCombined, Notebook, Library } from 'lucide-react-native';
+import { ChartNoAxesCombined, Notebook, Library, Users } from 'lucide-react-native';
 import { useTrackrPlus } from '@/hooks/useTrackrPlus';
 import PlusBadge from '@/components/ui/PlusBadge';
 import VisibilitySelector from '@/components/ui/VisibilitySelector';
@@ -91,6 +91,7 @@ export default function PrivacyScreen() {
   const statsVisibility = getVisibilityLevel(currentUser?.isStatsPublic, currentUser?.statsVisibility);
   const activityVisibility = getVisibilityLevel(currentUser?.isActivityPublic, currentUser?.activityVisibility);
   const libraryVisibility = getVisibilityLevel(currentUser?.isLibraryPublic, currentUser?.libraryVisibility);
+  const connectionsVisibility = currentUser?.connectionsVisibility ?? 'public';
 
   const handleStatsVisibilityChange = async (value: VisibilityLevel) => {
     if (!hasPlus) {
@@ -114,6 +115,12 @@ export default function PrivacyScreen() {
     updateMe.mutate({
       libraryVisibility: value,
       isLibraryPublic: value === 'public' || value === 'friends',
+    });
+  };
+
+  const handleConnectionsVisibilityChange = (value: VisibilityLevel) => {
+    updateMe.mutate({
+      connectionsVisibility: value,
     });
   };
 
@@ -175,6 +182,14 @@ export default function PrivacyScreen() {
             description={t('settings.privacy.libraryPublicDescription')}
             value={libraryVisibility}
             onChange={handleLibraryVisibilityChange}
+            disabled={updateMe.isPending}
+          />
+          <PrivacySection
+            icon={<Users size={20} color={colors.icon} />}
+            label={t('settings.privacy.connectionsPublic')}
+            description={t('settings.privacy.connectionsPublicDescription')}
+            value={connectionsVisibility}
+            onChange={handleConnectionsVisibilityChange}
             disabled={updateMe.isPending}
           />
         </View>

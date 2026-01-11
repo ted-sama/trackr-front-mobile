@@ -277,7 +277,9 @@
         "searchFollowers": "Search followers",
         "searchFollowing": "Search following",
         "noFollowersResults": "No followers found",
-        "noFollowingResults": "No following found"
+        "noFollowingResults": "No following found",
+        "followersPrivate": "This user's followers are private",
+        "followingPrivate": "This user's following list is private"
     },
     "stats": {
         "title": "{{name}}'s stats",
@@ -407,7 +409,9 @@
             "activityPublic": "Activity",
             "activityPublicDescription": "Who can see your activity log",
             "libraryPublic": "Library",
-            "libraryPublicDescription": "Who can see your library"
+            "libraryPublicDescription": "Who can see your library",
+            "connectionsPublic": "Connections",
+            "connectionsPublicDescription": "Who can see your followers and following"
         },
         "notifications": {
             "title": "Notifications",

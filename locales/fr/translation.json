@@ -277,7 +277,9 @@
         "searchFollowers": "Rechercher des abonnés",
         "searchFollowing": "Rechercher des abonnements",
         "noFollowersResults": "Aucun abonné trouvé",
-        "noFollowingResults": "Aucun abonnement trouvé"
+        "noFollowingResults": "Aucun abonnement trouvé",
+        "followersPrivate": "Les abonnés de cet utilisateur sont privés",
+        "followingPrivate": "Les abonnements de cet utilisateur sont privés"
     },
     "stats": {
         "title": "Stats de {{name}}",
@@ -407,7 +409,9 @@
             "activityPublic": "Activité",
             "activityPublicDescription": "Qui peut voir votre journal d'activité",
             "libraryPublic": "Bibliothèque",
-            "libraryPublicDescription": "Qui peut voir votre bibliothèque"
+            "libraryPublicDescription": "Qui peut voir votre bibliothèque",
+            "connectionsPublic": "Connexions",
+            "connectionsPublicDescription": "Qui peut voir vos abonnés et abonnements"
         },
         "notifications": {
             "title": "Notifications",

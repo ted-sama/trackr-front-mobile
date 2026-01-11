@@ -23,6 +23,7 @@ export interface User {
     statsVisibility?: VisibilityLevel;
     activityVisibility?: VisibilityLevel;
     libraryVisibility?: VisibilityLevel;
+    connectionsVisibility?: VisibilityLevel;
     // Follow counts
     followersCount?: number;
     followingCount?: number;

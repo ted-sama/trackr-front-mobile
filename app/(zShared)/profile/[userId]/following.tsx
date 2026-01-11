@@ -17,6 +17,8 @@ import { useUser } from '@/hooks/queries/users';
 import { User } from '@/types/user';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { useUserStore } from '@/stores/userStore';
+import { Lock } from 'lucide-react-native';
 
 type UserWithRelationship = User & { isFollowedByMe?: boolean; isFriend?: boolean };
 
@@ -29,8 +31,18 @@ export default function FollowingScreen() {
   const insets = useSafeAreaInsets();
   const { userId, username } = useLocalSearchParams<{ userId: string; username: string }>();
   const { data: user } = useUser(userId);
+  const currentUser = useUserStore((state) => state.currentUser);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery.trim(), 300);
+
+  // Check if connections are private
+  const isOwnProfile = currentUser?.id === user?.id || currentUser?.username === userId;
+  const connectionsVisibility = user?.connectionsVisibility ?? 'public';
+  const isConnectionsPrivate = !isOwnProfile && connectionsVisibility === 'private';
+  const isConnectionsFriendsOnly = !isOwnProfile && connectionsVisibility === 'friends' && !user?.isFriend;
+  const isConnectionsFollowersOnly = !isOwnProfile && connectionsVisibility === 'followers' && !user?.isFollowingMe;
+  const canViewConnections = !isConnectionsPrivate && !isConnectionsFriendsOnly && !isConnectionsFollowersOnly;
+
   const {
     data,
     isLoading,
@@ -39,7 +51,10 @@ export default function FollowingScreen() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useUserFollowing(username || user?.username || '', debouncedSearch || undefined);
+  } = useUserFollowing(
+    canViewConnections ? (username || user?.username || '') : '',
+    canViewConnections ? (debouncedSearch || undefined) : undefined
+  );
 
   // Only show full page loader on initial load (no data yet)
   const showFullPageLoader = isLoading && !data;
@@ -127,6 +142,17 @@ export default function FollowingScreen() {
     </View>
   );
 
+  const renderPrivateState = () => (
+    <View style={styles.privateContainer}>
+      <View style={[styles.privateIconContainer, { backgroundColor: colors.card }]}>
+        <Lock size={32} color={colors.secondaryText} />
+      </View>
+      <Text style={[typography.body, { color: colors.secondaryText, textAlign: 'center', marginTop: 16 }]}>
+        {t('profile.followingPrivate')}
+      </Text>
+    </View>
+  );
+
   const renderLoading = () => (
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color={colors.accent} />
@@ -157,7 +183,9 @@ export default function FollowingScreen() {
         collapseThreshold={titleY > 0 ? titleY : undefined}
       />
 
-      {showFullPageLoader ? (
+      {!canViewConnections ? (
+        renderPrivateState()
+      ) : showFullPageLoader ? (
         renderLoading()
       ) : error ? (
         renderError()
@@ -236,5 +264,18 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  privateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  privateIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
