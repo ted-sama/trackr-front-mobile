@@ -250,6 +250,7 @@ export default function AllReviewsScreen() {
 
       <AnimatedHeader
         title={t("reviews.title")}
+        subtitle={data?.total !== undefined && data.total > 0 ? `${data.total} ${data.total === 1 ? t("common.review") : t("common.reviews")}` : undefined}
         scrollY={scrollY}
         onBack={() => router.back()}
         collapseThreshold={titleY > 0 ? titleY : undefined}

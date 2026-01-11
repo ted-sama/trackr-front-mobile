@@ -151,7 +151,9 @@
         "noLastRead": "Commencez à lire pour voir vos dernières lectures",
         "mostTracked": "Les plus suivis",
         "topRated": "Les mieux notés",
-        "goToLibrary": "Aller à la bibliothèque"
+        "goToLibrary": "Aller à la bibliothèque",
+        "recentlyRatedByFollowing": "Récemment notés par vos abonnements",
+        "popularAmongFollowing": "Populaire chez vos abonnements"
     },
     "discover": {
         "title": "Découvrir",
@@ -254,7 +256,19 @@
             "infoNote": "Les statuts de lecture et la progression affichés sont ceux de {{username}}"
         },
         "report": "Signaler l'utilisateur",
-        "viewLibrary": "Voir la bibliothèque"
+        "viewLibrary": "Voir la bibliothèque",
+        "followers": "Abonnés",
+        "following": "Abonnements",
+        "followersTitle": "Abonnés de {{username}}",
+        "followingTitle": "Abonnements de {{username}}",
+        "noFollowers": "Aucun abonné",
+        "noFollowing": "Aucun abonnement",
+        "followersCount": "{{count}} abonné",
+        "followersCount_other": "{{count}} abonnés",
+        "followingCount": "{{count}} abonnement",
+        "followingCount_other": "{{count}} abonnements",
+        "follow": "Suivre",
+        "friends": "Amis"
     },
     "stats": {
         "title": "Stats de {{name}}",
@@ -379,12 +393,12 @@
         "privacy": {
             "title": "Confidentialité",
             "description": "Contrôlez ce que les autres utilisateurs peuvent voir sur votre profil.",
-            "statsPublic": "Statistiques publiques",
-            "statsPublicDescription": "Autoriser les autres utilisateurs à voir vos statistiques",
-            "activityPublic": "Activité publique",
-            "activityPublicDescription": "Autoriser les autres utilisateurs à voir votre journal d'activité",
-            "libraryPublic": "Bibliothèque publique",
-            "libraryPublicDescription": "Autoriser les autres utilisateurs à voir votre bibliothèque"
+            "statsPublic": "Statistiques",
+            "statsPublicDescription": "Qui peut voir vos statistiques",
+            "activityPublic": "Activité",
+            "activityPublicDescription": "Qui peut voir votre journal d'activité",
+            "libraryPublic": "Bibliothèque",
+            "libraryPublicDescription": "Qui peut voir votre bibliothèque"
         },
         "notifications": {
             "title": "Notifications",
@@ -395,7 +409,11 @@
             "listLikes": "Likes sur les listes",
             "listLikesDescription": "Recevoir une notification push quand quelqu'un aime votre liste",
             "listSaves": "Sauvegardes de listes",
-            "listSavesDescription": "Recevoir une notification push quand quelqu'un sauvegarde votre liste"
+            "listSavesDescription": "Recevoir une notification push quand quelqu'un sauvegarde votre liste",
+            "newFollower": "Nouveaux abonnés",
+            "newFollowerDescription": "Recevoir une notification push quand quelqu'un vous suit",
+            "newFriend": "Nouveaux amis",
+            "newFriendDescription": "Recevoir une notification push quand vous devenez ami avec quelqu'un"
         }
     },
     "languages": {
@@ -773,6 +791,14 @@
         "likedYourReview": "a aimé votre avis",
         "likedYourList": "a aimé votre liste",
         "savedYourList": "a enregistré votre liste",
-        "of": "de"
+        "of": "de",
+        "startedFollowingYou": "a commencé à vous suivre",
+        "isNowYourFriend": "est maintenant votre ami"
+    },
+    "privacy": {
+        "public": "Public",
+        "followers": "Abonnés",
+        "friends": "Amis",
+        "private": "Privé"
     }
 }

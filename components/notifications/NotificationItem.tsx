@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
 import { router } from "expo-router";
-import { Heart, Bookmark } from "lucide-react-native";
+import { Heart, Bookmark, UserPlus, Users } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -30,6 +30,10 @@ function getNotificationIcon(type: string, colors: any) {
       return <Heart {...iconProps} fill={colors.accent} color={colors.accent} />;
     case "list_save":
       return <Bookmark {...iconProps} fill={colors.accent} color={colors.accent} />;
+    case "new_follower":
+      return <UserPlus {...iconProps} fill={colors.accent} color={colors.accent} />;
+    case "new_friend":
+      return <Users {...iconProps} fill={colors.accent} color={colors.accent} />;
     default:
       return <Heart {...iconProps} />;
   }
@@ -49,7 +53,9 @@ function NotificationItemComponent({ notification }: NotificationItemProps) {
     }
 
     // Navigate based on type
-    if (notification.resourceType === "book_review" && notification.resource?.book) {
+    if (notification.type === "new_follower" || notification.type === "new_friend") {
+      router.push(`/profile/${notification.actor.username}`);
+    } else if (notification.resourceType === "book_review" && notification.resource?.book) {
       router.push(`/book/${notification.resource.book.id}`);
     } else if (notification.resourceType === "list") {
       router.push(`/list/${notification.resourceId}`);
@@ -96,6 +102,20 @@ function NotificationItemComponent({ notification }: NotificationItemProps) {
             {notification.resource?.name && (
               <Text style={typography.bodyBold2}>{notification.resource.name}</Text>
             )}
+          </Text>
+        );
+      case "new_follower":
+        return (
+          <Text style={[typography.body, { color: colors.text }]}>
+            <Text style={typography.bodyBold2}>{actorName}</Text>
+            {" " + t("notifications.startedFollowingYou")}
+          </Text>
+        );
+      case "new_friend":
+        return (
+          <Text style={[typography.body, { color: colors.text }]}>
+            <Text style={typography.bodyBold2}>{actorName}</Text>
+            {" " + t("notifications.isNowYourFriend")}
           </Text>
         );
       default:

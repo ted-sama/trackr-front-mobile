@@ -339,6 +339,7 @@ const theme = useUIStore((state) => state.theme);
 
 ### Colors
 Defined in `constants/Colors.ts` for light/dark mode
+Don't use colors.primary (deprecated), use colors.accent instead.
 
 ### Typography
 Custom hook `useTypography` for text styles

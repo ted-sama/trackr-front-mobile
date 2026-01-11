@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View, StyleSheet, Switch } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -13,18 +13,20 @@ import { useUpdateMe } from '@/hooks/queries/users';
 import { ChartNoAxesCombined, Notebook, Library } from 'lucide-react-native';
 import { useTrackrPlus } from '@/hooks/useTrackrPlus';
 import PlusBadge from '@/components/ui/PlusBadge';
+import VisibilitySelector from '@/components/ui/VisibilitySelector';
+import { VisibilityLevel } from '@/types/user';
 
-interface PrivacyToggleProps {
+interface PrivacySectionProps {
   icon: React.ReactNode;
   label: string;
   description: string;
-  value: boolean;
-  onValueChange: (value: boolean) => void;
+  value: VisibilityLevel;
+  onChange: (value: VisibilityLevel) => void;
   disabled?: boolean;
   badge?: React.ReactNode;
 }
 
-function PrivacyToggle({ icon, label, description, value, onValueChange, disabled = false, badge }: PrivacyToggleProps) {
+function PrivacySection({ icon, label, description, value, onChange, disabled = false, badge }: PrivacySectionProps) {
   const { colors } = useTheme();
   const typography = useTypography();
 
@@ -35,7 +37,7 @@ function PrivacyToggle({ icon, label, description, value, onValueChange, disable
         { backgroundColor: colors.card }
       ]}
     >
-      <View style={styles.privacyOptionLeft}>
+      <View style={styles.privacyHeader}>
         <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
           {icon}
         </View>
@@ -51,15 +53,12 @@ function PrivacyToggle({ icon, label, description, value, onValueChange, disable
           </Text>
         </View>
       </View>
-      <View style={styles.privacyOptionRight}>
-        <Switch
-          value={value}
-          onValueChange={onValueChange}
-          disabled={disabled}
-          trackColor={{ false: colors.border, true: colors.accent }}
-          thumbColor="#ffffff"
-        />
-      </View>
+      <VisibilitySelector
+        value={value}
+        onChange={onChange}
+        label=""
+        disabled={disabled}
+      />
     </View>
   );
 }
@@ -74,26 +73,48 @@ export default function PrivacyScreen() {
   const { t } = useTranslation();
   const currentUser = useUserStore((state) => state.currentUser);
   const updateMe = useUpdateMe();
-  const { isTrackrPlus, presentPaywall } = useTrackrPlus();
+  const { isTrackrPlus, presentPaywall, isLoading: isSubscriptionLoading } = useTrackrPlus();
+
+  // Check Plus status from both RevenueCat and user store for reliability
+  const hasPlus = isTrackrPlus || currentUser?.plan === 'plus';
 
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollY.value = event.contentOffset.y;
   });
 
-  const handleStatsPrivacyChange = async (value: boolean) => {
-    if (!isTrackrPlus) {
+  // Convert legacy boolean values to visibility levels
+  const getVisibilityLevel = (legacyValue: boolean | undefined, granularValue: VisibilityLevel | undefined): VisibilityLevel => {
+    if (granularValue) return granularValue;
+    return legacyValue !== false ? 'public' : 'private';
+  };
+
+  const statsVisibility = getVisibilityLevel(currentUser?.isStatsPublic, currentUser?.statsVisibility);
+  const activityVisibility = getVisibilityLevel(currentUser?.isActivityPublic, currentUser?.activityVisibility);
+  const libraryVisibility = getVisibilityLevel(currentUser?.isLibraryPublic, currentUser?.libraryVisibility);
+
+  const handleStatsVisibilityChange = async (value: VisibilityLevel) => {
+    if (!hasPlus) {
       presentPaywall();
       return;
     }
-    updateMe.mutate({ isStatsPublic: value });
+    updateMe.mutate({
+      statsVisibility: value,
+      isStatsPublic: value === 'public' || value === 'friends',
+    });
   };
 
-  const handleActivityPrivacyChange = (value: boolean) => {
-    updateMe.mutate({ isActivityPublic: value });
+  const handleActivityVisibilityChange = (value: VisibilityLevel) => {
+    updateMe.mutate({
+      activityVisibility: value,
+      isActivityPublic: value === 'public' || value === 'friends',
+    });
   };
 
-  const handleLibraryPrivacyChange = (value: boolean) => {
-    updateMe.mutate({ isLibraryPublic: value });
+  const handleLibraryVisibilityChange = (value: VisibilityLevel) => {
+    updateMe.mutate({
+      libraryVisibility: value,
+      isLibraryPublic: value === 'public' || value === 'friends',
+    });
   };
 
   if (!currentUser) {
@@ -131,29 +152,29 @@ export default function PrivacyScreen() {
         </Text>
 
         <View style={styles.optionsContainer}>
-          <PrivacyToggle
+          <PrivacySection
             icon={<ChartNoAxesCombined size={20} color={colors.icon} />}
             label={t('settings.privacy.statsPublic')}
             description={t('settings.privacy.statsPublicDescription')}
-            value={currentUser.isStatsPublic}
-            onValueChange={handleStatsPrivacyChange}
-            disabled={updateMe.isPending || !isTrackrPlus}
+            value={statsVisibility}
+            onChange={handleStatsVisibilityChange}
+            disabled={updateMe.isPending || (!hasPlus && !isSubscriptionLoading)}
             badge={<PlusBadge />}
           />
-          <PrivacyToggle
+          <PrivacySection
             icon={<Notebook size={20} color={colors.icon} />}
             label={t('settings.privacy.activityPublic')}
             description={t('settings.privacy.activityPublicDescription')}
-            value={currentUser.isActivityPublic}
-            onValueChange={handleActivityPrivacyChange}
+            value={activityVisibility}
+            onChange={handleActivityVisibilityChange}
             disabled={updateMe.isPending}
           />
-          <PrivacyToggle
+          <PrivacySection
             icon={<Library size={20} color={colors.icon} />}
             label={t('settings.privacy.libraryPublic')}
             description={t('settings.privacy.libraryPublicDescription')}
-            value={currentUser.isLibraryPublic}
-            onValueChange={handleLibraryPrivacyChange}
+            value={libraryVisibility}
+            onChange={handleLibraryVisibilityChange}
             disabled={updateMe.isPending}
           />
         </View>
@@ -171,20 +192,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   optionsContainer: {
-    gap: 12,
+    gap: 16,
   },
   privacyOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     padding: 16,
     borderRadius: 12,
   },
-  privacyOptionLeft: {
+  privacyHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    marginRight: 12,
+    marginBottom: 4,
   },
   iconContainer: {
     width: 48,
@@ -201,8 +218,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  privacyOptionRight: {
-    marginRight: 12,
   },
 });

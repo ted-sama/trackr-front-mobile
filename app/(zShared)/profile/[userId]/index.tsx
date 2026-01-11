@@ -33,6 +33,9 @@ import ActionButton from "@/components/ui/ActionButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Notebook, ChartNoAxesCombined, Flag, Library } from "lucide-react-native";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
+import FollowStats from "@/components/profile/FollowStats";
+import FollowButton from "@/components/ui/FollowButton";
+import { useFollowUser, useUnfollowUser } from "@/hooks/queries/follows";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -60,6 +63,24 @@ export default function UserProfileScreen() {
   });
   const [titleY, setTitleY] = useState<number>(0);
   const reportSheetRef = useRef<TrueSheet>(null);
+  const [followLoading, setFollowLoading] = useState(false);
+  const followMutation = useFollowUser();
+  const unfollowMutation = useUnfollowUser();
+
+  const handleFollowPress = useCallback(async () => {
+    if (!user || followLoading) return;
+    setFollowLoading(true);
+    try {
+      if (user.isFollowedByMe) {
+        await unfollowMutation.mutateAsync(user.username);
+      } else {
+        await followMutation.mutateAsync(user.username);
+      }
+      refetchUser();
+    } finally {
+      setFollowLoading(false);
+    }
+  }, [user, followLoading, followMutation, unfollowMutation, refetchUser]);
 
   const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
@@ -332,6 +353,26 @@ export default function UserProfileScreen() {
             </View>
             <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>@{user?.username}</Text>
             <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.memberSince")} {dayjs.utc(user?.createdAt).format("DD/MM/YYYY")}</Text>
+            {user && (
+              <View style={{ marginTop: 16 }}>
+                <FollowStats
+                  userId={user.id}
+                  username={user.username}
+                  followersCount={user.followersCount ?? 0}
+                  followingCount={user.followingCount ?? 0}
+                />
+              </View>
+            )}
+            {!isMe && user && (
+              <View style={{ marginTop: 16 }}>
+                <FollowButton
+                  isFollowing={user.isFollowedByMe ?? false}
+                  isFriend={user.isFriend}
+                  onPress={handleFollowPress}
+                  loading={followLoading}
+                />
+              </View>
+            )}
           </View>
         </View>
         {isMe ? (

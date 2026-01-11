@@ -151,7 +151,9 @@
         "noLastRead": "Start reading to see your last reads",
         "mostTracked": "Most tracked",
         "topRated": "Top rated",
-        "goToLibrary": "Go to library"
+        "goToLibrary": "Go to library",
+        "recentlyRatedByFollowing": "Recently rated by your follows",
+        "popularAmongFollowing": "Popular among your follows"
     },
     "discover": {
         "title": "Discover",
@@ -254,7 +256,19 @@
             "infoNote": "Reading status and progress shown are {{username}}'s"
         },
         "report": "Report user",
-        "viewLibrary": "View library"
+        "viewLibrary": "View library",
+        "followers": "Followers",
+        "following": "Following",
+        "followersTitle": "{{username}}'s followers",
+        "followingTitle": "{{username}}'s following",
+        "noFollowers": "No followers",
+        "noFollowing": "Not following anyone",
+        "followersCount": "{{count}} follower",
+        "followersCount_other": "{{count}} followers",
+        "followingCount": "{{count}} following",
+        "followingCount_other": "{{count}} following",
+        "follow": "Follow",
+        "friends": "Friends"
     },
     "stats": {
         "title": "{{name}}'s stats",
@@ -379,12 +393,12 @@
         "privacy": {
             "title": "Privacy",
             "description": "Control what other users can see on your profile.",
-            "statsPublic": "Public statistics",
-            "statsPublicDescription": "Allow other users to view your statistics",
-            "activityPublic": "Public activity",
-            "activityPublicDescription": "Allow other users to view your activity log",
-            "libraryPublic": "Public library",
-            "libraryPublicDescription": "Allow other users to view your library"
+            "statsPublic": "Statistics",
+            "statsPublicDescription": "Who can see your statistics",
+            "activityPublic": "Activity",
+            "activityPublicDescription": "Who can see your activity log",
+            "libraryPublic": "Library",
+            "libraryPublicDescription": "Who can see your library"
         },
         "notifications": {
             "title": "Notifications",
@@ -395,7 +409,11 @@
             "listLikes": "List likes",
             "listLikesDescription": "Receive a push notification when someone likes your list",
             "listSaves": "List saves",
-            "listSavesDescription": "Receive a push notification when someone saves your list"
+            "listSavesDescription": "Receive a push notification when someone saves your list",
+            "newFollower": "New followers",
+            "newFollowerDescription": "Receive a push notification when someone follows you",
+            "newFriend": "New friends",
+            "newFriendDescription": "Receive a push notification when you become friends with someone"
         }
     },
     "languages": {
@@ -772,6 +790,14 @@
         "likedYourReview": "liked your review",
         "likedYourList": "liked your list",
         "savedYourList": "saved your list",
-        "of": "of"
+        "of": "of",
+        "startedFollowingYou": "started following you",
+        "isNowYourFriend": "is now your friend"
+    },
+    "privacy": {
+        "public": "Public",
+        "followers": "Followers",
+        "friends": "Friends",
+        "private": "Private"
     }
 }

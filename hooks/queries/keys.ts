@@ -46,6 +46,16 @@ export const queryKeys = {
 
   // Genres
   genreTranslations: ['genres', 'translations'] as const,
+
+  // Follow system
+  userFollowers: (username: string) => ['user', username, 'followers'] as const,
+  userFollowing: (username: string) => ['user', username, 'following'] as const,
+  myFollowers: ['me', 'followers'] as const,
+  myFollowing: ['me', 'following'] as const,
+
+  // Feed
+  feedPopularAmongFollowing: ['feed', 'popular-among-following'] as const,
+  feedRecentlyRated: ['feed', 'recently-rated'] as const,
 };
 
 

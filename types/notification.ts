@@ -1,4 +1,4 @@
-export type NotificationType = 'review_like' | 'list_like' | 'list_save';
+export type NotificationType = 'review_like' | 'list_like' | 'list_save' | 'new_follower' | 'new_friend';
 
 export interface NotificationActor {
   id: string;
@@ -24,7 +24,7 @@ export interface NotificationResource {
 export interface Notification {
   id: string;
   type: NotificationType;
-  resourceType: 'book_review' | 'list';
+  resourceType: 'book_review' | 'list' | 'user';
   resourceId: string;
   read: boolean;
   createdAt: string;
@@ -55,4 +55,6 @@ export interface NotificationSettings {
   notifyReviewLikes: boolean;
   notifyListLikes: boolean;
   notifyListSaves: boolean;
+  notifyNewFollower: boolean;
+  notifyNewFriend: boolean;
 }

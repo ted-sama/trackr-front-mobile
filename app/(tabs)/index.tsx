@@ -10,6 +10,8 @@ import { useTrackedBooksStore } from "@/stores/trackedBookStore";
 import BookListElement from "@/components/BookListElement";
 import CategorySlider from "@/components/CategorySlider";
 import { useMostTrackedCategory, useTopRatedCategory } from "@/hooks/queries/categories";
+import { usePopularAmongFollowing, useRecentlyRatedByFollowing } from "@/hooks/queries/feed";
+import RecentlyRatedSlider from "@/components/home/RecentlyRatedSlider";
 import { ChevronRight } from "lucide-react-native";
 import { useAnimatedStyle, useSharedValue, withTiming, useAnimatedScrollHandler } from "react-native-reanimated";
 import Animated from "react-native-reanimated";
@@ -30,6 +32,8 @@ export default function Index() {
   const trackedBooks = useTrackedBooksStore((state) => state.trackedBooks);
   const { data: mostTracked, isLoading: isLoadingMostTracked, error: errorMostTracked, refetch: refetchMostTracked } = useMostTrackedCategory();
   const { data: topRated, isLoading: isLoadingTopRated, error: errorTopRated, refetch: refetchTopRated } = useTopRatedCategory();
+  const { data: popularAmongFollowing } = usePopularAmongFollowing();
+  const { data: recentlyRated } = useRecentlyRatedByFollowing();
 
   const isLoading = isLoadingMostTracked || isLoadingTopRated;
   const error = errorMostTracked || errorTopRated;
@@ -194,6 +198,16 @@ export default function Index() {
             </Pressable>
           </Animated.View>
         </View>
+        {recentlyRated && recentlyRated.length > 0 && (
+          <View style={{ marginHorizontal: -16 }}>
+            <RecentlyRatedSlider items={recentlyRated} />
+          </View>
+        )}
+        {popularAmongFollowing && popularAmongFollowing.books && popularAmongFollowing.books.length > 0 && (
+          <View style={{ marginHorizontal: -16 }}>
+            <CategorySlider category={popularAmongFollowing} seeMore={false} />
+          </View>
+        )}
         <View style={{ marginHorizontal: -16 }}>
           {mostTracked && (
             <CategorySlider category={mostTracked} seeMore={false} />

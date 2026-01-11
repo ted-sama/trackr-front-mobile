@@ -33,6 +33,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { ChartNoAxesCombined, Notebook, Settings } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
+import FollowStats from "@/components/profile/FollowStats";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -300,6 +301,16 @@ export default function Profile() {
             </View>
             <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>@{currentUser?.username}</Text>
             <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.memberSince")} {dayjs.utc(currentUser?.createdAt).format("DD/MM/YYYY")}</Text>
+            {currentUser && (
+              <View style={{ marginTop: 16 }}>
+                <FollowStats
+                  userId={currentUser.id}
+                  username={currentUser.username}
+                  followersCount={currentUser.followersCount ?? 0}
+                  followingCount={currentUser.followingCount ?? 0}
+                />
+              </View>
+            )}
           </View>
         </View>
         <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>

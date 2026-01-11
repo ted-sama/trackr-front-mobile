@@ -9,7 +9,7 @@ import { useRouter } from 'expo-router';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useNotificationSettings, useUpdateNotificationSettings } from '@/hooks/queries/notifications';
-import { Heart, Bookmark } from 'lucide-react-native';
+import { Heart, Bookmark, UserPlus, Users } from 'lucide-react-native';
 
 interface NotificationToggleProps {
   icon: React.ReactNode;
@@ -85,6 +85,14 @@ export default function NotificationSettingsScreen() {
     updateSettings.mutate({ notifyListSaves: value });
   };
 
+  const handleNewFollowerChange = (value: boolean) => {
+    updateSettings.mutate({ notifyNewFollower: value });
+  };
+
+  const handleNewFriendChange = (value: boolean) => {
+    updateSettings.mutate({ notifyNewFriend: value });
+  };
+
   const isDisabled = isLoading || updateSettings.isPending;
 
   return (
@@ -140,6 +148,22 @@ export default function NotificationSettingsScreen() {
             description={t('settings.notifications.listSavesDescription')}
             value={notificationSettings?.notifyListSaves ?? true}
             onValueChange={handleListSavesChange}
+            disabled={isDisabled}
+          />
+          <NotificationToggle
+            icon={<UserPlus size={20} color={colors.icon} />}
+            label={t('settings.notifications.newFollower')}
+            description={t('settings.notifications.newFollowerDescription')}
+            value={notificationSettings?.notifyNewFollower ?? true}
+            onValueChange={handleNewFollowerChange}
+            disabled={isDisabled}
+          />
+          <NotificationToggle
+            icon={<Users size={20} color={colors.icon} />}
+            label={t('settings.notifications.newFriend')}
+            description={t('settings.notifications.newFriendDescription')}
+            value={notificationSettings?.notifyNewFriend ?? true}
+            onValueChange={handleNewFriendChange}
             disabled={isDisabled}
           />
         </View>

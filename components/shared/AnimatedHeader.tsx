@@ -39,6 +39,7 @@ function ScalePressable({ onPress, style, children }: ScalePressableProps) {
 
 interface AnimatedHeaderProps {
   title: string;
+  subtitle?: string;
   scrollY: SharedValue<number>;
   collapseThreshold?: number;
   onBack?: () => void;
@@ -54,7 +55,7 @@ interface AnimatedHeaderProps {
 
 const DEFAULT_THRESHOLD = 320;
 
-export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, closeRightButtonIcon, onCloseRightButtonPress, rightButtonIcon, onRightButtonPress, farRightButtonIcon, onFarRightButtonPress, rightComponent, static: isStatic = false }: AnimatedHeaderProps) {
+export function AnimatedHeader({ title, subtitle, scrollY, collapseThreshold = DEFAULT_THRESHOLD, onBack, closeRightButtonIcon, onCloseRightButtonPress, rightButtonIcon, onRightButtonPress, farRightButtonIcon, onFarRightButtonPress, rightComponent, static: isStatic = false }: AnimatedHeaderProps) {
   const insets = useSafeAreaInsets();
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
@@ -150,13 +151,23 @@ export function AnimatedHeader({ title, scrollY, collapseThreshold = DEFAULT_THR
             <Ionicons name="arrow-back" size={22} color={colors.icon} />
           </ScalePressable>
         )}
-        <Animated.Text
-          style={[typography.h3, styles.title, { color: colors.text }, headerTitleStyle]}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
-          {title}
-        </Animated.Text>
+        <Animated.View style={[styles.titleContainer, headerTitleStyle]}>
+          <Animated.Text
+            style={[typography.h3, styles.title, { color: colors.text }]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {title}
+          </Animated.Text>
+          {subtitle && (
+            <Animated.Text
+              style={[typography.caption, styles.subtitle, { color: colors.secondaryText }]}
+              numberOfLines={1}
+            >
+              {subtitle}
+            </Animated.Text>
+          )}
+        </Animated.View>
         {/* Right side: custom component or button icons */}
         {rightComponent ? (
           <View style={styles.rightComponentContainer}>
@@ -267,9 +278,15 @@ const styles = StyleSheet.create({
   backButtonBg: {
     borderRadius: '50%',
   },
-  title: {
+  titleContainer: {
     flex: 1,
     marginHorizontal: 8,
+    justifyContent: 'center',
+  },
+  title: {
+  },
+  subtitle: {
+    marginTop: 2,
   },
   rightContainer: {
     alignItems: 'center',
