@@ -1,4 +1,4 @@
-import { useMutation, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useInfiniteQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { api } from '@/services/api';
 import { User } from '@/types/user';
 import { PaginatedResponse } from '@/types/api';
@@ -129,14 +129,14 @@ export function useUnfollowUser() {
 }
 
 // Get followers of a user
-export function useUserFollowers(username: string) {
+export function useUserFollowers(username: string, search?: string) {
   return useInfiniteQuery({
-    queryKey: queryKeys.userFollowers(username),
+    queryKey: queryKeys.userFollowers(username, search),
     queryFn: async ({ pageParam }) => {
       const page = pageParam ?? 1;
       const { data } = await api.get<PaginatedResponse<UserWithRelationship>>(
         `/users/${username}/followers`,
-        { params: { page, limit: PER_PAGE } }
+        { params: { page, limit: PER_PAGE, ...(search ? { q: search } : {}) } }
       );
       return data;
     },
@@ -147,18 +147,19 @@ export function useUserFollowers(username: string) {
     },
     enabled: Boolean(username),
     staleTime: staleTimes.user,
+    placeholderData: keepPreviousData,
   });
 }
 
 // Get users that a user is following
-export function useUserFollowing(username: string) {
+export function useUserFollowing(username: string, search?: string) {
   return useInfiniteQuery({
-    queryKey: queryKeys.userFollowing(username),
+    queryKey: queryKeys.userFollowing(username, search),
     queryFn: async ({ pageParam }) => {
       const page = pageParam ?? 1;
       const { data } = await api.get<PaginatedResponse<UserWithRelationship>>(
         `/users/${username}/following`,
-        { params: { page, limit: PER_PAGE } }
+        { params: { page, limit: PER_PAGE, ...(search ? { q: search } : {}) } }
       );
       return data;
     },
@@ -169,6 +170,7 @@ export function useUserFollowing(username: string) {
     },
     enabled: Boolean(username),
     staleTime: staleTimes.user,
+    placeholderData: keepPreviousData,
   });
 }
 

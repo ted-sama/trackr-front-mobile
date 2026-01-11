@@ -48,8 +48,10 @@ export const queryKeys = {
   genreTranslations: ['genres', 'translations'] as const,
 
   // Follow system
-  userFollowers: (username: string) => ['user', username, 'followers'] as const,
-  userFollowing: (username: string) => ['user', username, 'following'] as const,
+  userFollowers: (username: string, search?: string) => ['user', username, 'followers', search ?? ''] as const,
+  userFollowing: (username: string, search?: string) => ['user', username, 'following', search ?? ''] as const,
+  userFollowersTotal: (username: string) => ['user', username, 'followers', 'total'] as const,
+  userFollowingTotal: (username: string) => ['user', username, 'following', 'total'] as const,
   myFollowers: ['me', 'followers'] as const,
   myFollowing: ['me', 'following'] as const,
 

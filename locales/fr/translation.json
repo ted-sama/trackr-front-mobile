@@ -268,7 +268,11 @@
         "followingCount": "{{count}} abonnement",
         "followingCount_other": "{{count}} abonnements",
         "follow": "Suivre",
-        "friends": "Amis"
+        "friends": "Amis",
+        "searchFollowers": "Rechercher des abonnés",
+        "searchFollowing": "Rechercher des abonnements",
+        "noFollowersResults": "Aucun abonné trouvé",
+        "noFollowingResults": "Aucun abonnement trouvé"
     },
     "stats": {
         "title": "Stats de {{name}}",

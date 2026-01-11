@@ -101,7 +101,7 @@ export function SearchResults({ searchQuery, activeFilter }: SearchResultsProps)
       contentContainerStyle={styles.listContainer}
       ListEmptyComponent={
         <View style={styles.emptyContainer}>
-          <Text style={[typography.body, { color: colors.text }]}>
+          <Text style={[typography.body, { color: colors.secondaryText }]}>
             {error ? String(error) : (searchQuery.trim() ? t("discover.search.noResults") : t("discover.search.empty"))}
           </Text>
         </View>

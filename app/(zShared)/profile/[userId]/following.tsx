@@ -11,10 +11,12 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import UserListItem from '@/components/UserListItem';
+import SearchBar from '@/components/ui/SearchBar';
 import { useUserFollowing, useFollowUser, useUnfollowUser } from '@/hooks/queries/follows';
 import { useUser } from '@/hooks/queries/users';
 import { User } from '@/types/user';
 import { useTranslation } from 'react-i18next';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 type UserWithRelationship = User & { isFollowedByMe?: boolean; isFriend?: boolean };
 
@@ -27,14 +29,20 @@ export default function FollowingScreen() {
   const insets = useSafeAreaInsets();
   const { userId, username } = useLocalSearchParams<{ userId: string; username: string }>();
   const { data: user } = useUser(userId);
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebouncedValue(searchQuery.trim(), 300);
   const {
     data,
     isLoading,
+    isFetching,
     error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useUserFollowing(username || user?.username || '');
+  } = useUserFollowing(username || user?.username || '', debouncedSearch || undefined);
+
+  // Only show full page loader on initial load (no data yet)
+  const showFullPageLoader = isLoading && !data;
   const [titleY, setTitleY] = useState<number>(0);
   const [loadingUsers, setLoadingUsers] = useState<Set<string>>(new Set());
 
@@ -45,7 +53,8 @@ export default function FollowingScreen() {
     return data?.pages.flatMap(page => page.data) ?? [];
   }, [data]);
 
-  const totalCount = data?.pages[0]?.meta?.total ?? 0;
+  // Always show total following count from user profile, not from search results
+  const totalCount = user?.followingCount ?? 0;
 
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler((event) => {
@@ -101,15 +110,15 @@ export default function FollowingScreen() {
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Text style={[typography.h3, { color: colors.secondaryText, textAlign: 'center' }]}>
-        {t('profile.noFollowing')}
+      <Text style={[typography.body, { color: colors.secondaryText, textAlign: 'center' }]}>
+        {t('profile.noFollowingResults')}
       </Text>
     </View>
   );
 
   const renderError = () => (
     <View style={styles.emptyContainer}>
-      <Text style={[typography.h3, { color: colors.error, textAlign: 'center' }]}>
+      <Text style={[typography.body, { color: colors.error, textAlign: 'center' }]}>
         {t('common.error')}
       </Text>
       <Text style={[typography.body, { color: colors.secondaryText, textAlign: 'center', marginTop: 8 }]}>
@@ -148,7 +157,7 @@ export default function FollowingScreen() {
         collapseThreshold={titleY > 0 ? titleY : undefined}
       />
 
-      {isLoading ? (
+      {showFullPageLoader ? (
         renderLoading()
       ) : error ? (
         renderError()
@@ -164,20 +173,31 @@ export default function FollowingScreen() {
           contentContainerStyle={{ marginTop: insets.top, paddingBottom: 64, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
-            <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
-              <Text
-                style={[typography.h1, { color: colors.text, maxWidth: '80%' }]}
-                accessibilityRole="header"
-                accessibilityLabel="Following"
-                numberOfLines={1}
-              >
-                {t('profile.following')}
-              </Text>
-              {totalCount > 0 && (
-                <Text style={[typography.caption, { color: colors.secondaryText, marginTop: 4 }]}>
-                  {t('profile.followingCount', { count: totalCount })}
+            <View style={styles.headerContainer}>
+              {/* Search Bar */}
+              <SearchBar
+                placeholder={t('profile.searchFollowing')}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                containerStyle={styles.searchBar}
+              />
+
+              {/* Title and count */}
+              <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
+                <Text
+                  style={[typography.h1, { color: colors.text, maxWidth: '80%' }]}
+                  accessibilityRole="header"
+                  accessibilityLabel="Following"
+                  numberOfLines={1}
+                >
+                  {t('profile.following')}
                 </Text>
-              )}
+                {totalCount > 0 && (
+                  <Text style={[typography.caption, { color: colors.secondaryText, marginTop: 4 }]}>
+                    {t('profile.followingCount', { count: totalCount })}
+                  </Text>
+                )}
+              </View>
             </View>
           }
           ListEmptyComponent={renderEmptyState}
@@ -192,17 +212,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    marginTop: Platform.OS === 'android' ? 70 : 70,
-    marginBottom: 16,
+  headerContainer: {
+    marginTop: 80,
     paddingHorizontal: 16,
   },
+  searchBar: {
+    marginBottom: 16,
+  },
+  header: {
+    marginBottom: 16,
+  },
   emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
-    marginTop: 100,
+    marginTop: 32,
   },
   loadingContainer: {
     flex: 1,

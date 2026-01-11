@@ -268,7 +268,11 @@
         "followingCount": "{{count}} following",
         "followingCount_other": "{{count}} following",
         "follow": "Follow",
-        "friends": "Friends"
+        "friends": "Friends",
+        "searchFollowers": "Search followers",
+        "searchFollowing": "Search following",
+        "noFollowersResults": "No followers found",
+        "noFollowingResults": "No following found"
     },
     "stats": {
         "title": "{{name}}'s stats",
