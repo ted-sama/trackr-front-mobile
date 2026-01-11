@@ -499,6 +499,8 @@
         "updateSuccess": "Review updated successfully!",
         "updateError": "Failed to update review",
         "reviewDetail": "Review",
+        "reviewOf": "Review of {{bookTitle}}",
+        "reviewsOf": "Reviews of {{bookTitle}}",
         "previousVersions": "Previous versions",
         "edited": "Edited",
         "version": "Version {{number}}",

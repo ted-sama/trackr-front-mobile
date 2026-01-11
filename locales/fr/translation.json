@@ -499,6 +499,8 @@
         "updateSuccess": "Avis mis à jour avec succès !",
         "updateError": "Impossible de mettre à jour l'avis",
         "reviewDetail": "Avis",
+        "reviewOf": "Avis de {{bookTitle}}",
+        "reviewsOf": "Avis de {{bookTitle}}",
         "previousVersions": "Versions précédentes",
         "edited": "Modifié",
         "version": "Version {{number}}",

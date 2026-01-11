@@ -10,7 +10,8 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Star, StarHalf, Clock, History, Flag, AlertTriangle } from "lucide-react-native";
+import { Clock, History, Flag, AlertTriangle } from "lucide-react-native";
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useTranslation } from "react-i18next";
 import Animated, {
@@ -20,10 +21,12 @@ import Animated, {
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
+import { Image } from "expo-image";
 
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useReview, useToggleReviewLike } from "@/hooks/queries/reviews";
+import { useBook } from "@/hooks/queries/books";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import Avatar from "@/components/ui/Avatar";
@@ -55,6 +58,7 @@ export default function ReviewDetailScreen() {
   const reviewIdStr = reviewId as string;
   
   const { data: review, isLoading, refetch } = useReview(bookId, reviewIdStr);
+  const { data: book } = useBook(bookId);
   const { currentUser } = useUserStore();
   const { isAuthenticated } = useAuth();
   const { mutate: toggleLike } = useToggleReviewLike(bookId);
@@ -171,62 +175,86 @@ export default function ReviewDetailScreen() {
           />
         }
       >
-        {/* User Section */}
-        <Pressable 
-          onPress={handleUserPress} 
-          style={styles.userSection}
-          onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
-        >
-          <Avatar image={review.user.avatar} size={48} />
-          <View style={styles.userMeta}>
-            <View style={styles.usernameRow}>
-              <Text style={[typography.categoryTitle, { color: colors.text }]} numberOfLines={1}>
-                {review.user.displayName}
-              </Text>
-              {review.user.plan === "plus" && (
-                <View style={{ marginLeft: 6 }}>
-                  <PlusBadge />
+        {/* User Section with Book Cover */}
+        <View style={styles.headerSection}>
+          <View style={styles.headerLeft}>
+            <Pressable
+              onPress={handleUserPress}
+              style={styles.userSection}
+              onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
+            >
+              <Avatar image={review.user.avatar} size={48} />
+              <View style={styles.userMeta}>
+                <View style={styles.usernameRow}>
+                  <Text style={[typography.categoryTitle, { color: colors.text }]} numberOfLines={1}>
+                    {review.user.displayName}
+                  </Text>
+                  {review.user.plan === "plus" && (
+                    <View style={{ marginLeft: 6 }}>
+                      <PlusBadge />
+                    </View>
+                  )}
+                </View>
+                <Text style={[typography.caption, { color: colors.secondaryText }]}>
+                  @{review.user.username}
+                </Text>
+              </View>
+            </Pressable>
+
+            {/* Book Title and Rating Stars */}
+            <View style={styles.ratingSection}>
+              {book?.title && (
+                <Pressable onPress={() => router.push(`/book/${book.id}`)}>
+                  <Text
+                    style={[typography.categoryTitle, { color: colors.text, fontWeight: "600", marginBottom: 8 }]}
+                    numberOfLines={2}
+                  >
+                    {book.title}
+                  </Text>
+                </Pressable>
+              )}
+              {review.rating !== null && (
+                <View style={styles.starsContainer}>
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const fullStars = Math.floor(review.rating!);
+                    const hasHalf = review.rating! % 1 !== 0;
+                    const isHalf = star === fullStars + 1 && hasHalf;
+                    const isFull = star <= fullStars;
+
+                    let iconName: "star" | "star-half" | "star-outline" = "star-outline";
+                    if (isFull) {
+                      iconName = "star";
+                    } else if (isHalf) {
+                      iconName = "star-half";
+                    }
+
+                    return (
+                      <Ionicons
+                        key={star}
+                        name={iconName}
+                        size={15}
+                        color={isFull || isHalf ? colors.accent : colors.border}
+                        style={{ marginRight: 4 }}
+                      />
+                    );
+                  })}
                 </View>
               )}
             </View>
-            <Text style={[typography.caption, { color: colors.secondaryText }]}>
-              @{review.user.username}
-            </Text>
           </View>
-        </Pressable>
 
-        {/* Rating Stars and Spoiler Badge */}
-        <View style={styles.ratingSection}>
-          {review.rating !== null && (
-            <View style={styles.starsContainer}>
-              {[1, 2, 3, 4, 5].map((star) => {
-                const fullStars = Math.floor(review.rating!);
-                const hasHalf = review.rating! % 1 !== 0;
-                const isHalf = star === fullStars + 1 && hasHalf;
-                const isFull = star <= fullStars;
-
-                if (isHalf) {
-                  return (
-                    <StarHalf
-                      key={star}
-                      size={15}
-                      fill={colors.accent}
-                      color={colors.accent}
-                      style={{ marginRight: 4 }}
-                    />
-                  );
-                }
-                return (
-                  <Star
-                    key={star}
-                    size={15}
-                    fill={isFull ? colors.accent : "transparent"}
-                    color={isFull ? colors.accent : colors.border}
-                    style={{ marginRight: 4 }}
-                  />
-                );
-              })}
-            </View>
+          {/* Book Cover */}
+          {book?.coverImage && (
+            <Pressable
+              onPress={() => router.push(`/book/${book.id}`)}
+              style={styles.bookCoverContainer}
+            >
+              <Image
+                source={{ uri: book.coverImage }}
+                style={styles.bookCover}
+                contentFit="cover"
+              />
+            </Pressable>
           )}
         </View>
 
@@ -328,23 +356,19 @@ export default function ReviewDetailScreen() {
                           const isHalf = star === fullStars + 1 && hasHalf;
                           const isFull = star <= fullStars;
 
-                          if (isHalf) {
-                            return (
-                              <StarHalf
-                                key={star}
-                                size={12}
-                                fill={colors.accent}
-                                color={colors.accent}
-                                style={{ marginRight: 2 }}
-                              />
-                            );
+                          let iconName: "star" | "star-half" | "star-outline" = "star-outline";
+                          if (isFull) {
+                            iconName = "star";
+                          } else if (isHalf) {
+                            iconName = "star-half";
                           }
+
                           return (
-                            <Star
+                            <Ionicons
                               key={star}
+                              name={iconName}
                               size={12}
-                              fill={isFull ? colors.accent : "transparent"}
-                              color={isFull ? colors.accent : colors.border}
+                              color={isFull || isHalf ? colors.accent : colors.border}
                               style={{ marginRight: 2 }}
                             />
                           );
@@ -398,6 +422,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  headerSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  headerLeft: {
+    flex: 1,
+    marginRight: 16,
+  },
   userSection: {
     flexDirection: "row",
     alignItems: "center",
@@ -412,10 +445,15 @@ const styles = StyleSheet.create({
   },
   ratingSection: {
     marginTop: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 12,
+  },
+  bookCoverContainer: {
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  bookCover: {
+    width: 70,
+    height: 105,
+    borderRadius: 8,
   },
   starsContainer: {
     flexDirection: "row",

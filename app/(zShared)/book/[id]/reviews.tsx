@@ -30,6 +30,7 @@ import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useBookReviews, useToggleReviewLike } from "@/hooks/queries/reviews";
+import { useBook } from "@/hooks/queries/books";
 import { ReviewSortOption, BookReview } from "@/types/review";
 import { ReviewCard } from "@/components/reviews";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
@@ -104,6 +105,7 @@ export default function AllReviewsScreen() {
   const sortSheetRef = useRef<TrueSheet>(null);
 
   const bookId = id as string;
+  const { data: book } = useBook(bookId);
   const { data, isLoading, refetch } = useBookReviews(
     bookId,
     sortOption,
@@ -111,6 +113,10 @@ export default function AllReviewsScreen() {
   );
   const { currentUser } = useUserStore();
   const { mutate: toggleLike } = useToggleReviewLike(bookId);
+
+  const headerTitle = book?.title
+    ? t("reviews.reviewsOf", { bookTitle: book.title })
+    : t("reviews.title");
 
   const sortOptions: SortOptionConfig[] = useMemo(() => [
     { 
@@ -201,12 +207,12 @@ export default function AllReviewsScreen() {
   const keyExtractor = useCallback((item: BookReview) => item.id.toString(), []);
 
   const ListHeader = useMemo(() => (
-    <View 
-      style={styles.listHeader} 
+    <View
+      style={styles.listHeader}
       onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
     >
       <Text style={[typography.h1, { color: colors.text }]}>
-        {t("reviews.title")}
+        {headerTitle}
       </Text>
       {data?.total !== undefined && data.total > 0 && (
         <Text style={[typography.caption, { color: colors.secondaryText, marginTop: 4 }]}>
@@ -214,7 +220,7 @@ export default function AllReviewsScreen() {
         </Text>
       )}
     </View>
-  ), [typography, colors, t, data?.total, currentSortLabel, handleOpenSort]);
+  ), [typography, colors, t, data?.total, headerTitle, handleOpenSort]);
 
   const ListEmpty = useMemo(() => {
     if (isLoading) {
@@ -249,7 +255,7 @@ export default function AllReviewsScreen() {
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
 
       <AnimatedHeader
-        title={t("reviews.title")}
+        title={headerTitle}
         subtitle={data?.total !== undefined && data.total > 0 ? `${data.total} ${data.total === 1 ? t("common.review") : t("common.reviews")}` : undefined}
         scrollY={scrollY}
         onBack={() => router.back()}
