@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
+  TextInput,
   StyleSheet,
   ScrollView,
   Pressable,
@@ -71,6 +72,7 @@ export default function ProfileEditModal() {
 
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
   const [backdropMode, setBackdropMode] = useState<"color" | "image">("color");
   const [backdropColor, setBackdropColor] = useState<string>("#7C3AED");
   const [selectedBackdropImage, setSelectedBackdropImage] =
@@ -104,6 +106,7 @@ export default function ProfileEditModal() {
     if (!currentUser) return;
     setDisplayName(currentUser.displayName || "");
     setUsername(currentUser.username || "");
+    setBio(currentUser.bio || "");
     setBackdropMode(currentUser.backdropMode || "color");
     setBackdropColor(currentUser.backdropColor || "#7C3AED");
     setIsAvatarDeleted(false);
@@ -113,6 +116,7 @@ export default function ProfileEditModal() {
     if (!currentUser) return;
     const displayNameChanged = displayName !== (currentUser.displayName || "");
     const usernameChanged = username !== (currentUser.username || "");
+    const bioChanged = bio !== (currentUser.bio || "");
     const modeChanged = backdropMode !== (currentUser.backdropMode || "color");
     const colorChanged =
       (backdropColor || null) !== (currentUser.backdropColor || null);
@@ -121,6 +125,7 @@ export default function ProfileEditModal() {
     setHasChanges(
       displayNameChanged ||
         usernameChanged ||
+        bioChanged ||
         modeChanged ||
         colorChanged ||
         pendingMedia ||
@@ -129,6 +134,7 @@ export default function ProfileEditModal() {
   }, [
     displayName,
     username,
+    bio,
     backdropMode,
     backdropColor,
     selectedBackdropImage,
@@ -218,6 +224,7 @@ export default function ProfileEditModal() {
       const updated = {
         displayName: displayName.trim(),
         username: username.trim(),
+        bio: bio.trim() || null,
         backdropMode,
         backdropColor:
           backdropMode === "color"
@@ -531,7 +538,48 @@ export default function ProfileEditModal() {
           returnKeyType="done"
           placeholder={t("profile.editModal.usernamePlaceholder")}
           error={errors.username}
+        />
+
+        {/* Bio */}
+        <View>
+          <Text style={[typography.h3, styles.label, { color: colors.text }]}>
+            {t("profile.editModal.bio")}
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              styles.bioInput,
+              typography.body,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+                color: colors.text,
+              },
+            ]}
+            placeholder={t("profile.editModal.bioPlaceholder")}
+            placeholderTextColor={colors.secondaryText}
+            value={bio}
+            onChangeText={setBio}
+            multiline
+            numberOfLines={4}
+            maxLength={300}
+            textAlignVertical="top"
+            autoCapitalize="sentences"
+            autoCorrect={true}
           />
+          <Text
+            style={[
+              typography.caption,
+              {
+                color: bio.length >= 280 ? colors.error : colors.secondaryText,
+                textAlign: "right",
+                marginTop: 4,
+              },
+            ]}
+          >
+            {bio.length}/300
+          </Text>
+        </View>
         </View>
       </ScrollView>
 
@@ -564,6 +612,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 24,
     paddingBottom: 120,
+  },
+  label: {
+    marginBottom: 8,
+    fontWeight: "600",
+  },
+  input: {
+    height: 52,
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    fontSize: 16,
+  },
+  bioInput: {
+    height: 100,
+    paddingTop: 16,
   },
   toggleButton: {
     height: 72,

@@ -34,6 +34,7 @@ import { ChartNoAxesCombined, Notebook, Settings } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import FollowStats from "@/components/profile/FollowStats";
+import ExpandableDescription from "@/components/ExpandableDescription";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -263,55 +264,59 @@ export default function Profile() {
               )}
             </View>
           </View>
-          <View
-            style={{
-              alignItems: "center",
-              alignSelf: "center",
-              marginTop: -40,
-              zIndex: 1,
-            }}
-          >
+          {/* Avatar centered */}
+          <View style={{ alignItems: "center", marginTop: -40, zIndex: 1 }}>
             <Avatar
               image={currentUser?.avatar || ""}
               size={80}
               borderWidth={4}
               borderColor={colors.background}
             />
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-                justifyContent: "center",
-                marginTop: 16,
-              }}
-            >
-              <Text
-                numberOfLines={1}
-                ellipsizeMode="clip"
-                style={[
-                  typography.h1,
-                  { color: colors.text, textAlign: "center", maxWidth: 250 },
-                ]}
-                onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
-              >
-                {currentUser?.displayName}
-              </Text>
-              {currentUser?.plan === "plus" && <PlusBadge />}
-            </View>
-            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>@{currentUser?.username}</Text>
-            <Text style={[typography.body, { color: colors.secondaryText, textAlign: "center" }]}>{t("profile.memberSince")} {dayjs.utc(currentUser?.createdAt).format("DD/MM/YYYY")}</Text>
-            {currentUser && (
-              <View style={{ marginTop: 16 }}>
-                <FollowStats
-                  userId={currentUser.id}
-                  username={currentUser.username}
-                  followersCount={currentUser.followersCount ?? 0}
-                  followingCount={currentUser.followingCount ?? 0}
-                />
+          </View>
+          {/* Name + Username on left, FollowStats on right */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: 16,
+            }}
+          >
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="clip"
+                  style={[typography.h1, { color: colors.text, maxWidth: 200 }]}
+                  onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
+                >
+                  {currentUser?.displayName}
+                </Text>
+                {currentUser?.plan === "plus" && <PlusBadge />}
               </View>
+              <Text style={[typography.body, { color: colors.secondaryText }]}>
+                @{currentUser?.username}
+              </Text>
+            </View>
+            {currentUser && (
+              <FollowStats
+                userId={currentUser.id}
+                username={currentUser.username}
+                followersCount={currentUser.followersCount ?? 0}
+                followingCount={currentUser.followingCount ?? 0}
+              />
             )}
           </View>
+          {/* Bio */}
+          {currentUser?.bio && (
+            <View style={{ marginTop: 16 }}>
+              <ExpandableDescription
+                text={currentUser.bio}
+                initialCollapsedHeight={60}
+                textStyle={{ color: colors.secondaryText }}
+              />
+            </View>
+          )}
         </View>
         <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginTop: 24, justifyContent: "center", alignItems: "center" }}>
           <PillButton
@@ -406,6 +411,14 @@ export default function Profile() {
               />
             </View>
           ) : null}
+          {/* Member since - at the bottom */}
+          {currentUser && (
+            <View style={{ marginTop: 24, alignItems: "center" }}>
+              <Text style={[typography.caption, { color: colors.secondaryText }]}>
+                {t("profile.memberSince")} {dayjs.utc(currentUser.createdAt).format("DD/MM/YYYY")}
+              </Text>
+            </View>
+          )}
         </View>
       </AnimatedScrollView>
     </View>

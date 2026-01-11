@@ -229,6 +229,8 @@
         "lists": "Lists",
         "seeAllLists": "See all lists",
         "noLists": "No lists",
+        "seeMore": "See more",
+        "seeLess": "See less",
         "editModal": {
             "title": "Edit profile",
             "color": "Color",
@@ -238,7 +240,10 @@
             "displayName": "Display name",
             "displayNamePlaceholder": "Enter your display name",
             "username": "Username",
-            "usernamePlaceholder": "Enter your username"
+            "usernamePlaceholder": "Enter your username",
+            "bio": "Bio",
+            "bioPlaceholder": "Tell us about yourself...",
+            "deleteAvatar": "Remove avatar"
         },
         "reorderModal": {
             "title": "Reorder favorites",

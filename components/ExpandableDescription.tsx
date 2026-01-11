@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 interface ExpandableDescriptionProps {
   text: string;
   initialCollapsedHeight?: number;
+  minLengthForExpansion?: number;
   textStyle?: StyleProp<TextStyle>;
   toggleButtonTextStyle?: StyleProp<TextStyle>;
 }
@@ -25,6 +26,7 @@ const ANIMATION_DURATION = 300; // ms
 export default function ExpandableDescription({
   text,
   initialCollapsedHeight = DEFAULT_COLLAPSED_HEIGHT,
+  minLengthForExpansion = 200,
   textStyle,
   toggleButtonTextStyle,
 }: ExpandableDescriptionProps) {
@@ -33,7 +35,9 @@ export default function ExpandableDescription({
   const [isExpanded, setIsExpanded] = useState(false);
   const descriptionMaxHeight = useSharedValue(initialCollapsedHeight);
   const { t } = useTranslation();
-  const expandable = text.length > 200
+  // Check if expandable based on length OR number of line breaks
+  const lineBreaks = (text.match(/\n/g) || []).length;
+  const expandable = text.length > minLengthForExpansion || lineBreaks >= 2
 
   const animatedDescriptionStyle = useAnimatedStyle(() => {
     return {

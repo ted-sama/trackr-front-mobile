@@ -445,6 +445,18 @@ export default function ListEdit() {
                 autoCapitalize="sentences"
                 returnKeyType="default"
               />
+              <Text
+                style={[
+                  typography.caption,
+                  {
+                    color: description.length >= 450 ? colors.error : colors.secondaryText,
+                    textAlign: "right",
+                    marginTop: 4,
+                  },
+                ]}
+              >
+                {description.length}/500
+              </Text>
             </View>
 
             {/* Tags Field */}

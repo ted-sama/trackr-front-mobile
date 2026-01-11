@@ -4,6 +4,7 @@ export interface User {
     id: string;
     username: string;
     displayName: string;
+    bio?: string | null;
     email: string;
     avatar?: string;
     backdropMode: "color" | "image";

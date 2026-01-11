@@ -229,6 +229,8 @@
         "lists": "Listes",
         "seeAllLists": "Voir toutes les listes",
         "noLists": "Aucune liste",
+        "seeMore": "Voir plus",
+        "seeLess": "Voir moins",
         "editModal": {
             "title": "Modifier le profil",
             "color": "Couleur",
@@ -238,7 +240,10 @@
             "displayName": "Nom d'affichage",
             "displayNamePlaceholder": "Entrez votre nom d'affichage",
             "username": "Nom d'utilisateur",
-            "usernamePlaceholder": "Entrez votre nom d'utilisateur"
+            "usernamePlaceholder": "Entrez votre nom d'utilisateur",
+            "bio": "Bio",
+            "bioPlaceholder": "Parlez-nous de vous...",
+            "deleteAvatar": "Supprimer l'avatar"
         },
         "reorderModal": {
             "title": "Réordonner les favoris",
