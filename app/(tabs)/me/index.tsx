@@ -16,7 +16,9 @@ import PlusBadge from "@/components/ui/PlusBadge";
 import { router } from "expo-router";
 import BookCard from "@/components/BookCard";
 import { useUserCreatedLists, useUserTop } from "@/hooks/queries/users";
+import { useUserReviews } from "@/hooks/queries/reviews";
 import CollectionListElement from "@/components/CollectionListElement";
+import ReviewPreviewCard from "@/components/reviews/ReviewPreviewCard";
 import { AnimatedHeader } from "@/components/shared/AnimatedHeader";
 import { useState, useEffect } from "react";
 import Animated, {
@@ -47,6 +49,7 @@ export default function Profile() {
   const { currentUser } = useUserStore();
   const { data: topBooks, isLoading } = useUserTop();
   const { data: userListsPages } = useUserCreatedLists(currentUser?.username);
+  const { data: userReviewsData } = useUserReviews(currentUser?.username, 2);
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const scrollY = useSharedValue(0);
@@ -411,6 +414,40 @@ export default function Profile() {
               />
             </View>
           ) : null}
+          {/* Reviews Section */}
+          {userReviewsData && userReviewsData.reviews?.length > 0 && (
+            <View>
+              <Text
+                style={[
+                  typography.categoryTitle,
+                  { color: colors.text, marginBottom: 12 },
+                ]}
+              >
+                {t("profile.reviews")}
+              </Text>
+              <FlatList
+                data={userReviewsData.reviews.slice(0, 2)}
+                renderItem={({ item }) => (
+                  <ReviewPreviewCard
+                    review={item}
+                    onPress={() => {
+                      router.push(`/book/${item.bookId}/review/${item.id}`);
+                    }}
+                  />
+                )}
+                keyExtractor={(item) => item.id.toString()}
+                ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+                scrollEnabled={false}
+              />
+              <ActionButton
+                title={t("profile.seeAllReviews")}
+                onPress={() => {
+                  router.push("/me/reviews");
+                }}
+                style={{ marginTop: 16 }}
+              />
+            </View>
+          )}
           {/* Member since - at the bottom */}
           {currentUser && (
             <View style={{ marginTop: 24, alignItems: "center" }}>

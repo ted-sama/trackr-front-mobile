@@ -229,6 +229,13 @@
         "lists": "Lists",
         "seeAllLists": "See all lists",
         "noLists": "No lists",
+        "reviews": "Reviews",
+        "seeAllReviews": "See all reviews",
+        "noReviews": "No reviews",
+        "reviewsScreen": {
+            "title": "{{username}}'s reviews",
+            "noReviews": "No reviews yet"
+        },
         "seeMore": "See more",
         "seeLess": "See less",
         "editModal": {

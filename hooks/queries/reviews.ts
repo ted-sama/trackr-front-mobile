@@ -237,12 +237,65 @@ async function fetchReview(bookId: string, reviewId: string): Promise<BookReview
   return data;
 }
 
+// Fetch reviews by username
+interface UserReviewsResponse {
+  reviews: BookReview[];
+  total: number;
+  hasMore: boolean;
+}
+
+async function fetchUserReviews(
+  username: string,
+  page: number = 1,
+  limit: number = 20
+): Promise<UserReviewsResponse> {
+  const { data } = await api.get<ApiReviewsResponse | BookReview[]>(
+    `/users/${username}/reviews`,
+    { params: { page, limit } }
+  );
+
+  // Handle array response (simple list)
+  if (Array.isArray(data)) {
+    return {
+      reviews: data,
+      total: data.length,
+      hasMore: false,
+    };
+  }
+
+  // Handle paginated response from AdonisJS
+  if ('meta' in data && 'data' in data) {
+    return {
+      reviews: data.data,
+      total: data.meta.total,
+      hasMore: data.meta.nextPageUrl !== null,
+    };
+  }
+
+  // Fallback for other formats
+  return {
+    reviews: [],
+    total: 0,
+    hasMore: false,
+  };
+}
+
 // Hook to get a single review with revisions
 export function useReview(bookId: string | undefined, reviewId: string | undefined) {
   return useQuery({
     queryKey: bookId && reviewId ? queryKeys.review(bookId, reviewId) : ['review', 'disabled'],
     queryFn: () => fetchReview(bookId as string, reviewId as string),
     enabled: Boolean(bookId) && Boolean(reviewId),
+    staleTime: staleTimes.content,
+  });
+}
+
+// Hook to get reviews by username
+export function useUserReviews(username: string | undefined, limit: number = 20) {
+  return useQuery({
+    queryKey: username ? queryKeys.userReviews(username) : ['user', 'reviews', 'disabled'],
+    queryFn: () => fetchUserReviews(username as string, 1, limit),
+    enabled: Boolean(username),
     staleTime: staleTimes.content,
   });
 }
