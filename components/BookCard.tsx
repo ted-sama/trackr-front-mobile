@@ -51,6 +51,8 @@ interface BookCardProps {
     currentVolume?: number | null;
     rating?: number | null;
   } | null;
+  /** Custom info content to replace the default title/author/rating section */
+  customInfo?: React.ReactNode;
 }
 
 const { width } = Dimensions.get("window");
@@ -65,7 +67,7 @@ const COMPACT_XS_CARD_WIDTH = (width - 64 - 32) / 5;
 
 const DEFAULT_COVER_COLOR = '#6B7280'; // Grey color for missing covers
 
-const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showUserRating = false, showTrackingStatus = false, showTrackingButton = true, showTrackingChapter = false, rank, currentListId, isFromListPage, trackingStatusOverride }: BookCardProps) => {
+const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showUserRating = false, showTrackingStatus = false, showTrackingButton = true, showTrackingChapter = false, rank, currentListId, isFromListPage, trackingStatusOverride, customInfo }: BookCardProps) => {
   const hasCover = Boolean(book.coverImage);
   const [isLoading, setIsLoading] = useState(hasCover);
   const [hasError, setHasError] = useState(false);
@@ -257,80 +259,86 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
             )}
           </View>
 
-          <View style={[styles.mangaInfo, size === 'compact' && { paddingTop: 4 }]}> 
-            {rank && (
-              <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: 4 }]}>
-                {rank}
-              </Text>
-            )}
-            {showTitle && (
-            <Text
-              style={[
-                styles.mangaTitle,
-                typography.h3,
-                { color: colors.text },
-                size === 'compact' && { fontSize: 13, marginBottom: 2 },
-                size === 'compact-small' && { fontSize: 12, marginBottom: 2 },
-                size === 'compact-xs' && { fontSize: 11, marginBottom: 2 },
-              ]}
-              numberOfLines={1}
-            >
-                {book.title}
-              </Text>
-            )}
-            {showAuthor && (
-                <Text
-                style={[
-                  styles.mangaAuthor,
-                  typography.caption,
-                  { color: colors.secondaryText },
-                  size === 'compact' && { fontSize: 12, marginBottom: 2 },
-                  size === 'compact-small' && { fontSize: 11, marginBottom: 2 },
-                  size === 'compact-xs' && { fontSize: 10, marginBottom: 2 },
-                ]}
-                numberOfLines={1}
-              >
-                {book.type === 'comic'
-                  ? book.publishers?.map((pub) => pub.name).join(", ")
-                  : book.authors?.map((author) => author.name).join(", ")
-                }
-              </Text>
-            )}
-            {showRating && (
-              <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={12} color={colors.secondaryText} />
-                <Text
-                  style={[
-                    styles.ratingText,
-                    typography.caption,
-                    { color: colors.secondaryText },
-                    size === 'compact-small' && { fontSize: 11 },
-                    size === 'compact-xs' && { fontSize: 10 },
-                  ]}
-                >
-                  {book.rating || "N/A"}
-                </Text>
-              </View>
-            )}
-            {trackingStatus && showTrackingStatus && (
-              <View style={styles.badgeContainer}>
-                <Badge
-                  text={trackingStatusValues[trackingStatus.status as ReadingStatus].text}
-                  color={colors.badgeText}
-                  backgroundColor={colors.badgeBackground}
-                  icon={trackingStatusValues[trackingStatus.status as ReadingStatus].icon}
-                  borderColor={colors.badgeBorder}
-                />
-              </View>
-            )}
-            {showUserRating && trackingStatus?.rating && (
-              <View style={styles.userRatingContainer}>
-                <StarRating
-                  rating={trackingStatus.rating}
-                  size={size === 'compact-xs' ? 9 : size === 'compact-small' ? 10 : 12}
-                  color={colors.secondaryText}
-                />
-              </View>
+          <View style={[styles.mangaInfo, size === 'compact' && { paddingTop: 4 }]}>
+            {customInfo ? (
+              customInfo
+            ) : (
+              <>
+                {rank && (
+                  <Text style={[typography.caption, { color: colors.secondaryText, marginBottom: 4 }]}>
+                    {rank}
+                  </Text>
+                )}
+                {showTitle && (
+                  <Text
+                    style={[
+                      styles.mangaTitle,
+                      typography.h3,
+                      { color: colors.text },
+                      size === 'compact' && { fontSize: 13, marginBottom: 2 },
+                      size === 'compact-small' && { fontSize: 12, marginBottom: 2 },
+                      size === 'compact-xs' && { fontSize: 11, marginBottom: 2 },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {book.title}
+                  </Text>
+                )}
+                {showAuthor && (
+                  <Text
+                    style={[
+                      styles.mangaAuthor,
+                      typography.caption,
+                      { color: colors.secondaryText },
+                      size === 'compact' && { fontSize: 12, marginBottom: 2 },
+                      size === 'compact-small' && { fontSize: 11, marginBottom: 2 },
+                      size === 'compact-xs' && { fontSize: 10, marginBottom: 2 },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {book.type === 'comic'
+                      ? book.publishers?.map((pub) => pub.name).join(", ")
+                      : book.authors?.map((author) => author.name).join(", ")
+                    }
+                  </Text>
+                )}
+                {showRating && (
+                  <View style={styles.ratingContainer}>
+                    <Ionicons name="star" size={12} color={colors.secondaryText} />
+                    <Text
+                      style={[
+                        styles.ratingText,
+                        typography.caption,
+                        { color: colors.secondaryText },
+                        size === 'compact-small' && { fontSize: 11 },
+                        size === 'compact-xs' && { fontSize: 10 },
+                      ]}
+                    >
+                      {book.rating || "N/A"}
+                    </Text>
+                  </View>
+                )}
+                {trackingStatus && showTrackingStatus && (
+                  <View style={styles.badgeContainer}>
+                    <Badge
+                      text={trackingStatusValues[trackingStatus.status as ReadingStatus].text}
+                      color={colors.badgeText}
+                      backgroundColor={colors.badgeBackground}
+                      icon={trackingStatusValues[trackingStatus.status as ReadingStatus].icon}
+                      borderColor={colors.badgeBorder}
+                    />
+                  </View>
+                )}
+                {showUserRating && trackingStatus?.rating && (
+                  <View style={styles.userRatingContainer}>
+                    <StarRating
+                      rating={trackingStatus.rating}
+                      size={size === 'compact-xs' ? 9 : size === 'compact-small' ? 10 : 12}
+                      color={colors.secondaryText}
+                    />
+                  </View>
+                )}
+              </>
             )}
           </View>
         </Animated.View>
