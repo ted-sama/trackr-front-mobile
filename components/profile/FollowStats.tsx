@@ -113,11 +113,11 @@ const styles = StyleSheet.create({
   },
   statItem: {
     alignItems: 'center',
-    paddingHorizontal: 20,
     paddingVertical: 8,
   },
   separator: {
     width: 1,
     height: 32,
+    marginHorizontal: 20,
   },
 });

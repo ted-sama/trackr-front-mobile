@@ -328,40 +328,34 @@ export default function UserProfileScreen() {
               borderColor={colors.background}
             />
           </View>
-          {/* Name + Username on left, FollowStats on right */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginTop: 16,
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Text
-                  numberOfLines={1}
-                  ellipsizeMode="clip"
-                  style={[typography.h1, { color: colors.text, maxWidth: 200 }]}
-                  onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
-                >
-                  {user?.displayName}
-                </Text>
-                {user?.plan === "plus" && <PlusBadge />}
-              </View>
-              <Text style={[typography.body, { color: colors.secondaryText }]}>
-                @{user?.username}
+          {/* Name + Username aligned left */}
+          <View style={{ marginTop: 16 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="clip"
+                style={[typography.h1, { color: colors.text, maxWidth: 200 }]}
+                onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}
+              >
+                {user?.displayName}
               </Text>
+              {user?.plan === "plus" && <PlusBadge />}
             </View>
-            {user && (
+            <Text style={[typography.body, { color: colors.secondaryText }]}>
+              @{user?.username}
+            </Text>
+          </View>
+          {/* FollowStats centered */}
+          {user && (
+            <View style={{ marginTop: 12, alignItems: 'center' }}>
               <FollowStats
                 userId={user.id}
                 username={user.username}
                 followersCount={user.followersCount ?? 0}
                 followingCount={user.followingCount ?? 0}
               />
-            )}
-          </View>
+            </View>
+          )}
           {/* Bio */}
           {user?.bio && (
             <View style={{ marginTop: 16 }}>
