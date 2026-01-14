@@ -358,6 +358,52 @@ const animatedStyle = useAnimatedStyle(() => ({
 }));
 ```
 
+### Press In / Press Out Animation (Standard Pattern)
+
+**IMPORTANT**: All interactive `Pressable` components that require a press feedback animation MUST follow this standard pattern, based on the BookCard implementation:
+
+```typescript
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+
+// Inside component:
+const scale = useSharedValue(1);
+
+const animatedStyle = useAnimatedStyle(() => ({
+  transform: [{ scale: scale.value }],
+}));
+
+// Pressable handlers:
+<Pressable
+  onPressIn={() => {
+    scale.value = withTiming(0.98, { duration: 220 });
+  }}
+  onPressOut={() => {
+    scale.value = withTiming(1, { duration: 220 });
+  }}
+  onPress={handlePress}
+>
+  <Animated.View style={animatedStyle}>
+    {/* content */}
+  </Animated.View>
+</Pressable>
+```
+
+**Key values to respect:**
+- **Scale on press**: `0.98` (subtle but noticeable)
+- **Animation duration**: `220ms` (smooth transition)
+- **Easing**: `withTiming` (not `withSpring`)
+
+**Do NOT use:**
+- ❌ `scale: 0.95` (too aggressive)
+- ❌ `duration: 100` (too fast)
+- ❌ `withSpring` for press animations (inconsistent feel)
+
+This ensures a consistent, polished press feedback across all interactive elements in the app.
+
 ### Gestures
 ```typescript
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';

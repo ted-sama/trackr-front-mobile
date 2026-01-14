@@ -87,11 +87,11 @@ function ReaderCard({ reader, bookId }: ReaderCardProps) {
   }));
 
   const handlePressIn = () => {
-    scale.value = withTiming(0.95, { duration: 100 });
+    scale.value = withTiming(0.98, { duration: 220 });
   };
 
   const handlePressOut = () => {
-    scale.value = withTiming(1, { duration: 100 });
+    scale.value = withTiming(1, { duration: 220 });
   };
 
   const handlePress = () => {
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 2,
-    gap: 2,
+    gap: 4,
   },
   progressText: {
     fontSize: 10,
