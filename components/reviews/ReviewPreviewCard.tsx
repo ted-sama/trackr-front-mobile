@@ -111,7 +111,7 @@ export default function ReviewPreviewCard({
           {/* Review Excerpt */}
           <Text
             style={[
-              typography.body,
+              typography.bodyCaption,
               { color: colors.secondaryText, marginTop: 4 },
             ]}
             numberOfLines={2}

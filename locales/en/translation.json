@@ -6,8 +6,8 @@
         "chapters": "chapters",
         "issue": "issue",
         "issues": "issues",
-        "list": "list",
-        "lists": "lists",
+        "list": "shelf",
+        "lists": "shelves",
         "review": "review",
         "reviews": "reviews",
         "search": "Search books",
@@ -161,20 +161,20 @@
         "cancel": "Cancel",
         "filters": {
             "books": "Books",
-            "lists": "Lists",
+            "lists": "Shelves",
             "users": "Users"
         },
         "books": {
             "title": "Books"
         },
         "lists": {
-            "title": "Lists",
-            "header": "Popular lists",
-            "description": "Discover the lists created by the community",
-            "empty": "No lists found",
-            "emptyDescription": "There are no public lists to display yet.",
-            "recent": "Recent lists",
-            "popular": "Popular lists"
+            "title": "Shelves",
+            "header": "Popular shelves",
+            "description": "Discover the shelves created by the community",
+            "empty": "No shelves found",
+            "emptyDescription": "There are no public shelves to display yet.",
+            "recent": "Recent shelves",
+            "popular": "Popular shelves"
         },
         "popular": {
             "title": "Popular on Trackr",
@@ -194,7 +194,7 @@
             "title": "My library",
             "noBooks": "No books found in your library",
             "startReading": "Save a first book to your library",
-            "noLists": "Create your lists or save lists from other users",
+            "noLists": "Create your shelves or save shelves from other users",
             "searchPlaceholder": "Search books",
             "sort": {
                 "title": "Sort by",
@@ -209,11 +209,11 @@
             }
         },
         "allLists": {
-            "title": "All lists",
-            "searchPlaceholder": "Search lists",
-            "noLists": "No lists available",
-            "noResults": "No lists found for your search",
-            "errorLoading": "Unable to load lists"
+            "title": "All shelves",
+            "searchPlaceholder": "Search shelves",
+            "noLists": "No shelves available",
+            "noResults": "No shelves found for your search",
+            "errorLoading": "Unable to load shelves"
         },
         "searchPlaceholder": "Search in collection",
         "cancel": "Cancel",
@@ -226,9 +226,9 @@
         "reorder": "Reorder favorites",
         "favorites": "Favorites",
         "noFavorites": "No favorites",
-        "lists": "Lists",
-        "seeAllLists": "See all lists",
-        "noLists": "No lists",
+        "lists": "Shelves",
+        "seeAllLists": "See all shelves",
+        "noLists": "No shelves",
         "reviews": "Reviews",
         "seeAllReviews": "See all reviews",
         "noReviews": "No reviews",
@@ -257,8 +257,8 @@
             "description": "Hold an item and drag it to reorder your top."
         },
         "listsScreen": {
-            "title": "Lists of {{username}}",
-            "noLists": "No lists"
+            "title": "Shelves of {{username}}",
+            "noLists": "No shelves"
         },
         "libraryScreen": {
             "title": "{{username}}'s library",
@@ -426,10 +426,10 @@
             "description": "Choose which push notifications you want to receive. In-app notifications will always be shown.",
             "reviewLikes": "Review likes",
             "reviewLikesDescription": "Receive a push notification when someone likes your review",
-            "listLikes": "List likes",
-            "listLikesDescription": "Receive a push notification when someone likes your list",
-            "listSaves": "List saves",
-            "listSavesDescription": "Receive a push notification when someone saves your list",
+            "listLikes": "Shelf likes",
+            "listLikesDescription": "Receive a push notification when someone likes your shelf",
+            "listSaves": "Shelf saves",
+            "listSavesDescription": "Receive a push notification when someone saves your shelf",
             "newFollower": "New followers",
             "newFollowerDescription": "Receive a push notification when someone follows you",
             "newFriend": "New friends",
@@ -584,19 +584,19 @@
         "itemCount": "{{count}} item",
         "itemsCount": "{{count}} items",
         "reorderModal": {
-            "title": "Reorder list",
+            "title": "Reorder shelf",
             "book": "book",
             "description": "Hold an item and drag it to reorder."
         },
         "editModal": {
-            "title": "Edit list",
+            "title": "Edit shelf",
             "color": "Color",
             "chooseColor": "Choose a color",
             "backdrop": "Backdrop",
             "chooseBackdrop": "Change backdrop",
             "name": "Name",
             "description": "Description",
-            "descriptionPlaceholder": "Describe your list",
+            "descriptionPlaceholder": "Describe your shelf",
             "tags": "Tags",
             "tagsPlaceholder": "Add a tag",
             "settings": "Settings",
@@ -605,13 +605,13 @@
             "private": "Private",
             "privateDescription": "Visible only by you",
             "ranked": "Ranked",
-            "rankedDescription": "List with preference order",
+            "rankedDescription": "Shelf with preference order",
             "collection": "Collection",
             "collectionDescription": "Simple collection without ranking"
         },
         "deleteModal": {
-            "title": "Delete list",
-            "message": "This action cannot be undone. The list and all its content will be permanently deleted."
+            "title": "Delete shelf",
+            "message": "This action cannot be undone. The shelf and all its content will be permanently deleted."
         }
     },
     "description": {
@@ -621,7 +621,7 @@
     "bookBottomSheet": {
         "addToTracking": "Add to library",
         "addToFavorites": "Add to favorites",
-        "addToList": "Add to list",
+        "addToList": "Add to shelf",
         "changeCover": "Change cover",
         "share": "Share",
         "rate": "Rate",
@@ -629,13 +629,13 @@
         "saveRating": "Save rating",
         "removeFromTracking": "Remove from library",
         "removeFromFavorites": "Remove from favorites",
-        "removeFromList": "Remove from list",
+        "removeFromList": "Remove from shelf",
         "editStatus": "Edit status",
         "listEditor": {
-            "title": "Add to list",
-            "createList": "Create list",
-            "noListsFound": "No lists found, create one",
-            "namePlaceholder": "Enter the list name"
+            "title": "Add to shelf",
+            "createList": "Create shelf",
+            "noListsFound": "No shelves found, create one",
+            "namePlaceholder": "Enter the shelf name"
         }
     },
     "toast": {
@@ -646,24 +646,24 @@
         "removedFromTracking": "Book removed from library",
         "errorRemovingFromTracking": "Unable to remove book from library",
         "errorAddingToTracking": "Unable to add book to library",
-        "addedToList": "Book added to list",
-        "removedFromList": "Book removed from list",
-        "listsUpdated": "Lists updated",
+        "addedToList": "Book added to shelf",
+        "removedFromList": "Book removed from shelf",
+        "listsUpdated": "Shelves updated",
         "incrementChapter": "Chapter {{number}} marked as read",
         "backdropReserved": "The backdrop image is reserved for the Plus plan",
-        "listNameRequired": "The list name is required",
-        "listUpdated": "List updated",
-        "listDeleted": "List deleted",
-        "errorUpdatingList": "Unable to update list",
-        "errorSavingList": "Unable to save list",
-        "listLiked": "List liked",
+        "listNameRequired": "The shelf name is required",
+        "listUpdated": "Shelf updated",
+        "listDeleted": "Shelf deleted",
+        "errorUpdatingList": "Unable to update shelf",
+        "errorSavingList": "Unable to save shelf",
+        "listLiked": "Shelf liked",
         "listUnliked": "Like removed",
-        "listSaved": "List saved to your collection",
-        "listUnsaved": "List removed from your collection",
-        "errorLikingList": "Unable to like list",
-        "errorUnlikingList": "Unable to unlike list",
-        "errorSavingListToCollection": "Unable to save list",
-        "errorUnsavingList": "Unable to unsave list",
+        "listSaved": "Shelf saved to your collection",
+        "listUnsaved": "Shelf removed from your collection",
+        "errorLikingList": "Unable to like shelf",
+        "errorUnlikingList": "Unable to unlike shelf",
+        "errorSavingListToCollection": "Unable to save shelf",
+        "errorUnsavingList": "Unable to unsave shelf",
         "changesNotSaved": "Changes not saved",
         "profileUpdated": "Profile updated",
         "errorUpdatingProfile": "Unable to update profile",
@@ -674,11 +674,11 @@
         "goBack": "Go back",
         "comingSoon": "Coming soon",
         "errorTrackingToggle": "Unable to remove or add book",
-        "errorSavingLists": "Unable to save lists",
-        "errorLoadingLists": "Unable to load lists",
-        "listCreated": "List created successfully",
-        "errorCreatingList": "Unable to create list",
-        "errorDeletingList": "Unable to delete list",
+        "errorSavingLists": "Unable to save shelves",
+        "errorLoadingLists": "Unable to load shelves",
+        "listCreated": "Shelf created successfully",
+        "errorCreatingList": "Unable to create shelf",
+        "errorDeletingList": "Unable to delete shelf",
         "bookCompleted": "Congratulations! You've finished this book!"
     },
     "errors": {
@@ -704,7 +704,7 @@
     },
     "deleteAccount": {
         "title": "Delete your account?",
-        "warning": "This action cannot be undone. All your data will be permanently deleted, including your library, lists, reviews, and statistics.",
+        "warning": "This action cannot be undone. All your data will be permanently deleted, including your library, shelves, reviews, and statistics.",
         "confirm": "Delete permanently",
         "success": "Account deleted successfully",
         "errorDeleting": "Failed to delete account"
@@ -796,7 +796,7 @@
         "errorLoadingOfferings": "Failed to load subscription options",
         "features": {
             "customBackdrops": "Custom backdrops",
-            "customBackdropsDesc": "Personalize your profile and lists with custom backdrop images, with more options coming soon",
+            "customBackdropsDesc": "Personalize your profile and shelves with custom backdrop images, with more options coming soon",
             "aiChat": "AI-powered chat",
             "aiChatDesc": "Extend your chat usage limits for more summaries, analysis, and insights about your books",
             "advancedStats": "Advanced statistics",
@@ -813,8 +813,8 @@
         "markAllRead": "Mark all read",
         "new": "New notification",
         "likedYourReview": "liked your review",
-        "likedYourList": "liked your list",
-        "savedYourList": "saved your list",
+        "likedYourList": "liked your shelf",
+        "savedYourList": "saved your shelf",
         "of": "of",
         "startedFollowingYou": "started following you",
         "isNowYourFriend": "is now your friend"

@@ -6,8 +6,8 @@
         "chapters": "chapitres",
         "issue": "numéro",
         "issues": "numéros",
-        "list": "liste",
-        "lists": "listes",
+        "list": "étagère",
+        "lists": "étagères",
         "review": "avis",
         "reviews": "avis",
         "search": "Rechercher des livres",
@@ -161,20 +161,20 @@
         "cancel": "Annuler",
         "filters": {
             "books": "Livres",
-            "lists": "Listes",
+            "lists": "Étagères",
             "users": "Utilisateurs"
         },
         "books": {
             "title": "Livres"
         },
         "lists": {
-            "title": "Listes",
-            "header": "Listes populaires",
-            "description": "Découvrez les listes créées par la communauté",
-            "empty": "Aucune liste trouvée",
-            "emptyDescription": "Il n'y a pas encore de listes publiques à afficher.",
-            "recent": "Listes récentes",
-            "popular": "Listes populaires"
+            "title": "Étagères",
+            "header": "Étagères populaires",
+            "description": "Découvrez les étagères créées par la communauté",
+            "empty": "Aucune étagère trouvée",
+            "emptyDescription": "Il n'y a pas encore d'étagères publiques à afficher.",
+            "recent": "Étagères récentes",
+            "popular": "Étagères populaires"
         },
         "popular": {
             "title": "Populaire sur Trackr",
@@ -194,7 +194,7 @@
             "title": "Ma bibliothèque",
             "noBooks": "Aucun livre trouvé dans votre bibliothèque",
             "startReading": "Enregistrez un premier livre dans votre bibliothèque",
-            "noLists": "Créez vos listes ou sauvegardez des listes d'autres utilisateurs",
+            "noLists": "Créez vos étagères ou sauvegardez des étagères d'autres utilisateurs",
             "searchPlaceholder": "Rechercher des livres",
             "sort": {
                 "title": "Trier par",
@@ -209,11 +209,11 @@
             }
         },
         "allLists": {
-            "title": "Toutes les listes",
-            "searchPlaceholder": "Rechercher des listes",
-            "noLists": "Aucune liste disponible",
-            "noResults": "Aucune liste trouvée pour votre recherche",
-            "errorLoading": "Impossible de charger les listes"
+            "title": "Toutes les étagères",
+            "searchPlaceholder": "Rechercher des étagères",
+            "noLists": "Aucune étagère disponible",
+            "noResults": "Aucune étagère trouvée pour votre recherche",
+            "errorLoading": "Impossible de charger les étagères"
         },
         "searchPlaceholder": "Rechercher dans la collection",
         "cancel": "Annuler",
@@ -226,9 +226,9 @@
         "reorder": "Réordonner les favoris",
         "favorites": "Favoris",
         "noFavorites": "Aucun favori",
-        "lists": "Listes",
-        "seeAllLists": "Voir toutes les listes",
-        "noLists": "Aucune liste",
+        "lists": "Étagères",
+        "seeAllLists": "Voir toutes les étagères",
+        "noLists": "Aucune étagère",
         "reviews": "Avis",
         "seeAllReviews": "Voir tous les avis",
         "noReviews": "Aucun avis",
@@ -257,8 +257,8 @@
             "description": "Maintenez appuyé sur un élément et faites-le glisser pour réorganiser votre top."
         },
         "listsScreen": {
-            "title": "Listes de {{username}}",
-            "noLists": "Aucune liste"
+            "title": "Étagères de {{username}}",
+            "noLists": "Aucune étagère"
         },
         "libraryScreen": {
             "title": "Bibliothèque de {{username}}",
@@ -426,10 +426,10 @@
             "description": "Choisissez les notifications push que vous souhaitez recevoir. Les notifications in-app seront toujours affichées.",
             "reviewLikes": "Likes sur les avis",
             "reviewLikesDescription": "Recevoir une notification push quand quelqu'un aime votre avis",
-            "listLikes": "Likes sur les listes",
-            "listLikesDescription": "Recevoir une notification push quand quelqu'un aime votre liste",
-            "listSaves": "Sauvegardes de listes",
-            "listSavesDescription": "Recevoir une notification push quand quelqu'un sauvegarde votre liste",
+            "listLikes": "Likes sur les étagères",
+            "listLikesDescription": "Recevoir une notification push quand quelqu'un aime votre étagère",
+            "listSaves": "Sauvegardes d'étagères",
+            "listSavesDescription": "Recevoir une notification push quand quelqu'un sauvegarde votre étagère",
             "newFollower": "Nouveaux abonnés",
             "newFollowerDescription": "Recevoir une notification push quand quelqu'un vous suit",
             "newFriend": "Nouveaux amis",
@@ -584,20 +584,20 @@
         "itemCount": "{{count}} élément",
         "itemsCount": "{{count}} éléments",
         "reorderModal": {
-            "title": "Réordonner la liste",
+            "title": "Réordonner l'étagère",
             "book": "livre",
             "description": "Maintenez appuyé sur un élément et faites-le glisser pour réorganiser."
         },
         "editModal": {
-            "title": "Modifier la liste",
+            "title": "Modifier l'étagère",
             "color": "Couleur",
             "chooseColor": "Choisir une couleur",
             "backdrop": "Illustration",
             "chooseBackdrop": "Changer l'illustration",
-            "name": "Nom de la liste",
-            "namePlaceholder": "Entrez le nom de la liste",
+            "name": "Nom de l'étagère",
+            "namePlaceholder": "Entrez le nom de l'étagère",
             "description": "Description",
-            "descriptionPlaceholder": "Décrivez votre liste",
+            "descriptionPlaceholder": "Décrivez votre étagère",
             "tags": "Tags",
             "tagsPlaceholder": "Ajouter un tag",
             "settings": "Options",
@@ -606,19 +606,19 @@
             "private": "Privé",
             "privateDescription": "Visible seulement par vous",
             "ranked": "Classement",
-            "rankedDescription": "Liste avec ordre de préférence",
+            "rankedDescription": "Étagère avec ordre de préférence",
             "collection": "Collection",
             "collectionDescription": "Collection simple sans classement"
         },
         "deleteModal": {
-            "title": "Supprimer la liste",
-            "message": "Cette action est irréversible. La liste et tout son contenu seront définitivement supprimés."
+            "title": "Supprimer l'étagère",
+            "message": "Cette action est irréversible. L'étagère et tout son contenu seront définitivement supprimés."
         }
     },
     "bookBottomSheet": {
         "addToTracking": "Ajouter à ma bibliothèque",
         "addToFavorites": "Ajouter aux favoris",
-        "addToList": "Ajouter à une liste",
+        "addToList": "Ajouter à une étagère",
         "changeCover": "Changer de couverture",
         "share": "Partager",
         "rate": "Noter",
@@ -626,13 +626,13 @@
         "saveRating": "Sauvegarder la note",
         "removeFromTracking": "Retirer de ma bibliothèque",
         "removeFromFavorites": "Retirer des favoris",
-        "removeFromList": "Retirer de la liste",
+        "removeFromList": "Retirer de l'étagère",
         "editStatus": "Modifier le statut",
         "listEditor": {
-            "title": "Ajouter à une liste",
-            "createList": "Créer une liste",
-            "noListsFound": "Aucune liste, créez-en une",
-            "namePlaceholder": "Entrez le nom de la liste"
+            "title": "Ajouter à une étagère",
+            "createList": "Créer une étagère",
+            "noListsFound": "Aucune étagère, créez-en une",
+            "namePlaceholder": "Entrez le nom de l'étagère"
         }
     },
     "description": {
@@ -647,24 +647,24 @@
         "removedFromTracking": "Livre retiré de la bibliothèque",
         "errorRemovingFromTracking": "Impossible de retirer le livre de la bibliothèque",
         "errorAddingToTracking": "Impossible d'ajouter le livre à la bibliothèque",
-        "addedToList": "Livre ajouté à la liste",
-        "removedFromList": "Livre retiré de la liste",
-        "listsUpdated": "Listes mises à jour",
+        "addedToList": "Livre ajouté à l'étagère",
+        "removedFromList": "Livre retiré de l'étagère",
+        "listsUpdated": "Étagères mises à jour",
         "incrementChapter": "Chapitre {{number}} marqué comme lu",
         "backdropReserved": "L'illustration de bannière est réservée au plan Plus",
-        "listNameRequired": "Le nom de la liste est requis",
-        "listUpdated": "Liste mise à jour",
-        "listDeleted": "Liste supprimée",
-        "errorUpdatingList": "Impossible de mettre à jour la liste",
-        "errorSavingList": "Impossible de sauvegarder la liste",
-        "listLiked": "Liste likée",
+        "listNameRequired": "Le nom de l'étagère est requis",
+        "listUpdated": "Étagère mise à jour",
+        "listDeleted": "Étagère supprimée",
+        "errorUpdatingList": "Impossible de mettre à jour l'étagère",
+        "errorSavingList": "Impossible de sauvegarder l'étagère",
+        "listLiked": "Étagère likée",
         "listUnliked": "Like retiré",
-        "listSaved": "Liste sauvegardée dans votre collection",
-        "listUnsaved": "Liste retirée de votre collection",
-        "errorLikingList": "Impossible de liker la liste",
+        "listSaved": "Étagère sauvegardée dans votre collection",
+        "listUnsaved": "Étagère retirée de votre collection",
+        "errorLikingList": "Impossible de liker l'étagère",
         "errorUnlikingList": "Impossible de retirer le like",
-        "errorSavingListToCollection": "Impossible de sauvegarder la liste",
-        "errorUnsavingList": "Impossible de retirer la liste",
+        "errorSavingListToCollection": "Impossible de sauvegarder l'étagère",
+        "errorUnsavingList": "Impossible de retirer l'étagère",
         "changesNotSaved": "Modifications non sauvegardées",
         "profileUpdated": "Profil mis à jour",
         "errorUpdatingProfile": "Impossible de mettre à jour le profil",
@@ -675,11 +675,11 @@
         "goBack": "Retour",
         "comingSoon": "En cours de développement",
         "errorTrackingToggle": "Impossible de retirer ou d'ajouter le livre",
-        "errorSavingLists": "Impossible de sauvegarder les listes",
-        "errorLoadingLists": "Impossible de charger les listes",
-        "listCreated": "Liste créée avec succès",
-        "errorCreatingList": "Impossible de créer la liste",
-        "errorDeletingList": "Impossible de supprimer la liste",
+        "errorSavingLists": "Impossible de sauvegarder les étagères",
+        "errorLoadingLists": "Impossible de charger les étagères",
+        "listCreated": "Étagère créée avec succès",
+        "errorCreatingList": "Impossible de créer l'étagère",
+        "errorDeletingList": "Impossible de supprimer l'étagère",
         "bookCompleted": "Félicitations ! Vous avez terminé ce livre !"
     },
     "errors": {
@@ -705,7 +705,7 @@
     },
     "deleteAccount": {
         "title": "Supprimer votre compte ?",
-        "warning": "Cette action est irréversible. Toutes vos données seront définitivement supprimées, incluant votre bibliothèque, vos listes, vos avis et vos statistiques.",
+        "warning": "Cette action est irréversible. Toutes vos données seront définitivement supprimées, incluant votre bibliothèque, vos étagères, vos avis et vos statistiques.",
         "confirm": "Supprimer définitivement",
         "success": "Compte supprimé avec succès",
         "errorDeleting": "Impossible de supprimer le compte"
@@ -797,7 +797,7 @@
         "errorLoadingOfferings": "Échec du chargement des options d'abonnement",
         "features": {
             "customBackdrops": "Bannières personnalisées",
-            "customBackdropsDesc": "Personnalisez votre profil et vos listes avec des images de bannière, avec plus d'options à venir",
+            "customBackdropsDesc": "Personnalisez votre profil et vos étagères avec des images de bannière, avec plus d'options à venir",
             "aiChat": "Chat IA",
             "aiChatDesc": "Etendez vos limites d'utilisation du chat pour plus de résumés, analyses et informations sur vos livres",
             "advancedStats": "Statistiques avancées",
@@ -814,8 +814,8 @@
         "markAllRead": "Tout lire",
         "new": "Nouvelle notification",
         "likedYourReview": "a aimé votre avis",
-        "likedYourList": "a aimé votre liste",
-        "savedYourList": "a enregistré votre liste",
+        "likedYourList": "a aimé votre étagère",
+        "savedYourList": "a enregistré votre étagère",
         "of": "de",
         "startedFollowingYou": "a commencé à vous suivre",
         "isNowYourFriend": "est maintenant votre ami"
