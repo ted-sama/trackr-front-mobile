@@ -11,7 +11,7 @@ import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import Badge from "./ui/Badge";
 import StarRating from "./ui/StarRating";
-import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Ellipsis } from "lucide-react-native";
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Ellipsis, Star } from "lucide-react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { toast } from "sonner-native";
@@ -121,7 +121,7 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
                 )}
                 {showRating && (
                   <View style={styles.ratingContainer}>
-                    <Ionicons name="star" size={compact ? 10 : 12} color={colors.secondaryText} />
+                    <Star size={compact ? 10 : 12} color={colors.secondaryText} fill={colors.secondaryText} strokeWidth={2} />
                     <Text
                       style={[
                         styles.ratingText,

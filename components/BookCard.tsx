@@ -11,7 +11,7 @@ import {
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
-import { Clock3, BookOpenIcon, BookCheck, Pause, Square } from "lucide-react-native";
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Star } from "lucide-react-native";
 import Animated, {
   useAnimatedStyle,
   interpolate,
@@ -305,7 +305,7 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
                 )}
                 {showRating && (
                   <View style={styles.ratingContainer}>
-                    <Ionicons name="star" size={12} color={colors.secondaryText} />
+                    <Star size={12} color={colors.secondaryText} fill={colors.secondaryText} strokeWidth={2} />
                     <Text
                       style={[
                         styles.ratingText,

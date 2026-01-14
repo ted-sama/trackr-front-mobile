@@ -244,6 +244,7 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
                     size={16}
                     color={star <= userRating ? colors.accent : colors.border}
                     fill={star <= userRating ? colors.accent : "transparent"}
+                    opacity={star <= userRating ? 1 : 0.3}
                     style={{ marginRight: 2 }}
                   />
                 ))}

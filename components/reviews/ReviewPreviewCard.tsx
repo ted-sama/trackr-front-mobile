@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Image } from "expo-image";
-import { Ionicons } from "@expo/vector-icons";
+import { Star } from "lucide-react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -97,11 +97,13 @@ export default function ReviewPreviewCard({
           {review.rating !== null && (
             <View style={styles.ratingContainer}>
               {[1, 2, 3, 4, 5].map((star) => (
-                <Ionicons
+                <Star
                   key={star}
-                  name={star <= review.rating! ? "star" : "star-outline"}
                   size={14}
                   color={colors.secondaryText}
+                  fill={star <= review.rating! ? colors.secondaryText : "transparent"}
+                  strokeWidth={2}
+                  opacity={star <= review.rating! ? 1 : 0.3}
                   style={{ marginRight: 2 }}
                 />
               ))}
