@@ -132,6 +132,7 @@ export default function CollectionListElement({
                     borderColor: colors.border,
                   },
                 ]}
+                cachePolicy="memory-disk"
               />
             ) : (
               <View

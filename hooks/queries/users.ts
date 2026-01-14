@@ -43,6 +43,7 @@ export function useUser(userId: string) {
     queryKey: queryKeys.user(userId),
     queryFn: async () => (await api.get<User>(`/users/${userId}`)).data,
     enabled: Boolean(userId),
+    staleTime: staleTimes.user,
   });
 }
 

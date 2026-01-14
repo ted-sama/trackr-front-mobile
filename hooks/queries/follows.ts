@@ -70,7 +70,7 @@ export function useFollowUser() {
       const { data } = await api.post<FollowResponse>(`/users/${username}/follow`);
       return data;
     },
-    onSuccess: async (data, username) => {
+    onSuccess: (data, username) => {
       const currentUser = useUserStore.getState().currentUser;
 
       // Optimistically update user in cached lists
@@ -79,22 +79,40 @@ export function useFollowUser() {
         isFriend: data.isMutual,
       });
 
-      // Invalidate relevant queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.user(username) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.myFollowing });
-      queryClient.invalidateQueries({ queryKey: queryKeys.userFollowers(username) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.feedPopularAmongFollowing });
-      queryClient.invalidateQueries({ queryKey: queryKeys.feedRecentlyRated });
-      // Also invalidate current user's following list and profile (used by profile following screen)
+      // Update the target user's profile cache directly (no refetch)
+      queryClient.setQueriesData<User>(
+        {
+          predicate: (query) => {
+            const key = query.queryKey;
+            return Array.isArray(key) && key[0] === 'user' && query.state.data &&
+              (query.state.data as User).username === username;
+          },
+        },
+        (oldUser) => oldUser ? {
+          ...oldUser,
+          isFollowedByMe: true,
+          isFriend: data.isMutual,
+          followersCount: (oldUser.followersCount ?? 0) + 1,
+        } : oldUser
+      );
+
+      // Update current user's followingCount in store
+      if (currentUser) {
+        useUserStore.getState().setUser({
+          ...currentUser,
+          followingCount: (currentUser.followingCount ?? 0) + 1,
+        });
+      }
+
+      // Invalidate lists in background (refetchType: 'none' prevents immediate refetch)
+      // These will be refreshed when the user navigates to these screens
+      queryClient.invalidateQueries({ queryKey: queryKeys.myFollowing, refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: queryKeys.userFollowers(username), refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: queryKeys.feedPopularAmongFollowing, refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: queryKeys.feedRecentlyRated, refetchType: 'none' });
       if (currentUser?.username) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.userFollowing(currentUser.username) });
-        queryClient.invalidateQueries({ queryKey: queryKeys.user(currentUser.username) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.userFollowing(currentUser.username), refetchType: 'none' });
       }
-      if (currentUser?.id) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.user(currentUser.id) });
-      }
-      // Refresh current user to update followingCount
-      await useUserStore.getState().fetchCurrentUser();
     },
   });
 }
@@ -107,7 +125,7 @@ export function useUnfollowUser() {
     mutationFn: async (username: string) => {
       await api.delete(`/users/${username}/follow`);
     },
-    onSuccess: async (_data, username) => {
+    onSuccess: (_data, username) => {
       const currentUser = useUserStore.getState().currentUser;
 
       // Optimistically update user in cached lists
@@ -116,22 +134,40 @@ export function useUnfollowUser() {
         isFriend: false,
       });
 
-      // Invalidate relevant queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.user(username) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.myFollowing });
-      queryClient.invalidateQueries({ queryKey: queryKeys.userFollowers(username) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.feedPopularAmongFollowing });
-      queryClient.invalidateQueries({ queryKey: queryKeys.feedRecentlyRated });
-      // Also invalidate current user's following list and profile (used by profile following screen)
+      // Update the target user's profile cache directly (no refetch)
+      queryClient.setQueriesData<User>(
+        {
+          predicate: (query) => {
+            const key = query.queryKey;
+            return Array.isArray(key) && key[0] === 'user' && query.state.data &&
+              (query.state.data as User).username === username;
+          },
+        },
+        (oldUser) => oldUser ? {
+          ...oldUser,
+          isFollowedByMe: false,
+          isFriend: false,
+          followersCount: Math.max((oldUser.followersCount ?? 1) - 1, 0),
+        } : oldUser
+      );
+
+      // Update current user's followingCount in store
+      if (currentUser) {
+        useUserStore.getState().setUser({
+          ...currentUser,
+          followingCount: Math.max((currentUser.followingCount ?? 1) - 1, 0),
+        });
+      }
+
+      // Invalidate lists in background (refetchType: 'none' prevents immediate refetch)
+      // These will be refreshed when the user navigates to these screens
+      queryClient.invalidateQueries({ queryKey: queryKeys.myFollowing, refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: queryKeys.userFollowers(username), refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: queryKeys.feedPopularAmongFollowing, refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: queryKeys.feedRecentlyRated, refetchType: 'none' });
       if (currentUser?.username) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.userFollowing(currentUser.username) });
-        queryClient.invalidateQueries({ queryKey: queryKeys.user(currentUser.username) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.userFollowing(currentUser.username), refetchType: 'none' });
       }
-      if (currentUser?.id) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.user(currentUser.id) });
-      }
-      // Refresh current user to update followingCount
-      await useUserStore.getState().fetchCurrentUser();
     },
   });
 }

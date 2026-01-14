@@ -15,7 +15,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import Avatar from "@/components/ui/Avatar";
 import PlusBadge from "@/components/ui/PlusBadge";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import BookCard from "@/components/BookCard";
 import { useUser, useUserLists, useUserTop } from "@/hooks/queries/users";
 import { useUserReviews } from "@/hooks/queries/reviews";
@@ -27,7 +27,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   interpolate,
-  Extrapolate,
+  Extrapolation,
   withTiming,
 } from "react-native-reanimated";
 import PillButton from "@/components/ui/PillButton";
@@ -48,11 +48,14 @@ import { TrueSheet } from "@lodev09/react-native-true-sheet";
 
 dayjs.extend(utc);
 
+// Create AnimatedScrollView outside of component to prevent re-mounting on re-renders
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
+
 export default function UserProfileScreen() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const router = useRouter();
   const { currentUser } = useUserStore();
-  const { data: user, refetch: refetchUser, isLoading } = useUser(userId);
+  const { data: user, isLoading } = useUser(userId);
   const isMe = user?.id === currentUser?.id;
   const { data: topBooks } = useUserTop(isMe ? undefined : userId);
   const { data: userLists } = useUserLists(isMe ? undefined : userId);
@@ -67,26 +70,18 @@ export default function UserProfileScreen() {
   });
   const [titleY, setTitleY] = useState<number>(0);
   const reportSheetRef = useRef<TrueSheet>(null);
-  const [followLoading, setFollowLoading] = useState(false);
   const followMutation = useFollowUser();
   const unfollowMutation = useUnfollowUser();
+  const isFollowLoading = followMutation.isPending || unfollowMutation.isPending;
 
-  const handleFollowPress = useCallback(async () => {
-    if (!user || followLoading) return;
-    setFollowLoading(true);
-    try {
-      if (user.isFollowedByMe) {
-        await unfollowMutation.mutateAsync(user.username);
-      } else {
-        await followMutation.mutateAsync(user.username);
-      }
-      refetchUser();
-    } finally {
-      setFollowLoading(false);
+  const handleFollowPress = useCallback(() => {
+    if (!user || isFollowLoading) return;
+    if (user.isFollowedByMe) {
+      unfollowMutation.mutate(user.username);
+    } else {
+      followMutation.mutate(user.username);
     }
-  }, [user, followLoading, followMutation, unfollowMutation, refetchUser]);
-
-  const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
+  }, [user, isFollowLoading, followMutation, unfollowMutation]);
 
   // Dominant color for gradient
   const [dominantColor, setDominantColor] = useState<string | null>(null);
@@ -105,14 +100,14 @@ export default function UserProfileScreen() {
       scrollY.value,
       [-gradientHeight, 0],
       [2, 1],
-      Extrapolate.CLAMP
+      Extrapolation.CLAMP
     );
 
     const translateY = interpolate(
       scrollY.value,
       [-gradientHeight, 0],
       [-gradientHeight / 2, 0],
-      Extrapolate.CLAMP
+      Extrapolation.CLAMP
     );
 
     return {
@@ -120,12 +115,8 @@ export default function UserProfileScreen() {
     };
   });
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!userId) return;
-      refetchUser();
-    }, [userId, refetchUser])
-  );
+  // Note: useFocusEffect removed - TanStack Query handles data freshness via staleTime
+  // Refetching on focus caused image flickering due to component re-renders
 
   // Extract dominant color only from backdrop image (not color mode, not avatar)
   useEffect(() => {
@@ -307,6 +298,7 @@ export default function UserProfileScreen() {
                   source={{ uri: user?.backdropImage }}
                   style={{ width: "100%", height: "100%" }}
                   contentFit="cover"
+                  cachePolicy="memory-disk"
                 />
               ) : (
                 <View
@@ -373,7 +365,7 @@ export default function UserProfileScreen() {
                 isFollowing={user.isFollowedByMe ?? false}
                 isFriend={user.isFriend}
                 onPress={handleFollowPress}
-                loading={followLoading}
+                loading={isFollowLoading}
               />
             </View>
           )}

@@ -204,6 +204,7 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
                     height: '100%',
                   },
                 ]}
+                cachePolicy="memory-disk"
                 onLoad={handleImageLoad}
                 onError={handleImageError}
               />

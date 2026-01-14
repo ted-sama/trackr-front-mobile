@@ -33,6 +33,7 @@ export default function Avatar({
         placeholder={require("@/assets/images/user/default.png")}
         contentFit="contain"
         placeholderContentFit="contain"
+        cachePolicy="memory-disk"
         style={[
           styles.image,
           {
