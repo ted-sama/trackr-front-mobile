@@ -21,6 +21,10 @@ export interface BookReaderItem {
   rating: number | null;
   hasReview: boolean;
   reviewId: number | null;
+  /** Current chapter (null if not visible due to privacy settings) */
+  currentChapter: number | null;
+  /** Current volume (null if not visible due to privacy settings) */
+  currentVolume: number | null;
 }
 
 /**

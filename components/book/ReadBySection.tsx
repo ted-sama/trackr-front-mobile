@@ -1,7 +1,14 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList, Pressable, Dimensions } from "react-native";
 import { router } from "expo-router";
-import { Users, MessageSquare } from "lucide-react-native";
+import {
+  Users,
+  MessageSquare,
+  BookCheck,
+  BookOpenIcon,
+  Pause,
+  Square,
+} from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import Animated, {
   useAnimatedStyle,
@@ -37,8 +44,43 @@ interface ReaderCardProps {
 function ReaderCard({ reader, bookId }: ReaderCardProps) {
   const { colors } = useTheme();
   const typography = useTypography();
+  const { t } = useTranslation();
 
   const scale = useSharedValue(1);
+
+  // Get status icon and color
+  const getStatusIcon = () => {
+    const iconSize = 10;
+    const strokeWidth = 2.5;
+
+    switch (reader.status) {
+      case "completed":
+        return <BookCheck size={iconSize} color={colors.completed} strokeWidth={strokeWidth} />;
+      case "reading":
+        return <BookOpenIcon size={iconSize} color={colors.reading} strokeWidth={strokeWidth} />;
+      case "on_hold":
+        return <Pause size={iconSize} color={colors.onHold} strokeWidth={strokeWidth} />;
+      case "dropped":
+        return <Square size={iconSize} color={colors.dropped} strokeWidth={strokeWidth} />;
+      default:
+        return null;
+    }
+  };
+
+  // Determine progress text to display
+  const getProgressInfo = () => {
+    // For completed status, show "Completed" text
+    if (reader.status === "completed") {
+      return { text: t("status.completed"), icon: getStatusIcon() };
+    }
+    // For other statuses with a chapter, show chapter number
+    if (reader.currentChapter && reader.status !== "plan_to_read") {
+      return { text: `Ch. ${reader.currentChapter}`, icon: getStatusIcon() };
+    }
+    return null;
+  };
+
+  const progressInfo = getProgressInfo();
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -88,6 +130,22 @@ function ReaderCard({ reader, bookId }: ReaderCardProps) {
         >
           {reader.user.displayName || reader.user.username}
         </Text>
+
+        {/* Progress indicator (chapter or completed) */}
+        {progressInfo && (
+          <View style={styles.progressRow}>
+            {progressInfo.icon}
+            <Text
+              style={[
+                typography.caption,
+                styles.progressText,
+                { color: colors.secondaryText },
+              ]}
+            >
+              {progressInfo.text}
+            </Text>
+          </View>
+        )}
 
         {/* Rating and review indicator row */}
         {(reader.rating !== null || reader.hasReview) && (
@@ -223,6 +281,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 2,
+  },
+  progressRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 2,
+    gap: 2,
+  },
+  progressText: {
+    fontSize: 10,
   },
 });
 
