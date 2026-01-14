@@ -20,7 +20,6 @@ export default function NotificationBadge() {
   }));
 
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push("/notifications");
   };
 

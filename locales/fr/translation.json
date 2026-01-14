@@ -711,7 +711,7 @@
         "errorDeleting": "Impossible de supprimer le compte"
     },
     "activity": {
-        "title": "Activité",
+        "title": "Activité de {{username}}",
         "empty": "Aucune activité pour le moment",
         "private": "L'activité de cet utilisateur est privée",
         "error": "Une erreur est survenue lors du chargement de l'activité",

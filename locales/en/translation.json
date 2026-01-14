@@ -257,7 +257,7 @@
             "description": "Hold an item and drag it to reorder your top."
         },
         "listsScreen": {
-            "title": "Shelves of {{username}}",
+            "title": "{{username}}'s shelves",
             "noLists": "No shelves"
         },
         "libraryScreen": {
@@ -710,7 +710,7 @@
         "errorDeleting": "Failed to delete account"
     },
     "activity": {
-        "title": "Activity",
+        "title": "{{username}}'s activity",
         "empty": "No activity yet",
         "private": "This user's activity is private",
         "error": "An error occurred while loading activity",

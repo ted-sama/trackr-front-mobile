@@ -266,6 +266,9 @@ export default function ActivityPage() {
 
   // Récupérer les infos de l'utilisateur si ce n'est pas moi
   const { data: user } = useUser(isMe ? '' : username || '');
+
+  // Display name for the title (use currentUser if viewing own activity)
+  const displayedName = isMe ? currentUser?.displayName : user?.displayName;
   
   const {
     data,
@@ -318,9 +321,9 @@ export default function ActivityPage() {
 
   const ListHeader = useMemo(() => (
     <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
-      <Text style={[typography.h1, { color: colors.text }]}>{t("activity.title")}</Text>
+      <Text style={[typography.h1, { color: colors.text }]}>{t("activity.title", { username: displayedName })}</Text>
     </View>
-  ), [typography.h1, colors.text, t]);
+  ), [typography.h1, colors.text, t, displayedName]);
 
   const ListFooter = useMemo(() => {
     if (isFetchingNextPage) {
@@ -374,7 +377,7 @@ export default function ActivityPage() {
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
       
       <AnimatedHeader
-        title={t("activity.title")}
+        title={t("activity.title", { username: displayedName })}
         scrollY={scrollY}
         onBack={() => routerObj.back()}
         collapseThreshold={titleY > 0 ? titleY : undefined}
