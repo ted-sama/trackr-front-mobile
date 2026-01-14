@@ -739,6 +739,38 @@
             "reviewCreated": "{{user}} posted a review on <bold>{{title}}</bold>",
             "reviewUpdated": "{{user}} updated their review on <bold>{{title}}</bold>",
             "reviewDeleted": "{{user}} deleted their review on <bold>{{title}}</bold>"
+        },
+        "filters": {
+            "sort": {
+                "title": "Sort by",
+                "recent": "Most recent first",
+                "oldest": "Oldest first"
+            },
+            "period": {
+                "title": "Time period",
+                "all": "All dates",
+                "today": "Today",
+                "week": "This week",
+                "month": "This month",
+                "year": "This year"
+            },
+            "actions": {
+                "title": "Filter by action",
+                "all": "All actions",
+                "multiple": "{{count}} actions",
+                "addedToLibrary": "Added to library",
+                "removedFromLibrary": "Removed from library",
+                "addedToFavorites": "Added to favorites",
+                "removedFromFavorites": "Removed from favorites",
+                "statusUpdated": "Status changed",
+                "chapterUpdated": "Chapter updated",
+                "ratingUpdated": "Rating updated",
+                "reviewCreated": "Review created",
+                "reviewUpdated": "Review updated",
+                "reviewDeleted": "Review deleted",
+                "apply": "Apply",
+                "reset": "Reset"
+            }
         }
     },
     "report": {

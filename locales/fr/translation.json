@@ -740,6 +740,38 @@
             "reviewCreated": "{{user}} a publié un avis sur <bold>{{title}}</bold>",
             "reviewUpdated": "{{user}} a modifié son avis sur <bold>{{title}}</bold>",
             "reviewDeleted": "{{user}} a supprimé son avis sur <bold>{{title}}</bold>"
+        },
+        "filters": {
+            "sort": {
+                "title": "Trier par",
+                "recent": "Du plus récent au plus ancien",
+                "oldest": "Du plus ancien au plus récent"
+            },
+            "period": {
+                "title": "Période",
+                "all": "Toutes les dates",
+                "today": "Aujourd'hui",
+                "week": "Cette semaine",
+                "month": "Ce mois",
+                "year": "Cette année"
+            },
+            "actions": {
+                "title": "Filtrer par action",
+                "all": "Toutes les actions",
+                "multiple": "{{count}} actions",
+                "addedToLibrary": "Ajout à la bibliothèque",
+                "removedFromLibrary": "Retrait de la bibliothèque",
+                "addedToFavorites": "Ajout aux favoris",
+                "removedFromFavorites": "Retrait des favoris",
+                "statusUpdated": "Changement de statut",
+                "chapterUpdated": "Mise à jour du chapitre",
+                "ratingUpdated": "Notation",
+                "reviewCreated": "Création d'avis",
+                "reviewUpdated": "Modification d'avis",
+                "reviewDeleted": "Suppression d'avis",
+                "apply": "Appliquer",
+                "reset": "Réinitialiser"
+            }
         }
     },
     "report": {

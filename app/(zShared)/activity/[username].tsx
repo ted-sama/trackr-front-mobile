@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState } from "react";
+import React, { useMemo, useCallback, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,11 +7,18 @@ import {
   RefreshControl,
   TouchableOpacity,
   ListRenderItem,
+  FlatList,
 } from "react-native";
 import { useTranslation, Trans } from "react-i18next";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
-import { useUserActivity, useUser } from "@/hooks/queries/users";
+import {
+  useUserActivity,
+  useUser,
+  type ActivitySort,
+  type ActivityPeriod,
+  type ActivityFilters,
+} from "@/hooks/queries/users";
 import { ActivityLog } from "@/types/activityLog";
 import { router, useRouter, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -37,6 +44,14 @@ import {
 import { snakeToCamel } from "@/utils/snakeToCamel";
 import RatingStars from "@/components/ui/RatingStars";
 import { useUserStore } from "@/stores/userStore";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
+import * as Haptics from "expo-haptics";
+import FilterPillButton from "@/components/ui/FilterPillButton";
+import ActivitySortBottomSheet from "@/components/activity/ActivitySortBottomSheet";
+import ActivityPeriodBottomSheet from "@/components/activity/ActivityPeriodBottomSheet";
+import ActivityActionFilterBottomSheet, {
+  type ActivityActionType,
+} from "@/components/activity/ActivityActionFilterBottomSheet";
 
 dayjs.extend(relativeTime);
 
@@ -48,7 +63,7 @@ interface ActivityItemProps {
 
 function getActivityIcon(action: string, colors: any) {
   const iconProps = { size: 20, color: colors.text };
-  
+
   switch (action) {
     case "book.addedToLibrary":
       return <PlusIcon {...iconProps} color={colors.icon} />;
@@ -88,12 +103,12 @@ function ActivityContent({ activity, colors, isMe, userDisplayName }: ActivityCo
   const baseStyle = [typography.body, { color: colors.text }];
   const keyPrefix = isMe ? "activity.me" : "activity.profile";
   const values = isMe ? {} : { user: userDisplayName || '' };
-  
+
   switch (action) {
     case "book.addedToLibrary":
       return (
         <Text style={baseStyle}>
-          <Trans 
+          <Trans
             i18nKey={`${keyPrefix}.addedToLibrary`}
             values={{ ...values, title: resource.item.title }}
             components={{ bold: <Text style={typography.bodyBold2} /> }}
@@ -103,7 +118,7 @@ function ActivityContent({ activity, colors, isMe, userDisplayName }: ActivityCo
     case "book.removedFromLibrary":
       return (
         <Text style={baseStyle}>
-          <Trans 
+          <Trans
             i18nKey={`${keyPrefix}.removedFromLibrary`}
             values={{ ...values, title: resource.item.title }}
             components={{ bold: <Text style={typography.bodyBold2} /> }}
@@ -113,7 +128,7 @@ function ActivityContent({ activity, colors, isMe, userDisplayName }: ActivityCo
     case "book.addedToFavorites":
       return (
         <Text style={baseStyle}>
-          <Trans 
+          <Trans
             i18nKey={`${keyPrefix}.addedToFavorites`}
             values={{ ...values, title: resource.item.title }}
             components={{ bold: <Text style={typography.bodyBold2} /> }}
@@ -123,7 +138,7 @@ function ActivityContent({ activity, colors, isMe, userDisplayName }: ActivityCo
     case "book.removedFromFavorites":
       return (
         <Text style={baseStyle}>
-          <Trans 
+          <Trans
             i18nKey={`${keyPrefix}.removedFromFavorites`}
             values={{ ...values, title: resource.item.title }}
             components={{ bold: <Text style={typography.bodyBold2} /> }}
@@ -133,9 +148,9 @@ function ActivityContent({ activity, colors, isMe, userDisplayName }: ActivityCo
     case "book.statusUpdated":
       return (
         <Text style={baseStyle}>
-          <Trans 
+          <Trans
             i18nKey={`${keyPrefix}.statusUpdated`}
-            values={{ 
+            values={{
               ...values,
               title: resource.item.title,
               status: t(`status.${snakeToCamel(metadata.status)}`).toLowerCase()
@@ -147,9 +162,9 @@ function ActivityContent({ activity, colors, isMe, userDisplayName }: ActivityCo
     case "book.currentChapterUpdated":
       return (
         <Text style={baseStyle}>
-          <Trans 
+          <Trans
             i18nKey={`${keyPrefix}.chapterUpdated`}
-            values={{ 
+            values={{
               ...values,
               title: resource.item.title,
               chapter: metadata.currentChapter
@@ -258,7 +273,27 @@ export default function ActivityPage() {
   const [titleY, setTitleY] = useState<number>(0);
   const [refreshing, setRefreshing] = useState(false);
   const { currentUser } = useUserStore();
-  
+
+  // Filter states
+  const [sortFilter, setSortFilter] = useState<ActivitySort>("recent");
+  const [periodFilter, setPeriodFilter] = useState<ActivityPeriod>("all");
+  const [actionFilters, setActionFilters] = useState<ActivityActionType[]>([]);
+
+  // Bottom sheet refs
+  const sortSheetRef = useRef<TrueSheet>(null);
+  const periodSheetRef = useRef<TrueSheet>(null);
+  const actionSheetRef = useRef<TrueSheet>(null);
+
+  // Build filters object
+  const filters: ActivityFilters = useMemo(
+    () => ({
+      sort: sortFilter,
+      period: periodFilter,
+      actions: actionFilters.length > 0 ? actionFilters : undefined,
+    }),
+    [sortFilter, periodFilter, actionFilters]
+  );
+
   const isMe = useMemo(() => {
     if (!username || !currentUser) return true;
     return username === currentUser.username;
@@ -269,7 +304,7 @@ export default function ActivityPage() {
 
   // Display name for the title (use currentUser if viewing own activity)
   const displayedName = isMe ? currentUser?.displayName : user?.displayName;
-  
+
   const {
     data,
     isLoading,
@@ -279,7 +314,7 @@ export default function ActivityPage() {
     refetch,
     error,
     isError,
-  } = useUserActivity(username);
+  } = useUserActivity(username, filters);
 
   // Check if error is due to private activity
   const isPrivateError = (error as any)?.response?.data?.code === 'ACTIVITY_PRIVATE';
@@ -310,8 +345,8 @@ export default function ActivityPage() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const renderItem: ListRenderItem<ActivityLog> = useCallback(({ item }) => (
-    <ActivityItem 
-      activity={item} 
+    <ActivityItem
+      activity={item}
       isMe={isMe}
       userDisplayName={user?.displayName}
     />
@@ -319,11 +354,107 @@ export default function ActivityPage() {
 
   const keyExtractor = useCallback((item: ActivityLog) => item.id, []);
 
-  const ListHeader = useMemo(() => (
-    <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
-      <Text style={[typography.h1, { color: colors.text }]}>{t("activity.title", { username: displayedName })}</Text>
-    </View>
-  ), [typography.h1, colors.text, t, displayedName]);
+  // Open bottom sheets handlers
+  const handleOpenSortSheet = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    sortSheetRef.current?.present();
+  }, []);
+
+  const handleOpenPeriodSheet = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    periodSheetRef.current?.present();
+  }, []);
+
+  const handleOpenActionSheet = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    actionSheetRef.current?.present();
+  }, []);
+
+  // Get labels for filter pills
+  const sortLabel = useMemo(() => {
+    return sortFilter === "recent"
+      ? t("activity.filters.sort.recent")
+      : t("activity.filters.sort.oldest");
+  }, [sortFilter, t]);
+
+  const periodLabel = useMemo(() => {
+    return t(`activity.filters.period.${periodFilter}`);
+  }, [periodFilter, t]);
+
+  const actionLabel = useMemo(() => {
+    if (actionFilters.length === 0) {
+      return t("activity.filters.actions.all");
+    }
+    if (actionFilters.length === 1) {
+      return t(`activity.filters.actions.${actionFilters[0].replace("book.", "")}`);
+    }
+    return t("activity.filters.actions.multiple", { count: actionFilters.length });
+  }, [actionFilters, t]);
+
+  // Filter pills data
+  const filterPills = useMemo(
+    () => [
+      {
+        key: "sort",
+        label: sortLabel,
+        isActive: sortFilter !== "recent",
+        onPress: handleOpenSortSheet,
+      },
+      {
+        key: "period",
+        label: periodLabel,
+        isActive: periodFilter !== "all",
+        onPress: handleOpenPeriodSheet,
+      },
+      {
+        key: "actions",
+        label: actionLabel,
+        isActive: actionFilters.length > 0,
+        onPress: handleOpenActionSheet,
+      },
+    ],
+    [
+      sortLabel,
+      sortFilter,
+      handleOpenSortSheet,
+      periodLabel,
+      periodFilter,
+      handleOpenPeriodSheet,
+      actionLabel,
+      actionFilters,
+      handleOpenActionSheet,
+    ]
+  );
+
+  const ListHeader = useMemo(
+    () => (
+      <View>
+        <View style={styles.header} onLayout={(e) => setTitleY(e.nativeEvent.layout.y)}>
+          <Text style={[typography.h1, { color: colors.text }]}>
+            {t("activity.title", { username: displayedName })}
+          </Text>
+        </View>
+
+        {/* Filter Pills */}
+        <FlatList
+          horizontal
+          data={filterPills}
+          keyExtractor={(item) => item.key}
+          renderItem={({ item }) => (
+            <FilterPillButton
+              label={item.label}
+              isActive={item.isActive}
+              onPress={item.onPress}
+            />
+          )}
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterList}
+          contentContainerStyle={styles.filterListContent}
+        />
+      </View>
+    ),
+    [typography.h1, colors.text, t, displayedName, filterPills]
+  );
 
   const ListFooter = useMemo(() => {
     if (isFetchingNextPage) {
@@ -375,7 +506,7 @@ export default function ActivityPage() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-      
+
       <AnimatedHeader
         title={t("activity.title", { username: displayedName })}
         scrollY={scrollY}
@@ -389,9 +520,9 @@ export default function ActivityPage() {
         keyExtractor={keyExtractor}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        contentContainerStyle={{ 
-          marginTop: insets.top, 
-          paddingBottom: 64, 
+        contentContainerStyle={{
+          marginTop: insets.top,
+          paddingBottom: 64,
           paddingHorizontal: 16,
           flexGrow: 1,
         }}
@@ -414,6 +545,23 @@ export default function ActivityPage() {
           minIndexForVisible: 0,
         }}
       />
+
+      {/* Bottom Sheets */}
+      <ActivitySortBottomSheet
+        ref={sortSheetRef}
+        currentSort={sortFilter}
+        onSortChange={setSortFilter}
+      />
+      <ActivityPeriodBottomSheet
+        ref={periodSheetRef}
+        currentPeriod={periodFilter}
+        onPeriodChange={setPeriodFilter}
+      />
+      <ActivityActionFilterBottomSheet
+        ref={actionSheetRef}
+        currentActions={actionFilters}
+        onActionsChange={setActionFilters}
+      />
     </View>
   );
 }
@@ -425,6 +573,14 @@ const styles = StyleSheet.create({
   header: {
     marginTop: 70,
     marginBottom: 16,
+  },
+  filterList: {
+    marginHorizontal: -16,
+    marginBottom: 16,
+  },
+  filterListContent: {
+    paddingHorizontal: 16,
+    gap: 8,
   },
   activityItem: {
     flexDirection: "row",
@@ -454,4 +610,3 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-

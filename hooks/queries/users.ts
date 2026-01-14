@@ -258,21 +258,43 @@ export function useReorderUserTop() {
   });
 }
 
-export function useUserActivity(username?: string) {
+export type ActivitySort = 'recent' | 'oldest';
+export type ActivityPeriod = 'all' | 'today' | 'week' | 'month' | 'year';
+
+export interface ActivityFilters {
+  sort?: ActivitySort;
+  period?: ActivityPeriod;
+  actions?: string[];
+}
+
+export function useUserActivity(username?: string, filters?: ActivityFilters) {
   const { currentUser } = useUserStore();
   // Ensure username is a non-empty string for proper comparison
   const normalizedUsername = username?.trim() || undefined;
   const isMe = !normalizedUsername || normalizedUsername === currentUser?.username;
   const endpoint = isMe ? '/me/activity' : `/users/${normalizedUsername}/activity`;
 
+  // Build query key including filters for proper cache invalidation
+  const queryKey = [
+    'user',
+    'activity',
+    isMe ? 'me' : normalizedUsername,
+    filters?.sort || 'recent',
+    filters?.period || 'all',
+    filters?.actions?.join(',') || '',
+  ];
+
   return useInfiniteQuery({
-    queryKey: ['user', 'activity', isMe ? 'me' : normalizedUsername],
+    queryKey,
     queryFn: async ({ pageParam }) => {
       const page = pageParam ?? 1;
       const { data } = await api.get<PaginatedResponse<ActivityLog>>(endpoint, {
         params: {
           page,
           limit: 10,
+          sort: filters?.sort,
+          period: filters?.period,
+          actions: filters?.actions,
         },
       });
       return data;
