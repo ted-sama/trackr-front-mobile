@@ -7,6 +7,7 @@ import { useTypography } from "@/hooks/useTypography";
 import { ReadingStatus } from "@/types/reading-status";
 import { Clock3, BookOpenIcon, BookCheck, Pause, Square, BookMarked, BookmarkPlus } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
+import { usePostHog } from "posthog-react-native";
 
 interface TrackingTabBarProps {
   bookType: string;  
@@ -27,6 +28,7 @@ export function TrackingTabBar({
   onBookmarkPress,
   onStatusPress,
 }: TrackingTabBarProps) {
+  const posthog = usePostHog();
   const { width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -39,6 +41,11 @@ export function TrackingTabBar({
     'completed': { text: t("status.completed"), icon: <BookCheck size={20} strokeWidth={2.75} color={colors.completed} /> },
     'on_hold': { text: t("status.onHold"), icon: <Pause size={20} strokeWidth={2.75} color={colors.onHold} /> },
     'dropped': { text: t("status.dropped"), icon: <Square size={20} strokeWidth={2.75} color={colors.dropped} /> },
+  };
+
+  const handleMarkLastChapterAsReadPress = () => {
+    posthog.capture('button_pressed', { button_name: 'mark_last_chapter_as_read' });
+    onMarkLastChapterAsReadPress();
   };
 
   return (
@@ -87,7 +94,7 @@ export function TrackingTabBar({
             {!markLastChapterAsReadDisabled && (
               <Pressable
                 style={({ pressed }) => [styles.manageButton, { backgroundColor: colors.actionButton, opacity: pressed ? 0.8 : 1 }]}
-                onPress={onMarkLastChapterAsReadPress}
+                onPress={handleMarkLastChapterAsReadPress}
                 accessibilityRole="button"
                 accessibilityLabel="Mark last chapter as read"
               >

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import '@/i18n'
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { PostHogProvider } from 'posthog-react-native';
 import * as SystemUI from 'expo-system-ui';
 import ThemeProvider, { useTheme } from "../contexts/ThemeContext";
 import {
@@ -45,24 +46,40 @@ SplashScreen.setOptions({
   fade: true,
 });
 
-// Composant racine qui fournit les contextes globaux
+// Root component providing global contexts
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <SubscriptionProvider>
-            <ThemeProvider>
-              <DropdownProvider>
-                <BottomSheetProvider>
-                  <RootLayoutContent />
-                </BottomSheetProvider>
-              </DropdownProvider>
-            </ThemeProvider>
-          </SubscriptionProvider>
-        </QueryClientProvider>
-      </AuthProvider>
-    </GestureHandlerRootView>
+    <PostHogProvider
+      apiKey="phc_Kub1ae3pxNxCKEyR1P903VCKD7jAo9cPxgjscw768mJ"
+      options={{
+        host: "https://eu.i.posthog.com",
+        enableSessionReplay: true,
+        sessionReplayConfig: {
+          maskAllTextInputs: true,
+          maskAllImages: false,
+          maskAllSandboxedViews: true,
+          captureLog: true,
+          captureNetworkTelemetry: true,
+          throttleDelayMs: 1000,
+        }
+      }}
+    >
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <SubscriptionProvider>
+              <ThemeProvider>
+                <DropdownProvider>
+                  <BottomSheetProvider>
+                    <RootLayoutContent />
+                  </BottomSheetProvider>
+                </DropdownProvider>
+              </ThemeProvider>
+            </SubscriptionProvider>
+          </QueryClientProvider>
+        </AuthProvider>
+      </GestureHandlerRootView>
+    </PostHogProvider>
   );
 }
 
