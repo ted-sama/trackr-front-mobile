@@ -148,6 +148,12 @@ const SetChapterBottomSheet = forwardRef<TrueSheet, SetChapterBottomSheetProps>(
                     updateData.status = 'reading';
                 }
 
+                // Dismiss sheet BEFORE updating store to avoid "No sheet found" error
+                // (The parent component uses key={bookTracking?.currentChapter} which causes remount)
+                if (ref && typeof ref === 'object' && 'current' in ref) {
+                    ref.current?.dismiss();
+                }
+
                 await updateTrackedBook(book.id, updateData);
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 setChapter(chapter);
@@ -155,10 +161,6 @@ const SetChapterBottomSheet = forwardRef<TrueSheet, SetChapterBottomSheetProps>(
                 // Trigger celebration only if this action completes the book (wasn't already completed)
                 if (isCompleting && !wasAlreadyCompleted) {
                     onBookCompleted?.();
-                }
-
-                if (ref && typeof ref === 'object' && 'current' in ref) {
-                    ref.current?.dismiss();
                 }
             } catch (error) {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
