@@ -254,7 +254,7 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
   },
   logoContainer: {
     flex: 1,

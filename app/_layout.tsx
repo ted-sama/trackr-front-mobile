@@ -91,7 +91,6 @@ function RootLayoutContent() {
   const fetchMyLibraryBooks = useTrackedBooksStore(
     (state) => state.fetchMyLibraryBooks
   );
-  const fetchCurrentUser = useUserStore((state) => state.fetchCurrentUser);
   const currentUser = useUserStore((state) => state.currentUser);
   const isLibraryLoading = useTrackedBooksStore((state) => state.isLoading);
   const libraryError = useTrackedBooksStore((state) => state.error);
@@ -143,8 +142,9 @@ function RootLayoutContent() {
 
   useEffect(() => {
     if (isAuthenticated) {
+      // Only fetch library books here - fetchCurrentUser is already called
+      // during token validation in AuthContext
       fetchMyLibraryBooks();
-      fetchCurrentUser();
     }
   }, [isAuthenticated]);
 

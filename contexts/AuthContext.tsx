@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { useUserStore } from '@/stores/userStore';
-import { api } from '@/services/api';
+import { api, setupAuthInterceptor } from '@/services/api';
 import { LoginResponse, RegisterResponse } from '@/types/auth';
 import { useRouter } from 'expo-router';
 import { toast } from 'sonner-native';
@@ -35,14 +35,66 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const { t } = useTranslation();
+    const logoutRef = useRef<(() => Promise<void>) | null>(null);
+
+    // Logout function that clears all auth state
+    const performLogout = useCallback(async () => {
+        try {
+            await SecureStore.deleteItemAsync(TOKEN_KEY);
+            await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+            delete api.defaults.headers.common['Authorization'];
+            setToken(null);
+            // Clear all stores
+            useTrackedBooksStore.getState().clearTrackedBooks();
+            useUserStore.getState().logout();
+            // Clear all React Query cache
+            queryClient.clear();
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+    }, []);
+
+    // Keep logout ref updated for the interceptor
+    useEffect(() => {
+        logoutRef.current = performLogout;
+    }, [performLogout]);
+
+    // Setup 401 interceptor on mount
+    useEffect(() => {
+        const interceptorId = setupAuthInterceptor(() => {
+            // Call logout when 401 is received
+            if (logoutRef.current) {
+                logoutRef.current();
+            }
+        });
+
+        return () => {
+            // Cleanup interceptor on unmount
+            api.interceptors.response.eject(interceptorId);
+        };
+    }, []);
 
     useEffect(() => {
-        const loadToken = async () => {
+        const loadAndValidateToken = async () => {
             try {
                 const storedToken = await SecureStore.getItemAsync(TOKEN_KEY);
                 if (storedToken) {
-                    setToken(storedToken);
+                    // Set token in API headers first
                     api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+
+                    // Validate token by fetching current user
+                    try {
+                        await useUserStore.getState().fetchCurrentUser();
+                        // Token is valid, update state
+                        setToken(storedToken);
+                    } catch (error: any) {
+                        // Token is invalid or expired, clear it
+                        console.error('Token validation failed:', error);
+                        await SecureStore.deleteItemAsync(TOKEN_KEY);
+                        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+                        delete api.defaults.headers.common['Authorization'];
+                        useUserStore.getState().logout();
+                    }
                 }
             } catch (error) {
                 console.error('Error loading token:', error);
@@ -50,7 +102,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 setIsLoading(false);
             }
         };
-        loadToken();    
+        loadAndValidateToken();
     }, []);
 
     const register = async (email: string, password: string, username: string) => {
@@ -70,12 +122,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsLoading(true);
         try {
             const response = await api.post<LoginResponse>('/auth/login', { email, password });
-            if (response.data.token) {
-                const { token } = response.data;
+            const { token, refreshToken } = response.data;
+
+            if (token) {
+                // Store both tokens
                 await SecureStore.setItemAsync(TOKEN_KEY, token);
-                await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+                if (refreshToken) {
+                    await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
+                }
                 api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+                // Fetch user data and verify it succeeded
                 await useUserStore.getState().fetchCurrentUser();
+                const currentUser = useUserStore.getState().currentUser;
+
+                if (!currentUser) {
+                    // User fetch failed, clean up and throw error
+                    await SecureStore.deleteItemAsync(TOKEN_KEY);
+                    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+                    delete api.defaults.headers.common['Authorization'];
+                    throw new Error('Failed to fetch user data');
+                }
+
                 setToken(token);
             }
         } catch (error: any) {
@@ -94,30 +162,51 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const result = await WebBrowser.openAuthSessionAsync(authUrl, 'trackr');
 
             if (result.type === 'success' && result.url) {
-                // Try to extract token from URL (query param or hash)
+                // Try to extract tokens from URL
                 const url = result.url;
-                let token: string | null = null;
+                let newToken: string | null = null;
+                let newRefreshToken: string | null = null;
 
-                // Check query params: ?token=xxx
-                const queryMatch = url.match(/[?&]token=([^&]+)/);
-                if (queryMatch) {
-                    token = decodeURIComponent(queryMatch[1]);
+                // Check query params: ?token=xxx&refreshToken=yyy
+                const tokenMatch = url.match(/[?&]token=([^&]+)/);
+                if (tokenMatch) {
+                    newToken = decodeURIComponent(tokenMatch[1]);
                 }
 
-                // Check hash fragment: #token=xxx
-                if (!token) {
+                const refreshMatch = url.match(/[?&]refreshToken=([^&]+)/);
+                if (refreshMatch) {
+                    newRefreshToken = decodeURIComponent(refreshMatch[1]);
+                }
+
+                // Check hash fragment as fallback: #token=xxx
+                if (!newToken) {
                     const hashMatch = url.match(/#.*token=([^&]+)/);
                     if (hashMatch) {
-                        token = decodeURIComponent(hashMatch[1]);
+                        newToken = decodeURIComponent(hashMatch[1]);
                     }
                 }
 
-                if (token) {
-                    await SecureStore.setItemAsync(TOKEN_KEY, token);
-                    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                if (newToken) {
+                    // Set token in API headers first
+                    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+
+                    // Fetch user data to validate the token
                     await useUserStore.getState().fetchCurrentUser();
-                    setToken(token);
+                    const currentUser = useUserStore.getState().currentUser;
+
+                    if (!currentUser) {
+                        // User fetch failed, clean up
+                        delete api.defaults.headers.common['Authorization'];
+                        toast.error(t('errors.loginFailed'));
+                        return;
+                    }
+
+                    // Token is valid and user data loaded, persist tokens
+                    await SecureStore.setItemAsync(TOKEN_KEY, newToken);
+                    if (newRefreshToken) {
+                        await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, newRefreshToken);
+                    }
+                    setToken(newToken);
                 }
             }
         } catch (error: any) {
@@ -130,17 +219,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const logout = async () => {
         setIsLoading(true);
         try {
-            await SecureStore.deleteItemAsync(TOKEN_KEY);
-            await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-            delete api.defaults.headers.common['Authorization'];
-            setToken(null);
-            // Clear all stores
-            useTrackedBooksStore.getState().clearTrackedBooks();
-            useUserStore.getState().logout();
-            // Clear all React Query cache (lists, books, categories, etc.)
-            queryClient.clear();
+            // Try to revoke refresh token on server (ignore errors)
+            try {
+                await api.post('/auth/logout');
+            } catch {
+                // Server logout failed, but we still clear local state
+            }
+            await performLogout();
         } catch (error) {
-            console.error('Error deleting token:', error);
+            console.error('Error during logout:', error);
         } finally {
             setIsLoading(false);
         }

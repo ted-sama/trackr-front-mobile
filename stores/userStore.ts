@@ -29,11 +29,13 @@ export const useUserStore = create<UserState>((set, get) => ({
         isAuthenticated: true,
       });
     } catch (e: any) {
-      set({ 
+      set({
         error: e.message,
         currentUser: null,
         isAuthenticated: false,
       });
+      // Re-throw the error so callers can handle it
+      throw e;
     } finally {
       set({ isLoading: false });
     }
