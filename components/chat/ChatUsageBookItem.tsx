@@ -72,13 +72,13 @@ export default function ChatUsageBookItem({ item, onPress }: ChatUsageBookItemPr
 
         <View style={styles.badgeRow}>
           <Badge
-            text={`${item.monthlyRequests} ${t('chat.usage.thisMonth')}`}
+            text={`${item.monthlyRequests} ${t('chat.usage.thisMonth', { count: item.monthlyRequests })}`}
             color={colors.accent}
             backgroundColor={colors.badgeBackground}
             borderColor={colors.badgeBorder}
           />
           <Badge
-            text={`${item.totalRequests} ${t('chat.usage.allTime')}`}
+            text={`${item.totalRequests} ${t('chat.usage.allTime', { count: item.totalRequests })}`}
             color={colors.badgeText}
             backgroundColor={colors.badgeBackground}
             borderColor={colors.badgeBorder}

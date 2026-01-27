@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, interpolateColor, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -11,6 +11,7 @@ import { Book } from '@/types/book';
 import { Plus, Minus } from 'lucide-react-native';
 import Button from '@/components/ui/Button';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import ProgressBar from '@/components/ui/ProgressBar';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -80,6 +81,12 @@ const SetChapterBottomSheet = forwardRef<TrueSheet, SetChapterBottomSheetProps>(
     const [chapter, setChapter] = useState(bookTracking?.currentChapter?.toString() ?? '0');
     const { t } = useTranslation();
     const colorTransition = useSharedValue(0);
+
+    const lastReadTimeAgo = useMemo(() => {
+        if (!bookTracking?.lastReadAt) return null;
+        dayjs.locale(i18n.language);
+        return dayjs(bookTracking.lastReadAt).fromNow();
+    }, [bookTracking?.lastReadAt, i18n.language]);
 
     useEffect(() => {
         setChapter(bookTracking?.currentChapter?.toString() ?? '0');
@@ -242,9 +249,9 @@ const SetChapterBottomSheet = forwardRef<TrueSheet, SetChapterBottomSheetProps>(
                 />
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                         <View style={{ flex: 1 }}>
-                            {bookTracking?.lastReadAt && (
+                            {lastReadTimeAgo && (
                                 <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                                    {t("book.lastReadOn", { time: dayjs(bookTracking.lastReadAt).fromNow() })}
+                                    {t("book.lastReadOn", { time: lastReadTimeAgo })}
                                 </Text>
                             )}
                         </View>

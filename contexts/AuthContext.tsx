@@ -83,21 +83,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                     api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
 
                     // Validate token by fetching current user
-                    try {
-                        await useUserStore.getState().fetchCurrentUser();
-                        // Token is valid, update state
-                        setToken(storedToken);
-                    } catch (error: any) {
-                        // Token is invalid or expired, clear it
-                        console.error('Token validation failed:', error);
-                        await SecureStore.deleteItemAsync(TOKEN_KEY);
-                        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-                        delete api.defaults.headers.common['Authorization'];
-                        useUserStore.getState().logout();
-                    }
+                    // The interceptor will handle 401 and refresh automatically
+                    await useUserStore.getState().fetchCurrentUser();
+
+                    // After successful fetch, get the current token from storage
+                    // (it may have been refreshed by the interceptor)
+                    const currentToken = await SecureStore.getItemAsync(TOKEN_KEY);
+                    setToken(currentToken);
                 }
-            } catch (error) {
-                console.error('Error loading token:', error);
+            } catch (error: any) {
+                // Only clear tokens if it's an auth error (401)
+                // The interceptor already tried to refresh and failed
+                console.error('Token validation failed:', error);
+                if (error?.response?.status === 401) {
+                    await SecureStore.deleteItemAsync(TOKEN_KEY);
+                    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+                    delete api.defaults.headers.common['Authorization'];
+                    useUserStore.getState().logout();
+                }
+                // For other errors (network, server), keep the tokens
             } finally {
                 setIsLoading(false);
             }
