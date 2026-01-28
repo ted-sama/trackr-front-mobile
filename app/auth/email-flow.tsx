@@ -413,7 +413,7 @@ export default function EmailFlowScreen() {
           <Text style={[typography.h1, styles.title, { color: colors.text }]}>
             {currentStepConfig?.title}
           </Text>
-          <Text style={[typography.body, styles.subtitle, { color: colors.secondaryText }]}>
+          <Text style={[typography.body, styles.subtitle, { color: colors.secondaryText }]} numberOfLines={1} ellipsizeMode="tail">
             {currentStepConfig?.subtitle}
           </Text>
 

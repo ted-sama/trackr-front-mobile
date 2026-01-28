@@ -15,7 +15,7 @@ import RecentlyRatedSlider from "@/components/home/RecentlyRatedSlider";
 import { ChevronRight } from "lucide-react-native";
 import { useAnimatedStyle, useSharedValue, withTiming, useAnimatedScrollHandler } from "react-native-reanimated";
 import Animated from "react-native-reanimated";
-import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
+import { LastReadSkeleton, CategorySliderSkeleton } from "@/components/skeleton-loader";
 import { HomeAnimatedHeader } from "@/components/home/HomeAnimatedHeader";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { ErrorState } from "@/components/ErrorState";
@@ -74,74 +74,26 @@ export default function Index() {
   if (isLoading) {
     return (
       <ScreenWrapper>
-      <SafeAreaView
-        edges={["right", "left"]}
-        style={[styles.container, { backgroundColor: colors.background }]}
-      >
-        <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
-        <HomeAnimatedHeader scrollY={scrollY} />
-        <AnimatedScrollView
-          style={{ flex: 1 }}
-          onScroll={scrollHandler}
-          scrollEventThrottle={16}
+        <SafeAreaView
+          edges={["right", "left"]}
+          style={[styles.container, { backgroundColor: colors.background }]}
         >
-          <View style={styles.content}>
-            {/* Last Read section skeleton */}
-            <View style={styles.lastReadContainer}>
-              <SkeletonLoader width={120} height={20} style={{ marginBottom: 16 }} />
-              {[1, 2, 3].map((item) => (
-                <View key={item} style={{ marginBottom: 16 }}>
-                  <View style={{ flexDirection: "row", gap: 8 }}>
-                    <SkeletonLoader width={40} height={60} style={{ borderRadius: 4 }} />
-                    <View style={{ flex: 1, justifyContent: "space-between" }}>
-                      <View>
-                        <SkeletonLoader width="80%" height={16} style={{ marginBottom: 4 }} />
-                        <SkeletonLoader width="60%" height={12} style={{ marginBottom: 4 }} />
-                        <View style={{ flexDirection: "row", gap: 4 }}>
-                          <SkeletonLoader width={60} height={20} style={{ borderRadius: 10 }} />
-                          <SkeletonLoader width={40} height={20} style={{ borderRadius: 10 }} />
-                        </View>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-              ))}
-              <SkeletonLoader width={140} height={16} style={{ marginTop: 22, alignSelf: "center" }} />
-            </View>
-
-            {/* Category sliders skeleton */}
-            <View style={{ marginHorizontal: -16, marginTop: 20 }}>
-              <View style={{ marginHorizontal: 16, marginBottom: 12 }}>
-                <SkeletonLoader width={180} height={20} />
-              </View>
-              <View style={{ flexDirection: "row", paddingLeft: 16 }}>
-                {[1, 2, 3].map((item) => (
-                  <View key={item} style={{ marginRight: 12 }}>
-                    <SkeletonLoader width={110} height={165} style={{ borderRadius: 6, marginBottom: 8 }} />
-                    <SkeletonLoader width={100} height={14} style={{ marginBottom: 4 }} />
-                    <SkeletonLoader width={80} height={12} />
-                  </View>
-                ))}
+          <StatusBar style={currentTheme === "dark" ? "light" : "dark"} />
+          <HomeAnimatedHeader scrollY={scrollY} />
+          <AnimatedScrollView
+            style={{ flex: 1 }}
+            onScroll={scrollHandler}
+            scrollEventThrottle={16}
+          >
+            <View style={styles.content}>
+              <LastReadSkeleton />
+              <View style={{ marginHorizontal: -16 }}>
+                <CategorySliderSkeleton />
+                <CategorySliderSkeleton />
               </View>
             </View>
-
-            <View style={{ marginHorizontal: -16, marginTop: 20 }}>
-              <View style={{ marginHorizontal: 16, marginBottom: 12 }}>
-                <SkeletonLoader width={180} height={20} />
-              </View>
-              <View style={{ flexDirection: "row", paddingLeft: 16 }}>
-                {[1, 2, 3].map((item) => (
-                  <View key={item} style={{ marginRight: 12 }}>
-                    <SkeletonLoader width={110} height={165} style={{ borderRadius: 6, marginBottom: 8 }} />
-                    <SkeletonLoader width={100} height={14} style={{ marginBottom: 4 }} />
-                    <SkeletonLoader width={80} height={12} />
-                  </View>
-                ))}
-              </View>
-            </View>
-          </View>
-        </AnimatedScrollView>
-      </SafeAreaView>
+          </AnimatedScrollView>
+        </SafeAreaView>
       </ScreenWrapper>
     );
   }

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useMemo } from "react";
-import { StyleSheet, View, Text, ActivityIndicator, Dimensions } from "react-native";
+import { StyleSheet, View, Text, Dimensions } from "react-native";
 import Animated, { useAnimatedScrollHandler, useSharedValue, runOnJS } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -15,6 +15,7 @@ import CollectionListElement from "@/components/CollectionListElement";
 import TabBar from "@/components/TabBar";
 import { useTranslation } from "react-i18next";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { DiscoverGridSkeleton, ListSectionSkeleton } from "@/components/skeleton-loader";
 import { Book } from "@/types/book";
 import { List } from "@/types/list";
 
@@ -147,11 +148,7 @@ export default function Discover() {
 
   const renderPopularContent = () => {
     if (isLoadingPopular && popularBooks.length === 0) {
-      return (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.accent} />
-        </View>
-      );
+      return <DiscoverGridSkeleton rows={4} showHeader={false} />;
     }
 
     if (popularBooks.length === 0) {
@@ -184,9 +181,7 @@ export default function Discover() {
           </View>
         ))}
         {isFetchingNextPage && (
-          <View style={styles.loadingFooter}>
-            <ActivityIndicator size="small" color={colors.accent} />
-          </View>
+          <DiscoverGridSkeleton rows={1} showHeader={false} />
         )}
       </View>
     );
@@ -195,8 +190,9 @@ export default function Discover() {
   const renderListsContent = () => {
     if (isLoadingLists) {
       return (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.accent} />
+        <View style={styles.listsContent}>
+          <ListSectionSkeleton itemCount={3} />
+          <ListSectionSkeleton itemCount={3} />
         </View>
       );
     }
@@ -337,11 +333,6 @@ const styles = StyleSheet.create({
     marginHorizontal: GRID_PADDING,
     marginBottom: 16,
   },
-  centered: {
-    paddingVertical: 64,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   emptyContainer: {
     paddingVertical: 64,
     paddingHorizontal: 32,
@@ -356,10 +347,6 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     width: ITEM_WIDTH,
-  },
-  loadingFooter: {
-    paddingVertical: 20,
-    alignItems: 'center',
   },
   tabBarContainer: {
     paddingHorizontal: GRID_PADDING,
