@@ -19,7 +19,6 @@ import Animated from "react-native-reanimated";
 import Markdown from "@ronradtke/react-native-markdown-display";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "react-i18next";
-import { Circle } from "lucide-react-native";
 import { PredefinedQuestions } from "@/components/chat/PredefinedQuestions";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(DefaultScrollView);
@@ -106,7 +105,7 @@ export default function ChatScreen() {
     const { messages, error, sendMessage, status } = useChat({
         transport: new DefaultChatTransport({
             fetch: expoFetch as unknown as typeof globalThis.fetch,
-            api: `${process.env.EXPO_PUBLIC_API_URL}/chat/${bookId}`,
+            api: `http://localhost:3333/chat/${bookId}`,
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -412,7 +411,10 @@ export default function ChatScreen() {
                       <View style={styles.aiMessageContent}>
                         {dominantColor && (
                           <View style={styles.aiHeader}>
-                            <Circle size={22} color={dominantColor} fill={dominantColor} />
+                            <Image
+                              source={require('@/assets/images/trackr-logo.png')}
+                              style={[styles.aiLogo, { tintColor: dominantColor }]}
+                            />
                           </View>
                         )}
                         <Markdown style={markdownStyles}>
@@ -434,7 +436,10 @@ export default function ChatScreen() {
                 <View style={styles.aiMessageContent}>
                   {dominantColor && (
                     <View style={styles.aiHeader}>
-                      <Circle size={22} color={dominantColor} fill={dominantColor} />
+                      <Image
+                              source={require('@/assets/images/trackr-logo.png')}
+                              style={[styles.aiLogo, { tintColor: dominantColor }]}
+                            />
                     </View>
                   )}
                   <TypingIndicator color={dominantColor || undefined} />
@@ -583,6 +588,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  aiLogo: {
+    width: 22,
+    height: 22,
+    resizeMode: 'contain',
   },
   messageText: {
     lineHeight: 20,

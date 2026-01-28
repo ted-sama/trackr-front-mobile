@@ -545,6 +545,11 @@
     "chat": {
         "sources": "Used sources",
         "messagePlaceholder": "Ask a question",
+        "loading": {
+            "thinking": "Thinking",
+            "searching": "Searching the web",
+            "writing": "Writing"
+        },
         "predefinedQuestions": {
             "title": "Try something like...",
             "summarizeLastChapter": "Summarize the last chapter read",
