@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useMemo } from "react";
-import { StyleSheet, View, Text, Dimensions } from "react-native";
+import { StyleSheet, View, Text, Dimensions, ActivityIndicator } from "react-native";
 import Animated, { useAnimatedScrollHandler, useSharedValue, runOnJS } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -181,7 +181,9 @@ export default function Discover() {
           </View>
         ))}
         {isFetchingNextPage && (
-          <DiscoverGridSkeleton rows={1} showHeader={false} />
+          <View style={styles.loadingMore}>
+            <ActivityIndicator size="small" color={colors.accent} />
+          </View>
         )}
       </View>
     );
@@ -363,5 +365,10 @@ const styles = StyleSheet.create({
   },
   listItem: {
     marginBottom: 0,
+  },
+  loadingMore: {
+    paddingVertical: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
