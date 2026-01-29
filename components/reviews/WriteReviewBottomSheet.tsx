@@ -25,6 +25,11 @@ import { useTypography } from "@/hooks/useTypography";
 import { useCreateReview, useUpdateReview } from "@/hooks/queries/reviews";
 import { BookReview } from "@/types/review";
 import { toast } from "sonner-native";
+import {
+  handleErrorCodes,
+  isContentPolicyError,
+  getContentPolicyMessage,
+} from "@/utils/handleErrorCodes";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -90,9 +95,17 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
               (ref as React.RefObject<TrueSheet>)?.current?.dismiss();
               onSuccess?.();
             },
-            onError: () => {
+            onError: (error) => {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              toast.error(t("reviews.updateError"));
+              // Show specific message for content policy violations
+              if (isContentPolicyError(error)) {
+                const specificMessage = getContentPolicyMessage(error);
+                toast.error(specificMessage || t(handleErrorCodes(error)));
+              } else {
+                const errorKey = handleErrorCodes(error);
+                const translatedError = t(errorKey);
+                toast.error(translatedError !== errorKey ? translatedError : t("reviews.updateError"));
+              }
             },
           }
         );
@@ -111,7 +124,15 @@ const WriteReviewBottomSheet = forwardRef<TrueSheet, WriteReviewBottomSheetProps
             onError: (error) => {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
               console.error("Create review error:", error);
-              toast.error(t("reviews.createError"));
+              // Show specific message for content policy violations
+              if (isContentPolicyError(error)) {
+                const specificMessage = getContentPolicyMessage(error);
+                toast.error(specificMessage || t(handleErrorCodes(error)));
+              } else {
+                const errorKey = handleErrorCodes(error);
+                const translatedError = t(errorKey);
+                toast.error(translatedError !== errorKey ? translatedError : t("reviews.createError"));
+              }
             },
           }
         );

@@ -7,6 +7,11 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useCreateList } from "@/hooks/queries/lists";
 import { toast } from "sonner-native";
+import {
+  handleErrorCodes,
+  isContentPolicyError,
+  getContentPolicyMessage,
+} from "@/utils/handleErrorCodes";
 import Button from "./ui/Button";
 
 export interface CreateListBottomSheetProps {
@@ -53,7 +58,15 @@ const CreateListBottomSheet = forwardRef<
     } catch (error) {
       console.error("Error creating list:", error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      toast.error(t("toast.errorCreatingList"));
+      // Show specific message for content policy violations
+      if (isContentPolicyError(error)) {
+        const specificMessage = getContentPolicyMessage(error);
+        toast.error(specificMessage || t(handleErrorCodes(error)));
+      } else {
+        const errorKey = handleErrorCodes(error);
+        const translatedError = t(errorKey);
+        toast.error(translatedError !== errorKey ? translatedError : t("toast.errorCreatingList"));
+      }
     }
   };
 

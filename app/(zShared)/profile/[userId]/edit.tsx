@@ -16,7 +16,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import * as Haptics from "expo-haptics";
 import { toast } from "sonner-native";
+import { useTranslation } from "react-i18next";
 import { Camera, Check, Lock, Palette } from "lucide-react-native";
+import {
+  handleErrorCodes,
+  isContentPolicyError,
+  getContentPolicyMessage,
+} from "@/utils/handleErrorCodes";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
@@ -32,7 +38,6 @@ import {
 import { Image } from "expo-image";
 import PlusBadge from "@/components/ui/PlusBadge";
 import { LinearGradient } from "expo-linear-gradient";
-import { useTranslation } from "react-i18next";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import UnsavedChangesBottomSheet from "@/components/shared/UnsavedChangesBottomSheet";
 
@@ -242,9 +247,24 @@ export default function ProfileEditModal() {
       toast(t("toast.profileUpdated"));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.back();
-    } catch {
+    } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      toast.error(t("toast.errorUpdatingProfile"));
+
+      // Check for content policy violation and show specific message
+      if (isContentPolicyError(error)) {
+        const specificMessage = getContentPolicyMessage(error);
+        toast.error(specificMessage || t(handleErrorCodes(error)));
+      } else {
+        // Try to get translated error message, fall back to generic
+        const errorKey = handleErrorCodes(error);
+        const translatedError = t(errorKey);
+        // If translation key is returned as-is, use generic message
+        toast.error(
+          translatedError !== errorKey
+            ? translatedError
+            : t("toast.errorUpdatingProfile")
+        );
+      }
     } finally {
       setIsSaving(false);
     }

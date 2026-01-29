@@ -785,6 +785,16 @@
 
         "ALREADY_REVIEWED": "Ce contenu a déjà été examiné",
 
+        "CONTENT_POLICY_VIOLATION": "Votre contenu enfreint nos règles de la communauté",
+        "CONTENT_PROFANITY": "Votre contenu contient un langage inapproprié. Veuillez le modifier et réessayer",
+        "CONTENT_HATE_SPEECH": "Votre contenu contient des propos haineux ou nuisibles. Ce type de contenu n'est pas autorisé",
+        "CONTENT_SPAM": "Votre contenu a été détecté comme spam. Veuillez fournir un contenu pertinent",
+        "CONTENT_INVALID_USERNAME": "Ce nom d'utilisateur n'est pas autorisé. Veuillez en choisir un autre",
+
+        "ACCOUNT_BANNED": "Votre compte a été suspendu",
+        "ACCOUNT_BANNED_TEMP": "Votre compte est temporairement suspendu jusqu'au {{date}}",
+        "ACCOUNT_BANNED_PERM": "Votre compte a été définitivement suspendu",
+
         "errorCorrectionForm": "Veuillez corriger les erreurs dans le formulaire"
     },
     "changePassword": {

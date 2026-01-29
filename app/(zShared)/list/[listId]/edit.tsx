@@ -27,6 +27,11 @@ import { useUserStore } from "@/stores/userStore";
 import Badge from "@/components/ui/Badge";
 import { X, Plus, Check, Globe, Lock, Trophy, Users, Palette, Camera } from "lucide-react-native";
 import { toast } from "sonner-native";
+import {
+  handleErrorCodes,
+  isContentPolicyError,
+  getContentPolicyMessage,
+} from "@/utils/handleErrorCodes";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import PlusBadge from "@/components/ui/PlusBadge";
@@ -195,9 +200,17 @@ export default function ListEdit() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       router.back();
-  } catch {
+  } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      toast.error(t("toast.errorUpdatingList"));
+      // Show specific message for content policy violations
+      if (isContentPolicyError(error)) {
+        const specificMessage = getContentPolicyMessage(error);
+        toast.error(specificMessage || t(handleErrorCodes(error)));
+      } else {
+        const errorKey = handleErrorCodes(error);
+        const translatedError = t(errorKey);
+        toast.error(translatedError !== errorKey ? translatedError : t("toast.errorUpdatingList"));
+      }
     } finally {
       setIsSaving(false);
     }
