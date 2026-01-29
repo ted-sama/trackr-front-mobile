@@ -61,6 +61,10 @@ export const queryKeys = {
   // Feed
   feedPopularAmongFollowing: ['feed', 'popular-among-following'] as const,
   feedRecentlyRated: ['feed', 'recently-rated'] as const,
+
+  // Pinned Book (Trackr Plus feature)
+  pinnedBook: ['pinnedBook'] as const,
+  pinnedBookWithProgress: ['pinnedBookWithProgress'] as const,
 };
 
 
