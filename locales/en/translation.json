@@ -839,6 +839,19 @@
             "supportDevDesc": "Help me build new features and improve Trackr"
         }
     },
+    "pinnedBook": {
+        "title": "Pinned Book",
+        "pinned": "Pinned",
+        "pinBook": "Pin to home",
+        "unpinBook": "Remove pin",
+        "pinSuccess": "Book pinned to home screen",
+        "unpinSuccess": "Book removed from home screen",
+        "plusOnly": "Pinned Book is a Trackr Plus feature",
+        "aiSummary": "AI Summary",
+        "readingProgress": "Reading progress",
+        "noPinnedBook": "Pin a book to see it here",
+        "tapToPin": "Tap a book and pin it to display it on your home screen"
+    },
     "notifications": {
         "title": "Notifications",
         "empty": "No notifications",

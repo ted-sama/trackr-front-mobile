@@ -840,6 +840,19 @@
             "supportDevDesc": "Aidez-moi à créer de nouvelles fonctionnalités et à améliorer Trackr"
         }
     },
+    "pinnedBook": {
+        "title": "Livre épinglé",
+        "pinned": "Épinglé",
+        "pinBook": "Épingler à l'accueil",
+        "unpinBook": "Retirer l'épingle",
+        "pinSuccess": "Livre épinglé à l'écran d'accueil",
+        "unpinSuccess": "Livre retiré de l'écran d'accueil",
+        "plusOnly": "Livre épinglé est une fonctionnalité Trackr Plus",
+        "aiSummary": "Résumé IA",
+        "readingProgress": "Progression de lecture",
+        "noPinnedBook": "Épinglez un livre pour le voir ici",
+        "tapToPin": "Appuyez sur un livre et épinglez-le pour l'afficher sur votre écran d'accueil"
+    },
     "notifications": {
         "title": "Notifications",
         "empty": "Aucune notification",

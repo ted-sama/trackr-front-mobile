@@ -11,14 +11,17 @@ import BookListElement from "@/components/BookListElement";
 import CategorySlider from "@/components/CategorySlider";
 import { useMostTrackedCategory, useTopRatedCategory } from "@/hooks/queries/categories";
 import { usePopularAmongFollowing, useRecentlyRatedByFollowing } from "@/hooks/queries/feed";
+import { usePinnedBookWithProgress, useUnpinBook } from "@/hooks/queries/pinnedBook";
+import { useSubscriptionInfo } from "@/hooks/queries/subscription";
 import RecentlyRatedSlider from "@/components/home/RecentlyRatedSlider";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight, Sparkles } from "lucide-react-native";
 import { useAnimatedStyle, useSharedValue, withTiming, useAnimatedScrollHandler } from "react-native-reanimated";
 import Animated from "react-native-reanimated";
 import SkeletonLoader from "@/components/skeleton-loader/SkeletonLoader";
 import { HomeAnimatedHeader } from "@/components/home/HomeAnimatedHeader";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { ErrorState } from "@/components/ErrorState";
+import PinnedBookCard from "@/components/book/PinnedBookCard";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(Animated.ScrollView);
 
@@ -34,6 +37,14 @@ export default function Index() {
   const { data: topRated, isLoading: isLoadingTopRated, error: errorTopRated, refetch: refetchTopRated } = useTopRatedCategory();
   const { data: popularAmongFollowing } = usePopularAmongFollowing();
   const { data: recentlyRated } = useRecentlyRatedByFollowing();
+
+  // Trackr Plus subscription check
+  const { data: subscriptionData } = useSubscriptionInfo();
+  const isPlus = subscriptionData?.isPremium;
+
+  // Pinned book data (only for Plus users)
+  const { data: pinnedData, isLoading: isLoadingPinned } = usePinnedBookWithProgress();
+  const unpinBook = useUnpinBook();
 
   const isLoading = isLoadingMostTracked || isLoadingTopRated;
   const error = errorMostTracked || errorTopRated;
@@ -174,6 +185,31 @@ export default function Index() {
         scrollEventThrottle={16}
       >
       <View style={styles.content}>
+        {/* Pinned Book Card (Trackr Plus only) */}
+        {isPlus && !isLoadingPinned && (
+          <View style={styles.pinnedBookContainer}>
+            {pinnedData?.pinnedBook ? (
+              <PinnedBookCard
+                pinnedBook={pinnedData.pinnedBook}
+                progress={pinnedData.progress}
+                onUnpin={() => unpinBook.mutate()}
+              />
+            ) : (
+              <View style={styles.noPinnedBookCard}>
+                <View style={styles.noPinnedBookIcon}>
+                  <Sparkles size={32} color={colors.accent} fill={colors.accent} />
+                </View>
+                <Text style={[typography.h3, { color: colors.text, textAlign: 'center', marginTop: 12 }]}>
+                  {t('pinnedBook.noPinnedBook')}
+                </Text>
+                <Text style={[typography.body, { color: colors.secondaryText, textAlign: 'center', marginTop: 4 }]}>
+                  {t('pinnedBook.tapToPin')}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+
         <View style={styles.lastReadContainer}>
           <Text style={[typography.categoryTitle, { color: colors.text, marginBottom: 16 }]}>{t("home.lastRead")}</Text>
           {lastRead.length > 0 ? (
@@ -237,5 +273,24 @@ const styles = StyleSheet.create({
   lastReadContainer: {
     flexDirection: "column",
     marginBottom: 20,
+  },
+  pinnedBookContainer: {
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  noPinnedBookCard: {
+    width: width - 32,
+    paddingVertical: 32,
+    alignItems: 'center',
+    borderRadius: 16,
+    backgroundColor: colors.card,
+  },
+  noPinnedBookIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.accent + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
