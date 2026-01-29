@@ -15,6 +15,7 @@ export interface BookTracking {
   finishDate?: Date | null;
   notes?: string | null;
   lastReadAt?: Date | null;
+  isPinnedInLibrary?: boolean;
   createdAt?: Date | null;
   updatedAt?: Date | null;
 } 

@@ -22,6 +22,7 @@ import {
   ChevronRight,
   Pin,
   PinOff,
+  BookMarked,
 } from "lucide-react-native";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
@@ -119,6 +120,8 @@ const BookActionsBottomSheet = forwardRef<
       isBookTracked,
       removeTrackedBook,
       addTrackedBook,
+      getTrackedBookStatus,
+      togglePinInLibrary,
     } = useTrackedBooksStore();
     const { mutateAsync: removeBookFromList } = useRemoveBookFromList();
     const { mutateAsync: addBookToFavorites } = useAddBookToFavorites();
@@ -135,6 +138,8 @@ const BookActionsBottomSheet = forwardRef<
     const hasTrackrPlus = currentUser?.plan === "plus";
 
     const isTracking = isBookTracked(book.id);
+    const trackingStatus = getTrackedBookStatus(book.id);
+    const isPinnedInLibrary = trackingStatus?.isPinnedInLibrary ?? false;
     const isFavorited = useMemo(
       () =>
         favoriteBooks?.some((favoriteBook) => favoriteBook.id === book.id) ??
@@ -239,6 +244,21 @@ const BookActionsBottomSheet = forwardRef<
       }
     }, [closeSheet, unpinBook, t]);
 
+    const handleTogglePinInLibrary = useCallback(async () => {
+      closeSheet();
+      try {
+        await togglePinInLibrary(book.id);
+        if (isPinnedInLibrary) {
+          toast(t("toast.bookUnpinnedFromLibrary"));
+        } else {
+          toast(t("toast.bookPinnedInLibrary"));
+        }
+      } catch (error) {
+        console.error("Toggle pin in library error:", error);
+        toast.error(t(handleErrorCodes(error)));
+      }
+    }, [book.id, closeSheet, isPinnedInLibrary, togglePinInLibrary, t]);
+
     const actions = [
       {
         label: t("bookBottomSheet.addToTracking"),
@@ -287,6 +307,15 @@ const BookActionsBottomSheet = forwardRef<
         seeMore: false,
         show: isPinned,
         onPress: handleUnpinBook,
+      },
+      {
+        label: isPinnedInLibrary
+          ? t("bookBottomSheet.unpinFromLibrary")
+          : t("bookBottomSheet.pinInLibrary"),
+        icon: <BookMarked size={16} strokeWidth={2.75} color={colors.text} />,
+        seeMore: false,
+        show: isTracking,
+        onPress: handleTogglePinInLibrary,
       },
       {
         label: t("bookBottomSheet.removeFromTracking"),

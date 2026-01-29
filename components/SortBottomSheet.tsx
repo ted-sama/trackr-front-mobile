@@ -17,9 +17,10 @@ import {
   UserIcon,
   CalendarIcon,
   Check,
+  BookOpenIcon,
 } from 'lucide-react-native';
 
-export type SortType = 'rating' | 'title' | 'author' | 'date';
+export type SortType = 'rating' | 'title' | 'author' | 'date' | 'lastRead';
 export type SortOrder = 'asc' | 'desc';
 
 export interface SortOption {
@@ -132,6 +133,18 @@ const SortBottomSheet = forwardRef<TrueSheet, SortBottomSheetProps>(
         order: 'asc',
         label: t('collection.myLibrary.sort.date_asc'),
         icon: <CalendarIcon size={16} strokeWidth={2.75} color={colors.text} />,
+      },
+      {
+        type: 'lastRead',
+        order: 'desc',
+        label: t('collection.myLibrary.sort.lastRead_desc'),
+        icon: <BookOpenIcon size={16} strokeWidth={2.75} color={colors.text} />,
+      },
+      {
+        type: 'lastRead',
+        order: 'asc',
+        label: t('collection.myLibrary.sort.lastRead_asc'),
+        icon: <BookOpenIcon size={16} strokeWidth={2.75} color={colors.text} />,
       },
     ];
 

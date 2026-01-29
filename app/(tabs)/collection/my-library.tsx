@@ -223,12 +223,29 @@ export default function MyLibrary() {
             : 0;
           comparison = dateA - dateB;
           break;
+        case "lastRead":
+          const lastReadA = a.trackingStatus?.lastReadAt
+            ? new Date(a.trackingStatus.lastReadAt).getTime()
+            : null;
+          const lastReadB = b.trackingStatus?.lastReadAt
+            ? new Date(b.trackingStatus.lastReadAt).getTime()
+            : null;
+          // Books never read should always appear last (not affected by sort order)
+          if (lastReadA === null && lastReadB === null) return 0;
+          if (lastReadA === null) return 1;  // A has no date, goes last
+          if (lastReadB === null) return -1; // B has no date, goes last
+          comparison = lastReadA - lastReadB;
+          break;
       }
 
       return sortOption.order === "asc" ? comparison : -comparison;
     });
 
-    return sorted;
+    // Pinned books should appear first
+    const pinnedBooks = sorted.filter(book => book.trackingStatus?.isPinnedInLibrary);
+    const unpinnedBooks = sorted.filter(book => !book.trackingStatus?.isPinnedInLibrary);
+
+    return [...pinnedBooks, ...unpinnedBooks];
   }, [trackedBooks, selectedStatuses, sortOption, searchQuery]);
 
   const switchLayout = () => {
@@ -366,6 +383,7 @@ export default function MyLibrary() {
                 showTrackingButton={false}
                 showRating={false}
                 showTrackingChapter={true}
+                showPinBadge={true}
               />
             </View>
           ) : (
@@ -380,6 +398,7 @@ export default function MyLibrary() {
               showTrackingButton={false}
               showRating={false}
               showTrackingChapter={true}
+              showPinBadge={true}
             />
           )
         }

@@ -11,7 +11,7 @@ import {
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
-import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Star } from "lucide-react-native";
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Star, Pin } from "lucide-react-native";
 import Animated, {
   useAnimatedStyle,
   interpolate,
@@ -42,6 +42,7 @@ interface BookCardProps {
   showTrackingStatus?: boolean;
   showTrackingButton?: boolean;
   showTrackingChapter?: boolean;
+  showPinBadge?: boolean;
   rank?: number;
   currentListId?: string;
   isFromListPage?: boolean;
@@ -50,6 +51,7 @@ interface BookCardProps {
     currentChapter?: number | null;
     currentVolume?: number | null;
     rating?: number | null;
+    isPinnedInLibrary?: boolean;
   } | null;
   /** Custom info content to replace the default title/author/rating section */
   customInfo?: React.ReactNode;
@@ -67,7 +69,7 @@ const COMPACT_XS_CARD_WIDTH = (width - 64 - 32) / 5;
 
 const DEFAULT_COVER_COLOR = '#6B7280'; // Grey color for missing covers
 
-const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showUserRating = false, showTrackingStatus = false, showTrackingButton = true, showTrackingChapter = false, rank, currentListId, isFromListPage, trackingStatusOverride, customInfo }: BookCardProps) => {
+const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAuthor = true, showRating = true, showUserRating = false, showTrackingStatus = false, showTrackingButton = true, showTrackingChapter = false, showPinBadge = false, rank, currentListId, isFromListPage, trackingStatusOverride, customInfo }: BookCardProps) => {
   const hasCover = Boolean(book.coverImage);
   const [isLoading, setIsLoading] = useState(hasCover);
   const [hasError, setHasError] = useState(false);
@@ -239,6 +241,14 @@ const BookCard = ({ book, onPress, size = 'default', showTitle = true, showAutho
                   backgroundColor={colors.badgeBackground}
                   borderColor={colors.badgeBorder}
                 />
+              </View>
+            )}
+            {/* Pin icon on cover */}
+            {showPinBadge && trackingStatus?.isPinnedInLibrary && (
+              <View style={styles.pinBadgeContainer}>
+                <View style={[styles.pinBadge, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                  <Pin size={12} color={colors.accent} fill={colors.accent} />
+                </View>
               </View>
             )}
             {hasError && hasCover && (
@@ -450,6 +460,20 @@ const styles = StyleSheet.create({
     left: 4,
     bottom: 4,
     zIndex: 2,
+  },
+  pinBadgeContainer: {
+    position: 'absolute',
+    left: 4,
+    top: 4,
+    zIndex: 2,
+  },
+  pinBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

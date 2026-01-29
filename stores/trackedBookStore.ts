@@ -19,6 +19,7 @@ interface TrackedBooksState {
   fetchMyLibraryBooks: () => Promise<void>;
   checkBookTrackedServer: (id: string) => Promise<BookTracking | null>;
   refreshBookTracking: (id: string) => Promise<void>;
+  togglePinInLibrary: (id: string | number) => Promise<void>;
 }
 
 export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
@@ -99,6 +100,7 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
         finishDate: trackedBook.finishDate ? new Date(trackedBook.finishDate) : null,
         notes: trackedBook.notes,
         lastReadAt: trackedBook.lastReadAt ? new Date(trackedBook.lastReadAt) : null,
+        isPinnedInLibrary: trackedBook.isPinnedInLibrary ?? false,
         createdAt: trackedBook.createdAt ? new Date(trackedBook.createdAt) : null,
         updatedAt: trackedBook.updatedAt ? new Date(trackedBook.updatedAt) : null,
       };
@@ -159,6 +161,7 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
           finishDate: trackedBook.finishDate ? new Date(trackedBook.finishDate) : null,
           notes: trackedBook.notes,
           lastReadAt: trackedBook.lastReadAt ? new Date(trackedBook.lastReadAt) : null,
+          isPinnedInLibrary: trackedBook.isPinnedInLibrary ?? false,
           createdAt: trackedBook.createdAt ? new Date(trackedBook.createdAt) : null,
           updatedAt: trackedBook.updatedAt ? new Date(trackedBook.updatedAt) : null,
         };
@@ -198,6 +201,46 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
       set({ error: e.message || 'Erreur lors du rafraîchissement du suivi' });
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  togglePinInLibrary: async (id) => {
+    const bookKey = String(id);
+    const currentBook = get().trackedBooks[bookKey];
+    if (!currentBook?.trackingStatus) return;
+
+    const newPinStatus = !currentBook.trackingStatus.isPinnedInLibrary;
+
+    // Optimistic update
+    set((state) => ({
+      trackedBooks: {
+        ...state.trackedBooks,
+        [bookKey]: {
+          ...state.trackedBooks[bookKey],
+          trackingStatus: {
+            ...state.trackedBooks[bookKey].trackingStatus!,
+            isPinnedInLibrary: newPinStatus,
+          },
+        },
+      },
+    }));
+
+    try {
+      await api.post(`/me/books/${id}/pin`);
+    } catch (e: any) {
+      // Revert on failure
+      set((state) => ({
+        trackedBooks: {
+          ...state.trackedBooks,
+          [bookKey]: {
+            ...state.trackedBooks[bookKey],
+            trackingStatus: {
+              ...state.trackedBooks[bookKey].trackingStatus!,
+              isPinnedInLibrary: !newPinStatus,
+            },
+          },
+        },
+      }));
     }
   },
 })); 

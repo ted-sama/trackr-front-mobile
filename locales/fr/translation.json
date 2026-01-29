@@ -211,7 +211,9 @@
                 "author_asc": "Auteur A-Z",
                 "author_desc": "Auteur Z-A",
                 "date_desc": "Ajoutés récemment",
-                "date_asc": "Ajoutés anciennement"
+                "date_asc": "Ajoutés anciennement",
+                "lastRead_desc": "Lus récemment",
+                "lastRead_asc": "Lus anciennement"
             }
         },
         "allLists": {
@@ -641,6 +643,8 @@
         "editStatus": "Modifier le statut",
         "pinToHome": "Épingler à l'accueil",
         "unpinFromHome": "Désépingler de l'accueil",
+        "pinInLibrary": "Épingler dans la bibliothèque",
+        "unpinFromLibrary": "Désépingler de la bibliothèque",
         "listEditor": {
             "title": "Ajouter à une étagère",
             "createList": "Créer une étagère",
@@ -695,7 +699,9 @@
         "errorDeletingList": "Impossible de supprimer l'étagère",
         "bookCompleted": "Félicitations ! Vous avez terminé ce livre !",
         "bookPinned": "Livre épinglé à l'accueil",
-        "bookUnpinned": "Livre désépinglé de l'accueil"
+        "bookUnpinned": "Livre désépinglé de l'accueil",
+        "bookPinnedInLibrary": "Livre épinglé dans la bibliothèque",
+        "bookUnpinnedFromLibrary": "Livre désépinglé de la bibliothèque"
     },
     "errors": {
         "BAD_REQUEST": "Requête invalide",

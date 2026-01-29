@@ -390,6 +390,7 @@ export function useUserBooks(username?: string) {
           finishDate: trackedBook.finishDate ? new Date(trackedBook.finishDate) : null,
           notes: trackedBook.notes,
           lastReadAt: trackedBook.lastReadAt ? new Date(trackedBook.lastReadAt) : null,
+          isPinnedInLibrary: trackedBook.isPinnedInLibrary ?? false,
           createdAt: trackedBook.createdAt ? new Date(trackedBook.createdAt) : null,
           updatedAt: trackedBook.updatedAt ? new Date(trackedBook.updatedAt) : null,
         };

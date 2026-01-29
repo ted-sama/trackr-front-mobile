@@ -11,6 +11,7 @@ export interface TrackedBook {
     finishDate: string | null;
     notes: string | null;
     lastReadAt: string | null;
+    isPinnedInLibrary: boolean;
     createdAt: string | null;
     updatedAt: string | null;
     book: Book;

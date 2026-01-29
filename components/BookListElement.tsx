@@ -11,7 +11,7 @@ import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import Badge from "./ui/Badge";
 import StarRating from "./ui/StarRating";
-import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Ellipsis, Star } from "lucide-react-native";
+import { Clock3, BookOpenIcon, BookCheck, Pause, Square, Ellipsis, Star, Pin } from "lucide-react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { toast } from "sonner-native";
@@ -29,6 +29,7 @@ interface BookListElementProps {
   showRating?: boolean;
   showUserRating?: boolean;
   showTrackingChapter?: boolean;
+  showPinBadge?: boolean;
   rank?: number;
   currentListId?: string;
   isFromListPage?: boolean;
@@ -38,10 +39,11 @@ interface BookListElementProps {
     currentChapter?: number | null;
     currentVolume?: number | null;
     rating?: number | null;
+    isPinnedInLibrary?: boolean;
   } | null;
 }
 
-const BookListElement = ({ book, onPress, showAuthor = true, showRating = false, showUserRating = false, showTrackingButton = false, showTrackingStatus = false, showTrackingChapter = false, showBookType = false, rank, currentListId, isFromListPage, compact = false, trackingStatusOverride }: BookListElementProps) => {
+const BookListElement = ({ book, onPress, showAuthor = true, showRating = false, showUserRating = false, showTrackingButton = false, showTrackingStatus = false, showTrackingChapter = false, showPinBadge = false, showBookType = false, rank, currentListId, isFromListPage, compact = false, trackingStatusOverride }: BookListElementProps) => {
   const hasCover = Boolean(book.coverImage);
   const { colors } = useTheme();
   const typography = useTypography();
@@ -150,6 +152,11 @@ const BookListElement = ({ book, onPress, showAuthor = true, showRating = false,
                         borderColor={colors.badgeBorder}
                       />
                     )}
+                    {showPinBadge && trackingStatus.isPinnedInLibrary && (
+                      <View style={[styles.pinBadge, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                        <Pin size={12} color={colors.accent} fill={colors.accent} />
+                      </View>
+                    )}
                   </View>
                 )}
                 {showUserRating && trackingStatus?.rating && (
@@ -253,5 +260,13 @@ const styles = StyleSheet.create({
   },
   actionsContainerCompact: {
     gap: 5,
+  },
+  pinBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

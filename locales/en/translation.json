@@ -211,7 +211,9 @@
                 "author_asc": "Author A-Z",
                 "author_desc": "Author Z-A",
                 "date_desc": "Recently added",
-                "date_asc": "Oldest added"
+                "date_asc": "Oldest added",
+                "lastRead_desc": "Recently read",
+                "lastRead_asc": "Oldest read"
             }
         },
         "allLists": {
@@ -644,6 +646,8 @@
         "editStatus": "Edit status",
         "pinToHome": "Pin to home",
         "unpinFromHome": "Unpin from home",
+        "pinInLibrary": "Pin in library",
+        "unpinFromLibrary": "Unpin from library",
         "listEditor": {
             "title": "Add to shelf",
             "createList": "Create shelf",
@@ -694,7 +698,9 @@
         "errorDeletingList": "Unable to delete shelf",
         "bookCompleted": "Congratulations! You've finished this book!",
         "bookPinned": "Book pinned to home",
-        "bookUnpinned": "Book unpinned from home"
+        "bookUnpinned": "Book unpinned from home",
+        "bookPinnedInLibrary": "Book pinned in library",
+        "bookUnpinnedFromLibrary": "Book unpinned from library"
     },
     "errors": {
         "BAD_REQUEST": "Invalid request",
