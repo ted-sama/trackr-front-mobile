@@ -407,3 +407,65 @@ export function useUserBooks(username?: string) {
     staleTime: staleTimes.user,
   });
 }
+
+// --- Pinned Book ---
+
+export interface PinnedBookTracking {
+  status: ReadingStatus;
+  currentChapter: number | null;
+  currentVolume: number | null;
+  rating: number | null;
+  startDate: string | null;
+  finishDate: string | null;
+  lastReadAt: string | null;
+}
+
+export interface PinnedBookResponse {
+  book: Book | null;
+  tracking: PinnedBookTracking | null;
+}
+
+async function fetchPinnedBook(): Promise<PinnedBookResponse> {
+  const { data } = await api.get<PinnedBookResponse>('/me/pinned-book');
+  return data;
+}
+
+async function pinBookRequest(bookId: string | number): Promise<PinnedBookResponse> {
+  const { data } = await api.post<PinnedBookResponse>(`/me/pinned-book/${bookId}`);
+  return data;
+}
+
+async function unpinBookRequest(): Promise<void> {
+  await api.delete('/me/pinned-book');
+}
+
+export function usePinnedBook() {
+  return useQuery({
+    queryKey: queryKeys.pinnedBook,
+    queryFn: fetchPinnedBook,
+    staleTime: staleTimes.user,
+  });
+}
+
+export function usePinBook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (bookId: string | number) => pinBookRequest(bookId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.pinnedBook });
+    },
+    onError: (error) => {
+      console.error('Pin book mutation error:', error);
+    },
+  });
+}
+
+export function useUnpinBook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => unpinBookRequest(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.pinnedBook });
+    },
+  });
+}

@@ -61,6 +61,9 @@ export const queryKeys = {
   // Feed
   feedPopularAmongFollowing: ['feed', 'popular-among-following'] as const,
   feedRecentlyRated: ['feed', 'recently-rated'] as const,
+
+  // Pinned book
+  pinnedBook: ['me', 'pinned-book'] as const,
 };
 
 

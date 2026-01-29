@@ -153,7 +153,13 @@
         "topRated": "Les mieux notés",
         "goToLibrary": "Aller à la bibliothèque",
         "recentlyRatedByFollowing": "Récemment notés par vos abonnements",
-        "popularAmongFollowing": "Populaire chez vos abonnements"
+        "popularAmongFollowing": "Populaire chez vos abonnements",
+        "pinnedBook": "Livre épinglé",
+        "chapterSummary": "Résumé du chapitre {{chapter}}",
+        "continueReading": "Continuer la lecture",
+        "tapToReadMore": "Appuyer pour lire plus",
+        "noRecapAvailable": "Aucun résumé disponible pour ce chapitre",
+        "recapAvailableSoon": "Revenez bientôt pour un résumé"
     },
     "discover": {
         "title": "Découvrir",
@@ -633,6 +639,8 @@
         "removeFromFavorites": "Retirer des favoris",
         "removeFromList": "Retirer de l'étagère",
         "editStatus": "Modifier le statut",
+        "pinToHome": "Épingler à l'accueil",
+        "unpinFromHome": "Désépingler de l'accueil",
         "listEditor": {
             "title": "Ajouter à une étagère",
             "createList": "Créer une étagère",
@@ -685,7 +693,9 @@
         "listCreated": "Étagère créée avec succès",
         "errorCreatingList": "Impossible de créer l'étagère",
         "errorDeletingList": "Impossible de supprimer l'étagère",
-        "bookCompleted": "Félicitations ! Vous avez terminé ce livre !"
+        "bookCompleted": "Félicitations ! Vous avez terminé ce livre !",
+        "bookPinned": "Livre épinglé à l'accueil",
+        "bookUnpinned": "Livre désépinglé de l'accueil"
     },
     "errors": {
         "BAD_REQUEST": "Requête invalide",

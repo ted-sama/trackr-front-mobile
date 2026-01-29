@@ -13,6 +13,7 @@ import { BookTracking, ReadingStatus } from "@/types/reading-status";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
+import { useUpdateTracking } from "@/hooks/useUpdateTracking";
 import {
   BookOpenIcon,
   Clock3,
@@ -82,7 +83,8 @@ const StatusEditorBottomSheet = forwardRef<
   const { t } = useTranslation();
   const { colors } = useTheme();
   const typography = useTypography();
-  const { getTrackedBookStatus, updateTrackedBook } = useTrackedBooksStore();
+  const { getTrackedBookStatus } = useTrackedBooksStore();
+  const { updateTracking } = useUpdateTracking();
   const [tempStatus, setTempStatus] = useState<ReadingStatus>("plan_to_read");
 
   useEffect(() => {
@@ -114,7 +116,7 @@ const StatusEditorBottomSheet = forwardRef<
         updateData.currentChapter = book.chapters;
       }
 
-      await updateTrackedBook(book.id, updateData);
+      await updateTracking(book.id, updateData);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       if (status === "completed") {

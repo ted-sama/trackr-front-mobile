@@ -7,11 +7,14 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { router } from "expo-router";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
+import { useUserStore } from "@/stores/userStore";
 import BookListElement from "@/components/BookListElement";
 import CategorySlider from "@/components/CategorySlider";
 import { useMostTrackedCategory, useTopRatedCategory } from "@/hooks/queries/categories";
 import { usePopularAmongFollowing, useRecentlyRatedByFollowing } from "@/hooks/queries/feed";
+import { usePinnedBook } from "@/hooks/queries/users";
 import RecentlyRatedSlider from "@/components/home/RecentlyRatedSlider";
+import PinnedBookCard from "@/components/home/PinnedBookCard";
 import { ChevronRight } from "lucide-react-native";
 import { useAnimatedStyle, useSharedValue, withTiming, useAnimatedScrollHandler } from "react-native-reanimated";
 import Animated from "react-native-reanimated";
@@ -34,6 +37,11 @@ export default function Index() {
   const { data: topRated, isLoading: isLoadingTopRated, error: errorTopRated, refetch: refetchTopRated } = useTopRatedCategory();
   const { data: popularAmongFollowing } = usePopularAmongFollowing();
   const { data: recentlyRated } = useRecentlyRatedByFollowing();
+
+  // Pinned book (Trackr Plus feature)
+  const { currentUser } = useUserStore();
+  const hasTrackrPlus = currentUser?.plan === "plus";
+  const { data: pinnedBookData } = usePinnedBook();
 
   const isLoading = isLoadingMostTracked || isLoadingTopRated;
   const error = errorMostTracked || errorTopRated;
@@ -126,6 +134,14 @@ export default function Index() {
         scrollEventThrottle={16}
       >
       <View style={styles.content}>
+        {/* Pinned Book Card (Trackr Plus only) */}
+        {hasTrackrPlus && pinnedBookData?.book && (
+          <PinnedBookCard
+            book={pinnedBookData.book}
+            tracking={pinnedBookData.tracking}
+          />
+        )}
+
         <View style={styles.lastReadContainer}>
           <Text style={[typography.categoryTitle, { color: colors.text, marginBottom: 16 }]}>{t("home.lastRead")}</Text>
           {lastRead.length > 0 ? (
@@ -188,6 +204,7 @@ const styles = StyleSheet.create({
   },
   lastReadContainer: {
     flexDirection: "column",
+    marginTop: 20,
     marginBottom: 20,
   },
 });

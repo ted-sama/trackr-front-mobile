@@ -5,6 +5,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring, interpolateColo
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
+import { useUpdateTracking } from '@/hooks/useUpdateTracking';
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
 import { useTypography } from '@/hooks/useTypography';
 import { Book } from '@/types/book';
@@ -72,7 +73,8 @@ const AnimatedPressable: React.FC<AnimatedPressableProps> = ({ style, onPress, d
 };
 
 const SetChapterBottomSheet = forwardRef<TrueSheet, SetChapterBottomSheetProps>(({ book, onDismiss, onBookCompleted }, ref) => {
-    const { getTrackedBookStatus, updateTrackedBook } = useTrackedBooksStore();
+    const { getTrackedBookStatus } = useTrackedBooksStore();
+    const { updateTracking } = useUpdateTracking();
     const bookTracking = getTrackedBookStatus(book.id);
 
     const { colors } = useTheme();
@@ -161,7 +163,7 @@ const SetChapterBottomSheet = forwardRef<TrueSheet, SetChapterBottomSheetProps>(
                     ref.current?.dismiss();
                 }
 
-                await updateTrackedBook(book.id, updateData);
+                await updateTracking(book.id, updateData);
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 setChapter(chapter);
 

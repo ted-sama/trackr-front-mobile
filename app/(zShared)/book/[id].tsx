@@ -58,6 +58,7 @@ import { TrackingTabBar } from "@/components/book/TrackingTabBar";
 import SetChapterBottomSheet from "@/components/book/SetChapterBottomSheet";
 import ExpandableDescription from "@/components/ExpandableDescription";
 import { useBook, useBooksBySameAuthorCategory } from "@/hooks/queries/books";
+import { useUpdateTracking } from "@/hooks/useUpdateTracking";
 import { useMyBookReview } from "@/hooks/queries/reviews";
 import { useTranslateGenre } from "@/hooks/queries/genres";
 import { useQueryClient } from "@tanstack/react-query";
@@ -334,8 +335,8 @@ export default function BookScreen() {
     addTrackedBook: addTrackedBookToStore,
     removeTrackedBook: removeTrackedBookFromStore,
     isBookTracked,
-    updateTrackedBook,
   } = useTrackedBooksStore();
+  const { updateTracking } = useUpdateTracking();
 
   // Callback when book is completed - triggers celebration
   const handleBookCompleted = useCallback(() => {
@@ -355,15 +356,15 @@ export default function BookScreen() {
         updateData.status = 'completed';
       }
       
-      updateTrackedBook(book.id, updateData);
+      updateTracking(book.id, updateData);
       toast(t("toast.incrementChapter", { number: newChapter }));
-      
+
       // Trigger celebration if completing
       if (isCompleting && !wasAlreadyCompleted) {
         handleBookCompleted();
       }
     }
-  }, [bookTracking, book, updateTrackedBook, t, handleBookCompleted]);
+  }, [bookTracking, book, updateTracking, t, handleBookCompleted]);
 
   // State to control button rendering for animation
   const [isButtonRendered, setIsButtonRendered] = useState(false);

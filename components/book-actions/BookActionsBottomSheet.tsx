@@ -20,17 +20,25 @@ import {
   HeartIcon,
   HeartMinusIcon,
   ChevronRight,
+  Pin,
+  PinOff,
 } from "lucide-react-native";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
+import { useUserStore } from "@/stores/userStore";
 import { useRemoveBookFromList } from "@/hooks/queries/lists";
 import {
   useAddBookToFavorites,
   useRemoveBookFromFavorites,
   useUserTop,
+  usePinnedBook,
+  usePinBook,
+  useUnpinBook,
 } from "@/hooks/queries/users";
+import { useTrackrPlus } from "@/hooks/useTrackrPlus";
 import { toast } from "sonner-native";
 import { handleErrorCodes } from "@/utils/handleErrorCodes";
+import PlusBadge from "@/components/ui/PlusBadge";
 
 export interface BookActionsBottomSheetProps {
   book: Book;
@@ -49,6 +57,7 @@ interface ActionButtonProps {
     label: string;
     icon: React.ReactNode;
     seeMore?: boolean;
+    isPremium?: boolean;
     onPress?: () => void;
   };
   typography: any;
@@ -78,6 +87,7 @@ const ActionButton = ({ action, typography, colors }: ActionButtonProps) => {
         <Text style={[typography.h3, { color: colors.text }]}>
           {action.label}
         </Text>
+        {action.isPremium && <PlusBadge />}
       </View>
       {action.seeMore && (
         <ChevronRight size={16} strokeWidth={2.75} color={colors.text} />
@@ -115,6 +125,14 @@ const BookActionsBottomSheet = forwardRef<
     const { mutateAsync: removeBookFromFavorites } =
       useRemoveBookFromFavorites();
     const { data: favoriteBooks } = useUserTop();
+    const { data: pinnedBookData } = usePinnedBook();
+    const { mutateAsync: pinBook } = usePinBook();
+    const { mutateAsync: unpinBook } = useUnpinBook();
+    const { presentPaywall } = useTrackrPlus();
+    const { currentUser } = useUserStore();
+
+    // Use DB plan for badge display (not RevenueCat)
+    const hasTrackrPlus = currentUser?.plan === "plus";
 
     const isTracking = isBookTracked(book.id);
     const isFavorited = useMemo(
@@ -122,6 +140,10 @@ const BookActionsBottomSheet = forwardRef<
         favoriteBooks?.some((favoriteBook) => favoriteBook.id === book.id) ??
         false,
       [favoriteBooks, book.id]
+    );
+    const isPinned = useMemo(
+      () => pinnedBookData?.book?.id === book.id,
+      [pinnedBookData?.book?.id, book.id]
     );
 
     const closeSheet = useCallback(() => {
@@ -187,6 +209,36 @@ const BookActionsBottomSheet = forwardRef<
       }
     };
 
+    const handlePinBook = useCallback(async () => {
+      closeSheet();
+      try {
+        await pinBook(book.id);
+        toast(t("toast.bookPinned"));
+      } catch (error: any) {
+        console.error("Pin book error:", error);
+        // If user doesn't have Plus, show paywall
+        const errorCode = error?.response?.data?.code;
+        if (errorCode === "USER_PLUS_REQUIRED") {
+          setTimeout(() => {
+            presentPaywall();
+          }, 300);
+        } else {
+          toast.error(t(handleErrorCodes(error)));
+        }
+      }
+    }, [book.id, closeSheet, presentPaywall, pinBook, t]);
+
+    const handleUnpinBook = useCallback(async () => {
+      closeSheet();
+      try {
+        await unpinBook();
+        toast(t("toast.bookUnpinned"));
+      } catch (error) {
+        console.error("Unpin book error:", error);
+        toast.error(t(handleErrorCodes(error)));
+      }
+    }, [closeSheet, unpinBook, t]);
+
     const actions = [
       {
         label: t("bookBottomSheet.addToTracking"),
@@ -220,6 +272,21 @@ const BookActionsBottomSheet = forwardRef<
         seeMore: false,
         show: isFavorited,
         onPress: handleRemoveBookFromFavorites,
+      },
+      {
+        label: t("bookBottomSheet.pinToHome"),
+        icon: <Pin size={16} strokeWidth={2.75} color={colors.text} />,
+        seeMore: false,
+        show: !isPinned && isTracking,
+        isPremium: !hasTrackrPlus,
+        onPress: handlePinBook,
+      },
+      {
+        label: t("bookBottomSheet.unpinFromHome"),
+        icon: <PinOff size={16} strokeWidth={2.75} color={colors.text} />,
+        seeMore: false,
+        show: isPinned,
+        onPress: handleUnpinBook,
       },
       {
         label: t("bookBottomSheet.removeFromTracking"),

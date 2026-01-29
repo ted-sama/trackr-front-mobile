@@ -27,8 +27,15 @@ async function fetchBooksBySameAuthorCategory(bookId: string): Promise<Category>
   };
 }
 
-async function fetchRecap(bookId: string, chapter: number): Promise<string> {
-  const { data } = await api.get<string>(`/books/${bookId}/recap/${chapter}`);
+interface RecapResponse {
+  recap: string | null;
+  cached: boolean;
+  availableAt: string | null;
+}
+
+async function fetchRecap(bookId: string, chapter: number, force?: boolean): Promise<RecapResponse> {
+  const params = force ? { force: 'true' } : {};
+  const { data } = await api.get<RecapResponse>(`/books/${bookId}/recap/${chapter}`, { params });
   return data;
 }
 
@@ -50,14 +57,18 @@ export function useBooksBySameAuthorCategory(bookId: string | undefined) {
   });
 }
 
-export function useBookRecap(bookId: string | undefined, chapter: number | undefined) {
+export function useBookRecap(bookId: string | undefined, chapter: number | undefined, options?: { force?: boolean }) {
   const enabled = Boolean(bookId) && typeof chapter === 'number' && chapter > 0;
+  const force = options?.force;
   return useQuery({
-    queryKey: enabled ? queryKeys.bookRecap(bookId as string, chapter as number) : ['book', 'recap', 'disabled'],
-    queryFn: () => fetchRecap(bookId as string, chapter as number),
+    queryKey: enabled ? [...queryKeys.bookRecap(bookId as string, chapter as number), { force }] : ['book', 'recap', 'disabled'],
+    queryFn: () => fetchRecap(bookId as string, chapter as number, force),
     enabled,
+    staleTime: staleTimes.reference,
   });
 }
+
+export type { RecapResponse };
 
 const POPULAR_BOOKS_LIMIT = 20;
 const POPULAR_BOOKS_MAX = 100;

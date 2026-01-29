@@ -7,6 +7,7 @@ import { Book } from "@/types/book";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTypography } from "@/hooks/useTypography";
 import { useTrackedBooksStore } from "@/stores/trackedBookStore";
+import { useUpdateTracking } from "@/hooks/useUpdateTracking";
 import RatingSlider from "@/components/ui/RatingSlider";
 import Button from "@/components/ui/Button";
 
@@ -23,8 +24,9 @@ const RatingEditorBottomSheet = forwardRef<
   const { t } = useTranslation();
   const { colors } = useTheme();
   const typography = useTypography();
-  const { getTrackedBookStatus, updateTrackedBook, addTrackedBook, isBookTracked } =
+  const { getTrackedBookStatus, addTrackedBook, isBookTracked } =
     useTrackedBooksStore();
+  const { updateTracking } = useUpdateTracking();
   const [tempRating, setTempRating] = useState<number>(0);
 
   useEffect(() => {
@@ -52,7 +54,7 @@ const RatingEditorBottomSheet = forwardRef<
       }
 
       const ratingValue = tempRating === 0 ? null : tempRating;
-      await updateTrackedBook(book.id, { rating: ratingValue });
+      await updateTracking(book.id, { rating: ratingValue });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       onRatingUpdated?.(ratingValue);
       closeSheet();

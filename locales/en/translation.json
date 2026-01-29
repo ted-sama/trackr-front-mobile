@@ -153,7 +153,13 @@
         "topRated": "Top rated",
         "goToLibrary": "Go to library",
         "recentlyRatedByFollowing": "Recently rated by your follows",
-        "popularAmongFollowing": "Popular among your follows"
+        "popularAmongFollowing": "Popular among your follows",
+        "pinnedBook": "Pinned Book",
+        "chapterSummary": "Chapter {{chapter}} Summary",
+        "continueReading": "Continue Reading",
+        "tapToReadMore": "Tap to read more",
+        "noRecapAvailable": "No summary available for this chapter",
+        "recapAvailableSoon": "Come back soon for a summary"
     },
     "discover": {
         "title": "Discover",
@@ -636,6 +642,8 @@
         "removeFromFavorites": "Remove from favorites",
         "removeFromList": "Remove from shelf",
         "editStatus": "Edit status",
+        "pinToHome": "Pin to home",
+        "unpinFromHome": "Unpin from home",
         "listEditor": {
             "title": "Add to shelf",
             "createList": "Create shelf",
@@ -684,7 +692,9 @@
         "listCreated": "Shelf created successfully",
         "errorCreatingList": "Unable to create shelf",
         "errorDeletingList": "Unable to delete shelf",
-        "bookCompleted": "Congratulations! You've finished this book!"
+        "bookCompleted": "Congratulations! You've finished this book!",
+        "bookPinned": "Book pinned to home",
+        "bookUnpinned": "Book unpinned from home"
     },
     "errors": {
         "BAD_REQUEST": "Invalid request",
