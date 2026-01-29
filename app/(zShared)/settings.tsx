@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -287,14 +288,14 @@ export default function Settings() {
             icon={<ShieldCheck size={20} color={colors.icon} />}
             label={t('settings.about.privacy')}
             onPress={() => {
-              // Navigation vers la politique de confidentialité
+              WebBrowser.openBrowserAsync('https://trackrr.app/privacy');
             }}
           />
           <SettingsItem
             icon={<FileText size={20} color={colors.icon} />}
             label={t('settings.about.terms')}
             onPress={() => {
-              // Navigation vers les conditions d'utilisation
+              WebBrowser.openBrowserAsync('https://trackrr.app/terms');
             }}
           />
         </SettingsSection>
