@@ -144,6 +144,9 @@
         "public": "Publique",
         "private": "Privée"
     },
+    "imageCropper": {
+        "instructions": "Faites glisser pour déplacer • Pincez pour zoomer"
+    },
     "home": {
         "title": "Accueil",
         "greeting": "Bonjour, {{name}}",
@@ -258,7 +261,9 @@
             "usernamePlaceholder": "Entrez votre nom d'utilisateur",
             "bio": "Bio",
             "bioPlaceholder": "Parlez-nous de vous...",
-            "deleteAvatar": "Supprimer l'avatar"
+            "deleteAvatar": "Supprimer l'avatar",
+            "cropAvatar": "Recadrer l'avatar",
+            "cropBackdrop": "Recadrer le fond"
         },
         "reorderModal": {
             "title": "Réordonner les favoris",
@@ -621,7 +626,8 @@
             "ranked": "Classement",
             "rankedDescription": "Étagère avec ordre de préférence",
             "collection": "Collection",
-            "collectionDescription": "Collection simple sans classement"
+            "collectionDescription": "Collection simple sans classement",
+            "cropBackdrop": "Recadrer l'illustration"
         },
         "deleteModal": {
             "title": "Supprimer l'étagère",
@@ -701,7 +707,9 @@
         "bookPinned": "Livre épinglé à l'accueil",
         "bookUnpinned": "Livre désépinglé de l'accueil",
         "bookPinnedInLibrary": "Livre épinglé dans la bibliothèque",
-        "bookUnpinnedFromLibrary": "Livre désépinglé de la bibliothèque"
+        "bookUnpinnedFromLibrary": "Livre désépinglé de la bibliothèque",
+        "gifAvatarRequiresPlus": "Les avatars GIF sont une fonctionnalité Trackr Plus",
+        "gifBackdropRequiresPlus": "Les bannières GIF sont une fonctionnalité Trackr Plus"
     },
     "errors": {
         "BAD_REQUEST": "Requête invalide",

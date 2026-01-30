@@ -38,6 +38,8 @@ import PlusBadge from "@/components/ui/PlusBadge";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import UnsavedChangesBottomSheet from "@/components/shared/UnsavedChangesBottomSheet";
+import ImageCropper from "@/components/shared/ImageCropper";
+import { useImageProcessor } from "@/hooks/useImageProcessor";
 
 export default function ListEdit() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
@@ -79,6 +81,15 @@ export default function ListEdit() {
   const [selectedImage, setSelectedImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [backdropMode, setBackdropMode] = useState<"color" | "image">("color");
   const [backdropColor, setBackdropColor] = useState<string>("#7C3AED");
+
+  // Cropper state
+  const [cropperVisible, setCropperVisible] = useState(false);
+  const [pendingCropImage, setPendingCropImage] = useState<{
+    uri: string;
+    width: number;
+    height: number;
+    asset: ImagePicker.ImagePickerAsset;
+  } | null>(null);
 
   // Scale animations for toggle buttons
   const publicScale = useSharedValue(1);
@@ -134,22 +145,75 @@ export default function ListEdit() {
     }
   };
 
+  const { processBackdrop, isGif } = useImageProcessor();
+
   const handlePickImage = async () => {
     if (!isPlus) {
       toast(t("toast.backdropReserved"));
       return;
     }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [3, 2],
-      quality: 0.8,
+      allowsEditing: false, // Disable native cropper - we use custom cropper
+      quality: 1,
     });
 
     if (!result.canceled) {
-      setSelectedImage(result.assets[0]);
-      setBackdropMode("image");
+      const asset = result.assets[0];
+
+      // GIFs are allowed for Plus users - use directly
+      if (isGif(asset)) {
+        setSelectedImage(asset);
+        setBackdropMode("image");
+        return;
+      }
+
+      // Open custom cropper for non-GIF images
+      setPendingCropImage({
+        uri: asset.uri,
+        width: asset.width || 0,
+        height: asset.height || 0,
+        asset,
+      });
+      setCropperVisible(true);
     }
+  };
+
+  const handleCropComplete = async (result: { uri: string; width: number; height: number }) => {
+    if (!pendingCropImage) return;
+
+    setCropperVisible(false);
+
+    // Resize and compress after crop
+    try {
+      const processed = await processBackdrop({
+        ...pendingCropImage.asset,
+        uri: result.uri,
+        width: result.width,
+        height: result.height,
+      });
+      setSelectedImage({
+        ...pendingCropImage.asset,
+        uri: processed.uri,
+        width: processed.width,
+        height: processed.height,
+      });
+    } catch {
+      setSelectedImage({
+        ...pendingCropImage.asset,
+        uri: result.uri,
+        width: result.width,
+        height: result.height,
+      });
+    }
+    setBackdropMode("image");
+    setPendingCropImage(null);
+  };
+
+  const handleCropCancel = () => {
+    setCropperVisible(false);
+    setPendingCropImage(null);
   };
 
   const addTag = () => {
@@ -651,6 +715,20 @@ export default function ListEdit() {
         ref={unsavedChangesRef}
         onDiscard={() => router.back()}
       />
+
+      {/* Custom Image Cropper */}
+      {pendingCropImage && (
+        <ImageCropper
+          visible={cropperVisible}
+          imageUri={pendingCropImage.uri}
+          imageWidth={pendingCropImage.width}
+          imageHeight={pendingCropImage.height}
+          aspectRatio={[16, 9]}
+          onCrop={handleCropComplete}
+          onCancel={handleCropCancel}
+          cropperTitle={t("list.editModal.cropBackdrop")}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 }

@@ -40,6 +40,8 @@ import PlusBadge from "@/components/ui/PlusBadge";
 import { LinearGradient } from "expo-linear-gradient";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import UnsavedChangesBottomSheet from "@/components/shared/UnsavedChangesBottomSheet";
+import ImageCropper from "@/components/shared/ImageCropper";
+import { useImageProcessor } from "@/hooks/useImageProcessor";
 
 export default function ProfileEditModal() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
@@ -90,6 +92,16 @@ export default function ProfileEditModal() {
   const [errors, setErrors] = useState({
     username: "",
   });
+
+  // Cropper state
+  const [cropperVisible, setCropperVisible] = useState(false);
+  const [pendingCropImage, setPendingCropImage] = useState<{
+    uri: string;
+    width: number;
+    height: number;
+    type: "avatar" | "backdrop";
+    asset: ImagePicker.ImagePickerAsset;
+  } | null>(null);
 
   const validateUsername = () => {
     if (!username.trim()) {
@@ -157,16 +169,41 @@ export default function ProfileEditModal() {
     }
   };
 
+  const { processAvatar, processBackdrop, isGif } = useImageProcessor();
+
   const handlePickAvatar = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.9,
+      allowsEditing: false, // Disable native cropper - we use custom cropper
+      quality: 1,
     });
+
     if (!result.canceled) {
+      const asset = result.assets[0];
+
+      // Check if GIF and user is not Plus
+      if (isGif(asset) && !isPlus) {
+        toast(t("toast.gifAvatarRequiresPlus"));
+        return;
+      }
+
       setIsAvatarDeleted(false);
-      setSelectedAvatarImage(result.assets[0]);
+
+      // GIFs don't need cropping - use directly
+      if (isGif(asset)) {
+        setSelectedAvatarImage(asset);
+        return;
+      }
+
+      // Open custom cropper for non-GIF images
+      setPendingCropImage({
+        uri: asset.uri,
+        width: asset.width || 0,
+        height: asset.height || 0,
+        type: "avatar",
+        asset,
+      });
+      setCropperVisible(true);
     }
   };
 
@@ -175,15 +212,32 @@ export default function ProfileEditModal() {
       toast(t("toast.backdropReserved"));
       return;
     }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [3, 2],
-      quality: 0.8,
+      allowsEditing: false, // Disable native cropper - we use custom cropper
+      quality: 1,
     });
+
     if (!result.canceled) {
-      setSelectedBackdropImage(result.assets[0]);
-      setBackdropMode("image");
+      const asset = result.assets[0];
+
+      // GIFs are allowed for Plus users - use directly
+      if (isGif(asset)) {
+        setSelectedBackdropImage(asset);
+        setBackdropMode("image");
+        return;
+      }
+
+      // Open custom cropper for non-GIF images
+      setPendingCropImage({
+        uri: asset.uri,
+        width: asset.width || 0,
+        height: asset.height || 0,
+        type: "backdrop",
+        asset,
+      });
+      setCropperVisible(true);
     }
   };
 
@@ -193,6 +247,68 @@ export default function ProfileEditModal() {
     }
     setSelectedAvatarImage(null);
     setIsAvatarDeleted(true);
+  };
+
+  const handleCropComplete = async (result: { uri: string; width: number; height: number }) => {
+    if (!pendingCropImage) return;
+
+    setCropperVisible(false);
+
+    if (pendingCropImage.type === "avatar") {
+      // For avatar, resize and compress after crop
+      try {
+        const processed = await processAvatar({
+          ...pendingCropImage.asset,
+          uri: result.uri,
+          width: result.width,
+          height: result.height,
+        });
+        setSelectedAvatarImage({
+          ...pendingCropImage.asset,
+          uri: processed.uri,
+          width: processed.width,
+          height: processed.height,
+        });
+      } catch {
+        setSelectedAvatarImage({
+          ...pendingCropImage.asset,
+          uri: result.uri,
+          width: result.width,
+          height: result.height,
+        });
+      }
+    } else {
+      // For backdrop, resize and compress after crop
+      try {
+        const processed = await processBackdrop({
+          ...pendingCropImage.asset,
+          uri: result.uri,
+          width: result.width,
+          height: result.height,
+        });
+        setSelectedBackdropImage({
+          ...pendingCropImage.asset,
+          uri: processed.uri,
+          width: processed.width,
+          height: processed.height,
+        });
+      } catch {
+        setSelectedBackdropImage({
+          ...pendingCropImage.asset,
+          uri: result.uri,
+          width: result.width,
+          height: result.height,
+        });
+      }
+      setBackdropMode("image");
+    }
+
+    setPendingCropImage(null);
+  };
+
+  const handleCropCancel = () => {
+    setCropperVisible(false);
+    setPendingCropImage(null);
   };
 
   const handleSave = async () => {
@@ -607,6 +723,24 @@ export default function ProfileEditModal() {
         ref={unsavedChangesRef}
         onDiscard={() => router.back()}
       />
+
+      {/* Custom Image Cropper */}
+      {pendingCropImage && (
+        <ImageCropper
+          visible={cropperVisible}
+          imageUri={pendingCropImage.uri}
+          imageWidth={pendingCropImage.width}
+          imageHeight={pendingCropImage.height}
+          aspectRatio={pendingCropImage.type === "avatar" ? [1, 1] : [16, 9]}
+          onCrop={handleCropComplete}
+          onCancel={handleCropCancel}
+          cropperTitle={
+            pendingCropImage.type === "avatar"
+              ? t("profile.editModal.cropAvatar")
+              : t("profile.editModal.cropBackdrop")
+          }
+        />
+      )}
     </KeyboardAvoidingView>
   );
 }

@@ -144,6 +144,9 @@
         "public": "Public",
         "private": "Private"
     },
+    "imageCropper": {
+        "instructions": "Drag to reposition • Pinch to zoom"
+    },
     "home": {
         "title": "Home",
         "greeting": "Hello, {{name}}",
@@ -258,7 +261,9 @@
             "usernamePlaceholder": "Enter your username",
             "bio": "Bio",
             "bioPlaceholder": "Tell us about yourself...",
-            "deleteAvatar": "Remove avatar"
+            "deleteAvatar": "Remove avatar",
+            "cropAvatar": "Crop avatar",
+            "cropBackdrop": "Crop backdrop"
         },
         "reorderModal": {
             "title": "Reorder favorites",
@@ -620,7 +625,8 @@
             "ranked": "Ranked",
             "rankedDescription": "Shelf with preference order",
             "collection": "Collection",
-            "collectionDescription": "Simple collection without ranking"
+            "collectionDescription": "Simple collection without ranking",
+            "cropBackdrop": "Crop backdrop"
         },
         "deleteModal": {
             "title": "Delete shelf",
@@ -700,7 +706,9 @@
         "bookPinned": "Book pinned to home",
         "bookUnpinned": "Book unpinned from home",
         "bookPinnedInLibrary": "Book pinned in library",
-        "bookUnpinnedFromLibrary": "Book unpinned from library"
+        "bookUnpinnedFromLibrary": "Book unpinned from library",
+        "gifAvatarRequiresPlus": "GIF avatars are a Trackr Plus feature",
+        "gifBackdropRequiresPlus": "GIF backdrops are a Trackr Plus feature"
     },
     "errors": {
         "BAD_REQUEST": "Invalid request",
