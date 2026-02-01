@@ -18,71 +18,7 @@ import { useUserSearch } from "@/hooks/queries/comments";
 import { User } from "@/types/user";
 import { useUserStore } from "@/stores/userStore";
 
-interface MentionAutocompleteProps {
-  visible: boolean;
-  query: string;
-  onSelect: (user: User) => void;
-  onClose: () => void;
-  targetLayout: { x: number; y: number; width: number; height: number } | null;
-}
-
-export const MentionAutocomplete = ({
-  visible,
-  query,
-  onSelect,
-  onClose,
-  targetLayout,
-}: MentionAutocompleteProps) => {
-  const { colors } = useTheme();
-  const typography = useTypography();
-  const { data: users, isLoading } = useUserSearch(query);
-
-  if (!visible || !targetLayout || (!users?.length && !isLoading)) return null;
-
-  return (
-    <View
-      style={[
-        styles.autocompleteContainer,
-        {
-          backgroundColor: colors.card,
-          borderColor: colors.border,
-          bottom: targetLayout.height + 10, // Position above the input
-        },
-      ]}
-    >
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        style={{ maxHeight: 200 }}
-      >
-        {users?.map((user) => (
-          <Pressable
-            key={user.id}
-            style={({ pressed }) => [
-              styles.userItem,
-              pressed && { backgroundColor: colors.background },
-            ]}
-            onPress={() => onSelect(user)}
-          >
-            <Avatar image={user.avatar} size={24} />
-            <View style={styles.userInfo}>
-              <Text style={[typography.bodyBold, { color: colors.text }]}>
-                {user.username}
-              </Text>
-              <Text
-                style={[
-                  typography.bodyCaption,
-                  { color: colors.secondaryText },
-                ]}
-              >
-                {user.displayName}
-              </Text>
-            </View>
-          </Pressable>
-        ))}
-      </ScrollView>
-    </View>
-  );
-};
+import { MentionAutocomplete } from "./MentionAutocomplete";
 
 interface CommentInputProps {
   onSubmit: (content: string) => void;
