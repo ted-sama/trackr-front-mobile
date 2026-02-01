@@ -553,7 +553,14 @@
             "deleteFailed": "Failed to delete review",
             "notFound": "Review not found",
             "notOwned": "You can only edit your own reviews"
-        }
+        },
+        "comments": "Comments",
+        "noComments": "No comments yet. Be the first to comment!",
+        "reply": "Reply",
+        "replyingTo": "Replying to",
+        "viewReplies": "View {{count}} replies",
+        "loadMoreReplies": "Load more replies",
+        "commentPlaceholder": "Write a comment..."
     },
     "chat": {
         "sources": "Used sources",

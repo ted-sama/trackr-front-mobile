@@ -6,6 +6,7 @@ export interface ReviewComment {
   content: string;
   likesCount: number;
   isLikedByMe: boolean;
+  depth: number;
   createdAt: string;
   updatedAt: string;
   user: {
@@ -15,6 +16,7 @@ export interface ReviewComment {
     avatar: string | null;
   };
   replies?: ReviewComment[]; // For nested structure in UI
+  hasMoreReplies?: boolean; // True if there are deeper replies not yet loaded
 }
 
 export interface CreateCommentDTO {

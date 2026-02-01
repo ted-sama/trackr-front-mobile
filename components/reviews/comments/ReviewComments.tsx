@@ -17,6 +17,7 @@ import {
   useCreateComment,
   useDeleteComment,
   useToggleCommentLike,
+  useCommentReplies,
 } from "@/hooks/queries/comments";
 import Avatar from "@/components/ui/Avatar";
 import {
@@ -45,6 +46,11 @@ if (Platform.OS === "android") {
   }
 }
 
+// Max visual indentation level (beyond this, we don't indent further)
+const MAX_VISUAL_DEPTH = 5;
+// Depth at which we need to lazy load (backend preloads 3 levels)
+const LAZY_LOAD_DEPTH = 3;
+
 interface CommentItemProps {
   comment: ReviewComment;
   depth?: number;
@@ -64,9 +70,23 @@ const CommentItem = ({
   const { mutate: toggleLike } = useToggleCommentLike(comment.reviewId);
   const { t } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [loadMoreReplies, setLoadMoreReplies] = useState(false);
+
+  // Lazy load replies when we're at the edge of preloaded depth
+  const shouldLazyLoad = depth >= LAZY_LOAD_DEPTH && !comment.replies?.length;
+  const {
+    data: lazyReplies,
+    isLoading: isLoadingReplies,
+  } = useCommentReplies(comment.id, loadMoreReplies && shouldLazyLoad);
+
+  // Use lazy-loaded replies if available, otherwise use preloaded
+  const replies = lazyReplies || comment.replies;
 
   const isOwnComment = currentUser?.id === comment.userId;
   const formattedDate = dayjs(comment.createdAt).fromNow();
+
+  // Cap visual indentation
+  const visualDepth = Math.min(depth, MAX_VISUAL_DEPTH);
 
   const scale = useSharedValue(1);
 
@@ -87,8 +107,22 @@ const CommentItem = ({
     setIsCollapsed(!isCollapsed);
   };
 
+  const handleLoadMoreReplies = () => {
+    setLoadMoreReplies(true);
+  };
+
   return (
-    <View style={[styles.commentContainer, { marginLeft: depth * 16 }]}>
+    <View style={[styles.commentContainer, { marginLeft: visualDepth * 16 }]}>
+      {/* Thread line indicator for deep nesting */}
+      {depth > 0 && (
+        <View
+          style={[
+            styles.threadLine,
+            { backgroundColor: colors.border, left: -8 },
+          ]}
+        />
+      )}
+
       <View style={styles.commentHeader}>
         <Pressable onPress={toggleCollapse} style={styles.userInfo}>
           <Avatar image={comment.user.avatar || undefined} size={24} />
@@ -164,8 +198,33 @@ const CommentItem = ({
             </Pressable>
           </View>
 
-          {comment.replies &&
-            comment.replies.map((reply) => (
+          {/* Show load more button if we need to lazy load */}
+          {shouldLazyLoad && !loadMoreReplies && (
+            <Pressable
+              onPress={handleLoadMoreReplies}
+              style={[styles.loadMoreButton, { borderColor: colors.border }]}
+            >
+              <Text style={[typography.caption, { color: colors.accent }]}>
+                {t("reviews.loadMoreReplies")}
+              </Text>
+            </Pressable>
+          )}
+
+          {/* Loading indicator */}
+          {isLoadingReplies && (
+            <Text
+              style={[
+                typography.caption,
+                { color: colors.secondaryText, marginTop: 8 },
+              ]}
+            >
+              {t("common.loading")}
+            </Text>
+          )}
+
+          {/* Render replies */}
+          {replies &&
+            replies.map((reply) => (
               <CommentItem
                 key={reply.id}
                 comment={reply}
@@ -177,10 +236,10 @@ const CommentItem = ({
         </>
       )}
 
-      {isCollapsed && comment.replies && comment.replies.length > 0 && (
+      {isCollapsed && replies && replies.length > 0 && (
         <Pressable onPress={toggleCollapse} style={{ marginTop: 4 }}>
           <Text style={[typography.caption, { color: colors.accent }]}>
-            {t("reviews.viewReplies", { count: comment.replies.length })}
+            {t("reviews.viewReplies", { count: replies.length })}
           </Text>
         </Pressable>
       )}
@@ -296,6 +355,7 @@ const styles = StyleSheet.create({
   },
   commentContainer: {
     marginBottom: 16,
+    position: "relative",
   },
   commentHeader: {
     flexDirection: "row",
@@ -318,5 +378,20 @@ const styles = StyleSheet.create({
   emptyContainer: {
     padding: 24,
     alignItems: "center",
+  },
+  threadLine: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 2,
+    borderRadius: 1,
+  },
+  loadMoreButton: {
+    marginTop: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+    alignSelf: "flex-start",
   },
 });

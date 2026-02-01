@@ -553,7 +553,14 @@
             "deleteFailed": "Impossible de supprimer l'avis",
             "notFound": "Avis introuvable",
             "notOwned": "Vous ne pouvez modifier que vos propres avis"
-        }
+        },
+        "comments": "Commentaires",
+        "noComments": "Aucun commentaire. Soyez le premier à commenter !",
+        "reply": "Répondre",
+        "replyingTo": "En réponse à",
+        "viewReplies": "Voir {{count}} réponses",
+        "loadMoreReplies": "Charger plus de réponses",
+        "commentPlaceholder": "Écrire un commentaire..."
     },
     "chat": {
         "sources": "Sources utilisées",

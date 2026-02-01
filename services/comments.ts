@@ -58,4 +58,15 @@ export const commentsApi = {
     });
     return data;
   },
+
+  getCommentReplies: async (
+    commentId: number,
+    page: number = 1,
+  ): Promise<ReviewComment[]> => {
+    const { data } = await api.get<ReviewComment[]>(
+      `/comments/${commentId}/replies`,
+      { params: { page } },
+    );
+    return data;
+  },
 };

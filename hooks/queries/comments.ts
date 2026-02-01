@@ -9,6 +9,7 @@ import { staleTimes } from "@/lib/queryClient";
 
 export const commentKeys = {
   reviewComments: (reviewId: number) => ["comments", "review", reviewId],
+  commentReplies: (commentId: number) => ["comments", "replies", commentId],
   userSearch: (query: string) => ["users", "search", query],
 };
 
@@ -145,5 +146,14 @@ export function useUserSearch(query: string) {
     queryFn: () => commentsApi.searchUsers(query),
     enabled: query.length > 1,
     staleTime: 60 * 1000, // 1 minute
+  });
+}
+
+export function useCommentReplies(commentId: number, enabled: boolean = false) {
+  return useQuery({
+    queryKey: commentKeys.commentReplies(commentId),
+    queryFn: () => commentsApi.getCommentReplies(commentId),
+    staleTime: staleTimes.content,
+    enabled,
   });
 }
