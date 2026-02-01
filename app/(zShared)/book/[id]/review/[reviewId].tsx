@@ -38,6 +38,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { BookReviewRevision } from "@/types/review";
 import PillButton from "@/components/ui/PillButton";
 import DotSeparator from "@/components/ui/DotSeparator";
+import { ReviewComments } from "@/components/reviews/comments/ReviewComments";
 
 dayjs.extend(relativeTime);
 
@@ -56,7 +57,7 @@ export default function ReviewDetailScreen() {
 
   const bookId = id as string;
   const reviewIdStr = reviewId as string;
-  
+
   const { data: review, isLoading, refetch } = useReview(bookId, reviewIdStr);
   const { data: book } = useBook(bookId);
   const { currentUser } = useUserStore();
@@ -101,7 +102,9 @@ export default function ReviewDetailScreen() {
   };
 
   const formattedDate = review ? dayjs(review.createdAt).fromNow() : "";
-  const formattedFullDate = review ? dayjs(review.createdAt).format("DD/MM/YYYY HH:mm") : "";
+  const formattedFullDate = review
+    ? dayjs(review.createdAt).format("DD/MM/YYYY HH:mm")
+    : "";
   const wasEdited = review && review.updatedAt !== review.createdAt;
   const editedDate = wasEdited ? dayjs(review.updatedAt).fromNow() : "";
 
@@ -116,13 +119,25 @@ export default function ReviewDetailScreen() {
         />
         <View style={[styles.content, { paddingTop: insets.top + 70 }]}>
           <View style={styles.userSection}>
-            <SkeletonLoader width={48} height={48} style={{ borderRadius: 24 }} />
+            <SkeletonLoader
+              width={48}
+              height={48}
+              style={{ borderRadius: 24 }}
+            />
             <View style={{ marginLeft: 12, flex: 1 }}>
-              <SkeletonLoader width={120} height={18} style={{ marginBottom: 4 }} />
+              <SkeletonLoader
+                width={120}
+                height={18}
+                style={{ marginBottom: 4 }}
+              />
               <SkeletonLoader width={80} height={14} />
             </View>
           </View>
-          <SkeletonLoader width="100%" height={200} style={{ marginTop: 24, borderRadius: 0 }} />
+          <SkeletonLoader
+            width="100%"
+            height={200}
+            style={{ marginTop: 24, borderRadius: 0 }}
+          />
         </View>
       </View>
     );
@@ -137,7 +152,13 @@ export default function ReviewDetailScreen() {
           scrollY={scrollY}
           onBack={() => router.back()}
         />
-        <View style={[styles.content, styles.emptyContainer, { paddingTop: insets.top + 70 }]}>
+        <View
+          style={[
+            styles.content,
+            styles.emptyContainer,
+            { paddingTop: insets.top + 70 },
+          ]}
+        >
           <Text style={[typography.body, { color: colors.secondaryText }]}>
             {t("reviews.noReviews")}
           </Text>
@@ -186,7 +207,10 @@ export default function ReviewDetailScreen() {
               <Avatar image={review.user.avatar} size={48} />
               <View style={styles.userMeta}>
                 <View style={styles.usernameRow}>
-                  <Text style={[typography.categoryTitle, { color: colors.text }]} numberOfLines={1}>
+                  <Text
+                    style={[typography.categoryTitle, { color: colors.text }]}
+                    numberOfLines={1}
+                  >
                     {review.user.displayName}
                   </Text>
                   {review.user.plan === "plus" && (
@@ -195,7 +219,9 @@ export default function ReviewDetailScreen() {
                     </View>
                   )}
                 </View>
-                <Text style={[typography.caption, { color: colors.secondaryText }]}>
+                <Text
+                  style={[typography.caption, { color: colors.secondaryText }]}
+                >
                   @{review.user.username}
                 </Text>
               </View>
@@ -206,7 +232,14 @@ export default function ReviewDetailScreen() {
               {book?.title && (
                 <Pressable onPress={() => router.push(`/book/${book.id}`)}>
                   <Text
-                    style={[typography.categoryTitle, { color: colors.text, fontWeight: "600", marginBottom: 8 }]}
+                    style={[
+                      typography.categoryTitle,
+                      {
+                        color: colors.text,
+                        fontWeight: "600",
+                        marginBottom: 8,
+                      },
+                    ]}
                     numberOfLines={2}
                   >
                     {book.title}
@@ -221,7 +254,8 @@ export default function ReviewDetailScreen() {
                     const isHalf = star === fullStars + 1 && hasHalf;
                     const isFull = star <= fullStars;
 
-                    let iconName: "star" | "star-half" | "star-outline" = "star-outline";
+                    let iconName: "star" | "star-half" | "star-outline" =
+                      "star-outline";
                     if (isFull) {
                       iconName = "star";
                     } else if (isHalf) {
@@ -262,7 +296,15 @@ export default function ReviewDetailScreen() {
         <View style={[styles.contentSection, { borderColor: colors.border }]}>
           {review.isSpoiler && !spoilerRevealed ? (
             <Pressable
-              style={[styles.spoilerOverlay, { backgroundColor: currentTheme === "dark" ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.08)" }]}
+              style={[
+                styles.spoilerOverlay,
+                {
+                  backgroundColor:
+                    currentTheme === "dark"
+                      ? "rgba(0,0,0,0.6)"
+                      : "rgba(0,0,0,0.08)",
+                },
+              ]}
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setSpoilerRevealed(true);
@@ -270,13 +312,25 @@ export default function ReviewDetailScreen() {
             >
               <View style={styles.spoilerContent}>
                 <AlertTriangle size={32} color={colors.secondaryText} />
-                <Text style={[typography.body, { color: colors.secondaryText, marginTop: 12, fontWeight: "600", textAlign: "center" }]}>
+                <Text
+                  style={[
+                    typography.body,
+                    {
+                      color: colors.secondaryText,
+                      marginTop: 12,
+                      fontWeight: "600",
+                      textAlign: "center",
+                    },
+                  ]}
+                >
                   {t("reviews.containsSpoilerWarning")}
                 </Text>
               </View>
             </Pressable>
           ) : (
-            <Text style={[typography.body, { color: colors.text, lineHeight: 26 }]}>
+            <Text
+              style={[typography.body, { color: colors.text, lineHeight: 26 }]}
+            >
               {review.content}
             </Text>
           )}
@@ -286,14 +340,24 @@ export default function ReviewDetailScreen() {
         <View style={styles.dateSection}>
           <View style={styles.dateRow}>
             <Clock size={14} color={colors.secondaryText} />
-            <Text style={[typography.caption, { color: colors.secondaryText, marginLeft: 6 }]}>
+            <Text
+              style={[
+                typography.caption,
+                { color: colors.secondaryText, marginLeft: 6 },
+              ]}
+            >
               {formattedDate} <DotSeparator /> {formattedFullDate}
             </Text>
           </View>
           {wasEdited && (
             <View style={[styles.dateRow, { marginTop: 4 }]}>
               <History size={14} color={colors.secondaryText} />
-              <Text style={[typography.caption, { color: colors.secondaryText, marginLeft: 6 }]}>
+              <Text
+                style={[
+                  typography.caption,
+                  { color: colors.secondaryText, marginLeft: 6 },
+                ]}
+              >
                 {t("reviews.edited")} {editedDate}
               </Text>
             </View>
@@ -317,79 +381,127 @@ export default function ReviewDetailScreen() {
           )}
         </View>
 
+        {/* Comments Section */}
+        {review && (
+          <View
+            style={{
+              marginTop: 24,
+              borderTopWidth: 1,
+              borderColor: colors.border,
+            }}
+          >
+            <ReviewComments reviewId={review.id} bookId={bookId} />
+          </View>
+        )}
+
         {/* Previous Versions */}
         {hasRevisions && (
-          <View style={[styles.revisionsSection, { borderColor: colors.border }]}>
+          <View
+            style={[styles.revisionsSection, { borderColor: colors.border }]}
+          >
             <View style={styles.revisionsSectionHeader}>
               <Text style={[typography.categoryTitle, { color: colors.text }]}>
                 {t("reviews.previousVersions")}
               </Text>
               <DotSeparator />
-              <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                {review.revisionsCount} {review.revisionsCount === 1 ? t("reviews.revision") : t("reviews.revisions")}
+              <Text
+                style={[typography.caption, { color: colors.secondaryText }]}
+              >
+                {review.revisionsCount}{" "}
+                {review.revisionsCount === 1
+                  ? t("reviews.revision")
+                  : t("reviews.revisions")}
               </Text>
             </View>
-            {review.revisions?.map((revision: BookReviewRevision, index: number) => (
-              <View 
-                key={revision.id} 
-                style={[
-                  styles.revisionItem,
-                  { 
-                    borderColor: colors.border,
-                    backgroundColor: currentTheme === "dark" 
-                      ? "rgba(255,255,255,0.02)" 
-                      : "rgba(0,0,0,0.02)",
-                  },
-                  index < (review.revisions?.length ?? 0) - 1 && { marginBottom: 12 }
-                ]}
-              >
-                <View style={styles.revisionHeader}>
-                  <View style={styles.revisionHeaderLeft}>
-                    <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                      {t("reviews.version", { number: (review.revisions?.length ?? 0) - index })}
-                    </Text>
-                    {revision.rating !== null && (
-                      <View style={styles.revisionRating}>
-                        {[1, 2, 3, 4, 5].map((star) => {
-                          const fullStars = Math.floor(revision.rating!);
-                          const hasHalf = revision.rating! % 1 !== 0;
-                          const isHalf = star === fullStars + 1 && hasHalf;
-                          const isFull = star <= fullStars;
-
-                          let iconName: "star" | "star-half" | "star-outline" = "star-outline";
-                          if (isFull) {
-                            iconName = "star";
-                          } else if (isHalf) {
-                            iconName = "star-half";
-                          }
-
-                          return (
-                            <Ionicons
-                              key={star}
-                              name={iconName}
-                              size={12}
-                              color={isFull || isHalf ? colors.accent : colors.border}
-                              style={{ marginRight: 2 }}
-                            />
-                          );
-                        })}
-                      </View>
-                    )}
-                  </View>
-                  <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                    {dayjs(revision.createdAt).format("DD/MM/YYYY HH:mm")}
-                  </Text>
-                </View>
-                <Text 
+            {review.revisions?.map(
+              (revision: BookReviewRevision, index: number) => (
+                <View
+                  key={revision.id}
                   style={[
-                    typography.body, 
-                    { color: colors.secondaryText, marginTop: 8, lineHeight: 22 }
+                    styles.revisionItem,
+                    {
+                      borderColor: colors.border,
+                      backgroundColor:
+                        currentTheme === "dark"
+                          ? "rgba(255,255,255,0.02)"
+                          : "rgba(0,0,0,0.02)",
+                    },
+                    index < (review.revisions?.length ?? 0) - 1 && {
+                      marginBottom: 12,
+                    },
                   ]}
                 >
-                  {revision.content}
-                </Text>
-              </View>
-            ))}
+                  <View style={styles.revisionHeader}>
+                    <View style={styles.revisionHeaderLeft}>
+                      <Text
+                        style={[
+                          typography.caption,
+                          { color: colors.secondaryText },
+                        ]}
+                      >
+                        {t("reviews.version", {
+                          number: (review.revisions?.length ?? 0) - index,
+                        })}
+                      </Text>
+                      {revision.rating !== null && (
+                        <View style={styles.revisionRating}>
+                          {[1, 2, 3, 4, 5].map((star) => {
+                            const fullStars = Math.floor(revision.rating!);
+                            const hasHalf = revision.rating! % 1 !== 0;
+                            const isHalf = star === fullStars + 1 && hasHalf;
+                            const isFull = star <= fullStars;
+
+                            let iconName:
+                              | "star"
+                              | "star-half"
+                              | "star-outline" = "star-outline";
+                            if (isFull) {
+                              iconName = "star";
+                            } else if (isHalf) {
+                              iconName = "star-half";
+                            }
+
+                            return (
+                              <Ionicons
+                                key={star}
+                                name={iconName}
+                                size={12}
+                                color={
+                                  isFull || isHalf
+                                    ? colors.accent
+                                    : colors.border
+                                }
+                                style={{ marginRight: 2 }}
+                              />
+                            );
+                          })}
+                        </View>
+                      )}
+                    </View>
+                    <Text
+                      style={[
+                        typography.caption,
+                        { color: colors.secondaryText },
+                      ]}
+                    >
+                      {dayjs(revision.createdAt).format("DD/MM/YYYY HH:mm")}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      typography.body,
+                      {
+                        color: colors.secondaryText,
+                        marginTop: 8,
+                        lineHeight: 22,
+                      },
+                    ]}
+                  >
+                    {revision.content}
+                  </Text>
+                </View>
+              ),
+            )}
           </View>
         )}
       </AnimatedScrollView>
