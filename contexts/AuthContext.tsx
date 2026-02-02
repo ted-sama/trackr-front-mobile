@@ -163,7 +163,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const redirectUrl = 'trackr://auth/callback';
             const authUrl = `${api.defaults.baseURL}/auth/google/redirect?redirect_uri=${encodeURIComponent(redirectUrl)}`;
 
+            if (__DEV__) {
+                console.log('[Auth] Starting Google OAuth flow');
+                console.log('[Auth] Auth URL:', authUrl);
+                console.log('[Auth] Expected redirect URL:', redirectUrl);
+            }
+
             const result = await WebBrowser.openAuthSessionAsync(authUrl, 'trackr');
+
+            if (__DEV__) {
+                console.log('[Auth] WebBrowser result type:', result.type);
+                if ('url' in result) {
+                    console.log('[Auth] Callback URL received:', result.url?.substring(0, 100) + '...');
+                    console.log('[Auth] Full URL length:', result.url?.length);
+                }
+            }
 
             if (result.type === 'success' && result.url) {
                 // Parse tokens from the callback URL
@@ -178,11 +192,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 const queryStart = url.indexOf('?');
                 const hashStart = url.indexOf('#');
 
+                if (__DEV__) {
+                    console.log('[Auth] URL parsing - query starts at:', queryStart);
+                    console.log('[Auth] URL parsing - hash starts at:', hashStart);
+                }
+
                 // Extract query string (between ? and # or end of URL)
                 let queryString = '';
                 if (queryStart !== -1) {
                     const endIndex = hashStart !== -1 && hashStart > queryStart ? hashStart : url.length;
                     queryString = url.substring(queryStart + 1, endIndex);
+                }
+
+                if (__DEV__) {
+                    console.log('[Auth] Extracted query string length:', queryString.length);
+                    // Log parameter names but not values for security
+                    const paramNames = queryString.split('&').map(p => p.split('=')[0]);
+                    console.log('[Auth] Query parameters found:', paramNames);
                 }
 
                 // Parse query parameters
@@ -193,14 +219,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
                     if (tokenParam) {
                         newToken = tokenParam;
+                        if (__DEV__) {
+                            console.log('[Auth] Access token extracted, length:', tokenParam.length);
+                        }
                     }
                     if (refreshParam) {
                         newRefreshToken = refreshParam;
+                        if (__DEV__) {
+                            console.log('[Auth] Refresh token extracted, length:', refreshParam.length);
+                        }
                     }
                 }
 
                 // Fallback: Check hash fragment (some OAuth flows use fragment)
                 if (!newToken && hashStart !== -1) {
+                    if (__DEV__) {
+                        console.log('[Auth] Trying hash fragment fallback');
+                    }
                     const fragment = url.substring(hashStart + 1);
                     const fragmentParams = new URLSearchParams(fragment);
                     const tokenParam = fragmentParams.get('token');
@@ -214,11 +249,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                     }
                 }
 
-                // Log for debugging (can be removed in production)
+                // Log for debugging
                 if (__DEV__) {
-                    console.log('[Auth] Google OAuth callback URL received');
-                    console.log('[Auth] Token present:', !!newToken);
-                    console.log('[Auth] Refresh token present:', !!newRefreshToken);
+                    console.log('[Auth] Google OAuth callback parsed:');
+                    console.log('[Auth] - Access token present:', !!newToken);
+                    console.log('[Auth] - Refresh token present:', !!newRefreshToken);
                 }
 
                 if (newToken) {
@@ -232,31 +267,77 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                     if (!currentUser) {
                         // User fetch failed, clean up
                         delete api.defaults.headers.common['Authorization'];
+                        console.error('[Auth] Failed to fetch user data after OAuth');
                         toast.error(t('errors.loginFailed'));
                         return;
                     }
 
+                    if (__DEV__) {
+                        console.log('[Auth] User data fetched successfully:', currentUser.username);
+                    }
+
                     // Token is valid and user data loaded, persist tokens
-                    await SecureStore.setItemAsync(TOKEN_KEY, newToken);
+                    // Use try-catch for each storage operation to ensure both are attempted
+                    try {
+                        await SecureStore.setItemAsync(TOKEN_KEY, newToken);
+                        if (__DEV__) {
+                            console.log('[Auth] Access token stored successfully');
+                        }
+                    } catch (storeError) {
+                        console.error('[Auth] Failed to store access token:', storeError);
+                        toast.error(t('errors.loginFailed'));
+                        return;
+                    }
 
                     // CRITICAL: Always store refresh token when provided
                     // This enables automatic token refresh and prevents 1-hour logout
                     if (newRefreshToken) {
-                        await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, newRefreshToken);
-                        if (__DEV__) {
-                            console.log('[Auth] Refresh token stored successfully');
+                        try {
+                            await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, newRefreshToken);
+                            if (__DEV__) {
+                                console.log('[Auth] Refresh token stored successfully');
+                            }
+                            
+                            // Verify storage succeeded
+                            const storedRefresh = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+                            if (!storedRefresh) {
+                                console.error('[Auth] CRITICAL: Refresh token storage verification failed!');
+                                // Continue anyway - user is logged in, just won't have refresh capability
+                            } else if (__DEV__) {
+                                console.log('[Auth] Refresh token storage verified');
+                            }
+                        } catch (storeError) {
+                            console.error('[Auth] Failed to store refresh token:', storeError);
+                            // Continue - user is logged in, just won't auto-refresh
                         }
                     } else {
                         // Log warning if refresh token is missing - this would cause 1h logout!
                         console.warn('[Auth] WARNING: No refresh token received from Google OAuth callback!');
                         console.warn('[Auth] Users will be logged out when access token expires (1 hour)');
+                        console.warn('[Auth] Callback URL was:', url.substring(0, 100) + '...');
                     }
 
                     setToken(newToken);
+                    
+                    if (__DEV__) {
+                        console.log('[Auth] Google OAuth login completed successfully');
+                    }
                 } else {
                     console.error('[Auth] No access token found in Google OAuth callback URL');
+                    console.error('[Auth] Raw URL:', url);
                     toast.error(t('errors.loginFailed'));
                 }
+            } else if (result.type === 'cancel') {
+                if (__DEV__) {
+                    console.log('[Auth] User cancelled Google OAuth');
+                }
+                // Don't show error for user cancellation
+            } else if (result.type === 'dismiss') {
+                if (__DEV__) {
+                    console.log('[Auth] Google OAuth browser dismissed');
+                }
+            } else {
+                console.error('[Auth] Unexpected OAuth result:', result);
             }
         } catch (error: any) {
             console.error('[Auth] Google OAuth error:', error);

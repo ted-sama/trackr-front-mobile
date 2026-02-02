@@ -54,11 +54,12 @@ const refreshAccessToken = async (): Promise<{
   try {
     const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
     if (!refreshToken) {
-      console.log('[Auth] No refresh token found in storage');
+      console.log('[Auth] No refresh token found in storage - user needs to re-login');
       return null;
     }
 
     console.log('[Auth] Attempting to refresh access token...');
+    console.log('[Auth] Refresh token length:', refreshToken.length);
 
     // Make refresh request without the Authorization header
     const response = await axios.post(`${apiUrl}/auth/refresh`, {
@@ -67,21 +68,68 @@ const refreshAccessToken = async (): Promise<{
 
     const { token, refreshToken: newRefreshToken } = response.data;
 
-    // Store new tokens
-    await SecureStore.setItemAsync(TOKEN_KEY, token);
-    await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, newRefreshToken);
+    if (!token || !newRefreshToken) {
+      console.error('[Auth] Refresh response missing tokens:', { hasToken: !!token, hasRefresh: !!newRefreshToken });
+      return null;
+    }
+
+    console.log('[Auth] Received new tokens from server');
+
+    // CRITICAL: Store tokens in correct order with verification
+    // Store new access token first
+    try {
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      console.log('[Auth] New access token stored');
+    } catch (storeError) {
+      console.error('[Auth] Failed to store new access token:', storeError);
+      // Don't continue if we can't store the access token
+      return null;
+    }
+
+    // Store new refresh token (critical for next refresh cycle)
+    try {
+      await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, newRefreshToken);
+      console.log('[Auth] New refresh token stored');
+      
+      // Verify the refresh token was stored correctly
+      const verifyRefresh = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+      if (verifyRefresh !== newRefreshToken) {
+        console.error('[Auth] CRITICAL: Refresh token storage verification failed!');
+        console.error('[Auth] Expected length:', newRefreshToken.length, 'Got length:', verifyRefresh?.length);
+      } else {
+        console.log('[Auth] Refresh token storage verified');
+      }
+    } catch (storeError) {
+      console.error('[Auth] Failed to store new refresh token:', storeError);
+      // Continue anyway - we have the access token, just won't be able to refresh again
+    }
 
     // Update API header
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-    console.log('[Auth] Token refresh successful');
+    console.log('[Auth] Token refresh completed successfully');
     return { token, refreshToken: newRefreshToken };
   } catch (error: any) {
-    // Refresh failed, clear tokens
-    console.log('[Auth] Token refresh failed:', error?.response?.status, error?.response?.data || error?.message);
-    await SecureStore.deleteItemAsync(TOKEN_KEY);
-    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-    delete api.defaults.headers.common['Authorization'];
+    // Refresh failed
+    const status = error?.response?.status;
+    const data = error?.response?.data;
+    
+    console.error('[Auth] Token refresh failed:');
+    console.error('[Auth] - Status:', status);
+    console.error('[Auth] - Error code:', data?.code);
+    console.error('[Auth] - Message:', data?.message || error?.message);
+    
+    // Only clear tokens if it's a definitive auth failure (401)
+    // For network errors or server errors, we might want to retry later
+    if (status === 401) {
+      console.log('[Auth] Clearing tokens due to 401 response');
+      await SecureStore.deleteItemAsync(TOKEN_KEY);
+      await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+      delete api.defaults.headers.common['Authorization'];
+    } else {
+      console.log('[Auth] Keeping tokens - error may be temporary (status:', status, ')');
+    }
+    
     return null;
   }
 };
