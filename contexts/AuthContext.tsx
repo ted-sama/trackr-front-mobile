@@ -166,28 +166,59 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const result = await WebBrowser.openAuthSessionAsync(authUrl, 'trackr');
 
             if (result.type === 'success' && result.url) {
-                // Try to extract tokens from URL
+                // Parse tokens from the callback URL
+                // The URL format is: trackr://auth/callback?token=xxx&refreshToken=yyy
                 const url = result.url;
                 let newToken: string | null = null;
                 let newRefreshToken: string | null = null;
 
-                // Check query params: ?token=xxx&refreshToken=yyy
-                const tokenMatch = url.match(/[?&]token=([^&]+)/);
-                if (tokenMatch) {
-                    newToken = decodeURIComponent(tokenMatch[1]);
+                // Robust URL parsing that handles custom schemes
+                // Custom schemes like trackr:// don't work with URL() constructor
+                // so we extract the query string manually
+                const queryStart = url.indexOf('?');
+                const hashStart = url.indexOf('#');
+
+                // Extract query string (between ? and # or end of URL)
+                let queryString = '';
+                if (queryStart !== -1) {
+                    const endIndex = hashStart !== -1 && hashStart > queryStart ? hashStart : url.length;
+                    queryString = url.substring(queryStart + 1, endIndex);
                 }
 
-                const refreshMatch = url.match(/[?&]refreshToken=([^&]+)/);
-                if (refreshMatch) {
-                    newRefreshToken = decodeURIComponent(refreshMatch[1]);
-                }
+                // Parse query parameters
+                if (queryString) {
+                    const params = new URLSearchParams(queryString);
+                    const tokenParam = params.get('token');
+                    const refreshParam = params.get('refreshToken');
 
-                // Check hash fragment as fallback: #token=xxx
-                if (!newToken) {
-                    const hashMatch = url.match(/#.*token=([^&]+)/);
-                    if (hashMatch) {
-                        newToken = decodeURIComponent(hashMatch[1]);
+                    if (tokenParam) {
+                        newToken = tokenParam;
                     }
+                    if (refreshParam) {
+                        newRefreshToken = refreshParam;
+                    }
+                }
+
+                // Fallback: Check hash fragment (some OAuth flows use fragment)
+                if (!newToken && hashStart !== -1) {
+                    const fragment = url.substring(hashStart + 1);
+                    const fragmentParams = new URLSearchParams(fragment);
+                    const tokenParam = fragmentParams.get('token');
+                    const refreshParam = fragmentParams.get('refreshToken');
+
+                    if (tokenParam) {
+                        newToken = tokenParam;
+                    }
+                    if (!newRefreshToken && refreshParam) {
+                        newRefreshToken = refreshParam;
+                    }
+                }
+
+                // Log for debugging (can be removed in production)
+                if (__DEV__) {
+                    console.log('[Auth] Google OAuth callback URL received');
+                    console.log('[Auth] Token present:', !!newToken);
+                    console.log('[Auth] Refresh token present:', !!newRefreshToken);
                 }
 
                 if (newToken) {
@@ -207,13 +238,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
                     // Token is valid and user data loaded, persist tokens
                     await SecureStore.setItemAsync(TOKEN_KEY, newToken);
+
+                    // CRITICAL: Always store refresh token when provided
+                    // This enables automatic token refresh and prevents 1-hour logout
                     if (newRefreshToken) {
                         await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, newRefreshToken);
+                        if (__DEV__) {
+                            console.log('[Auth] Refresh token stored successfully');
+                        }
+                    } else {
+                        // Log warning if refresh token is missing - this would cause 1h logout!
+                        console.warn('[Auth] WARNING: No refresh token received from Google OAuth callback!');
+                        console.warn('[Auth] Users will be logged out when access token expires (1 hour)');
                     }
+
                     setToken(newToken);
+                } else {
+                    console.error('[Auth] No access token found in Google OAuth callback URL');
+                    toast.error(t('errors.loginFailed'));
                 }
             }
         } catch (error: any) {
+            console.error('[Auth] Google OAuth error:', error);
             toast.error(t(handleErrorCodes(error)));
         } finally {
             setIsLoading(false);
