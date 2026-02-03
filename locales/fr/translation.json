@@ -447,6 +447,10 @@
             "newFollowerDescription": "Recevoir une notification push quand quelqu'un vous suit",
             "newFriend": "Nouveaux amis",
             "newFriendDescription": "Recevoir une notification push quand vous devenez ami avec quelqu'un"
+        },
+        "import": {
+            "title": "Import",
+            "malImport": "Importer depuis MyAnimeList"
         }
     },
     "languages": {
@@ -977,5 +981,43 @@
         "followers": "Abonnés",
         "friends": "Amis",
         "private": "Privé"
+    },
+    "malImport": {
+        "title": "Import MyAnimeList",
+        "description": "Entrez votre nom d'utilisateur MyAnimeList pour importer votre bibliothèque de mangas. Votre compte MAL doit être public pour que cela fonctionne.",
+        "usernameLabel": "Nom d'utilisateur MAL",
+        "usernamePlaceholder": "Entrez votre nom d'utilisateur MAL",
+        "importButton": "Importer la bibliothèque",
+        "importing": "Import en cours...",
+        "success": "{{count}} livre(s) importé(s) avec succès !",
+        "noNewBooks": "Aucun nouveau livre à importer",
+        "done": "Terminé",
+        "note": "Seules les entrées manga seront importées. Assurez-vous que votre liste MAL est publique.",
+        "errors": {
+            "usernameTooShort": "Le nom d'utilisateur doit contenir au moins 2 caractères",
+            "userNotFound": "Utilisateur MAL introuvable. Vérifiez que le nom d'utilisateur est correct et que le profil est public.",
+            "importFailed": "Échec de l'import depuis MyAnimeList. Veuillez réessayer.",
+            "generic": "Une erreur est survenue. Veuillez réessayer."
+        },
+        "results": {
+            "title": "Résultats de l'import",
+            "imported": "Importés",
+            "alreadyExists": "Déjà en bibliothèque",
+            "notFound": "Non trouvés",
+            "notFoundList": "Livres non trouvés sur Trackr :",
+            "alreadyExistsList": "Livres déjà dans votre bibliothèque :",
+            "andMore": "et {{count}} de plus..."
+        }
+    },
+    "onboarding": {
+        "import": {
+            "title": "Importer votre bibliothèque",
+            "subtitle": "Vous avez déjà une liste sur MyAnimeList ?",
+            "note": "Vous pourrez aussi importer votre bibliothèque plus tard depuis les Paramètres.",
+            "skip": "Passer",
+            "continue": "Continuer",
+            "successWithCount": "{{count}} livre(s) ajouté(s) à votre bibliothèque !",
+            "noNewBooks": "Aucun nouveau livre à importer"
+        }
     }
 }
