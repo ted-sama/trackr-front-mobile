@@ -98,7 +98,7 @@ export default function Profile() {
     if (currentUser?.backdropMode === "image" && currentUser?.backdropImage) {
       getPalette(currentUser.backdropImage).then(palette => {
         setDominantColor(palette.vibrant);
-      });
+      }).catch(() => {});
     } else {
       setDominantColor(null);
     }

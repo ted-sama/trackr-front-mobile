@@ -50,7 +50,7 @@ SplashScreen.setOptions({
 export default function RootLayout() {
   return (
     <PostHogProvider
-      apiKey="phc_Kub1ae3pxNxCKEyR1P903VCKD7jAo9cPxgjscw768mJ"
+      apiKey={process.env.EXPO_PUBLIC_POSTHOG_KEY!}
       options={{
         host: "https://eu.i.posthog.com",
         enableSessionReplay: true,

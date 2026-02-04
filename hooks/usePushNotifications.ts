@@ -31,14 +31,14 @@ export function usePushNotifications() {
   async function registerForPushNotificationsAsync(): Promise<string | null> {
     // Skip on simulators/emulators
     if (!Device.isDevice) {
-      console.log('Push notifications require a physical device');
+      if (__DEV__) console.log('Push notifications require a physical device');
       return null;
     }
 
     // Skip in Expo Go - push requires a development build
     const isExpoGo = Constants.appOwnership === 'expo';
     if (isExpoGo) {
-      console.log('Push notifications are not supported in Expo Go. Use a development build.');
+      if (__DEV__) console.log('Push notifications are not supported in Expo Go. Use a development build.');
       return null;
     }
 
@@ -52,7 +52,7 @@ export function usePushNotifications() {
       }
 
       if (finalStatus !== 'granted') {
-        console.log('Push notification permission not granted');
+        if (__DEV__) console.log('Push notification permission not granted');
         return null;
       }
 
@@ -60,7 +60,7 @@ export function usePushNotifications() {
       const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
 
       if (!projectId) {
-        console.warn('No EAS project ID found - push notifications may not work in development');
+        if (__DEV__) console.warn('No EAS project ID found - push notifications may not work in development');
       }
 
       const tokenData = await Notifications.getExpoPushTokenAsync({
@@ -84,10 +84,10 @@ export function usePushNotifications() {
       // Silently fail for known development environment issues
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       if (errorMessage.includes('aps-environment') || errorMessage.includes('entitlement')) {
-        console.log('Push notifications require a development build with proper entitlements');
+        if (__DEV__) console.log('Push notifications require a development build with proper entitlements');
         return null;
       }
-      console.error('Error registering for push notifications:', err);
+      if (__DEV__) console.error('Error registering for push notifications:', err);
       setError(errorMessage);
       return null;
     }
@@ -98,7 +98,7 @@ export function usePushNotifications() {
     try {
       await api.post('/me/push-token', { pushToken: token });
     } catch (err) {
-      console.error('Failed to register push token with backend:', err);
+      if (__DEV__) console.error('Failed to register push token with backend:', err);
     }
   }
 
@@ -142,12 +142,14 @@ export function usePushNotifications() {
         setExpoPushToken(token);
         sendTokenToBackend(token);
       }
+    }).catch((err) => {
+      if (__DEV__) console.error('Error during push notification registration:', err);
     });
 
     // Listen for incoming notifications while app is foregrounded
     notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
       // Could invalidate notification queries here if needed
-      console.log('Notification received:', notification);
+      if (__DEV__) console.log('Notification received:', notification);
     });
 
     // Listen for notification taps

@@ -272,8 +272,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             // Try to revoke refresh token on server (ignore errors)
             try {
                 await api.post('/auth/logout');
-            } catch {
+            } catch (e) {
                 // Server logout failed, but we still clear local state
+                if (__DEV__) console.error('Server logout failed:', e);
             }
             await performLogout();
         } catch (error) {

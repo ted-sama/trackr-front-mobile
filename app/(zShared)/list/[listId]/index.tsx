@@ -473,7 +473,7 @@ export default function ListFullScreen() {
     if (list?.backdropMode === "image" && list?.backdropImage) {
       getPalette(list.backdropImage).then(palette => {
         setDominantColor(palette.vibrant);
-      });
+      }).catch(() => {});
     } else {
       setDominantColor(null);
     }

@@ -7,6 +7,7 @@ import {
   Pressable,
   Keyboard,
   TextInput,
+  Linking,
 } from "react-native";
 import React, { useState, useRef } from "react";
 import Button from "@/components/ui/Button";
@@ -222,8 +223,7 @@ export default function Signup() {
           <Text
             style={{ color: colors.accent, fontWeight: "600" }}
             onPress={() => {
-              // TODO: Navigation vers les conditions d'utilisation
-              toast(t("toast.comingSoon"));
+              Linking.openURL("https://trackrr.app/terms");
             }}
           >
             {t("auth.signup.termsLink")}
@@ -232,8 +232,7 @@ export default function Signup() {
           <Text
             style={{ color: colors.accent, fontWeight: "600" }}
             onPress={() => {
-              // TODO: Navigation vers la politique de confidentialité
-              toast(t("toast.comingSoon"));
+              Linking.openURL("https://trackrr.app/privacy");
             }}
           >
             {t("auth.signup.privacyLink")}

@@ -111,7 +111,7 @@ export default function ChatScreen() {
             }
         }),
         onError: (error) => {
-            console.error(error);
+            if (__DEV__) console.error(error);
         },
     });
 
@@ -126,7 +126,7 @@ export default function ChatScreen() {
 
     useEffect(() => {
         if (book?.coverImage) {
-            getPalette(book.coverImage).then(palette => setDominantColor(palette.vibrant));
+            getPalette(book.coverImage).then(palette => setDominantColor(palette.vibrant)).catch(() => {});
         }
     }, [book?.coverImage]);
 
@@ -368,6 +368,14 @@ export default function ChatScreen() {
             onScroll={handleScroll}
             scrollEventThrottle={400}
           >
+            {error && (
+              <View style={[styles.errorContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Ionicons name="alert-circle" size={24} color={colors.accent} />
+                <Text style={[typography.body, { color: colors.text, marginLeft: 8, flex: 1 }]}>
+                  {t("chat.error")}
+                </Text>
+              </View>
+            )}
             {messages.length > 0 && (
               messages.map((m) => {
                 const isUser = m.role === 'user';
@@ -546,6 +554,14 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 16,
     textAlign: 'center',
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 16,
   },
   bookInfo: {
     justifyContent: 'center',
