@@ -1,18 +1,35 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
+import { View, Text, StyleSheet, Pressable, FlatList, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
 import { useRouter } from 'expo-router';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
-import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+  runOnJS,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import Button from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { toast } from 'sonner-native';
-import { useMalImport, MalImportResponse } from '@/hooks/queries/malImport';
-import { CheckCircle, XCircle, AlertCircle } from 'lucide-react-native';
+import {
+  useMalFetch,
+  useMalConfirmImport,
+  MalFetchResponse,
+  PendingImportBook,
+} from '@/hooks/queries/malImport';
+import { ChevronUp } from 'lucide-react-native';
+import { useUIStore } from '@/stores/uiStore';
+import { useTrackedBooksStore } from '@/stores/trackedBookStore';
+import { BookItem } from '@/components/mal-import/BookItem';
+import { ActionBar } from '@/components/mal-import/ActionBar';
+import { SummaryCard } from '@/components/mal-import/SummaryCard';
+import { Toolbar } from '@/components/mal-import/Toolbar';
+import { NotFoundList } from '@/components/mal-import/NotFoundList';
+import { GRID_COLUMNS, GRID_GAP } from '@/components/mal-import/constants';
 
 export default function MalImport() {
   const { colors, currentTheme } = useTheme();
@@ -20,16 +37,38 @@ export default function MalImport() {
   const typography = useTypography();
   const router = useRouter();
   const { t } = useTranslation();
+  const scrollViewRef = useRef<ScrollView>(null);
   const scrollY = useSharedValue(0);
   const [titleY, setTitleY] = useState<number>(0);
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
-  const [result, setResult] = useState<MalImportResponse | null>(null);
+  const [fetchResult, setFetchResult] = useState<MalFetchResponse | null>(null);
+  const [selectedBooks, setSelectedBooks] = useState<Set<number>>(new Set());
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
-  const malImportMutation = useMalImport();
+  // Use global layout preference from store (consistent with my-library)
+  const currentLayout = useUIStore((state) => state.myLibraryLayout);
+  const setLayout = useUIStore((state) => state.setMyLibraryLayout);
+  const fetchMyLibraryBooks = useTrackedBooksStore((state) => state.fetchMyLibraryBooks);
 
-  const scrollHandler = useAnimatedScrollHandler((event) => {
-    scrollY.value = event.contentOffset.y;
+  const switchLayout = () => {
+    setLayout(currentLayout === 'grid' ? 'list' : 'grid');
+  };
+
+  const malFetchMutation = useMalFetch();
+  const malConfirmMutation = useMalConfirmImport();
+
+  const pendingBooks = fetchResult?.pendingBooks || [];
+
+  const updateScrollTopVisibility = useCallback((offsetY: number) => {
+    setShowScrollTop(offsetY > 400);
+  }, []);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+      runOnJS(updateScrollTopVisibility)(event.contentOffset.y);
+    },
   });
 
   const validateUsername = (): string => {
@@ -42,7 +81,7 @@ export default function MalImport() {
     return '';
   };
 
-  const handleImport = async () => {
+  const handleFetch = async () => {
     const validationError = validateUsername();
     setError(validationError);
 
@@ -51,12 +90,27 @@ export default function MalImport() {
     }
 
     try {
-      const response = await malImportMutation.mutateAsync(username.trim());
-      setResult(response);
-      if (response.imported > 0) {
-        toast.success(t('malImport.success', { count: response.imported }));
+      const response = await malFetchMutation.mutateAsync(username.trim());
+
+      if (response.pendingBooks.length > 0) {
+        // Only show validation page if there are books to import
+        setFetchResult(response);
+        setSelectedBooks(new Set(response.pendingBooks.map((b) => b.bookId)));
+        toast.success(t('malImport.foundBooks', { count: response.pendingBooks.length }));
       } else {
+        // No new books - show message but stay on current page
         toast(t('malImport.noNewBooks'));
+        // Show stats about already existing / not found
+        if (response.alreadyExists > 0 || response.notFound > 0) {
+          const parts = [];
+          if (response.alreadyExists > 0) {
+            parts.push(t('malImport.alreadyExistsCount', { count: response.alreadyExists }));
+          }
+          if (response.notFound > 0) {
+            parts.push(t('malImport.notFoundCount', { count: response.notFound }));
+          }
+          toast(parts.join(' • '), { duration: 4000 });
+        }
       }
     } catch (err: any) {
       const errorCode = err?.response?.data?.code;
@@ -70,92 +124,133 @@ export default function MalImport() {
     }
   };
 
-  const renderResults = () => {
-    if (!result) return null;
+  const handleToggleBook = useCallback((bookId: number) => {
+    setSelectedBooks((prev) => {
+      const next = new Set(prev);
+      if (next.has(bookId)) {
+        next.delete(bookId);
+      } else {
+        next.add(bookId);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    setSelectedBooks(new Set(pendingBooks.map((b) => b.bookId)));
+  }, [pendingBooks]);
+
+  const handleDeselectAll = useCallback(() => {
+    setSelectedBooks(new Set());
+  }, []);
+
+  const handleConfirmImport = async () => {
+    if (selectedBooks.size === 0) {
+      toast.error(t('malImport.errors.noSelection'));
+      return;
+    }
+
+    const booksToImport = pendingBooks.filter((b) => selectedBooks.has(b.bookId));
+
+    try {
+      const result = await malConfirmMutation.mutateAsync(booksToImport);
+      toast.success(t('malImport.importSuccess', { count: result.imported }));
+      await fetchMyLibraryBooks();
+      router.replace('/(tabs)/collection');
+    } catch (err) {
+      toast.error(t('malImport.errors.importFailed'));
+    }
+  };
+
+  const handleCancel = () => {
+    if (fetchResult) {
+      setFetchResult(null);
+      setSelectedBooks(new Set());
+    } else {
+      router.back();
+    }
+  };
+
+  const scrollToTop = () => {
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+  };
+
+  const renderGridItem = useCallback(
+    ({ item }: { item: PendingImportBook }) => (
+      <BookItem
+        book={item}
+        isSelected={selectedBooks.has(item.bookId)}
+        onToggle={handleToggleBook}
+        viewMode="grid"
+      />
+    ),
+    [selectedBooks, handleToggleBook]
+  );
+
+  const renderListItem = useCallback(
+    ({ item }: { item: PendingImportBook }) => (
+      <BookItem
+        book={item}
+        isSelected={selectedBooks.has(item.bookId)}
+        onToggle={handleToggleBook}
+        viewMode="list"
+      />
+    ),
+    [selectedBooks, handleToggleBook]
+  );
+
+  const renderPendingBooks = () => {
+    if (!fetchResult || pendingBooks.length === 0) return null;
 
     return (
       <View style={styles.resultsContainer}>
-        <Text style={[typography.h2, { color: colors.text, marginBottom: 16 }]}>
-          {t('malImport.results.title')}
-        </Text>
-
-        {/* Summary */}
-        <View style={[styles.summaryCard, { backgroundColor: colors.card }]}>
-          <View style={styles.summaryRow}>
-            <View style={styles.summaryItem}>
-              <CheckCircle size={24} color={colors.accent} />
-              <Text style={[typography.h2, { color: colors.text }]}>{result.imported}</Text>
-              <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                {t('malImport.results.imported')}
-              </Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <AlertCircle size={24} color={colors.icon} />
-              <Text style={[typography.h2, { color: colors.text }]}>{result.alreadyExists.length}</Text>
-              <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                {t('malImport.results.alreadyExists')}
-              </Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <XCircle size={24} color={colors.error} />
-              <Text style={[typography.h2, { color: colors.text }]}>{result.notFound.length}</Text>
-              <Text style={[typography.caption, { color: colors.secondaryText }]}>
-                {t('malImport.results.notFound')}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Not found list */}
-        {result.notFound.length > 0 && (
-          <View style={styles.listSection}>
-            <Text style={[typography.body, { color: colors.secondaryText, marginBottom: 8, fontWeight: '600' }]}>
-              {t('malImport.results.notFoundList')}
-            </Text>
-            <View style={[styles.listCard, { backgroundColor: colors.card }]}>
-              {result.notFound.map((title, index) => (
-                <Text
-                  key={index}
-                  style={[typography.body, { color: colors.text, paddingVertical: 8 }]}
-                  numberOfLines={1}
-                >
-                  {title}
-                </Text>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* Already exists list */}
-        {result.alreadyExists.length > 0 && (
-          <View style={styles.listSection}>
-            <Text style={[typography.body, { color: colors.secondaryText, marginBottom: 8, fontWeight: '600' }]}>
-              {t('malImport.results.alreadyExistsList')}
-            </Text>
-            <View style={[styles.listCard, { backgroundColor: colors.card }]}>
-              {result.alreadyExists.slice(0, 10).map((title, index) => (
-                <Text
-                  key={index}
-                  style={[typography.body, { color: colors.text, paddingVertical: 8 }]}
-                  numberOfLines={1}
-                >
-                  {title}
-                </Text>
-              ))}
-              {result.alreadyExists.length > 10 && (
-                <Text style={[typography.caption, { color: colors.secondaryText, paddingVertical: 8 }]}>
-                  {t('malImport.results.andMore', { count: result.alreadyExists.length - 10 })}
-                </Text>
-              )}
-            </View>
-          </View>
-        )}
-
-        <Button
-          title={t('malImport.done')}
-          onPress={() => router.back()}
-          style={{ marginTop: 24 }}
+        <ActionBar
+          selectedCount={selectedBooks.size}
+          totalCount={pendingBooks.length}
+          onCancel={handleCancel}
+          onConfirm={handleConfirmImport}
+          confirmDisabled={malConfirmMutation.isPending}
         />
+
+        <SummaryCard
+          foundCount={pendingBooks.length}
+          alreadyExistsCount={fetchResult.details.alreadyExists.length}
+          notFoundCount={fetchResult.details.notFound.length}
+        />
+
+        <Toolbar
+          onSelectAll={handleSelectAll}
+          onDeselectAll={handleDeselectAll}
+          onSwitchLayout={switchLayout}
+          currentLayout={currentLayout}
+        />
+
+        {/* Books */}
+        {currentLayout === 'grid' ? (
+          <FlatList
+            key="grid"
+            data={pendingBooks}
+            renderItem={renderGridItem}
+            keyExtractor={(item) => item.bookId.toString()}
+            numColumns={GRID_COLUMNS}
+            columnWrapperStyle={styles.gridRow}
+            scrollEnabled={false}
+            contentContainerStyle={styles.gridContent}
+          />
+        ) : (
+          <FlatList
+            key="list"
+            data={pendingBooks}
+            renderItem={renderListItem}
+            keyExtractor={(item) => item.bookId.toString()}
+            scrollEnabled={false}
+            contentContainerStyle={styles.listContent}
+            ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+          />
+        )}
+
+        {/* Not found list (collapsed) */}
+        <NotFoundList titles={fetchResult.details.notFound} />
       </View>
     );
   };
@@ -167,16 +262,17 @@ export default function MalImport() {
       <AnimatedHeader
         title={t('malImport.title')}
         scrollY={scrollY}
-        onBack={() => router.back()}
+        onBack={handleCancel}
         collapseThreshold={titleY > 0 ? titleY : undefined}
       />
 
       <Animated.ScrollView
+        ref={scrollViewRef as any}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         contentContainerStyle={{
           marginTop: insets.top,
-          paddingBottom: 64,
+          paddingBottom: 100,
           paddingHorizontal: 16,
         }}
       >
@@ -184,7 +280,7 @@ export default function MalImport() {
           <Text style={[typography.h1, { color: colors.text }]}>{t('malImport.title')}</Text>
         </View>
 
-        {!result ? (
+        {!fetchResult ? (
           <>
             <Text style={[typography.body, { color: colors.secondaryText, marginBottom: 24 }]}>
               {t('malImport.description')}
@@ -204,20 +300,32 @@ export default function MalImport() {
             />
 
             <Button
-              title={malImportMutation.isPending ? t('malImport.importing') : t('malImport.importButton')}
-              onPress={handleImport}
-              disabled={malImportMutation.isPending || !username.trim()}
+              title={malFetchMutation.isPending ? t('malImport.fetching') : t('malImport.fetchButton')}
+              onPress={handleFetch}
+              disabled={malFetchMutation.isPending || !username.trim()}
               style={{ marginTop: 24 }}
             />
 
-            <Text style={[typography.caption, { color: colors.secondaryText, marginTop: 16, textAlign: 'center' }]}>
+            <Text
+              style={[typography.caption, { color: colors.secondaryText, marginTop: 16, textAlign: 'center' }]}
+            >
               {t('malImport.note')}
             </Text>
           </>
         ) : (
-          renderResults()
+          renderPendingBooks()
         )}
       </Animated.ScrollView>
+
+      {/* Scroll to top button */}
+      {showScrollTop && (
+        <Pressable
+          style={[styles.scrollTopButton, { backgroundColor: colors.accent }]}
+          onPress={scrollToTop}
+        >
+          <ChevronUp size={24} color="#fff" />
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -233,24 +341,29 @@ const styles = StyleSheet.create({
   resultsContainer: {
     marginTop: 8,
   },
-  summaryCard: {
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
+  gridRow: {
+    gap: GRID_GAP,
+    marginBottom: GRID_GAP,
   },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+  gridContent: {
+    paddingBottom: 8,
   },
-  summaryItem: {
+  listContent: {
+    paddingBottom: 8,
+  },
+  scrollTopButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-  },
-  listSection: {
-    marginBottom: 16,
-  },
-  listCard: {
-    borderRadius: 12,
-    paddingHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
