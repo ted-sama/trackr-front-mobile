@@ -22,9 +22,8 @@ import {
 } from '@/types/subscription';
 import { useUserStore } from '@/stores/userStore';
 
-// RevenueCat API Keys
-// const REVENUECAT_API_KEY = 'test_otUyOYODvVzwlGNibUdnnrhWEPi'; // Test API Key
-const REVENUECAT_API_KEY = 'appl_dPEKcJFhYjVaExTXthPDKuAysrp'; // Production API Key
+// RevenueCat API Key (loaded from environment variable)
+const REVENUECAT_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_KEY!;
 
 // Default subscription status
 const defaultSubscriptionStatus: SubscriptionStatus = {
@@ -125,7 +124,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to initialize RevenueCat';
-      console.error('RevenueCat initialization error:', errorMessage);
+      if (__DEV__) console.error('RevenueCat initialization error:', errorMessage);
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -162,7 +161,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     // 1. User is logged in (currentUser exists)
     // 2. Plan has actually changed from the previous value
     if (currentUser && previousPlanRef.current !== currentPlan) {
-      console.log(
+      if (__DEV__) console.log(
         `[RevenueCat] Plan changed: ${previousPlanRef.current} -> ${currentPlan}`
       );
       updatePlan(currentPlan);
@@ -197,7 +196,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to present paywall';
-      console.error('Paywall error:', errorMessage);
+      if (__DEV__) console.error('Paywall error:', errorMessage);
       setError(errorMessage);
       return false;
     } finally {
@@ -235,7 +234,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to present paywall';
-      console.error('Paywall error:', errorMessage);
+      if (__DEV__) console.error('Paywall error:', errorMessage);
       setError(errorMessage);
       return false;
     } finally {
@@ -251,30 +250,30 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       await RevenueCatUI.presentCustomerCenter({
         callbacks: {
           onFeedbackSurveyCompleted: ({ feedbackSurveyOptionId }) => {
-            console.log('Feedback survey completed:', feedbackSurveyOptionId);
+            if (__DEV__) console.log('Feedback survey completed:', feedbackSurveyOptionId);
           },
           onShowingManageSubscriptions: () => {
-            console.log('Showing manage subscriptions');
+            if (__DEV__) console.log('Showing manage subscriptions');
           },
           onRestoreStarted: () => {
-            console.log('Restore started');
+            if (__DEV__) console.log('Restore started');
           },
           onRestoreCompleted: async ({ customerInfo: restoredInfo }) => {
-            console.log('Restore completed');
+            if (__DEV__) console.log('Restore completed');
             setCustomerInfo(restoredInfo);
             setSubscriptionStatus(parseSubscriptionStatus(restoredInfo));
           },
           onRestoreFailed: ({ error: restoreError }) => {
-            console.error('Restore failed:', restoreError);
+            if (__DEV__) console.error('Restore failed:', restoreError);
           },
           onRefundRequestStarted: ({ productIdentifier }) => {
-            console.log('Refund request started for:', productIdentifier);
+            if (__DEV__) console.log('Refund request started for:', productIdentifier);
           },
           onRefundRequestCompleted: async ({
             productIdentifier,
             refundRequestStatus,
           }) => {
-            console.log(
+            if (__DEV__) console.log(
               'Refund request completed:',
               productIdentifier,
               refundRequestStatus
@@ -285,11 +284,11 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
               setCustomerInfo(info);
               setSubscriptionStatus(parseSubscriptionStatus(info));
             } catch (e) {
-              console.error('Failed to refresh after refund:', e);
+              if (__DEV__) console.error('Failed to refresh after refund:', e);
             }
           },
           onManagementOptionSelected: ({ option, url }) => {
-            console.log('Management option selected:', option, url);
+            if (__DEV__) console.log('Management option selected:', option, url);
           },
         },
       });
@@ -301,14 +300,14 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
         setCustomerInfo(info);
         setSubscriptionStatus(parseSubscriptionStatus(info));
       } catch (e) {
-        console.error('Failed to refresh after Customer Center:', e);
+        if (__DEV__) console.error('Failed to refresh after Customer Center:', e);
       }
     } catch (err) {
       const errorMessage =
         err instanceof Error
           ? err.message
           : 'Failed to present customer center';
-      console.error('Customer center error:', errorMessage);
+      if (__DEV__) console.error('Customer center error:', errorMessage);
       setError(errorMessage);
     }
   }, [parseSubscriptionStatus]);
@@ -326,7 +325,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to restore purchases';
-      console.error('Restore error:', errorMessage);
+      if (__DEV__) console.error('Restore error:', errorMessage);
       setError(errorMessage);
       return false;
     } finally {
@@ -347,7 +346,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to refresh customer info';
-      console.error('Refresh error:', errorMessage);
+      if (__DEV__) console.error('Refresh error:', errorMessage);
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -368,7 +367,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to log in user';
-        console.error('Login error:', errorMessage);
+        if (__DEV__) console.error('Login error:', errorMessage);
         setError(errorMessage);
       } finally {
         setIsLoading(false);
@@ -390,7 +389,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to log out user';
-      console.error('Logout error:', errorMessage);
+      if (__DEV__) console.error('Logout error:', errorMessage);
       setError(errorMessage);
     } finally {
       setIsLoading(false);

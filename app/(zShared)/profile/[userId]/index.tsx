@@ -123,7 +123,7 @@ export default function UserProfileScreen() {
     if (user?.backdropMode === "image" && user?.backdropImage) {
       getPalette(user.backdropImage).then(palette => {
         setDominantColor(palette.vibrant);
-      });
+      }).catch(() => {});
     } else {
       setDominantColor(null);
     }

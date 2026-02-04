@@ -378,7 +378,7 @@ export default function BookScreen() {
 
   useEffect(() => {
     if (book?.coverImage) {
-      getPalette(book.coverImage).then(palette => setDominantColor(palette.vibrant));
+      getPalette(book.coverImage).then(palette => setDominantColor(palette.vibrant)).catch(() => {});
     } else if (book) {
       // Use grey color when no cover image
       setDominantColor(DEFAULT_COVER_COLOR);

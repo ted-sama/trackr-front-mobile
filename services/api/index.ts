@@ -21,7 +21,7 @@ export const initializeAPI = async () => {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
   } catch (error) {
-    console.error('Failed to initialize API with stored token:', error);
+    if (__DEV__) console.error('Failed to initialize API with stored token:', error);
   }
 };
 
@@ -54,11 +54,11 @@ const refreshAccessToken = async (): Promise<{
   try {
     const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
     if (!refreshToken) {
-      console.log('[Auth] No refresh token found in storage');
+      if (__DEV__) console.log('[Auth] No refresh token found in storage');
       return null;
     }
 
-    console.log('[Auth] Attempting to refresh access token...');
+    if (__DEV__) console.log('[Auth] Attempting to refresh access token...');
 
     // Make refresh request without the Authorization header
     const response = await axios.post(`${apiUrl}/auth/refresh`, {
@@ -74,11 +74,11 @@ const refreshAccessToken = async (): Promise<{
     // Update API header
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-    console.log('[Auth] Token refresh successful');
+    if (__DEV__) console.log('[Auth] Token refresh successful');
     return { token, refreshToken: newRefreshToken };
   } catch (error: any) {
     // Refresh failed, clear tokens
-    console.log('[Auth] Token refresh failed:', error?.response?.status, error?.response?.data || error?.message);
+    if (__DEV__) console.log('[Auth] Token refresh failed:', error?.response?.status, error?.response?.data || error?.message);
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
     delete api.defaults.headers.common['Authorization'];

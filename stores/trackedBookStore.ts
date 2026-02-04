@@ -228,6 +228,7 @@ export const useTrackedBooksStore = create<TrackedBooksState>((set, get) => ({
     try {
       await api.post(`/me/books/${id}/pin`);
     } catch (e: any) {
+      if (__DEV__) console.error('Toggle pin in library error:', e?.message || e);
       // Revert on failure
       set((state) => ({
         trackedBooks: {
