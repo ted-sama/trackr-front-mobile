@@ -7,7 +7,7 @@ import { api, setupAuthInterceptor } from '@/services/api';
 import { LoginResponse, RegisterResponse } from '@/types/auth';
 import { useRouter } from 'expo-router';
 import { toast } from 'sonner-native';
-import { handleErrorCodes } from '@/utils/handleErrorCodes';
+import { handleErrorCodes, getErrorCode } from '@/utils/handleErrorCodes';
 import { useTranslation } from 'react-i18next';
 import { queryClient } from '@/lib/queryClient';
 
@@ -114,7 +114,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         try {
             const response = await api.post<RegisterResponse>('/auth/register', { email, password, username, displayName: username });
             toast(t("toast.registerSuccess"));
-            router.push('/auth/email-flow');
+            router.push({ pathname: '/auth/email-flow', params: { email, action: 'verify' } });
         } catch (error: any) {
             toast.error(t(handleErrorCodes(error)));
         } finally {
@@ -151,7 +151,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 setToken(token);
             }
         } catch (error: any) {
-            toast.error(t(handleErrorCodes(error)));
+            const errorCode = getErrorCode(error);
+            if (errorCode === 'AUTH_EMAIL_NOT_VERIFIED') {
+                toast.error(t('errors.AUTH_EMAIL_NOT_VERIFIED'));
+                router.push({ pathname: '/auth/email-flow', params: { email, action: 'verify' } });
+            } else {
+                toast.error(t(handleErrorCodes(error)));
+            }
         } finally {
             setIsLoading(false);
         }
