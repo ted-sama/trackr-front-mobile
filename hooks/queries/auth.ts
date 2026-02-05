@@ -3,6 +3,7 @@ import { api } from '@/services/api';
 
 interface CheckEmailResponse {
   exists: boolean;
+  verified?: boolean;
 }
 
 interface ForgotPasswordResponse {
@@ -44,6 +45,21 @@ export function useResetPassword() {
   return useMutation({
     mutationFn: ({ token, password }: { token: string; password: string }) =>
       resetPasswordRequest(token, password),
+  });
+}
+
+interface ResendVerificationResponse {
+  message: string;
+}
+
+async function resendVerificationRequest(email: string): Promise<ResendVerificationResponse> {
+  const { data } = await api.post<ResendVerificationResponse>('/auth/resend-verification', { email });
+  return data;
+}
+
+export function useResendVerification() {
+  return useMutation({
+    mutationFn: (email: string) => resendVerificationRequest(email),
   });
 }
 

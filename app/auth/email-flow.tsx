@@ -14,7 +14,7 @@ import Animated, {
   Easing,
   runOnJS,
 } from 'react-native-reanimated';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
@@ -26,7 +26,7 @@ import { TextField } from '@/components/ui/TextField';
 import LinkButton from '@/components/ui/LinkButton';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTypography } from '@/hooks/useTypography';
-import { useCheckEmail } from '@/hooks/queries/auth';
+import { useCheckEmail, useResendVerification } from '@/hooks/queries/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import { emailRegex } from '@/utils/regex';
 import { handleErrorCodes } from '@/utils/handleErrorCodes';
@@ -34,7 +34,7 @@ import { handleErrorCodes } from '@/utils/handleErrorCodes';
 const ANIMATION_DURATION = 300;
 
 type FlowType = 'login' | 'register' | null;
-type Step = 'email' | 'password' | 'register';
+type Step = 'email' | 'password' | 'register' | 'verify';
 
 interface StepConfig {
   key: Step;
@@ -47,16 +47,19 @@ export default function EmailFlowScreen() {
   const { colors, currentTheme } = useTheme();
   const typography = useTypography();
   const router = useRouter();
+  const params = useLocalSearchParams<{ email?: string; action?: string }>();
   const insets = useSafeAreaInsets();
   const { login, register, isLoading } = useAuth();
 
   // Flow state
   const [flowType, setFlowType] = useState<FlowType>(null);
-  const [currentStep, setCurrentStep] = useState<Step>('email');
+  const [currentStep, setCurrentStep] = useState<Step>(
+    params?.action === 'verify' ? 'verify' : 'email'
+  );
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Form state
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(params?.email || '');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -68,6 +71,7 @@ export default function EmailFlowScreen() {
   });
 
   const checkEmailMutation = useCheckEmail();
+  const resendVerificationMutation = useResendVerification();
 
   // Refs for keyboard navigation
   const passwordRef = useRef<TextInput>(null);
@@ -89,6 +93,10 @@ export default function EmailFlowScreen() {
       return [
         { key: 'email', title: t('auth.email.title'), subtitle: t('auth.email.subtitle') },
         { key: 'register', title: t('auth.register.title'), subtitle: t('auth.register.subtitle', { email }) },
+      ];
+    } else if (currentStep === 'verify') {
+      return [
+        { key: 'verify', title: t('auth.verifyEmail.title'), subtitle: t('auth.verifyEmail.subtitle', { email }) },
       ];
     }
     return [
@@ -170,6 +178,12 @@ export default function EmailFlowScreen() {
     try {
       const result = await checkEmailMutation.mutateAsync(email);
 
+      if (result.exists && result.verified === false) {
+        setFlowType(null);
+        animateToNextStep('verify');
+        return;
+      }
+
       if (result.exists) {
         setFlowType('login');
         animateToNextStep('password');
@@ -209,6 +223,21 @@ export default function EmailFlowScreen() {
     }
 
     await register(email, password, username);
+    setFlowType(null);
+    animateToNextStep('verify');
+  };
+
+  const handleResendVerification = async () => {
+    if (!email.trim()) {
+      toast.error(t('auth.verifyEmail.missingEmail'));
+      return;
+    }
+    try {
+      await resendVerificationMutation.mutateAsync(email);
+      toast(t('auth.verifyEmail.resent'));
+    } catch (err: any) {
+      toast.error(t(handleErrorCodes(err)));
+    }
   };
 
   const handleBack = () => {
@@ -251,6 +280,12 @@ export default function EmailFlowScreen() {
           title: t('auth.register.createButton'),
           onPress: handleRegister,
           disabled: !username.trim() || !password || !confirmPassword || isLoading || isTransitioning,
+        };
+      case 'verify':
+        return {
+          title: t('auth.verifyEmail.resendButton'),
+          onPress: handleResendVerification,
+          disabled: resendVerificationMutation.isPending || isTransitioning,
         };
       default:
         return { title: '', onPress: () => {}, disabled: true };
@@ -354,6 +389,22 @@ export default function EmailFlowScreen() {
               error={errors.confirmPassword}
               returnKeyType="done"
               onSubmitEditing={handleRegister}
+            />
+          </View>
+        );
+
+      case 'verify':
+        return (
+          <View style={styles.verifyContainer}>
+            <Text style={[typography.body, styles.verifyText, { color: colors.secondaryText }]}>
+              {t('auth.verifyEmail.description')}
+            </Text>
+            <LinkButton
+              title={t('auth.verifyEmail.changeEmail')}
+              onPress={() => {
+                setFlowType(null);
+                animateToPrevStep('email');
+              }}
             />
           </View>
         );
@@ -481,6 +532,12 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: 16,
+  },
+  verifyContainer: {
+    gap: 16,
+  },
+  verifyText: {
+    lineHeight: 22,
   },
   forgotPassword: {
     alignSelf: 'flex-end',

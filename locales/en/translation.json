@@ -128,6 +128,15 @@
             "invalidToken": "Invalid reset token",
             "tokenExpired": "This link has expired. Please request a new one.",
             "errorResetting": "Failed to reset password. Please try again."
+        },
+        "verifyEmail": {
+            "title": "Check your email",
+            "subtitle": "We sent a verification link to {{email}}",
+            "description": "Open the link in your email to verify your account. You can request a new link if it expired.",
+            "resendButton": "Resend verification link",
+            "resent": "Verification email sent",
+            "missingEmail": "Please enter your email first",
+            "changeEmail": "Use a different email"
         }
     },
     "status": {
@@ -734,6 +743,7 @@
         "AUTH_GOOGLE_DENIED": "Google authentication was denied",
         "AUTH_GOOGLE_FAILED": "Google authentication failed. Please try again",
         "AUTH_INVALID_REFRESH_TOKEN": "Your session has expired. Please log in again",
+        "AUTH_EMAIL_NOT_VERIFIED": "Please verify your email before logging in",
 
         "USER_NOT_FOUND": "User not found",
         "USER_USERNAME_INVALID": "Invalid username format",

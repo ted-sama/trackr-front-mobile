@@ -6,6 +6,7 @@ export interface User {
     displayName: string;
     bio?: string | null;
     email: string;
+    emailVerifiedAt?: string | null;
     avatar?: string;
     backdropMode: "color" | "image";
     backdropColor: string;
