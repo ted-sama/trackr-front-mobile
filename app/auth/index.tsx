@@ -63,7 +63,7 @@ export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const { loginWithGoogle, isLoading, isAuthenticated } = useAuth();
 
-  const [_, setCurrentState] = useState<OnboardingState>('welcome');
+  const [currentState, setCurrentState] = useState<OnboardingState>('welcome');
 
   // Animation shared values
   const logoTranslateY = useSharedValue(0);
@@ -213,7 +213,10 @@ export default function OnboardingScreen() {
       {/* Buttons Section */}
       <View style={styles.buttonsContainer}>
         {/* Continue Button (visible in welcome state) */}
-        <Animated.View style={[styles.buttonWrapper, continueButtonStyle]}>
+        <Animated.View
+          pointerEvents={currentState === 'welcome' ? 'auto' : 'none'}
+          style={[styles.buttonWrapper, continueButtonStyle]}
+        >
           <Button
             title={t('auth.onboarding.continue')}
             onPress={transitionToAuthOptions}
@@ -222,7 +225,10 @@ export default function OnboardingScreen() {
         </Animated.View>
 
         {/* Auth Buttons (visible in auth_options state) */}
-        <Animated.View style={[styles.authButtonsWrapper, authButtonsStyle]}>
+        <Animated.View
+          pointerEvents={currentState === 'auth_options' ? 'auto' : 'none'}
+          style={[styles.authButtonsWrapper, authButtonsStyle]}
+        >
           <AnimatedPressable
             onPress={loginWithGoogle}
             onPressIn={handleGooglePressIn}
