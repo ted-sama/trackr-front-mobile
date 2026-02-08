@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
-import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { Check } from 'lucide-react-native';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -46,7 +45,6 @@ export function BookItem({ book, isSelected, onToggle, viewMode }: BookItemProps
   }));
 
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onToggle(book.bookId);
   };
 
