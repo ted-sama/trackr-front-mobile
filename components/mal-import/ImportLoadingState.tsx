@@ -120,7 +120,7 @@ export function ImportLoadingState({
       {/* Rotating tips */}
       <Animated.View style={[styles.tipContainer, tipAnimatedStyle]}>
         <Sparkles size={14} color={colors.secondaryText} style={{ marginRight: 6 }} />
-        <Text style={[typography.caption, { color: colors.secondaryText, flex: 1 }]}>
+        <Text style={[typography.caption, { color: colors.secondaryText }]}>
           {tips[currentTipIndex]}
         </Text>
       </Animated.View>
@@ -155,6 +155,7 @@ const styles = StyleSheet.create({
   },
   tipContainer: {
     flexDirection: 'row',
+    alignContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,
     minHeight: 20,
