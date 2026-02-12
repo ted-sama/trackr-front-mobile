@@ -459,7 +459,8 @@
         },
         "import": {
             "title": "Import",
-            "malImport": "Importer depuis MyAnimeList"
+            "malImport": "Importer depuis MyAnimeList",
+            "mangacollecImport": "Importer depuis Mangacollec"
         }
     },
     "languages": {
@@ -1014,6 +1015,39 @@
             "usernameTooShort": "Le nom d'utilisateur doit contenir au moins 2 caractères",
             "userNotFound": "Utilisateur MAL introuvable. Vérifiez que le nom d'utilisateur est correct et que le profil est public.",
             "importFailed": "Échec de l'import depuis MyAnimeList. Veuillez réessayer.",
+            "generic": "Une erreur est survenue. Veuillez réessayer.",
+            "noSelection": "Veuillez sélectionner au moins un livre"
+        },
+        "results": {
+            "title": "Résultats",
+            "found": "Trouvés",
+            "alreadyExists": "Déjà présents",
+            "notFound": "Non trouvés",
+            "notFoundList": "Non trouvés sur Trackr",
+            "andMore": "et {{count}} de plus..."
+        }
+    },
+    "mangacollecImport": {
+        "title": "Import Mangacollec",
+        "description": "Entrez votre nom d'utilisateur Mangacollec pour importer votre collection.",
+        "usernameLabel": "Nom d'utilisateur Mangacollec",
+        "usernamePlaceholder": "Entrez votre nom d'utilisateur Mangacollec",
+        "fetchButton": "Rechercher la collection",
+        "fetching": "Recherche en cours...",
+        "importing": "Import...",
+        "confirm": "Valider",
+        "cancel": "Annuler",
+        "selectAll": "Tout sélectionner",
+        "deselectAll": "Tout désélectionner",
+        "foundBooks": "{{count}} livre(s) trouvé(s) !",
+        "importSuccess": "{{count}} livre(s) importé(s) avec succès !",
+        "noNewBooks": "Aucun nouveau livre à importer",
+        "alreadyExistsCount": "{{count}} déjà présent(s)",
+        "notFoundCount": "{{count}} non trouvé(s)",
+        "note": "Seules les collections publiques peuvent être importées. Le matching utilise les traductions de titres.",
+        "errors": {
+            "usernameTooShort": "Le nom d'utilisateur doit contenir au moins 2 caractères",
+            "importFailed": "Échec de l'import depuis Mangacollec. Veuillez réessayer.",
             "generic": "Une erreur est survenue. Veuillez réessayer.",
             "noSelection": "Veuillez sélectionner au moins un livre"
         },

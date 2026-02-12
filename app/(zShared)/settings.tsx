@@ -248,6 +248,11 @@ export default function Settings() {
               label={t('settings.import.malImport')}
               onPress={() => router.push('/(zShared)/mal-import')}
             />
+            <SettingsItem
+              icon={<Download size={20} color={colors.icon} />}
+              label={t('settings.import.mangacollecImport')}
+              onPress={() => router.push('/(zShared)/mangacollec-import')}
+            />
           </SettingsSection>
         )}
 
