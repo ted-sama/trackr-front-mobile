@@ -1010,6 +1010,12 @@
         "alreadyExistsCount": "{{count}} already in library",
         "notFoundCount": "{{count}} not found",
         "note": "Only manga entries will be imported. Make sure your MAL list is set to public.",
+        "loadingTitle": "Searching your library",
+        "loadingTips": {
+            "fetching": "Fetching your manga list from MyAnimeList",
+            "matching": "Matching titles with our database",
+            "patience": "This may take a moment for large libraries"
+        },
         "errors": {
             "usernameTooShort": "Username must be at least 2 characters",
             "userNotFound": "MAL user not found. Make sure the username is correct and the profile is public.",
@@ -1044,6 +1050,13 @@
         "alreadyExistsCount": "{{count}} already in library",
         "notFoundCount": "{{count}} not found",
         "note": "Only public collections can be imported. Matching is based on title translations.",
+        "loadingTitle": "Searching your collection",
+        "loadingTips": {
+            "scraping": "Fetching your collection from Mangacollec",
+            "matching": "Matching titles with our database",
+            "translating": "Translating titles for better matching",
+            "patience": "This may take a few minutes for large collections"
+        },
         "errors": {
             "usernameTooShort": "Username must be at least 2 characters",
             "importFailed": "Failed to import from Mangacollec. Please try again.",

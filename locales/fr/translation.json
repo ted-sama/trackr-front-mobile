@@ -1011,6 +1011,12 @@
         "alreadyExistsCount": "{{count}} déjà présent(s)",
         "notFoundCount": "{{count}} non trouvé(s)",
         "note": "Seules les entrées manga seront importées. Assurez-vous que votre liste MAL est publique.",
+        "loadingTitle": "Recherche de votre bibliothèque",
+        "loadingTips": {
+            "fetching": "Récupération de votre liste manga depuis MyAnimeList",
+            "matching": "Correspondance des titres avec notre base de données",
+            "patience": "Cela peut prendre un moment pour les grandes bibliothèques"
+        },
         "errors": {
             "usernameTooShort": "Le nom d'utilisateur doit contenir au moins 2 caractères",
             "userNotFound": "Utilisateur MAL introuvable. Vérifiez que le nom d'utilisateur est correct et que le profil est public.",
@@ -1045,6 +1051,13 @@
         "alreadyExistsCount": "{{count}} déjà présent(s)",
         "notFoundCount": "{{count}} non trouvé(s)",
         "note": "Seules les collections publiques peuvent être importées. Le matching utilise les traductions de titres.",
+        "loadingTitle": "Recherche de votre collection",
+        "loadingTips": {
+            "scraping": "Récupération de votre collection depuis Mangacollec",
+            "matching": "Correspondance des titres avec notre base de données",
+            "translating": "Traduction des titres pour un meilleur matching",
+            "patience": "Cela peut prendre quelques minutes pour les grandes collections"
+        },
         "errors": {
             "usernameTooShort": "Le nom d'utilisateur doit contenir au moins 2 caractères",
             "importFailed": "Échec de l'import depuis Mangacollec. Veuillez réessayer.",
