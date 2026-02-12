@@ -459,7 +459,8 @@
         },
         "import": {
             "title": "Import",
-            "malImport": "Import from MyAnimeList"
+            "malImport": "Import from MyAnimeList",
+            "mangacollecImport": "Import from Mangacollec"
         }
     },
     "languages": {
@@ -1013,6 +1014,39 @@
             "usernameTooShort": "Username must be at least 2 characters",
             "userNotFound": "MAL user not found. Make sure the username is correct and the profile is public.",
             "importFailed": "Failed to import from MyAnimeList. Please try again.",
+            "generic": "An error occurred. Please try again.",
+            "noSelection": "Please select at least one book"
+        },
+        "results": {
+            "title": "Results",
+            "found": "Found",
+            "alreadyExists": "Already exists",
+            "notFound": "Not found",
+            "notFoundList": "Not found on Trackr",
+            "andMore": "and {{count}} more..."
+        }
+    },
+    "mangacollecImport": {
+        "title": "Mangacollec Import",
+        "description": "Enter your Mangacollec username to import your manga collection.",
+        "usernameLabel": "Mangacollec username",
+        "usernamePlaceholder": "Enter your Mangacollec username",
+        "fetchButton": "Search Collection",
+        "fetching": "Searching...",
+        "importing": "Importing...",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all",
+        "foundBooks": "{{count}} book(s) found!",
+        "importSuccess": "{{count}} book(s) imported successfully!",
+        "noNewBooks": "No new books to import",
+        "alreadyExistsCount": "{{count}} already in library",
+        "notFoundCount": "{{count}} not found",
+        "note": "Only public collections can be imported. Matching is based on title translations.",
+        "errors": {
+            "usernameTooShort": "Username must be at least 2 characters",
+            "importFailed": "Failed to import from Mangacollec. Please try again.",
             "generic": "An error occurred. Please try again.",
             "noSelection": "Please select at least one book"
         },

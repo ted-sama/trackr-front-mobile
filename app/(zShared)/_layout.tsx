@@ -16,6 +16,8 @@ export default function SharedLayout() {
       <Stack.Screen name="chart-details" />
       <Stack.Screen name="settings" />
       <Stack.Screen name="subscription" />
+      <Stack.Screen name="mal-import" />
+      <Stack.Screen name="mangacollec-import" />
       <Stack.Screen
         name="paywall"
         options={{
