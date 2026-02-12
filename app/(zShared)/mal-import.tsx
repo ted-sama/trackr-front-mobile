@@ -29,6 +29,7 @@ import { ActionBar } from '@/components/mal-import/ActionBar';
 import { SummaryCard } from '@/components/mal-import/SummaryCard';
 import { Toolbar } from '@/components/mal-import/Toolbar';
 import { NotFoundList } from '@/components/mal-import/NotFoundList';
+import { ImportLoadingState } from '@/components/mal-import/ImportLoadingState';
 import { GRID_COLUMNS, GRID_GAP } from '@/components/mal-import/constants';
 
 export default function MalImport() {
@@ -57,6 +58,15 @@ export default function MalImport() {
 
   const malFetchMutation = useMalFetch();
   const malConfirmMutation = useMalConfirmImport();
+
+  const loadingTips = useMemo(
+    () => [
+      t('malImport.loadingTips.fetching'),
+      t('malImport.loadingTips.matching'),
+      t('malImport.loadingTips.patience'),
+    ],
+    [t]
+  );
 
   const pendingBooks = fetchResult?.pendingBooks || [];
 
@@ -270,6 +280,7 @@ export default function MalImport() {
         ref={scrollViewRef as any}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
+        scrollEnabled={!malFetchMutation.isPending}
         contentContainerStyle={{
           marginTop: insets.top,
           paddingBottom: 100,
@@ -281,37 +292,44 @@ export default function MalImport() {
         </View>
 
         {!fetchResult ? (
-          <>
-            <Text style={[typography.body, { color: colors.secondaryText, marginBottom: 24 }]}>
-              {t('malImport.description')}
-            </Text>
-
-            <TextField
-              label={t('malImport.usernameLabel')}
-              placeholder={t('malImport.usernamePlaceholder')}
-              value={username}
-              onChangeText={(text) => {
-                setUsername(text);
-                setError('');
-              }}
-              error={error}
-              autoCapitalize="none"
-              autoCorrect={false}
+          malFetchMutation.isPending ? (
+            <ImportLoadingState
+              title={t('malImport.loadingTitle')}
+              tips={loadingTips}
             />
+          ) : (
+            <>
+              <Text style={[typography.body, { color: colors.secondaryText, marginBottom: 24 }]}>
+                {t('malImport.description')}
+              </Text>
 
-            <Button
-              title={malFetchMutation.isPending ? t('malImport.fetching') : t('malImport.fetchButton')}
-              onPress={handleFetch}
-              disabled={malFetchMutation.isPending || !username.trim()}
-              style={{ marginTop: 24 }}
-            />
+              <TextField
+                label={t('malImport.usernameLabel')}
+                placeholder={t('malImport.usernamePlaceholder')}
+                value={username}
+                onChangeText={(text) => {
+                  setUsername(text);
+                  setError('');
+                }}
+                error={error}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
 
-            <Text
-              style={[typography.caption, { color: colors.secondaryText, marginTop: 16, textAlign: 'center' }]}
-            >
-              {t('malImport.note')}
-            </Text>
-          </>
+              <Button
+                title={t('malImport.fetchButton')}
+                onPress={handleFetch}
+                disabled={!username.trim()}
+                style={{ marginTop: 24 }}
+              />
+
+              <Text
+                style={[typography.caption, { color: colors.secondaryText, marginTop: 16, textAlign: 'center' }]}
+              >
+                {t('malImport.note')}
+              </Text>
+            </>
+          )
         ) : (
           renderPendingBooks()
         )}

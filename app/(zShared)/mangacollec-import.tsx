@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -25,6 +25,7 @@ import { ActionBar } from '@/components/mal-import/ActionBar';
 import { SummaryCard } from '@/components/mal-import/SummaryCard';
 import { Toolbar } from '@/components/mal-import/Toolbar';
 import { NotFoundList } from '@/components/mal-import/NotFoundList';
+import { ImportLoadingState } from '@/components/mal-import/ImportLoadingState';
 import { GRID_COLUMNS, GRID_GAP } from '@/components/mal-import/constants';
 
 export default function MangacollecImport() {
@@ -52,6 +53,16 @@ export default function MangacollecImport() {
 
   const mangacollecFetchMutation = useMangacollecFetch();
   const malConfirmMutation = useMalConfirmImport();
+
+  const loadingTips = useMemo(
+    () => [
+      t('mangacollecImport.loadingTips.scraping'),
+      t('mangacollecImport.loadingTips.matching'),
+      t('mangacollecImport.loadingTips.translating'),
+      t('mangacollecImport.loadingTips.patience'),
+    ],
+    [t]
+  );
 
   const pendingBooks = fetchResult?.pendingBooks || [];
 
@@ -258,6 +269,7 @@ export default function MangacollecImport() {
         ref={scrollViewRef as any}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
+        scrollEnabled={!mangacollecFetchMutation.isPending}
         contentContainerStyle={{
           marginTop: insets.top,
           paddingBottom: 100,
@@ -269,41 +281,44 @@ export default function MangacollecImport() {
         </View>
 
         {!fetchResult ? (
-          <>
-            <Text style={[typography.body, { color: colors.secondaryText, marginBottom: 24 }] }>
-              {t('mangacollecImport.description')}
-            </Text>
-
-            <TextField
-              label={t('mangacollecImport.usernameLabel')}
-              placeholder={t('mangacollecImport.usernamePlaceholder')}
-              value={username}
-              onChangeText={(text) => {
-                setUsername(text);
-                setError('');
-              }}
-              error={error}
-              autoCapitalize="none"
-              autoCorrect={false}
+          mangacollecFetchMutation.isPending ? (
+            <ImportLoadingState
+              title={t('mangacollecImport.loadingTitle')}
+              tips={loadingTips}
             />
+          ) : (
+            <>
+              <Text style={[typography.body, { color: colors.secondaryText, marginBottom: 24 }]}>
+                {t('mangacollecImport.description')}
+              </Text>
 
-            <Button
-              title={
-                mangacollecFetchMutation.isPending
-                  ? t('mangacollecImport.fetching')
-                  : t('mangacollecImport.fetchButton')
-              }
-              onPress={handleFetch}
-              disabled={mangacollecFetchMutation.isPending || !username.trim()}
-              style={{ marginTop: 24 }}
-            />
+              <TextField
+                label={t('mangacollecImport.usernameLabel')}
+                placeholder={t('mangacollecImport.usernamePlaceholder')}
+                value={username}
+                onChangeText={(text) => {
+                  setUsername(text);
+                  setError('');
+                }}
+                error={error}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
 
-            <Text
-              style={[typography.caption, { color: colors.secondaryText, marginTop: 16, textAlign: 'center' }]}
-            >
-              {t('mangacollecImport.note')}
-            </Text>
-          </>
+              <Button
+                title={t('mangacollecImport.fetchButton')}
+                onPress={handleFetch}
+                disabled={!username.trim()}
+                style={{ marginTop: 24 }}
+              />
+
+              <Text
+                style={[typography.caption, { color: colors.secondaryText, marginTop: 16, textAlign: 'center' }]}
+              >
+                {t('mangacollecImport.note')}
+              </Text>
+            </>
+          )
         ) : (
           renderPendingBooks()
         )}
