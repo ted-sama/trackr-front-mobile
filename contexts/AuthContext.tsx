@@ -21,6 +21,7 @@ interface AuthContextType {
   register: (email: string,  password: string, username: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
+  processOAuthCallback: (accessToken: string, refreshToken?: string) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -163,64 +164,81 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     };
 
+    // Shared logic to process OAuth tokens (used by loginWithGoogle and auth/callback screen)
+    const processOAuthCallback = useCallback(async (accessToken: string, oauthRefreshToken?: string): Promise<boolean> => {
+        try {
+            // Set token in API headers first
+            api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+            // Fetch user data to validate the token
+            await useUserStore.getState().fetchCurrentUser();
+            const currentUser = useUserStore.getState().currentUser;
+
+            if (!currentUser) {
+                // User fetch failed, clean up
+                delete api.defaults.headers.common['Authorization'];
+                return false;
+            }
+
+            // Token is valid and user data loaded, persist tokens
+            await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+
+            if (oauthRefreshToken) {
+                await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, oauthRefreshToken);
+                if (__DEV__) {
+                    console.log('[Auth] Refresh token stored successfully');
+                }
+            } else {
+                console.warn('[Auth] WARNING: No refresh token received from OAuth callback!');
+            }
+
+            setToken(accessToken);
+            return true;
+        } catch (error) {
+            console.error('[Auth] Error processing OAuth callback:', error);
+            delete api.defaults.headers.common['Authorization'];
+            return false;
+        }
+    }, []);
+
     const loginWithGoogle = async () => {
         setIsLoading(true);
         try {
             const redirectUrl = 'trackr://auth/callback';
             const authUrl = `${api.defaults.baseURL}/auth/google/redirect?redirect_uri=${encodeURIComponent(redirectUrl)}`;
 
-            const result = await WebBrowser.openAuthSessionAsync(authUrl, 'trackr');
+            const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
 
             if (result.type === 'success' && result.url) {
                 // Parse tokens from the callback URL
-                // The URL format is: trackr://auth/callback?token=xxx&refreshToken=yyy
                 const url = result.url;
                 let newToken: string | null = null;
                 let newRefreshToken: string | null = null;
 
-                // Robust URL parsing that handles custom schemes
-                // Custom schemes like trackr:// don't work with URL() constructor
-                // so we extract the query string manually
                 const queryStart = url.indexOf('?');
                 const hashStart = url.indexOf('#');
 
-                // Extract query string (between ? and # or end of URL)
                 let queryString = '';
                 if (queryStart !== -1) {
                     const endIndex = hashStart !== -1 && hashStart > queryStart ? hashStart : url.length;
                     queryString = url.substring(queryStart + 1, endIndex);
                 }
 
-                // Parse query parameters
                 if (queryString) {
                     const params = new URLSearchParams(queryString);
-                    const tokenParam = params.get('token');
-                    const refreshParam = params.get('refreshToken');
-
-                    if (tokenParam) {
-                        newToken = tokenParam;
-                    }
-                    if (refreshParam) {
-                        newRefreshToken = refreshParam;
-                    }
+                    newToken = params.get('token');
+                    newRefreshToken = params.get('refreshToken');
                 }
 
-                // Fallback: Check hash fragment (some OAuth flows use fragment)
                 if (!newToken && hashStart !== -1) {
                     const fragment = url.substring(hashStart + 1);
                     const fragmentParams = new URLSearchParams(fragment);
-                    const tokenParam = fragmentParams.get('token');
-                    const refreshParam = fragmentParams.get('refreshToken');
-
-                    if (tokenParam) {
-                        newToken = tokenParam;
-                    }
-                    if (!newRefreshToken && refreshParam) {
-                        newRefreshToken = refreshParam;
+                    newToken = fragmentParams.get('token');
+                    if (!newRefreshToken) {
+                        newRefreshToken = fragmentParams.get('refreshToken');
                     }
                 }
 
-                // Log for debugging (can be removed in production)
                 if (__DEV__) {
                     console.log('[Auth] Google OAuth callback URL received');
                     console.log('[Auth] Token present:', !!newToken);
@@ -228,37 +246,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 }
 
                 if (newToken) {
-                    // Set token in API headers first
-                    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-
-                    // Fetch user data to validate the token
-                    await useUserStore.getState().fetchCurrentUser();
-                    const currentUser = useUserStore.getState().currentUser;
-
-                    if (!currentUser) {
-                        // User fetch failed, clean up
-                        delete api.defaults.headers.common['Authorization'];
+                    const success = await processOAuthCallback(newToken, newRefreshToken ?? undefined);
+                    if (!success) {
                         toast.error(t('errors.loginFailed'));
-                        return;
                     }
-
-                    // Token is valid and user data loaded, persist tokens
-                    await SecureStore.setItemAsync(TOKEN_KEY, newToken);
-
-                    // CRITICAL: Always store refresh token when provided
-                    // This enables automatic token refresh and prevents 1-hour logout
-                    if (newRefreshToken) {
-                        await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, newRefreshToken);
-                        if (__DEV__) {
-                            console.log('[Auth] Refresh token stored successfully');
-                        }
-                    } else {
-                        // Log warning if refresh token is missing - this would cause 1h logout!
-                        console.warn('[Auth] WARNING: No refresh token received from Google OAuth callback!');
-                        console.warn('[Auth] Users will be logged out when access token expires (1 hour)');
-                    }
-
-                    setToken(newToken);
                 } else {
                     console.error('[Auth] No access token found in Google OAuth callback URL');
                     toast.error(t('errors.loginFailed'));
@@ -291,7 +282,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     return (
-        <AuthContext.Provider value={{ token, isAuthenticated: !!token, isLoading, login, loginWithGoogle, register, logout }}>
+        <AuthContext.Provider value={{ token, isAuthenticated: !!token, isLoading, login, loginWithGoogle, processOAuthCallback, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

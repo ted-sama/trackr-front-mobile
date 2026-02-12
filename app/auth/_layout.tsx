@@ -9,6 +9,7 @@ export default function AuthLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="email-flow" options={{ gestureEnabled: true, animation: 'slide_from_right' }} />
       <Stack.Screen name="onboarding" options={{ gestureEnabled: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="callback" options={{ gestureEnabled: false, animation: 'none' }} />
       <Stack.Screen name="login" />
       <Stack.Screen name="signup" />
     </Stack>

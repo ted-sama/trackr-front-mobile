@@ -212,6 +212,7 @@ function RootLayoutContent() {
           <Stack.Screen name="(zShared)" />
           <Stack.Screen name="category-full" />
         </Stack.Protected>
+        <Stack.Screen name="+not-found" options={{ headerShown: false }} />
       </Stack>
 
       {/* Global Bottom Sheets */}
