@@ -1050,12 +1050,13 @@
         "alreadyExistsCount": "{{count}} already in library",
         "notFoundCount": "{{count}} not found",
         "note": "Only public collections can be imported. Matching is based on title translations.",
-        "loadingTitle": "Searching your collection",
+        "loadingTitle": "Import in progress...",
+        "loadingSubtitle": "We're searching your collection. This may take a few minutes, feel free to leave this screen and come back later.",
         "loadingTips": {
             "scraping": "Fetching your collection from Mangacollec",
             "matching": "Matching titles with our database",
             "translating": "Translating titles for better matching",
-            "patience": "This may take a few minutes for large collections"
+            "patience": "You'll be notified when the import is complete"
         },
         "errors": {
             "usernameTooShort": "Username must be at least 2 characters",
@@ -1070,6 +1071,17 @@
             "notFound": "Not found",
             "notFoundList": "Not found on Trackr",
             "andMore": "and {{count}} more..."
+        },
+        "notifications": {
+            "completionToast": "Mangacollec: {{count}} manga(s) found!",
+            "completionAction": "Review and import",
+            "completionToastEmpty": "Mangacollec import complete — no new manga to add.",
+            "completionTitle": "Mangacollec import ready",
+            "completionBody": "{{count}} manga(s) found. Tap to review and import.",
+            "completionBodyEmpty": "Import complete, but no new manga to add.",
+            "failureToast": "Mangacollec import failed. Please try again.",
+            "failureTitle": "Mangacollec import failed",
+            "failureBody": "An error occurred during the import. Please try again."
         }
     },
     "onboarding": {

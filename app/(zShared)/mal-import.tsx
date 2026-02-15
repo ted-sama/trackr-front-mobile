@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -58,15 +58,6 @@ export default function MalImport() {
 
   const malFetchMutation = useMalFetch();
   const malConfirmMutation = useMalConfirmImport();
-
-  const loadingTips = useMemo(
-    () => [
-      t('malImport.loadingTips.fetching'),
-      t('malImport.loadingTips.matching'),
-      t('malImport.loadingTips.patience'),
-    ],
-    [t]
-  );
 
   const pendingBooks = fetchResult?.pendingBooks || [];
 
@@ -295,7 +286,6 @@ export default function MalImport() {
           malFetchMutation.isPending ? (
             <ImportLoadingState
               title={t('malImport.loadingTitle')}
-              tips={loadingTips}
             />
           ) : (
             <>

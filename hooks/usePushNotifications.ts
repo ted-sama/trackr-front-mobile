@@ -121,7 +121,9 @@ export function usePushNotifications() {
     }
 
     // Navigate based on notification type
-    if (resourceType === 'book_review' && resourceId) {
+    if (type === 'mangacollec-import') {
+      router.push('/mangacollec-import');
+    } else if (resourceType === 'book_review' && resourceId) {
       // Navigate to notifications screen or book
       router.push('/notifications');
     } else if (resourceType === 'list' && resourceId) {

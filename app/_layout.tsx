@@ -37,6 +37,7 @@ import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useMangacollecImportWatcher } from '@/hooks/useMangacollecImportWatcher';
 import { prefetchGenreTranslations } from '@/hooks/queries/genres';
 
 // Keep the splash screen visible while we fetch resources
@@ -161,6 +162,9 @@ function RootLayoutContent() {
 
   // Register for push notifications
   usePushNotifications();
+
+  // Background polling for Mangacollec import jobs
+  useMangacollecImportWatcher();
 
   // Present or dismiss the appropriate bottom sheet when visibility/type changes
   useEffect(() => {

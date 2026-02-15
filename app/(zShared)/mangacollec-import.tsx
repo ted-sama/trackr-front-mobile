@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -7,7 +7,9 @@ import { useRouter } from 'expo-router';
 import { AnimatedHeader } from '@/components/shared/AnimatedHeader';
 import Animated, {
   useAnimatedScrollHandler,
+  useAnimatedStyle,
   useSharedValue,
+  withTiming,
   runOnJS,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,8 +18,9 @@ import Button from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { toast } from 'sonner-native';
 import { useMalConfirmImport, MalFetchResponse, PendingImportBook } from '@/hooks/queries/malImport';
-import { useMangacollecFetch } from '@/hooks/queries/mangacollecImport';
-import { ChevronUp } from 'lucide-react-native';
+import { useMangacollecStartImport } from '@/hooks/queries/mangacollecImport';
+import { useMangacollecImportStore } from '@/stores/mangacollecImportStore';
+import { ChevronUp, Sparkles } from 'lucide-react-native';
 import { useUIStore } from '@/stores/uiStore';
 import { useTrackedBooksStore } from '@/stores/trackedBookStore';
 import { BookItem } from '@/components/mal-import/BookItem';
@@ -42,6 +45,15 @@ export default function MangacollecImport() {
   const [fetchResult, setFetchResult] = useState<MalFetchResponse | null>(null);
   const [selectedBooks, setSelectedBooks] = useState<Set<number>>(new Set());
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+  const tipOpacity = useSharedValue(1);
+
+  // Read from global store (populated by background watcher)
+  const importStatus = useMangacollecImportStore((s) => s.status);
+  const importResult = useMangacollecImportStore((s) => s.result);
+  const importError = useMangacollecImportStore((s) => s.error);
+  const startJob = useMangacollecImportStore((s) => s.startJob);
+  const clearImport = useMangacollecImportStore((s) => s.clear);
 
   const currentLayout = useUIStore((state) => state.myLibraryLayout);
   const setLayout = useUIStore((state) => state.setMyLibraryLayout);
@@ -51,8 +63,39 @@ export default function MangacollecImport() {
     setLayout(currentLayout === 'grid' ? 'list' : 'grid');
   };
 
-  const mangacollecFetchMutation = useMangacollecFetch();
+  const startImportMutation = useMangacollecStartImport();
   const malConfirmMutation = useMalConfirmImport();
+
+  // React to store completion/failure (from background watcher)
+  useEffect(() => {
+    if (importStatus === 'completed' && importResult && !fetchResult) {
+      handleImportCompleted(importResult);
+    } else if (importStatus === 'failed' && importError) {
+      toast.error(importError || t('mangacollecImport.errors.importFailed'));
+      clearImport();
+    }
+  }, [importStatus, importResult, importError]);
+
+  const handleImportCompleted = (result: MalFetchResponse) => {
+    if (result.pendingBooks.length > 0) {
+      setFetchResult(result);
+      setSelectedBooks(new Set(result.pendingBooks.map((b) => b.bookId)));
+      toast.success(t('mangacollecImport.foundBooks', { count: result.pendingBooks.length }));
+    } else {
+      toast(t('mangacollecImport.noNewBooks'));
+      if (result.alreadyExists > 0 || result.notFound > 0) {
+        const parts = [];
+        if (result.alreadyExists > 0) {
+          parts.push(t('mangacollecImport.alreadyExistsCount', { count: result.alreadyExists }));
+        }
+        if (result.notFound > 0) {
+          parts.push(t('mangacollecImport.notFoundCount', { count: result.notFound }));
+        }
+        toast(parts.join(' \u2022 '), { duration: 4000 });
+      }
+      clearImport();
+    }
+  };
 
   const loadingTips = useMemo(
     () => [
@@ -65,6 +108,28 @@ export default function MangacollecImport() {
   );
 
   const pendingBooks = fetchResult?.pendingBooks || [];
+
+  const isLoading = importStatus === 'processing' || startImportMutation.isPending;
+
+  // Rotate tips while loading
+  useEffect(() => {
+    if (!isLoading || loadingTips.length <= 1) return;
+
+    const interval = setInterval(() => {
+      tipOpacity.value = withTiming(0, { duration: 300 }, () => {
+        tipOpacity.value = withTiming(1, { duration: 300 });
+      });
+      setTimeout(() => {
+        setCurrentTipIndex((prev) => (prev + 1) % loadingTips.length);
+      }, 300);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isLoading, loadingTips]);
+
+  const tipAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: tipOpacity.value,
+  }));
 
   const updateScrollTopVisibility = useCallback((offsetY: number) => {
     setShowScrollTop(offsetY > 400);
@@ -96,32 +161,10 @@ export default function MangacollecImport() {
     }
 
     try {
-      const response = await mangacollecFetchMutation.mutateAsync(username.trim());
-
-      if (response.pendingBooks.length > 0) {
-        setFetchResult(response);
-        setSelectedBooks(new Set(response.pendingBooks.map((b) => b.bookId)));
-        toast.success(t('mangacollecImport.foundBooks', { count: response.pendingBooks.length }));
-      } else {
-        toast(t('mangacollecImport.noNewBooks'));
-        if (response.alreadyExists > 0 || response.notFound > 0) {
-          const parts = [];
-          if (response.alreadyExists > 0) {
-            parts.push(t('mangacollecImport.alreadyExistsCount', { count: response.alreadyExists }));
-          }
-          if (response.notFound > 0) {
-            parts.push(t('mangacollecImport.notFoundCount', { count: response.notFound }));
-          }
-          toast(parts.join(' • '), { duration: 4000 });
-        }
-      }
+      const response = await startImportMutation.mutateAsync(username.trim());
+      startJob(response.jobId);
     } catch (err: any) {
-      const errorCode = err?.response?.data?.code;
-      if (errorCode === 'MANGACOLLEC_IMPORT_FAILED') {
-        toast.error(t('mangacollecImport.errors.importFailed'));
-      } else {
-        toast.error(t('mangacollecImport.errors.generic'));
-      }
+      toast.error(t('mangacollecImport.errors.generic'));
     }
   };
 
@@ -156,6 +199,7 @@ export default function MangacollecImport() {
     try {
       const result = await malConfirmMutation.mutateAsync(booksToImport);
       toast.success(t('mangacollecImport.importSuccess', { count: result.imported }));
+      clearImport();
       await fetchMyLibraryBooks();
       router.replace('/(tabs)/collection');
     } catch (err) {
@@ -167,6 +211,7 @@ export default function MangacollecImport() {
     if (fetchResult) {
       setFetchResult(null);
       setSelectedBooks(new Set());
+      clearImport();
     } else {
       router.back();
     }
@@ -269,7 +314,7 @@ export default function MangacollecImport() {
         ref={scrollViewRef as any}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        scrollEnabled={!mangacollecFetchMutation.isPending}
+        scrollEnabled={!isLoading}
         contentContainerStyle={{
           marginTop: insets.top,
           paddingBottom: 100,
@@ -281,10 +326,10 @@ export default function MangacollecImport() {
         </View>
 
         {!fetchResult ? (
-          mangacollecFetchMutation.isPending ? (
+          isLoading ? (
             <ImportLoadingState
               title={t('mangacollecImport.loadingTitle')}
-              tips={loadingTips}
+              subtitle={t('mangacollecImport.loadingSubtitle')}
             />
           ) : (
             <>
@@ -324,6 +369,23 @@ export default function MangacollecImport() {
         )}
       </Animated.ScrollView>
 
+      {isLoading && (
+        <View style={[styles.tipsWrapper, { bottom: insets.bottom + 20 }]}>
+          <Animated.View
+            style={[
+              styles.tipsPill,
+              { backgroundColor: colors.card, borderColor: colors.border },
+              tipAnimatedStyle,
+            ]}
+          >
+            <Sparkles size={14} color={colors.secondaryText} />
+            <Text style={[typography.caption, { color: colors.secondaryText }]}>
+              {loadingTips[currentTipIndex]}
+            </Text>
+          </Animated.View>
+        </View>
+      )}
+
       {showScrollTop && (
         <Pressable
           style={[styles.scrollTopButton, { backgroundColor: colors.accent }]}
@@ -356,6 +418,26 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 8,
+  },
+  tipsWrapper: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  tipsPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   scrollTopButton: {
     position: 'absolute',

@@ -1051,12 +1051,13 @@
         "alreadyExistsCount": "{{count}} déjà présent(s)",
         "notFoundCount": "{{count}} non trouvé(s)",
         "note": "Seules les collections publiques peuvent être importées. Le matching utilise les traductions de titres.",
-        "loadingTitle": "Recherche de votre collection",
+        "loadingTitle": "Import en cours...",
+        "loadingSubtitle": "Nous recherchons votre collection. Cela peut prendre quelques minutes, vous pouvez quitter cet écran et revenir plus tard.",
         "loadingTips": {
             "scraping": "Récupération de votre collection depuis Mangacollec",
             "matching": "Correspondance des titres avec notre base de données",
             "translating": "Traduction des titres pour un meilleur matching",
-            "patience": "Cela peut prendre quelques minutes pour les grandes collections"
+            "patience": "Vous serez notifié dès que l'import sera terminé"
         },
         "errors": {
             "usernameTooShort": "Le nom d'utilisateur doit contenir au moins 2 caractères",
@@ -1071,6 +1072,17 @@
             "notFound": "Non trouvés",
             "notFoundList": "Non trouvés sur Trackr",
             "andMore": "et {{count}} de plus..."
+        },
+        "notifications": {
+            "completionToast": "Mangacollec : {{count}} manga(s) trouvé(s) !",
+            "completionAction": "Voir et importer",
+            "completionToastEmpty": "Import Mangacollec terminé — aucun nouveau manga à ajouter.",
+            "completionTitle": "Import Mangacollec terminé",
+            "completionBody": "{{count}} manga(s) trouvé(s). Appuyez pour vérifier et importer.",
+            "completionBodyEmpty": "Import terminé, mais aucun nouveau manga à ajouter.",
+            "failureToast": "Échec de l'import Mangacollec. Veuillez réessayer.",
+            "failureTitle": "Échec de l'import Mangacollec",
+            "failureBody": "Une erreur est survenue lors de l'import. Veuillez réessayer."
         }
     },
     "onboarding": {
